@@ -16,6 +16,12 @@ Route::group(['middleware' => 'auth'], function () {
 	    return redirect('home'); 
 	});
 
+	// currency
+	Route::get('currency','CurrencyController@index');
+	Route::post('currency/get', 'CurrencyController@get')->name('currency.get');
+	Route::post('currency/insert', 'CurrencyController@insert')->name('currency.insert');
+	Route::post('currency/update', 'CurrencyController@update')->name('currency.update');
+	Route::post('currency/delete', 'CurrencyController@delete')->name('currency.delete');
 
 	// Contoh area
 	// page contoh view

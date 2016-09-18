@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Requests;
+use Auth;
+// load model
+use App\Models\MsCurrency;
+use App\Models\User;
+
+class CurrencyController extends Controller
+{
+	public function index(){
+		return view('currency');
+    }
+
+    public function get(Request $request){
+    	// params
+    	$page = $request->page;
+    	$perPage = $request->rows; 
+    	$page-=1;
+    	$offset = $page * $perPage;
+    	// olah data
+    	$count = MsCurrency::count();
+    	$fetch = MsCurrency::skip($offset)->take($perPage)->get();
+    	$result = ['total' => $count, 'rows' => []];
+    	foreach ($fetch as $key => $value) {
+    		$temp = [];
+    		$temp['id'] = $value->id;
+    		$temp['curr_code'] = $value->curr_code;
+    		$temp['curr_name'] = $value->curr_name;
+    		$temp['curr_isactive'] = !empty($value->curr_isactive) ? 'yes' : 'no';
+    		try{
+    			$temp['created_by'] = User::findOrFail($value->created_by)->name;
+    		}catch(\Exception $e){
+    			$temp['created_by'] = '-';
+    		}
+    		$result['rows'][] = $temp;
+    	}
+        return response()->json($result);
+    }
+
+    public function insert(Request $request){
+		$input = $request->all();
+		$input['created_by'] = Auth::id();
+		$input['updated_by'] = Auth::id();
+		return MsCurrency::create($input);    	
+    }
+
+    public function update(Request $request){
+    	$id = $request->id;
+    	$input = $request->all();
+    	$input['updated_by'] = Auth::id();
+    	MsCurrency::find($id)->update($input);
+    	return MsCurrency::find($id);
+    }
+
+    public function delete(Request $request){
+    	$id = $request->id;
+    	MsCurrency::destroy($id);
+    	return response()->json(['success'=>true]);
+    }
+}

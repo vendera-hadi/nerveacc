@@ -40,7 +40,7 @@ class HomeController extends Controller
         return view('contoh');   
     }
 
-    public function contohget(){
+    public function contohget(Request $request){
         $test = '{"total":"1","rows":[{"id":"63443","firstname":"3423","lastname":"1","phone":"4234","email":"234@ww.sda"}]}';
         $test = json_decode($test);
         return response()->json($test);
@@ -58,7 +58,7 @@ class HomeController extends Controller
         return response()->json($test);
     }
 
-    public function contohdelete(){
+    public function contohdelete(Request $request){
         return response()->json(['success'=>true]);
     }
 }
