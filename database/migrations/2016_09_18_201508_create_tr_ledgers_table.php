@@ -16,6 +16,7 @@ class CreateTrLedgersTable extends Migration
         Schema::create('tr_ledger', function (Blueprint $table) {
             $table->increments('id');
             $table->unique('ledg_id');
+            $table->char('ledg_id', 36);
             $table->integer('ledge_fisyear');
             $table->string('ledg_number', 20);
             $table->date('ledg_date');
