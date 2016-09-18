@@ -7,3 +7,11 @@ Homestead.yaml
 .env
 composer.lock
 /composer.lock
+less
+scss
+/public/plugins/font-awesome/package.json
+/public/plugins/font-awesome/README.md
+/public/plugins/font-awesome/.bower.json
+/public/plugins/font-awesome/.gitignore
+/public/plugins/font-awesome/.npmignore
+/public/plugins/font-awesome/bower.json

@@ -35,4 +35,30 @@ class HomeController extends Controller
     {
         return view('home');
     }
+
+    public function contoh(){
+        return view('contoh');   
+    }
+
+    public function contohget(){
+        $test = '{"total":"1","rows":[{"id":"63443","firstname":"3423","lastname":"1","phone":"4234","email":"234@ww.sda"}]}';
+        $test = json_decode($test);
+        return response()->json($test);
+    }
+
+    public function contohinsert(Request $request){
+        // var_dump($request->all());
+        $test = array_merge(['id'=>2], $request->all());
+        return response()->json($test);
+    }
+
+    public function contohupdate(Request $request){
+        // var_dump($request->all());
+        $test = $request->all();
+        return response()->json($test);
+    }
+
+    public function contohdelete(){
+        return response()->json(['success'=>true]);
+    }
 }
