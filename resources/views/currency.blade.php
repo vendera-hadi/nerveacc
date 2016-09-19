@@ -31,17 +31,15 @@
           		<!-- content -->
 
                 <!-- template tabel -->
-          		<table id="dg" title="Currency" class="easyui-datagrid" style="width:100%;height:100%"
-                        url="{{route('currency.get')}}"
-                        toolbar="#toolbar" pagination="true"
-                        rownumbers="true" fitColumns="true" singleSelect="true">
+          		<table id="dg" title="Currency" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
-                            <th field="curr_code" width="50">Currency Code</th>
-                            <th field="curr_name" width="50">Currency Name</th>
-                            <th field="curr_isactive" width="50">Active</th>
-                            <th field="created_by" width="50">Created By</th>
+                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            <th field="curr_code" width="50" sortable="true">Currency Code</th>
+                            <th field="curr_name" width="50" sortable="true">Currency Name</th>
+                            <th field="curr_isactive" width="50" sortable="true">Active</th>
+                            <th field="created_by" width="50" >Created By</th>
                         </tr>
                     </thead>
                 </table>
@@ -89,11 +87,25 @@
 @section('footer-scripts')
 <script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript">
         var entity = "User"; // nama si tabel, ditampilin di dialog
+        var get_url = "{{route('currency.get')}}";
         var insert_url = "{{route('currency.insert')}}";
         var update_url = "{{route('currency.update')}}";
         var delete_url = "{{route('currency.delete')}}";
+
+        $(function(){
+            var dg = $('#dg').datagrid({
+                url: get_url,
+                pagination: true,
+                remoteFilter: true, //utk jalanin search filter
+                rownumbers: true,
+                singleSelect: true,
+                fitColumns: true
+            });
+            dg.datagrid('enableFilter');
+        });
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection
