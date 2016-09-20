@@ -35,6 +35,13 @@ Route::group(['middleware' => 'auth'], function () {
 	// ajax delete
 	Route::post('contohdelete', 'HomeController@contohdelete')->name('contoh.delete');
 
+	// master coa
+	Route::get('coa','CoaController@index');
+	Route::post('coa/get', 'CoaController@get')->name('coa.get');
+	Route::post('coa/insert', 'CoaController@insert')->name('coa.insert');
+	Route::post('coa/update', 'CoaController@update')->name('coa.update');
+	Route::post('coa/delete', 'CoaController@delete')->name('coa.delete');
+
 });
 
 Route::get('logout','Auth\AuthController@logout');
