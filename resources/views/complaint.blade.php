@@ -89,7 +89,7 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript">
-        var entity = "User"; // nama si tabel, ditampilin di dialog
+        var entity = "Complaint"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('complaint.get')}}";
         var insert_url = "{{route('complaint.insert')}}";
         var update_url = "{{route('complaint.update')}}";

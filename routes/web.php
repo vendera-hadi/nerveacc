@@ -34,6 +34,18 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('contractstatus/insert', 'ContractStatusController@insert')->name('contractstatus.insert');
 	Route::post('contractstatus/update', 'ContractStatusController@update')->name('contractstatus.update');
 	Route::post('contractstatus/delete', 'ContractStatusController@delete')->name('contractstatus.delete');
+	// department
+	Route::get('department','DepartmentController@index');
+	Route::post('department/get', 'DepartmentController@get')->name('department.get');
+	Route::post('department/insert', 'DepartmentController@insert')->name('department.insert');
+	Route::post('department/update', 'DepartmentController@update')->name('department.update');
+	Route::post('department/delete', 'DepartmentController@delete')->name('department.delete');
+	// invoice type
+	Route::get('invtype','InvoiceTypeController@index');
+	Route::post('invtype/get', 'InvoiceTypeController@get')->name('invtype.get');
+	Route::post('invtype/insert', 'InvoiceTypeController@insert')->name('invtype.insert');
+	Route::post('invtype/update', 'InvoiceTypeController@update')->name('invtype.update');
+	Route::post('invtype/delete', 'InvoiceTypeController@delete')->name('invtype.delete');
 
 	// Contoh area
 	// page contoh view
