@@ -53,7 +53,30 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('coa/insert', 'CoaController@insert')->name('coa.insert');
 	Route::post('coa/update', 'CoaController@update')->name('coa.update');
 	Route::post('coa/delete', 'CoaController@delete')->name('coa.delete');
-
+	// Rental period
+	Route::get('rentalperiod','RentalPeriodController@index');
+	Route::post('rentalperiod/get', 'RentalPeriodController@get')->name('rentalperiod.get');
+	Route::post('rentalperiod/insert', 'RentalPeriodController@insert')->name('rentalperiod.insert');
+	Route::post('rentalperiod/update', 'RentalPeriodController@update')->name('rentalperiod.update');
+	Route::post('rentalperiod/delete', 'RentalPeriodController@delete')->name('rentalperiod.delete');
+	// master supplier
+	Route::get('supplier','SupplierController@index');
+	Route::post('supplier/get', 'SupplierController@get')->name('supplier.get');
+	Route::post('supplier/insert', 'SupplierController@insert')->name('supplier.insert');
+	Route::post('supplier/update', 'SupplierController@update')->name('supplier.update');
+	Route::post('supplier/delete', 'SupplierController@delete')->name('supplier.delete');
+	// master tenant
+	Route::get('tenant','TenantController@index');
+	Route::post('tenant/get', 'TenantController@get')->name('tenant.get');
+	Route::post('tenant/insert', 'TenantController@insert')->name('tenant.insert');
+	Route::post('tenant/update', 'TenantController@update')->name('tenant.update');
+	Route::post('tenant/delete', 'TenantController@delete')->name('tenant.delete');
+	// master tenant type
+	Route::get('typetenant','TenantTypeController@index');
+	Route::post('typetenant/get', 'TenantTypeController@get')->name('typetenant.get');
+	Route::post('typetenant/insert', 'TenantTypeController@insert')->name('typetenant.insert');
+	Route::post('typetenant/update', 'TenantTypeController@update')->name('typetenant.update');
+	Route::post('typetenant/delete', 'TenantTypeController@delete')->name('typetenant.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');
