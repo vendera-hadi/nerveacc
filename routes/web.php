@@ -22,6 +22,18 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('currency/insert', 'CurrencyController@insert')->name('currency.insert');
 	Route::post('currency/update', 'CurrencyController@update')->name('currency.update');
 	Route::post('currency/delete', 'CurrencyController@delete')->name('currency.delete');
+	// complaint
+	Route::get('complaint','ComplaintController@index');
+	Route::post('complaint/get', 'ComplaintController@get')->name('complaint.get');
+	Route::post('complaint/insert', 'ComplaintController@insert')->name('complaint.insert');
+	Route::post('complaint/update', 'ComplaintController@update')->name('complaint.update');
+	Route::post('complaint/delete', 'ComplaintController@delete')->name('complaint.delete');
+	// contract status
+	Route::get('contractstatus','ContractStatusController@index');
+	Route::post('contractstatus/get', 'ContractStatusController@get')->name('contractstatus.get');
+	Route::post('contractstatus/insert', 'ContractStatusController@insert')->name('contractstatus.insert');
+	Route::post('contractstatus/update', 'ContractStatusController@update')->name('contractstatus.update');
+	Route::post('contractstatus/delete', 'ContractStatusController@delete')->name('contractstatus.delete');
 
 	// Contoh area
 	// page contoh view
