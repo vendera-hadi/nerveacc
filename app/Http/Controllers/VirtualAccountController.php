@@ -6,31 +6,29 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Auth;
 // load model
-use App\Models\MsTenant;
-use App\Models\MsTenantType;
-use App\Models\User;
+use App\Models\MsVirtualAccount;
 
-class TenantController extends Controller
+class VirtualAccountController extends Controller
 {
 	public function index(){
-		return view('tenant');
+		return view('virtual_account');
     }
 
     public function get(Request $request){
-        // params
-        $page = $request->page;
-        $perPage = $request->rows; 
-        $page-=1;
-        $offset = $page * $perPage;
+    	// params
+    	$page = $request->page;
+    	$perPage = $request->rows; 
+    	$page-=1;
+    	$offset = $page * $perPage;
         // @ -> isset(var) ? var : null
         $sort = @$request->sort;
         $order = @$request->order;
         $filters = @$request->filterRules;
         if(!empty($filters)) $filters = json_decode($filters);
 
-        // olah data
-        $count = MsTenant::count();
-        $fetch = MsTenant::query();
+    	// olah data
+    	$count = MsVirtualAccount::count();
+    	$fetch = MsVirtualAccount::query();
         if(!empty($filters) && count($filters) > 0){
             foreach($filters as $filter){
                 $op = "like";
@@ -48,54 +46,51 @@ class TenantController extends Controller
                     default:
                         break;
                 }
+                 // special condition
+                if($filter->field == 'viracc_isactive'){
+                    if(strtolower($filter->value) == "yes") $filter->value = "true";
+                    else $filter->value = "false";
+                }
+                // end special condition
+                if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                else $fetch = $fetch->where($filter->field, $op, $filter->value);
             }
         }
         $count = $fetch->count();
         if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
         $fetch = $fetch->skip($offset)->take($perPage)->get();
-        $result = ['total' => $count, 'rows' => []];
-        foreach ($fetch as $key => $value) {
-            $temp = [];
-            $temp['id'] = $value->id;
-            $temp['tenan_id'] = $value->tenan_id;
-            $temp['tenan_code'] = $value->tenan_code;
-            $temp['tenan_name'] = $value->tenan_name;
-            $temp['tenan_idno'] = $value->tenan_idno;
-            $temp['tenan_phone'] = $value->tenan_phone;
-            $temp['tenan_email'] = $value->tenan_email;
-            $temp['tenan_address'] = $value->tenan_address;
-            $temp['tenan_npwp'] = $value->tenan_npwp;
-            $temp['tenan_taxname'] = $value->tenan_taxname;
-            $temp['tenan_tax_address'] = $value->tenan_tax_address;
-            try{
-                $temp['tent_id'] = MsTenantType::findOrFail($value->tent_id)->tent_name;
-            }catch(\Exception $e){
-                $temp['tent_id'] = '-';
-            }
-            $result['rows'][] = $temp;
-        }
+    	$result = ['total' => $count, 'rows' => []];
+    	foreach ($fetch as $key => $value) {
+    		$temp = [];
+    		$temp['id'] = $value->id;
+    		$temp['viracc_id'] = $value->viracc_id;
+    		$temp['viracc_no'] = $value->viracc_no;
+            $temp['viracc_name'] = $value->viracc_name;
+            $temp['viracc_isactive'] = !empty($value->viracc_isactive) ? 'yes' : 'no';
+    		$result['rows'][] = $temp;
+    	}
         return response()->json($result);
     }
 
     public function insert(Request $request){
 		$input = $request->all();
-        $input['tenan_id'] = md5(date('Y-m-d H:i:s'));
+        $input['viracc_id'] = md5(date('Y-m-d H:i:s'));
         $input['created_by'] = Auth::id();
         $input['updated_by'] = Auth::id();
-		return MsTenant::create($input);    	
+		return MsVirtualAccount::create($input);    	
     }
 
     public function update(Request $request){
     	$id = $request->id;
     	$input = $request->all();
         $input['updated_by'] = Auth::id();
-    	MsTenant::find($id)->update($input);
-    	return MsTenant::find($id);
+    	MsVirtualAccount::find($id)->update($input);
+    	return MsVirtualAccount::find($id);
     }
 
     public function delete(Request $request){
     	$id = $request->id;
-    	MsTenant::destroy($id);
+    	MsVirtualAccount::destroy($id);
     	return response()->json(['success'=>true]);
     }
 }

@@ -6,31 +6,31 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Auth;
 // load model
-use App\Models\MsTenant;
-use App\Models\MsTenantType;
+use App\Models\MsUnit;
+use App\Models\MsUnitType;
 use App\Models\User;
 
-class TenantController extends Controller
+class UnitController extends Controller
 {
 	public function index(){
-		return view('tenant');
+		return view('unit');
     }
 
     public function get(Request $request){
-        // params
-        $page = $request->page;
-        $perPage = $request->rows; 
-        $page-=1;
-        $offset = $page * $perPage;
+    	// params
+    	$page = $request->page;
+    	$perPage = $request->rows; 
+    	$page-=1;
+    	$offset = $page * $perPage;
         // @ -> isset(var) ? var : null
         $sort = @$request->sort;
         $order = @$request->order;
         $filters = @$request->filterRules;
         if(!empty($filters)) $filters = json_decode($filters);
 
-        // olah data
-        $count = MsTenant::count();
-        $fetch = MsTenant::query();
+    	// olah data
+    	$count = MsUnit::count();
+    	$fetch = MsUnit::query();
         if(!empty($filters) && count($filters) > 0){
             foreach($filters as $filter){
                 $op = "like";
@@ -53,49 +53,46 @@ class TenantController extends Controller
         $count = $fetch->count();
         if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
         $fetch = $fetch->skip($offset)->take($perPage)->get();
-        $result = ['total' => $count, 'rows' => []];
-        foreach ($fetch as $key => $value) {
-            $temp = [];
-            $temp['id'] = $value->id;
-            $temp['tenan_id'] = $value->tenan_id;
-            $temp['tenan_code'] = $value->tenan_code;
-            $temp['tenan_name'] = $value->tenan_name;
-            $temp['tenan_idno'] = $value->tenan_idno;
-            $temp['tenan_phone'] = $value->tenan_phone;
-            $temp['tenan_email'] = $value->tenan_email;
-            $temp['tenan_address'] = $value->tenan_address;
-            $temp['tenan_npwp'] = $value->tenan_npwp;
-            $temp['tenan_taxname'] = $value->tenan_taxname;
-            $temp['tenan_tax_address'] = $value->tenan_tax_address;
+    	$result = ['total' => $count, 'rows' => []];
+    	foreach ($fetch as $key => $value) {
+    		$temp = [];
+    		$temp['id'] = $value->id;
+    		$temp['unit_id'] = $value->unit_id;
+    		$temp['unit_name'] = $value->unit_name;
             try{
-                $temp['tent_id'] = MsTenantType::findOrFail($value->tent_id)->tent_name;
+                $temp['untype_id'] = MsUnitType::findOrFail($value->untype_id)->untype_name;
             }catch(\Exception $e){
-                $temp['tent_id'] = '-';
+                $temp['untype_id'] = '-';
             }
-            $result['rows'][] = $temp;
-        }
+            try{
+                $temp['created_by'] = User::findOrFail($value->created_by)->name;
+            }catch(\Exception $e){
+                $temp['created_by'] = '-';
+            }
+    		$result['rows'][] = $temp;
+    	}
         return response()->json($result);
     }
 
     public function insert(Request $request){
 		$input = $request->all();
-        $input['tenan_id'] = md5(date('Y-m-d H:i:s'));
+        $input['unit_id'] = md5(date('Y-m-d H:i:s'));
         $input['created_by'] = Auth::id();
         $input['updated_by'] = Auth::id();
-		return MsTenant::create($input);    	
+		return MsUnit::create($input);    	
     }
 
     public function update(Request $request){
     	$id = $request->id;
     	$input = $request->all();
         $input['updated_by'] = Auth::id();
-    	MsTenant::find($id)->update($input);
-    	return MsTenant::find($id);
+    	MsUnit::find($id)->update($input);
+    	return MsUnit::find($id);
     }
 
     public function delete(Request $request){
     	$id = $request->id;
-    	MsTenant::destroy($id);
+    	MsUnit::destroy($id);
     	return response()->json(['success'=>true]);
     }
 }

@@ -89,6 +89,24 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('typetenant/insert', 'TenantTypeController@insert')->name('typetenant.insert');
 	Route::post('typetenant/update', 'TenantTypeController@update')->name('typetenant.update');
 	Route::post('typetenant/delete', 'TenantTypeController@delete')->name('typetenant.delete');
+	// master unit
+	Route::get('unit','UnitController@index');
+	Route::post('unit/get', 'UnitController@get')->name('unit.get');
+	Route::post('unit/insert', 'UnitController@insert')->name('unit.insert');
+	Route::post('unit/update', 'UnitController@update')->name('unit.update');
+	Route::post('unit/delete', 'UnitController@delete')->name('unit.delete');
+	// master unit type
+	Route::get('unittype','UnitTypeController@index');
+	Route::post('unittype/get', 'UnitTypeController@get')->name('unittype.get');
+	Route::post('unittype/insert', 'UnitTypeController@insert')->name('unittype.insert');
+	Route::post('unittype/update', 'UnitTypeController@update')->name('unittype.update');
+	Route::post('unittype/delete', 'UnitTypeController@delete')->name('unittype.delete');
+	// master virtual account
+	Route::get('vaccount','VirtualAccountController@index');
+	Route::post('vaccount/get', 'VirtualAccountController@get')->name('vaccount.get');
+	Route::post('vaccount/insert', 'VirtualAccountController@insert')->name('vaccount.insert');
+	Route::post('vaccount/update', 'VirtualAccountController@update')->name('vaccount.update');
+	Route::post('vaccount/delete', 'VirtualAccountController@delete')->name('vaccount.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');
