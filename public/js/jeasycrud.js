@@ -32,7 +32,10 @@ function saveUser(){
                 $('#dlg').dialog('close');      // close the dialog
                 $('#dg').datagrid('reload');    // reload the user data
             }
-        }
+        },
+        error: function (request, status, error) {
+            alert(request.responseText);
+          }
     });
 }
 function destroyUser(){

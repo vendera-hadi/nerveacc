@@ -46,6 +46,20 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('invtype/insert', 'InvoiceTypeController@insert')->name('invtype.insert');
 	Route::post('invtype/update', 'InvoiceTypeController@update')->name('invtype.update');
 	Route::post('invtype/delete', 'InvoiceTypeController@delete')->name('invtype.delete');
+	// group account
+	Route::get('groupaccount','GroupAccountController@index');
+	Route::post('groupaccount/get', 'GroupAccountController@get')->name('groupaccount.get');
+	Route::post('groupaccount/options', 'GroupAccountController@getOptions')->name('groupaccount.options');
+	Route::post('groupaccount/insert', 'GroupAccountController@insert')->name('groupaccount.insert');
+	Route::post('groupaccount/update', 'GroupAccountController@update')->name('groupaccount.update');
+	Route::post('groupaccount/delete', 'GroupAccountController@delete')->name('groupaccount.delete');
+	// group account detail
+	Route::get('groupaccdetail','GroupAccountDetailController@index');
+	Route::post('groupaccdetail/get', 'GroupAccountDetailController@get')->name('groupaccdetail.get');
+	Route::post('groupaccdetail/insert', 'GroupAccountDetailController@insert')->name('groupaccdetail.insert');
+	Route::post('groupaccdetail/update', 'GroupAccountDetailController@update')->name('groupaccdetail.update');
+	Route::post('groupaccdetail/delete', 'GroupAccountDetailController@delete')->name('groupaccdetail.delete');
+
 
 	// Contoh area
 	// page contoh view
@@ -62,6 +76,8 @@ Route::group(['middleware' => 'auth'], function () {
 	// master coa
 	Route::get('coa','CoaController@index');
 	Route::post('coa/get', 'CoaController@get')->name('coa.get');
+	Route::post('coa/years', 'CoaController@getCoaYear')->name('coa.year');
+	Route::post('coa/code', 'CoaController@getCoaCode')->name('coa.code');
 	Route::post('coa/insert', 'CoaController@insert')->name('coa.insert');
 	Route::post('coa/update', 'CoaController@update')->name('coa.update');
 	Route::post('coa/delete', 'CoaController@delete')->name('coa.delete');

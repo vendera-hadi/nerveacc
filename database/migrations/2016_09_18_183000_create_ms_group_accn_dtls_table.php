@@ -15,7 +15,6 @@ class CreateMsGroupAccnDtlsTable extends Migration
     {
         Schema::create('ms_group_accn_dtl', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('grpaccn_id');
             $table->char('grpaccn_id',36);
             $table->char('coa_year',36);
             $table->char('coa_code',10);

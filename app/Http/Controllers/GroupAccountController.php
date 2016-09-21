@@ -4,19 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests;
-use Auth;
 // load model
-use App\Models\MsTenantType;
+use App\Models\MsGroupAccount;
+use App\Models\User;
 
-class TenantTypeController extends Controller
+class GroupAccountController extends Controller
 {
-	public function index(){
-		return view('tenant_type');
+    public function index(){
+		return view('groupaccount');
     }
 
     public function get(Request $request){
-    	try{
-            // params
+        try{
+        	// params
         	$page = $request->page;
         	$perPage = $request->rows; 
         	$page-=1;
@@ -28,8 +28,8 @@ class TenantTypeController extends Controller
             if(!empty($filters)) $filters = json_decode($filters);
 
         	// olah data
-        	$count = MsTenantType::count();
-        	$fetch = MsTenantType::query();
+        	$count = MsGroupAccount::count();
+        	$fetch = MsGroupAccount::query();
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -47,6 +47,14 @@ class TenantTypeController extends Controller
                         default:
                             break;
                     }
+                    // special condition
+                    if($filter->field == 'curr_isactive'){
+                        if(strtolower($filter->value) == "yes") $filter->value = "true";
+                        else $filter->value = "false";
+                    }
+                    // end special condition
+                    if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                    else $fetch = $fetch->where($filter->field, $op, $filter->value);
                 }
             }
             $count = $fetch->count();
@@ -56,8 +64,7 @@ class TenantTypeController extends Controller
         	foreach ($fetch as $key => $value) {
         		$temp = [];
         		$temp['id'] = $value->id;
-        		$temp['tent_id'] = $value->tent_id;
-        		$temp['tent_name'] = $value->tent_name;
+        		$temp['grpaccn_name'] = $value->grpaccn_name;
         		$result['rows'][] = $temp;
         	}
             return response()->json($result);
@@ -66,31 +73,45 @@ class TenantTypeController extends Controller
         } 
     }
 
-    public function insert(Request $request){
-		try{
-            $input = $request->all();
-            $input['tent_id'] = md5(date('Y-m-d H:i:s'));
-    		return MsTenantType::create($input);    	
+    public function getOptions(){
+        try{
+            $all = MsGroupAccount::all();
+            $result = [];
+            if(count($all) > 0){
+                foreach ($all as $value) {
+                    $result[] = ['id'=>$value->id, 'text'=>$value->grpaccn_name];
+                }
+            }
+            return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
 
+    public function insert(Request $request){
+        try{
+    		$input = $request->all();
+    		return MsGroupAccount::create($input);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }     	
+    }
+
     public function update(Request $request){
-    	try{
-            $id = $request->id;
+        try{
+        	$id = $request->id;
         	$input = $request->all();
-        	MsTenantType::find($id)->update($input);
-        	return MsTenantType::find($id);
+        	MsGroupAccount::find($id)->update($input);
+        	return MsGroupAccount::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
 
     public function delete(Request $request){
-    	try{
-            $id = $request->id;
-        	MsTenantType::destroy($id);
+        try{
+        	$id = $request->id;
+        	MsGroupAccount::destroy($id);
         	return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
