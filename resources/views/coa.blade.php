@@ -89,13 +89,13 @@
                             <input name="coa_beginning" class="easyui-textbox" label="COA Beginning:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="coa_debit" class="easyui-textbox" label="COA Debit:" style="width:100%" data-options="required:true'">
+                            <input name="coa_debit" class="easyui-textbox" label="COA Debit:" style="width:100%" data-options="required:true">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="coa_credit" class="easyui-textbox" label="COA Credit:" style="width:100%" data-options="required:true'">
+                            <input name="coa_credit" class="easyui-textbox" label="COA Credit:" style="width:100%" data-options="required:true">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="coa_ending" class="easyui-textbox" label="COA Ending:" style="width:100%" data-options="required:true'">
+                            <input name="coa_ending" class="easyui-textbox" label="COA Ending:" style="width:100%" data-options="required:true">
                         </div>
                     </form>
                 </div>

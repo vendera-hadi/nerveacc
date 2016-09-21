@@ -45,7 +45,7 @@
                             <th field="tenan_npwp" width="50" sortable="true">NPWP</th>
                             <th field="tenan_taxname" width="50" sortable="true">Tax Name</th>
                             <th field="tenan_tax_address" width="50" sortable="true">Tenan Tax Address</th>
-                            <th field="tent_id" width="50" sortable="true">Tenant Type</th>
+                            <th field="tent_name" width="50" sortable="true">Tenant Type</th>
                         </tr>
                     </thead>
                 </table>
@@ -92,10 +92,7 @@
                             <input name="tenan_tax_address" class="easyui-textbox" label="Tenant Tax Address:" style="width:100%" data-options="validType:'length[0,150]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <select id="cc" class="easyui-combobox" required="true" name="tent_id" label="Unit Type:" style="width:300px;">
-                                <option value="1" >Tes</option>
-                                <option value="2">no</option>
-                            </select>
+                            <input id="cc" class="easyui-combobox" required="true" name="tent_id" style="width:100%" label="Tenant Type:" data-options="valueField:'id',textField:'text',url:'{{route('tenant.options')}}'">
                         </div>
                         
                     </form>

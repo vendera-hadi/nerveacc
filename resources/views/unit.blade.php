@@ -38,7 +38,7 @@
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="unit_id" width="120" sortable="true">ID</th>
                             <th field="unit_name" width="120" sortable="true">Unit Name</th>
-                            <th field="untype_id" width="120" sortable="true">Unit Type</th>
+                            <th field="untype_name" width="120" sortable="true">Unit Type</th>
                             <th field="created_by" width="120" sortable="true">Created By</th>
                         </tr>
                     </thead>
@@ -59,15 +59,11 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="unit_name" class="easyui-textbox" label="Unit Name:" style="width:100%" data-options="required:true,validType:'length[0,4]'">
+                            <input name="unit_name" class="easyui-textbox" label="Unit Name:" style="width:100%" data-options="required:true,validType:'length[0,25]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <select id="cc" class="easyui-combobox" required="true" name="untype_id" label="Unit Type:" style="width:300px;">
-                                <option value="1" >Tes</option>
-                                <option value="2">no</option>
-                            </select>
-                        </div>
-                        
+                            <input id="cc" class="easyui-combobox" required="true" name="untype_id" style="width:100%" label="Unit Type:" data-options="valueField:'id',textField:'text',url:'{{route('unit.options')}}'">
+                        </div>  
                     </form>
                 </div>
                 <div id="dlg-buttons">

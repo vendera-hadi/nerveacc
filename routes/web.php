@@ -96,6 +96,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// master tenant
 	Route::get('tenant','TenantController@index');
 	Route::post('tenant/get', 'TenantController@get')->name('tenant.get');
+	Route::post('tenant/options', 'TenantController@getOptions')->name('tenant.options');
 	Route::post('tenant/insert', 'TenantController@insert')->name('tenant.insert');
 	Route::post('tenant/update', 'TenantController@update')->name('tenant.update');
 	Route::post('tenant/delete', 'TenantController@delete')->name('tenant.delete');
@@ -108,6 +109,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// master unit
 	Route::get('unit','UnitController@index');
 	Route::post('unit/get', 'UnitController@get')->name('unit.get');
+	Route::post('unit/options', 'UnitController@getOptions')->name('unit.options');
 	Route::post('unit/insert', 'UnitController@insert')->name('unit.insert');
 	Route::post('unit/update', 'UnitController@update')->name('unit.update');
 	Route::post('unit/delete', 'UnitController@delete')->name('unit.delete');
