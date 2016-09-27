@@ -62,7 +62,7 @@
                             <input name="unit_name" class="easyui-textbox" label="Unit Name:" style="width:100%" data-options="required:true,validType:'length[0,25]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="untype_id" style="width:100%" label="Unit Type:" data-options="valueField:'id',textField:'text',url:'{{route('unit.options')}}'">
+                            <input id="cc" class="easyui-combobox" required="true" name="untype_id" style="width:100%" label="Unit Type:" data-options="valueField:'id',textField:'text',url:'{{route('unit.all')}}'">
                         </div>  
                     </form>
                 </div>

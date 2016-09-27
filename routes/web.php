@@ -28,6 +28,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('complaint/insert', 'ComplaintController@insert')->name('complaint.insert');
 	Route::post('complaint/update', 'ComplaintController@update')->name('complaint.update');
 	Route::post('complaint/delete', 'ComplaintController@delete')->name('complaint.delete');
+	Route::post('complaint/options', 'ComplaintController@getOptions')->name('complaint.options');
 	// contract status
 	Route::get('contractstatus','ContractStatusController@index');
 	Route::post('contractstatus/get', 'ContractStatusController@get')->name('contractstatus.get');
@@ -110,6 +111,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('unit','UnitController@index');
 	Route::post('unit/get', 'UnitController@get')->name('unit.get');
 	Route::post('unit/options', 'UnitController@getOptions')->name('unit.options');
+	Route::post('unit/all', 'UnitController@getAll')->name('unit.all');
 	Route::post('unit/insert', 'UnitController@insert')->name('unit.insert');
 	Route::post('unit/update', 'UnitController@update')->name('unit.update');
 	Route::post('unit/delete', 'UnitController@delete')->name('unit.delete');
@@ -125,6 +127,13 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('vaccount/insert', 'VirtualAccountController@insert')->name('vaccount.insert');
 	Route::post('vaccount/update', 'VirtualAccountController@update')->name('vaccount.update');
 	Route::post('vaccount/delete', 'VirtualAccountController@delete')->name('vaccount.delete');
+
+	// unit complaints / tr complaint
+	Route::get('unitcomplaint','UnitComplaintController@index');
+	Route::post('unitcomplaint/get', 'UnitComplaintController@get')->name('unitcomplaint.get');
+	Route::post('unitcomplaint/insert', 'UnitComplaintController@insert')->name('unitcomplaint.insert');
+	Route::post('unitcomplaint/update', 'UnitComplaintController@update')->name('unitcomplaint.update');
+	Route::post('unitcomplaint/delete', 'UnitComplaintController@delete')->name('unitcomplaint.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');

@@ -6,13 +6,13 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Auth;
 // load model
-use App\Models\MsComplaint;
+use App\Models\TrComplaint;
 use App\Models\User;
 
-class ComplaintController extends Controller
+class UnitComplaintController extends Controller
 {
     public function index(){
-		return view('complaint');
+		return view('trcomplaint');
     }
 
     public function get(Request $request){
@@ -29,8 +29,10 @@ class ComplaintController extends Controller
             if(!empty($filters)) $filters = json_decode($filters);
 
         	// olah data
-        	$count = MsComplaint::count();
-        	$fetch = MsComplaint::query();
+        	$count = TrComplaint::count();
+        	$fetch = TrComplaint::select('tr_complaint.*','ms_unit.unit_name','ms_complaint.compl_code')
+        						->join('ms_unit','ms_unit.id','=','tr_complaint.unit_id')
+        						->join('ms_complaint','ms_complaint.id','=','tr_complaint.compl_id');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -65,14 +67,16 @@ class ComplaintController extends Controller
         	foreach ($fetch as $key => $value) {
         		$temp = [];
         		$temp['id'] = $value->id;
+        		$temp['comtr_no'] = $value->comtr_no;
+        		$temp['comtr_date'] = $value->comtr_date;
+        		$temp['comtr_note'] = $value->comtr_note;
+        		$temp['comtr_handling_date'] = $value->comtr_handling_date;
+        		$temp['comtr_handling_by'] = $value->comtr_handling_by;
+        		$temp['comtr_finish_date'] = $value->comtr_finish_date;
+        		$temp['comtr_handling_note'] = $value->comtr_handling_note;
+        		$temp['unit_name'] = $value->unit_name;
         		$temp['compl_code'] = $value->compl_code;
-        		$temp['compl_name'] = $value->compl_name;
-        		$temp['compl_isactive'] = !empty($value->compl_isactive) ? 'yes' : 'no';
-        		try{
-        			$temp['created_by'] = User::findOrFail($value->created_by)->name;
-        		}catch(\Exception $e){
-        			$temp['created_by'] = '-';
-        		}
+        		$temp['created_by'] = $value->created_by;
         		$result['rows'][] = $temp;
         	}
             return response()->json($result);
@@ -84,9 +88,18 @@ class ComplaintController extends Controller
     public function insert(Request $request){
         try{
     		$input = $request->all();
-    		$input['created_by'] = Auth::id();
-    		$input['updated_by'] = Auth::id();
-    		return MsComplaint::create($input);
+    		$lastRecord = TrComplaint::orderBy('id','desc')->first();
+    		if(empty($lastRecord)) $lastId = 1;
+    		else $lastId = $lastRecord->id + 1;
+    		$input['comtr_date'] = date('Y-m-d H:i:s', strtotime($input['comtr_date']));
+    		if(!empty($input['comtr_handling_date'])) $input["comtr_handling_date"] = date('Y-m-d H:i:s', strtotime($input['comtr_handling_date']));
+    		else $input["comtr_handling_date"] = NULL;
+    		if(!empty($input['comtr_finish_date'])) $input["comtr_finish_date"] = date('Y-m-d H:i:s', strtotime($input['comtr_finish_date']));
+     		else $input['comtr_finish_date'] = NULL;
+     		$input['comtr_no'] = 'COMPL-'.date('Y').'-'.$lastId;
+    		$input['created_by'] = Auth::user()->name;
+    		$input['updated_by'] = $input['created_by'];
+    		return TrComplaint::create($input);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }     	
@@ -96,9 +109,14 @@ class ComplaintController extends Controller
         try{
         	$id = $request->id;
         	$input = $request->all();
-        	$input['updated_by'] = Auth::id();
-        	MsComplaint::find($id)->update($input);
-        	return MsComplaint::find($id);
+        	$input['comtr_date'] = date('Y-m-d H:i:s', strtotime($input['comtr_date']));
+    		if(!empty($input['comtr_handling_date'])) $input["comtr_handling_date"] = date('Y-m-d H:i:s', strtotime($input['comtr_handling_date']));
+    		else $input["comtr_handling_date"] = NULL;
+    		if(!empty($input['comtr_finish_date'])) $input["comtr_finish_date"] = date('Y-m-d H:i:s', strtotime($input['comtr_finish_date']));
+     		else $input['comtr_finish_date'] = NULL;
+        	$input['created_by'] = Auth::user()->name;
+        	TrComplaint::find($id)->update($input);
+        	return TrComplaint::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
@@ -107,23 +125,8 @@ class ComplaintController extends Controller
     public function delete(Request $request){
         try{
         	$id = $request->id;
-        	MsComplaint::destroy($id);
+        	TrComplaint::destroy($id);
         	return response()->json(['success'=>true]);
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
-    }
-
-    public function getOptions(){
-        try{
-            $all = MsComplaint::all();
-            $result = [];
-            if(count($all) > 0){
-                foreach ($all as $value) {
-                    $result[] = ['id'=>$value->id, 'text'=>$value->compl_code];
-                }
-            }
-            return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 

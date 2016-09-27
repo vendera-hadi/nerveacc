@@ -74,6 +74,21 @@ class UnitController extends Controller
         } 
     }
 
+    public function getAll(){
+        try{
+            $all = MsUnit::all();
+            $result = [];
+            if(count($all) > 0){
+                foreach ($all as $value) {
+                    $result[] = ['id'=>$value->id, 'text'=>$value->unit_name];
+                }
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
     public function getOptions(){
         try{
             $all = MsUnitType::all();
