@@ -19,18 +19,45 @@
         @endif
 
         <!-- search form (Optional) -->
-        <form action="#" method="get" class="sidebar-form">
+        <!-- <form action="#" method="get" class="sidebar-form">
             <div class="input-group">
                 <input type="text" name="q" class="form-control" placeholder="{{ trans('adminlte_lang::message.search') }}..."/>
               <span class="input-group-btn">
                 <button type='submit' name='search' id='search-btn' class="btn btn-flat"><i class="fa fa-search"></i></button>
               </span>
             </div>
-        </form>
+        </form> -->
         <!-- /.search form -->
 
         <!-- Sidebar Menu -->
         <ul class="sidebar-menu">
+
+            <li class="treeview">
+              <a href="#">
+                <i class="fa fa-gears"></i> <span>MASTER DATA</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li><a href="{{url('currency')}}"><i class="fa fa-circle-o"></i> Currency</a></li>
+                <li><a href="{{url('complaint')}}"><i class="fa fa-circle-o"></i> Complaint</a></li>
+                <li><a href="{{url('contractstatus')}}"><i class="fa fa-circle-o"></i> Contract Status</a></li>
+                <li><a href="{{url('department')}}"><i class="fa fa-circle-o"></i> Department</a></li>
+                <li><a href="{{url('invtype')}}"><i class="fa fa-circle-o"></i> Invoice Type</a></li>
+                <li><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li>
+                <li><a href="{{url('groupaccdetail')}}"><i class="fa fa-circle-o"></i> Group Account Detail</a></li>
+                <li><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
+                <li><a href="{{url('rentalperiod')}}"><i class="fa fa-circle-o"></i> Rental Period</a></li>
+                <li><a href="{{url('supplier')}}"><i class="fa fa-circle-o"></i> Supplier</a></li>
+                <li><a href="{{url('tenant')}}"><i class="fa fa-circle-o"></i> Tenant</a></li>
+                <li><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant Type</a></li>
+                <li><a href="{{url('unit')}}"><i class="fa fa-circle-o"></i> Unit</a></li>
+                <li><a href="{{url('unittype')}}"><i class="fa fa-circle-o"></i> Unit Type</a></li>
+                <li><a href="{{url('vaccount')}}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
+              </ul>
+            </li>
+
             <li class="treeview">
               <a href="#">
                 <i class="fa fa-gears"></i> <span>FILE</span>
@@ -411,6 +438,8 @@
                 </li>
               </ul>
             </li>
+
+            
 
         </ul><!-- /.sidebar-menu -->
     </section>
