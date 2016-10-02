@@ -17,6 +17,7 @@ class CreateMsContractStatusesTable extends Migration
             $table->increments('id');
             $table->unique('const_code');
             $table->char('const_code',5);
+            $table->string('const_name',30);
             $table->tinyInteger('const_order');
             $table->string('created_by', 15);
             $table->string('updated_by', 15);

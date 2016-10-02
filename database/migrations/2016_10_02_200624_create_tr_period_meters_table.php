@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMsMarketingAgentsTable extends Migration
+class CreateTrPeriodMetersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,12 @@ class CreateMsMarketingAgentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('ms_marketing_agent', function (Blueprint $table) {
+        Schema::create('tr_period_meter', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('mark_id');
-            $table->char('mark_id', 36);
-            $table->string('mark_code', 5);
-            $table->string('mark_name', 50);
-            $table->string('mark_address', 150);
-            $table->string('mark_phone', 20);
-            $table->boolean('mark_isactive')->default(0);
+            $table->char('prdmet_id', 36)->unique();
+            $table->date('prdmet_start_date');
+            $table->date('prdmet_end_date');
+            $table->date('prd_billing_date');
             $table->string('created_by', 15);
             $table->string('updated_by', 15);
             $table->timestamps();
@@ -35,6 +32,6 @@ class CreateMsMarketingAgentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ms_marketing_agent');
+        Schema::dropIfExists('tr_period_meter');
     }
 }
