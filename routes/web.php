@@ -134,6 +134,22 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unitcomplaint/insert', 'UnitComplaintController@insert')->name('unitcomplaint.insert');
 	Route::post('unitcomplaint/update', 'UnitComplaintController@update')->name('unitcomplaint.update');
 	Route::post('unitcomplaint/delete', 'UnitComplaintController@delete')->name('unitcomplaint.delete');
+
+	// cash bank
+	Route::get('cash_bank','CashBankController@index');
+	Route::post('cash_bank/get', 'CashBankController@get')->name('cash_bank.get');
+	Route::post('cash_bank/options', 'CashBankController@getOptions')->name('cash_bank.options');
+	Route::post('cash_bank/insert', 'CashBankController@insert')->name('cash_bank.insert');
+	Route::post('cash_bank/update', 'CashBankController@update')->name('cash_bank.update');
+	Route::post('cash_bank/delete', 'CashBankController@delete')->name('cash_bank.delete');
+
+	// company
+	Route::get('company','CompanyController@index');
+	Route::post('company/get', 'CompanyController@get')->name('company.get');
+	Route::post('company/options', 'CompanyController@getOptions')->name('company.options');
+	Route::post('company/insert', 'CompanyController@insert')->name('company.insert');
+	Route::post('company/update', 'CompanyController@update')->name('company.update');
+	Route::post('company/delete', 'CompanyController@delete')->name('company.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');
