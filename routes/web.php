@@ -134,6 +134,14 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unitcomplaint/insert', 'UnitComplaintController@insert')->name('unitcomplaint.insert');
 	Route::post('unitcomplaint/update', 'UnitComplaintController@update')->name('unitcomplaint.update');
 	Route::post('unitcomplaint/delete', 'UnitComplaintController@delete')->name('unitcomplaint.delete');
+
+	// tr contract
+	Route::get('contract','ContractController@index');
+	Route::post('contract/get', 'ContractController@get')->name('contract.get');
+	Route::post('contract/insert', 'ContractController@insert')->name('contract.insert');
+	Route::post('contract/update', 'ContractController@update')->name('contract.update');
+	Route::post('contract/delete', 'ContractController@delete')->name('contract.delete');
+
 });
 
 Route::get('logout','Auth\AuthController@logout');

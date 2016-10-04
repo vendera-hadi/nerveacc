@@ -22,9 +22,10 @@ class CreateTrContractsTable extends Migration
             $table->string('contr_no', 15);
             $table->date('contr_startdate');
             $table->date('contr_enddate');
-            $table->date('contr_bast_date');
-            $table->string('contr_bast_by', 20);
-            $table->string('contr_note', 150);
+            $table->date('contr_bast_date')->nullable();
+            $table->string('contr_bast_by', 20)->nullable();
+            $table->string('contr_note', 150)->nullable();
+            $table->enum('contr_status',['inputed','confirmed','updated'])->default('inputed');  
             $table->char('tenan_id', 36);
             $table->char('mark_id', 36);
             $table->char('renprd_id', 36);
