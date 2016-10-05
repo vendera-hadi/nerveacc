@@ -82,6 +82,16 @@ class ContractController extends Controller
         ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
         ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->first();
         return view('modal.contract', ['fetch' => $fetch]);
+    }
 
+    public function optionParent(Request $request){
+        $key = $request->q;
+        $fetch = TrContract::select('id','contr_code','contr_no')->where('contr_code','like','%'.$key.'%')->orWhere('contr_no','like','%'.$key.'%')->get();
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->id, 'text'=>$value->contr_code." (".$value->contr_no.")"];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
     }
 }

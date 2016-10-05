@@ -15,6 +15,8 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/default/easyui.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
+    <!-- select2 -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/select2.min.css') }}">
     <style>
     .datagrid-wrap{
         height: 400px;
@@ -56,7 +58,7 @@
                 
                 <!-- icon2 atas table -->
                 <div id="toolbar">
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="alert('haha')">New</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" data-toggle="modal" data-target="#formModal">New</a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Edit</a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
                 </div>
@@ -74,7 +76,7 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                         <h4 class="modal-title">Contract Information</h4>
                       </div>
-                      <div class="modal-body">
+                      <div class="modal-body" id="detailModalContent">
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -84,6 +86,46 @@
                   </div>
                 </div>
                 <!-- End Modal -->
+
+                <!-- modal form -->
+                <div id="formModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Add Contract</h4>
+                      </div>
+                      <div class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label>Contract Parent</label>
+                                <select class="form-control contract-parent" style="width:100%">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Contract Code</label>
+                                <input type="text" name="contr_code" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Contract No</label>
+                                <input type="text" name="contr_no" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Contract Start Date</label>
+                                <input type="text" name="contr_no" class="form-control">
+                            </div>
+                        </form>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <!-- end modal form -->
 
                 <!-- content -->
             </div>
@@ -95,7 +137,28 @@
 <script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
+<!-- select2 -->
+<script type="text/javascript" src="{{ asset('plugins/select2/select2.min.js') }}"></script>
+
 <script type="text/javascript">
+        $(".contract-parent").select2({
+              ajax: {
+                url: "{{route('contract.optParent')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              minimumInputLength: 1
+        });
+
         var entity = "Contract"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('contract.get')}}";
         var insert_url = "{{route('unit.insert')}}";
@@ -115,10 +178,10 @@
         });
 
         $(document).delegate('.getDetail','click',function(){
-            $('.modal-body').html('<center><img src="{{ asset('img/loading.gif') }}"><p>Loading ...</p></center>');
+            $('#detailModalContent').html('<center><img src="{{ asset('img/loading.gif') }}"><p>Loading ...</p></center>');
             var id = $(this).data('id');
             $.post('{{route('contract.getdetail')}}',{id:id}, function(data){
-                $('.modal-body').html(data);
+                $('#detailModalContent').html(data);
             });
         });
 </script>
