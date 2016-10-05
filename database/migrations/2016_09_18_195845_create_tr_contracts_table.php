@@ -30,7 +30,7 @@ class CreateTrContractsTable extends Migration
             $table->char('mark_id', 36);
             $table->char('renprd_id', 36);
             $table->char('viracc_id', 36);
-            $table->char('const_code', 5);
+            $table->char('const_id', 5);
             $table->char('unit_id', 36);
         });
     }

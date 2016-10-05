@@ -15,6 +15,11 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/default/easyui.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
+    <style>
+    .datagrid-wrap{
+        height: 400px;
+    }
+    </style>
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -57,18 +62,28 @@
                 </div>
                 <!-- end icon -->
             
-                <!-- hidden form buat create edit -->
-                <div id="dlg" class="easyui-dialog" style="width:60%"
-                        closed="true" buttons="#dlg-buttons">
-                    <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
-                        
+                
+
+                <!-- Modal extra -->
+                <div id="detailModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Contract Information</h4>
+                      </div>
+                      <div class="modal-body">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
-                <div id="dlg-buttons">
-                    <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
-                </div>
-                <!-- end form -->
+                <!-- End Modal -->
 
                 <!-- content -->
             </div>
@@ -98,6 +113,13 @@
             });
             dg.datagrid('enableFilter');
         });
+
+        $(document).delegate('.getDetail','click',function(){
+            $('.modal-body').html('<center><img src="{{ asset('img/loading.gif') }}"><p>Loading ...</p></center>');
+            var id = $(this).data('id');
+            $.post('{{route('contract.getdetail')}}',{id:id}, function(data){
+                $('.modal-body').html(data);
+            });
+        });
 </script>
-<script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection
