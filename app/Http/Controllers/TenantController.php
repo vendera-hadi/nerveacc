@@ -125,4 +125,15 @@ class TenantController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
+
+    public function getOptTenant(Request $request){
+        $key = $request->q;
+        $fetch = MsTenant::select('id','tenan_code','tenan_name')->where(\DB::raw('LOWER(tenan_code)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(tenan_name)'),'like','%'.$key.'%')->get();
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->id, 'text'=>$value->tenan_code." (".$value->tenan_name.")"];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
+    }
 }

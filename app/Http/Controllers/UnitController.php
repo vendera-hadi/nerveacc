@@ -137,4 +137,17 @@ class UnitController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
+
+    public function getOptUnit(Request $request){
+        $key = $request->q;
+        $fetch = MsUnit::select('id','unit_code','unit_name')->where(function($query) use($key){
+            $query->where(\DB::raw('LOWER(unit_code)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(unit_name)'),'like','%'.$key.'%');
+        })->where('unit_isactive', 'TRUE')->get();
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->id, 'text'=>$value->unit_name." (".$value->unit_code.")"];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
+    }
 }

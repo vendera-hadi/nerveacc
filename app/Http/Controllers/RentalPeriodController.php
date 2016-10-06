@@ -106,4 +106,15 @@ class RentalPeriodController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
+
+    public function getOptRentalPeriod(Request $request){
+        $key = $request->q;
+        $fetch = MsRentalPeriod::select('id','renprd_name')->where(\DB::raw('LOWER(renprd_name)'),'like','%'.$key.'%')->get();
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->id, 'text'=>$value->renprd_name];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
+    }
 }

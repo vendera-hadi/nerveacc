@@ -108,4 +108,15 @@ class ContractStatusController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
+
+    public function getOptionContractStatus(Request $request){
+        $key = $request->q;
+        $fetch = MsContractStatus::select('id','const_name')->where(\DB::raw('LOWER(const_name)'),'like','%'.$key.'%')->get();
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->id, 'text'=>$value->const_name];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
+    }
 }
