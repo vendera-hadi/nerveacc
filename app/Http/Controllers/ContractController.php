@@ -63,7 +63,7 @@ class ContractController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['contr_status'] = $value->contr_status;
                 $temp['contr_terminate_date'] = $value->contr_terminate_date;
-                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail">Detail</a>';
+                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail">Detail</a> <a href="#" data-toggle="modal" data-target="#formModal" data-id="'.$value->id.'" class="edit">Edit</a> <a href="#" data-id="'.$value->id.'" class="remove">Remove</a>';
                 
                 $result['rows'][] = $temp;
             }
@@ -126,10 +126,20 @@ class ContractController extends Controller
             'mark_id' => $request->input('mark_id'),
             'renprd_id' => $request->input('renprd_id'),
             'viracc_id' => $request->input('viracc_id'),
-            'const_id' => (int)$request->input('const_id'),
+            'const_id' => $request->input('const_id'),
             'unit_id' => $request->input('unit_id')
         ];
         TrContract::create($input);
         return ['status' => 1, 'message' => 'Insert Success'];
+    }
+
+    public function delete(Request $request){
+        try{
+            $id = $request->id;
+            TrContract::destroy($id);
+            return response()->json(['success'=>true]);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
     }   
 }

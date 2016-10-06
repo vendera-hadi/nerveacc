@@ -62,8 +62,7 @@
                 <!-- icon2 atas table -->
                 <div id="toolbar">
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" data-toggle="modal" data-target="#formModal">New</a>
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Edit</a>
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
+                    
                 </div>
                 <!-- end icon -->
             
@@ -344,15 +343,24 @@
             });
         });
 
+        $(document).delegate('.remove','click',function(){
+            var r = confirm("Are you sure want to delete entry ?");
+            if(r == true){
+                var id = $(this).data('id');
+                $.post('{{route('contract.delete')}}',{id:id},function(result){
+                    if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+                    if(result.success) location.reload();
+                });
+                // location.reload();
+            }
+        });
+
         $('.datepicker').datepicker({
             autoclose: true
         });
 
         var entity = "Contract"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('contract.get')}}";
-        var insert_url = "{{route('unit.insert')}}";
-        var update_url = "{{route('unit.update')}}";
-        var delete_url = "{{route('unit.delete')}}";
 
         $(function(){
             var dg = $('#dg').datagrid({
