@@ -109,4 +109,18 @@ class VirtualAccountController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
+
+    public function getOptVaccount(Request $request){
+        $key = $request->q;
+        $fetch = MsVirtualAccount::select('id','viracc_no','viracc_name')->where(function($query) use($key) {
+                $query->where(\DB::raw('LOWER(viracc_no)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(viracc_name)'),'like','%'.$key.'%');
+            })->where('viracc_isactive','TRUE')->get();
+        
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->id, 'text'=>$value->viracc_no." (".$value->viracc_name.")"];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
+    }
 }

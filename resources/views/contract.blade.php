@@ -17,10 +17,13 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
     <!-- select2 -->
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/select2.min.css') }}">
+    <!-- datepicker -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
     <style>
     .datagrid-wrap{
         height: 400px;
     }
+    .datepicker{z-index:1151 !important;}
     </style>
 @endsection
 
@@ -98,24 +101,87 @@
                         <h4 class="modal-title">Add Contract</h4>
                       </div>
                       <div class="modal-body">
-                        <form>
+                        <form method="POST" id="formContract">
                             <div class="form-group">
                                 <label>Contract Parent</label>
-                                <select class="form-control contract-parent" style="width:100%">
+                                <select class="form-control contract-parent" style="width:100%" name="contr_parent" required="required">
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Contract Code</label>
-                                <input type="text" name="contr_code" class="form-control">
+                                <input type="text" name="contr_code" required="required" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label>Contract No</label>
-                                <input type="text" name="contr_no" class="form-control">
+                                <input type="text" name="contr_no" required="required" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label>Contract Start Date</label>
-                                <input type="text" name="contr_no" class="form-control">
+                                <div class="input-group date">
+                                  <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                  </div>
+                                  <input type="text" name="contr_startdate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                </div>
                             </div>
+                            <div class="form-group">
+                                <label>Contract End Date</label>
+                                <div class="input-group date">
+                                  <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                  </div>
+                                  <input type="text" name="contr_enddate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Berita Acara Serah Terima Date</label>
+                                <div class="input-group date">
+                                  <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                  </div>
+                                  <input type="text" name="contr_bast_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Berita Acara Serah Terima By</label>
+                                <input type="text" name="contr_bast_by" required="required" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Note</label>
+                                <textarea name="contr_note" class="form-control"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Tenant</label>
+                                <select class="form-control choose-tenant" name="tenan_id" required="required" style="width:100%">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Marketing Agent</label>
+                                <select class="form-control choose-marketing" name="mark_id" required="required" style="width:100%">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Rental Period</label>
+                                <select class="form-control choose-rental" name="renprd_id" required="required" style="width:100%">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Virtual Account</label>
+                                <select class="form-control choose-vaccount" name="viracc_id" required="required" style="width:100%">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Contract Status</label>
+                                <select class="form-control choose-ctrstatus" name="const_id" required="required" style="width:100%">
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Unit</label>
+                                <select class="form-control choose-unit" name="unit_id" required="required" style="width:100%">
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-default">Submit</button>
                         </form>
                       </div>
                       <div class="modal-footer">
@@ -139,6 +205,8 @@
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <!-- select2 -->
 <script type="text/javascript" src="{{ asset('plugins/select2/select2.min.js') }}"></script>
+<!-- datepicker -->
+<script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 
 <script type="text/javascript">
         $(".contract-parent").select2({
@@ -157,6 +225,127 @@
               },
               escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
               minimumInputLength: 1
+        });
+
+        $(".choose-tenant").select2({
+              ajax: {
+                url: "{{route('tenant.select2')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              minimumInputLength: 1
+        });
+
+        $(".choose-marketing").select2({
+              ajax: {
+                url: "{{route('marketing.select2')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              minimumInputLength: 1
+        });
+
+        $(".choose-rental").select2({
+              ajax: {
+                url: "{{route('rentalperiod.select2')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              minimumInputLength: 1
+        });
+
+        $(".choose-vaccount").select2({
+              ajax: {
+                url: "{{route('vaccount.select2')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              minimumInputLength: 1
+        });
+
+        $(".choose-ctrstatus").select2({
+              ajax: {
+                url: "{{route('contractstatus.select2')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              minimumInputLength: 1
+        });
+
+        $(".choose-unit").select2({
+              ajax: {
+                url: "{{route('unit.select2')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              minimumInputLength: 1
+        });
+
+        $('#formContract').submit(function(e){
+            e.preventDefault();
+            var data = $(this).serialize();
+            $.post('{{route('contract.insert')}}',data, function(result){
+                alert(result.message);
+                if(result.status == 1) location.reload();
+            });
+        });
+
+        $('.datepicker').datepicker({
+            autoclose: true
         });
 
         var entity = "Contract"; // nama si tabel, ditampilin di dialog

@@ -31,6 +31,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('complaint/options', 'ComplaintController@getOptions')->name('complaint.options');
 	// contract status
 	Route::get('contractstatus','ContractStatusController@index');
+	Route::get('contractstatus/optContrStatus','ContractStatusController@getOptionContractStatus')->name('contractstatus.select2');
 	Route::post('contractstatus/get', 'ContractStatusController@get')->name('contractstatus.get');
 	Route::post('contractstatus/insert', 'ContractStatusController@insert')->name('contractstatus.insert');
 	Route::post('contractstatus/update', 'ContractStatusController@update')->name('contractstatus.update');
@@ -84,6 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('coa/delete', 'CoaController@delete')->name('coa.delete');
 	// Rental period
 	Route::get('rentalperiod','RentalPeriodController@index');
+	Route::get('rentalperiod/optRenprd','RentalPeriodController@getOptRentalPeriod')->name('rentalperiod.select2');
 	Route::post('rentalperiod/get', 'RentalPeriodController@get')->name('rentalperiod.get');
 	Route::post('rentalperiod/insert', 'RentalPeriodController@insert')->name('rentalperiod.insert');
 	Route::post('rentalperiod/update', 'RentalPeriodController@update')->name('rentalperiod.update');
@@ -97,6 +99,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// master tenant
 	Route::get('tenant','TenantController@index');
 	Route::post('tenant/get', 'TenantController@get')->name('tenant.get');
+	Route::get('tenant/optTenant', 'TenantController@getOptTenant')->name('tenant.select2');
 	Route::post('tenant/options', 'TenantController@getOptions')->name('tenant.options');
 	Route::post('tenant/insert', 'TenantController@insert')->name('tenant.insert');
 	Route::post('tenant/update', 'TenantController@update')->name('tenant.update');
@@ -110,6 +113,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// master unit
 	Route::get('unit','UnitController@index');
 	Route::post('unit/get', 'UnitController@get')->name('unit.get');
+	Route::get('unit/optUnit','UnitController@getOptUnit')->name('unit.select2');
 	Route::post('unit/options', 'UnitController@getOptions')->name('unit.options');
 	Route::post('unit/all', 'UnitController@getAll')->name('unit.all');
 	Route::post('unit/insert', 'UnitController@insert')->name('unit.insert');
@@ -123,10 +127,14 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unittype/delete', 'UnitTypeController@delete')->name('unittype.delete');
 	// master virtual account
 	Route::get('vaccount','VirtualAccountController@index');
+	Route::get('vaccount/optVA','VirtualAccountController@getOptVaccount')->name('vaccount.select2');
 	Route::post('vaccount/get', 'VirtualAccountController@get')->name('vaccount.get');
 	Route::post('vaccount/insert', 'VirtualAccountController@insert')->name('vaccount.insert');
 	Route::post('vaccount/update', 'VirtualAccountController@update')->name('vaccount.update');
 	Route::post('vaccount/delete', 'VirtualAccountController@delete')->name('vaccount.delete');
+
+	// marketing agent
+	Route::get('marketing','MarketingAgentController@getOptMarketing')->name('marketing.select2');
 
 	// unit complaints / tr complaint
 	Route::get('unitcomplaint','UnitComplaintController@index');
@@ -140,7 +148,6 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('contract/get', 'ContractController@get')->name('contract.get');
 	Route::post('contract/detail', 'ContractController@getdetail')->name('contract.getdetail');
 	Route::get('contract/optParent', 'ContractController@optionParent')->name('contract.optParent');
-
 	Route::post('contract/insert', 'ContractController@insert')->name('contract.insert');
 	Route::post('contract/update', 'ContractController@update')->name('contract.update');
 	Route::post('contract/delete', 'ContractController@delete')->name('contract.delete');

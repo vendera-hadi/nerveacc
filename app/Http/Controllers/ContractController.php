@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\TrContract;
+use Validator;
 
 class ContractController extends Controller
 {
@@ -88,10 +89,47 @@ class ContractController extends Controller
         $key = $request->q;
         $fetch = TrContract::select('id','contr_code','contr_no')->where('contr_code','like','%'.$key.'%')->orWhere('contr_no','like','%'.$key.'%')->get();
         $result['results'] = [];
+        array_push($result['results'], ['id'=>"0",'text'=>'No Parent']);
         foreach ($fetch as $key => $value) {
             $temp = ['id'=>$value->id, 'text'=>$value->contr_code." (".$value->contr_no.")"];
             array_push($result['results'], $temp);
         }
         return json_encode($result);
     }
+
+    public function insert(Request $request){
+        $messages = [
+            'contr_code.unique' => 'Contract Code must be unique',
+            'contr_no.unique' => 'Contract No must be unique',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'contr_code' => 'required|unique:tr_contract',
+            'contr_no' => 'required|unique:tr_contract',
+        ], $messages);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->first();
+            return ['status' => 0, 'message' => $errors];
+        }
+        $input = [
+            'contr_id' => 'CTR'.microtime(),
+            'contr_parent' => $request->input('contr_parent'),
+            'contr_code' => $request->input('contr_code'),
+            'contr_no' => $request->input('contr_no'),
+            'contr_startdate' => $request->input('contr_startdate'),
+            'contr_enddate' => $request->input('contr_enddate'),
+            'contr_bast_date' => $request->input('contr_bast_date'),
+            'contr_bast_by' => $request->input('contr_bast_by'),
+            'contr_note' => $request->input('contr_note'),
+            'tenan_id' => $request->input('tenan_id'),
+            'mark_id' => $request->input('mark_id'),
+            'renprd_id' => $request->input('renprd_id'),
+            'viracc_id' => $request->input('viracc_id'),
+            'const_id' => (int)$request->input('const_id'),
+            'unit_id' => $request->input('unit_id')
+        ];
+        TrContract::create($input);
+        return ['status' => 1, 'message' => 'Insert Success'];
+    }   
 }
