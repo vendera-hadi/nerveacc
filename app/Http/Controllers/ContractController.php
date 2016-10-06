@@ -63,7 +63,7 @@ class ContractController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['contr_status'] = $value->contr_status;
                 $temp['contr_terminate_date'] = $value->contr_terminate_date;
-                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail">Detail</a> <a href="#" data-toggle="modal" data-target="#formModal" data-id="'.$value->id.'" class="edit">Edit</a> <a href="#" data-id="'.$value->id.'" class="remove">Remove</a>';
+                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail">Detail</a> <a href="#" data-toggle="modal" data-target="#editModal" data-id="'.$value->id.'" class="edit">Edit</a> <a href="#" data-id="'.$value->id.'" class="remove">Remove</a>';
                 
                 $result['rows'][] = $temp;
             }
@@ -83,6 +83,24 @@ class ContractController extends Controller
         ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
         ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->first();
         return view('modal.contract', ['fetch' => $fetch]);
+    }
+
+    public function detailJson(Request $request){
+        try{
+            $contractId = $request->id;
+            $fetch = TrContract::select('tr_contract.*',\DB::raw('parent.contr_code as parent_code'),\DB::raw('parent.contr_no as parent_no'),'ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_rental_period.renprd_name','ms_rental_period.renprd_day','ms_virtual_account.viracc_no','ms_virtual_account.viracc_name','ms_virtual_account.viracc_isactive','ms_contract_status.const_code','ms_contract_status.const_name','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
+            ->leftJoin(\DB::raw('tr_contract as parent'),\DB::raw('parent.id::integer'),"=",\DB::raw('tr_contract.contr_parent::integer'))
+            ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
+            ->join('ms_marketing_agent',\DB::raw('ms_marketing_agent.id::integer'),"=",\DB::raw('tr_contract.mark_id::integer'))
+            ->join('ms_rental_period',\DB::raw('ms_rental_period.id::integer'),"=",\DB::raw('tr_contract.renprd_id::integer'))
+            ->join('ms_virtual_account',\DB::raw('ms_virtual_account.id::integer'),"=",\DB::raw('tr_contract.viracc_id::integer'))
+            ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
+            ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->first();
+            $result = ['success'=>1, 'data'=>$fetch];
+            return view('modal.editcontract', ['fetch' => $fetch]);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
     }
 
     public function optionParent(Request $request){
