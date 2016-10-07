@@ -34,6 +34,17 @@
 
             <li class="treeview">
               <a href="#">
+                <i class="fa fa-gears"></i> <span>ACCOUNT RECEIVABLE</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li><a href="{{url('contract')}}"><i class="fa fa-circle-o"></i> Contract</a></li>
+              </ul>
+            </li>
+            <li class="treeview">
+              <a href="#">
                 <i class="fa fa-gears"></i> <span>MASTER DATA</span>
                 <span class="pull-right-container">
                   <i class="fa fa-angle-left pull-right"></i>
