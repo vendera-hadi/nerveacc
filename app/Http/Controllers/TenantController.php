@@ -9,6 +9,7 @@ use Auth;
 use App\Models\MsTenant;
 use App\Models\MsTenantType;
 use App\Models\User;
+use Validator;
 
 class TenantController extends Controller
 {
@@ -31,7 +32,7 @@ class TenantController extends Controller
 
             // olah data
             $count = MsTenant::count();
-            $fetch = MsTenant::select('ms_tenant.*','ms_tenant_type.tent_name')->join('ms_tenant_type',\DB::raw('ms_tenant.tent_id::integer'),"=",\DB::raw('ms_tenant_type.id::integer'));
+            $fetch = MsTenant::select('ms_tenant.*','ms_tenant_type.tent_name')->leftJoin('ms_tenant_type',\DB::raw('ms_tenant.tent_id::integer'),"=",\DB::raw('ms_tenant_type.id::integer'));
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -94,8 +95,19 @@ class TenantController extends Controller
 
     public function insert(Request $request){
         try{
+            $messages = [
+                'tenan_code.unique' => 'Tenant Code must be unique',
+            ];
+            $validator = Validator::make($request->all(), [
+                'tenan_code' => 'required|unique:ms_tenant',
+            ],$messages);
+            if ($validator->fails()) {
+                $errors = $validator->errors()->first();
+                return response()->json(['errorMsg' => $errors]);
+            }
+
             $input = $request->all();
-            $input['tenan_id'] = md5(date('Y-m-d H:i:s'));
+            $input['tenan_id'] = 'TNT-'.md5(date('Y-m-d H:i:s'));
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
             return MsTenant::create($input);        
@@ -107,6 +119,17 @@ class TenantController extends Controller
     public function update(Request $request){
         try{
             $id = $request->id;
+            $messages = [
+                'tenan_code.unique' => 'Tenant Code must be unique',
+            ];
+            $validator = Validator::make($request->all(), [
+                'tenan_code' => 'required|unique:ms_tenant,tenan_code,'.$id,
+            ],$messages);
+            if ($validator->fails()) {
+                $errors = $validator->errors()->first();
+                return response()->json(['errorMsg' => $errors]);
+            }
+
             $input = $request->all();
             $input['updated_by'] = Auth::id();
             MsTenant::find($id)->update($input);

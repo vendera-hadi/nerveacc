@@ -142,15 +142,6 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unitcomplaint/insert', 'UnitComplaintController@insert')->name('unitcomplaint.insert');
 	Route::post('unitcomplaint/update', 'UnitComplaintController@update')->name('unitcomplaint.update');
 	Route::post('unitcomplaint/delete', 'UnitComplaintController@delete')->name('unitcomplaint.delete');
-// tr contract
-	Route::get('contract','ContractController@index');
-	Route::post('contract/get', 'ContractController@get')->name('contract.get');
-	Route::post('contract/detail', 'ContractController@getdetail')->name('contract.getdetail');
-	Route::post('contract/detailJson', 'ContractController@editModal')->name('contract.detail');
-	Route::get('contract/optParent', 'ContractController@optionParent')->name('contract.optParent');
-	Route::post('contract/insert', 'ContractController@insert')->name('contract.insert');
-	Route::post('contract/update', 'ContractController@update')->name('contract.update');
-	Route::post('contract/delete', 'ContractController@delete')->name('contract.delete');
 
 // cash bank
 	Route::get('cash_bank','CashBankController@index');
@@ -166,6 +157,22 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('company/options', 'CompanyController@getOptions')->name('company.options');
 	Route::post('company/insert', 'CompanyController@insert')->name('company.insert');
 	Route::post('company/update', 'CompanyController@update')->name('company.update');
-	Route::post('company/delete', 'CompanyController@delete')->name('company.delete');});
+	Route::post('company/delete', 'CompanyController@delete')->name('company.delete');
+
+	// tr contract
+	Route::get('contract','ContractController@index');
+	Route::post('contract/get', 'ContractController@get')->name('contract.get');
+	Route::post('contract/detail', 'ContractController@getdetail')->name('contract.getdetail');
+	Route::post('contract/editModal', 'ContractController@editModal')->name('contract.detail');
+	Route::get('contract/optParent', 'ContractController@optionParent')->name('contract.optParent');
+	Route::post('contract/insert', 'ContractController@insert')->name('contract.insert');
+	Route::post('contract/update', 'ContractController@update')->name('contract.update');
+	Route::post('contract/delete', 'ContractController@delete')->name('contract.delete');
+
+	// period meter
+
+	// tr meter
+	Route::get('meter','MeterController@index');
+});
 
 Route::get('logout','Auth\AuthController@logout');

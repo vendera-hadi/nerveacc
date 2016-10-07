@@ -7,7 +7,7 @@
 
 <!-- page title -->
 @section('contentheader_title')
-   Master Tenant
+   Tenant / Owner List
 @endsection
 
 <!-- tambahan script atas -->
@@ -65,34 +65,34 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_code" class="easyui-textbox" label="Unit Name:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                            <input name="tenan_code" class="easyui-textbox" label="Tenant/Owner Code:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_name" class="easyui-textbox" label="Tenant Name:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
+                            <input name="tenan_name" class="easyui-textbox" label="Tenant/Owner Name:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_idno" class="easyui-textbox" label="Unit No:" style="width:100%" data-options="required:true,validType:'length[0,20]'">
+                            <input name="tenan_idno" class="easyui-textbox" label="KTP No:" style="width:100%" data-options="required:true,validType:'length[0,20]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_phone" class="easyui-textbox" label="Tenant Phone:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                            <input name="tenan_phone" class="easyui-textbox" label="Tenant/Owner Phone:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_email" class="easyui-textbox" label="Tenant Email:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
+                            <input name="tenan_email" class="easyui-textbox" label="Tenant/Owner Email:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_address" class="easyui-textbox" label="Tenant Address:" style="width:100%" data-options="required:true,validType:'length[0,150]'">
+                            <input name="tenan_address" class="easyui-textbox" label="Tenant/Owner Address:" style="width:100%" data-options="required:true,validType:'length[0,150]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_npwp" class="easyui-textbox" label="Tenant NPWP:" style="width:100%" data-options="validType:'length[0,15]'">
+                            <input name="tenan_npwp" class="easyui-textbox" label="Tenant/Owner NPWP:" style="width:100%" data-options="validType:'length[0,15]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_taxname" class="easyui-textbox" label="Tenant Taxname:" style="width:100%" data-options="validType:'length[0,50]'">
+                            <input name="tenan_taxname" class="easyui-textbox" label="Tax Name:" style="width:100%" data-options="validType:'length[0,50]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_tax_address" class="easyui-textbox" label="Tenant Tax Address:" style="width:100%" data-options="validType:'length[0,150]'">
+                            <input name="tenan_tax_address" class="easyui-textbox" label="Tax Address:" style="width:100%" data-options="validType:'length[0,150]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="tent_id" style="width:100%" label="Tenant Type:" data-options="valueField:'id',textField:'text',url:'{{route('tenant.options')}}'">
+                            <input id="cc" class="easyui-combobox" required="true" name="tent_id" style="width:100%" label="Tenant/Owner Type:" data-options="valueField:'id',textField:'text',url:'{{route('tenant.options')}}'">
                         </div>
                         
                     </form>

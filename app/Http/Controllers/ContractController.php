@@ -105,7 +105,7 @@ class ContractController extends Controller
 
     public function optionParent(Request $request){
         $key = $request->q;
-        $fetch = TrContract::select('id','contr_code','contr_no')->where('contr_code','like','%'.$key.'%')->orWhere('contr_no','like','%'.$key.'%')->get();
+        $fetch = TrContract::select('id','contr_code','contr_no')->where(\DB::raw('LOWER(contr_code)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(contr_no)'),'like','%'.$key.'%')->get();
         $result['results'] = [];
         array_push($result['results'], ['id'=>"0",'text'=>'No Parent']);
         foreach ($fetch as $key => $value) {

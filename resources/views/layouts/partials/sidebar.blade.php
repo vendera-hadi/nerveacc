@@ -45,12 +45,51 @@
             </li>
             <li class="treeview">
               <a href="#">
+                <i class="fa fa-gears"></i> <span>SETUP</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li><a href="{{url('meter')}}"><i class="fa fa-circle-o"></i> Meter Setup</a></li>
+              </ul>
+            </li>
+            <li class="treeview">
+              <a href="#">
                 <i class="fa fa-gears"></i> <span>MASTER DATA</span>
                 <span class="pull-right-container">
                   <i class="fa fa-angle-left pull-right"></i>
                 </span>
               </a>
               <ul class="treeview-menu">
+                <li>
+                  <a href="#"><i class="fa fa-circle"></i> Tenant/Owner
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                    <li><a href="{{url('tenant')}}"><i class="fa fa-circle-o"></i> Tenant</a></li>
+                    <li><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant Type</a></li>
+                  </ul>
+                </li>
+                <li><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
+
+                <li>
+                  <a href="#"><i class="fa fa-circle"></i> Unit
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                      <li><a href="{{url('unit')}}"><i class="fa fa-circle-o"></i> Unit</a></li>
+                      <li><a href="{{url('unittype')}}"><i class="fa fa-circle-o"></i> Unit Type</a></li>
+                  </ul>
+                </li>
+
+                <li><a href="{{url('vaccount')}}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
+
+
                 <li><a href="{{url('currency')}}"><i class="fa fa-circle-o"></i> Currency</a></li>
                 <li><a href="{{url('complaint')}}"><i class="fa fa-circle-o"></i> Complaint</a></li>
                 <li><a href="{{url('contractstatus')}}"><i class="fa fa-circle-o"></i> Contract Status</a></li>
@@ -58,14 +97,11 @@
                 <li><a href="{{url('invtype')}}"><i class="fa fa-circle-o"></i> Invoice Type</a></li>
                 <li><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li>
                 <li><a href="{{url('groupaccdetail')}}"><i class="fa fa-circle-o"></i> Group Account Detail</a></li>
-                <li><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
+                
                 <li><a href="{{url('rentalperiod')}}"><i class="fa fa-circle-o"></i> Rental Period</a></li>
                 <li><a href="{{url('supplier')}}"><i class="fa fa-circle-o"></i> Supplier</a></li>
-                <li><a href="{{url('tenant')}}"><i class="fa fa-circle-o"></i> Tenant</a></li>
-                <li><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant Type</a></li>
-                <li><a href="{{url('unit')}}"><i class="fa fa-circle-o"></i> Unit</a></li>
-                <li><a href="{{url('unittype')}}"><i class="fa fa-circle-o"></i> Unit Type</a></li>
-                <li><a href="{{url('vaccount')}}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
+                
+                
               </ul>
             </li>
 

@@ -58,6 +58,7 @@ class TenantTypeController extends Controller
         		$temp['id'] = $value->id;
         		$temp['tent_id'] = $value->tent_id;
         		$temp['tent_name'] = $value->tent_name;
+                $temp['tent_isowner'] = !empty($value->tent_isowner) ? 'yes' : 'no';
         		$result['rows'][] = $temp;
         	}
             return response()->json($result);
@@ -70,6 +71,8 @@ class TenantTypeController extends Controller
 		try{
             $input = $request->all();
             $input['tent_id'] = md5(date('Y-m-d H:i:s'));
+            $input['created_by'] = Auth::id();
+            $input['updated_by'] = Auth::id();
     		return MsTenantType::create($input);    	
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);

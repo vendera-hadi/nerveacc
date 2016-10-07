@@ -2,7 +2,7 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Unit
+    Contract
 @endsection
 
 <!-- page title -->
@@ -46,11 +46,12 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            <th field="tenan_name" width="120" sortable="true">Tenant</th>
                             <th field="contr_code" width="120" sortable="true">Contract Code</th>
                             <th field="contr_no" width="120" sortable="true">Contract No</th>
                             <th field="contr_startdate" width="120" sortable="true">Start Date</th>
                             <th field="contr_enddate" width="120" sortable="true">End Date</th>
-                            <th field="tenan_name" width="120" sortable="true">Tenant</th>
+                            
                             <th field="contr_status" width="120" sortable="true">Status</th>
                             <th field="contr_terminate_date" width="120" sortable="true">Terminated Date</th>
                             <th field="action">Action</th>

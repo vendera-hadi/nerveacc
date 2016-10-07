@@ -48,10 +48,11 @@ function destroyUser(){
                     if (result.success){
                         $('#dg').datagrid('reload');    // reload the user data
                     } else {
-                        $.messager.show({   // show error message
-                            title: 'Error',
-                            msg: result.errorMsg
-                        });
+                        // $.messager.show({   // show error message
+                        //     title: 'Error',
+                        //     msg: result.errorMsg
+                        // });
+                        $.messager.alert('Warning','The warning message');
                     }
                 },'json');
             }

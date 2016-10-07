@@ -7,7 +7,7 @@
 
 <!-- page title -->
 @section('contentheader_title')
-   Master Tenant Type
+   Tenant / Owner Type
 @endsection
 
 <!-- tambahan script atas -->
@@ -15,12 +15,17 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/default/easyui.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
+    <style>
+    .datagrid-wrap{
+        height: 300px;
+    }
+    </style>
 @endsection
 
 @section('contentheader_breadcrumbs')
 	<ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Master Tenant Type</li>
+        <li class="active">Tenant Type</li>
     </ol>
 @stop
 
@@ -36,8 +41,8 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="tent_id" width="50" sortable="true">ID</th>
-                            <th field="tent_name" width="50" sortable="true">Tent Name</th>
+                            <th field="tent_name" width="50" sortable="true">Tenant Type</th>
+                            <th field="tent_isowner" width="50" sortable="true">Is Owner</th>
                         </tr>
                     </thead>
                 </table>
@@ -58,6 +63,12 @@
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
                             <input name="tent_name" class="easyui-textbox" label="Tenant Name Type:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <select id="cc" class="easyui-combobox" required="true" name="tent_isowner" label="Is Owner:" style="width:300px;">
+                                <option value="true">yes</option>
+                                <option value="false">no</option>
+                            </select>
                         </div>
                     </form>
                 </div>
