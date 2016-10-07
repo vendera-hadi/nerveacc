@@ -85,7 +85,7 @@ class ContractController extends Controller
         return view('modal.contract', ['fetch' => $fetch]);
     }
 
-    public function detailJson(Request $request){
+    public function editModal(Request $request){
         try{
             $contractId = $request->id;
             $fetch = TrContract::select('tr_contract.*',\DB::raw('parent.contr_code as parent_code'),\DB::raw('parent.contr_no as parent_no'),'ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_rental_period.renprd_name','ms_rental_period.renprd_day','ms_virtual_account.viracc_no','ms_virtual_account.viracc_name','ms_virtual_account.viracc_isactive','ms_contract_status.const_code','ms_contract_status.const_name','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
@@ -149,6 +149,42 @@ class ContractController extends Controller
         ];
         TrContract::create($input);
         return ['status' => 1, 'message' => 'Insert Success'];
+    }
+
+    public function update(Request $request){
+        $messages = [
+            'contr_code.unique' => 'Contract Code must be unique',
+            'contr_no.unique' => 'Contract No must be unique',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'contr_code' => 'required|unique:tr_contract,contr_code,'.$request->input('id'),
+            'contr_no' => 'required|unique:tr_contract,contr_no,'.$request->input('id'),
+        ], $messages);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->first();
+            return ['status' => 0, 'message' => $errors];
+        }
+
+        $update = [
+            'contr_parent' => $request->input('contr_parent'),
+            'contr_code' => $request->input('contr_code'),
+            'contr_no' => $request->input('contr_no'),
+            'contr_startdate' => $request->input('contr_startdate'),
+            'contr_enddate' => $request->input('contr_enddate'),
+            'contr_bast_date' => $request->input('contr_bast_date'),
+            'contr_bast_by' => $request->input('contr_bast_by'),
+            'contr_note' => $request->input('contr_note'),
+            'tenan_id' => $request->input('tenan_id'),
+            'mark_id' => $request->input('mark_id'),
+            'renprd_id' => $request->input('renprd_id'),
+            'viracc_id' => $request->input('viracc_id'),
+            'const_id' => $request->input('const_id'),
+            'unit_id' => $request->input('unit_id')
+        ];
+        TrContract::where('id',$request->input('id'))->update($update);
+        return ['status' => 1, 'message' => 'Update Success'];
     }
 
     public function delete(Request $request){
