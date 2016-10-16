@@ -143,7 +143,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unitcomplaint/update', 'UnitComplaintController@update')->name('unitcomplaint.update');
 	Route::post('unitcomplaint/delete', 'UnitComplaintController@delete')->name('unitcomplaint.delete');
 
-// cash bank
+	// cash bank
 	Route::get('cash_bank','CashBankController@index');
 	Route::post('cash_bank/get', 'CashBankController@get')->name('cash_bank.get');
 	Route::post('cash_bank/options', 'CashBankController@getOptions')->name('cash_bank.options');
@@ -173,6 +173,28 @@ Route::group(['middleware' => 'auth'], function () {
 
 	// tr meter
 	Route::get('meter','MeterController@index');
+
+	//cost item
+	Route::get('cost_item','CostItemController@index');
+	Route::post('cost_item/get', 'CostItemController@get')->name('cost_item.get');
+	Route::post('cost_item/insert', 'CostItemController@insert')->name('cost_item.insert');
+	Route::post('cost_item/update', 'CostItemController@update')->name('cost_item.update');
+	Route::post('cost_item/delete', 'CostItemController@delete')->name('cost_item.delete');
+
+	//cost detail
+	Route::get('cost_detail','CostDetailController@index');
+	Route::post('cost_detail/get', 'CostDetailController@get')->name('cost_detail.get');
+	Route::post('cost_detail/options', 'CostDetailController@getOptions')->name('cost_detail.options');
+	Route::post('cost_detail/insert', 'CostDetailController@insert')->name('cost_detail.insert');
+	Route::post('cost_detail/update', 'CostDetailController@update')->name('cost_detail.update');
+	Route::post('cost_detail/delete', 'CostDetailController@delete')->name('cost_detail.delete');
+
+	//floor
+	Route::get('floor','FloorController@index');
+	Route::post('floor/get', 'FloorController@get')->name('floor.get');
+	Route::post('floor/insert', 'FloorController@insert')->name('floor.insert');
+	Route::post('floor/update', 'FloorController@update')->name('floor.update');
+	Route::post('floor/delete', 'FloorController@delete')->name('floor.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');

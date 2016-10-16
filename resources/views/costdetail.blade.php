@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Contract Status
+    Cost Detail
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Master Contract Status
+   Master Cost Detil
 @endsection
 
 <!-- tambahan script atas -->
@@ -18,27 +18,32 @@
 @endsection
 
 @section('contentheader_breadcrumbs')
-    <ol class="breadcrumb">
+	<ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Master Contract Status</li>
+        <li class="active">Master Cost Detail</li>
     </ol>
 @stop
 
 @section('main-content')
-    <div class="container spark-screen">
-        <div class="row">
-            <div class="col-md-11">
-                <!-- content -->
+	<div class="container spark-screen">
+		<div class="row">
+			<div class="col-md-11">
+          		<!-- content -->
 
                 <!-- template tabel -->
-                <table id="dg" title="Contract Status" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Master Cost Detail" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="const_code" width="50" sortable="true">Contract Status Code</th>
-                            <th field="const_order" width="50" sortable="true">Contract Status Name</th>
-                            <th field="created_by" width="50" >Created By</th>
+                            <th field="costd_name" width="50" sortable="true">Cost Detail Name</th>
+                            <th field="costd_unit" width="50" sortable="true">Unit</th>
+                            <th field="costd_rate" width="50" sortable="true">Rate</th>
+                            <th field="costd_burden" width="50" sortable="true">Biaya Abodemen</th>
+                            <th field="costd_admin" width="50" sortable="true">Biaya Admin</th>
+                            <th field="costd_ismeter" width="50" sortable="true">Status Meter</th>
+                            <th field="cost_id" width="50" sortable="true">Cost Item Code</th>
+                            <th field="cost_name" width="50" sortable="true">Cost Item Name</th>      
                         </tr>
                     </thead>
                 </table>
@@ -56,15 +61,30 @@
                 <div id="dlg" class="easyui-dialog" style="width:60%"
                         closed="true" buttons="#dlg-buttons">
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Information</div>
+                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="const_code" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,5]'" label="Code:" style="width:100%">
+                            <input name="costd_name" class="easyui-textbox" label="Cost Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="const_name" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,30]'" label="Name:" style="width:100%">
+                            <input name="costd_unit" class="easyui-textbox" label="Unit:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="const_order" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,3]'" label="Order (angka) :" style="width:100%">
+                            <input name="costd_rate" class="easyui-textbox" label="Rate:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input name="costd_burden" class="easyui-textbox" label="Biaya Abodemen:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input name="costd_admin" class="easyui-textbox" label="Biaya Admin:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Cost Item:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Active Meter:" style="width:300px;">
+                                <option value="true" >yes</option>
+                                <option value="false">no</option>
+                            </select>
                         </div>
                     </form>
                 </div>
@@ -74,10 +94,10 @@
                 </div>
                 <!-- end form -->
 
-                <!-- content -->
-            </div>
-        </div>
-    </div>
+          		<!-- content -->
+        	</div>
+		</div>
+	</div>
 @endsection
 
 @section('footer-scripts')
@@ -85,11 +105,11 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Contract Status"; // nama si tabel, ditampilin di dialog
-        var get_url = "{{route('contractstatus.get')}}";
-        var insert_url = "{{route('contractstatus.insert')}}";
-        var update_url = "{{route('contractstatus.update')}}";
-        var delete_url = "{{route('contractstatus.delete')}}";
+        var entity = "Master Cost Detail"; // nama si tabel, ditampilin di dialog
+        var get_url = "{{route('cost_detail.get')}}";
+        var insert_url = "{{route('cost_detail.insert')}}";
+        var update_url = "{{route('cost_detail.update')}}";
+        var delete_url = "{{route('cost_detail.delete')}}";
 
         $(function(){
             var dg = $('#dg').datagrid({

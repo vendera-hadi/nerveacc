@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Contract Status
+    Cost Item
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Master Contract Status
+   Master Cost Item
 @endsection
 
 <!-- tambahan script atas -->
@@ -18,27 +18,27 @@
 @endsection
 
 @section('contentheader_breadcrumbs')
-    <ol class="breadcrumb">
+	<ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Master Contract Status</li>
+        <li class="active">Master Cost Item</li>
     </ol>
 @stop
 
 @section('main-content')
-    <div class="container spark-screen">
-        <div class="row">
-            <div class="col-md-11">
-                <!-- content -->
+	<div class="container spark-screen">
+		<div class="row">
+			<div class="col-md-11">
+          		<!-- content -->
 
                 <!-- template tabel -->
-                <table id="dg" title="Contract Status" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Master Cost Item" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="const_code" width="50" sortable="true">Contract Status Code</th>
-                            <th field="const_order" width="50" sortable="true">Contract Status Name</th>
-                            <th field="created_by" width="50" >Created By</th>
+                            <th field="cost_code" width="50" sortable="true">Cost Code</th>
+                            <th field="cost_name" width="50" sortable="true">Cost Name</th>
+                            <th field="cost_isactive" width="50" sortable="true">Cost Active</th>
                         </tr>
                     </thead>
                 </table>
@@ -56,15 +56,18 @@
                 <div id="dlg" class="easyui-dialog" style="width:60%"
                         closed="true" buttons="#dlg-buttons">
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Information</div>
+                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="const_code" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,5]'" label="Code:" style="width:100%">
+                            <input name="cost_code" class="easyui-textbox" label="Cost Code:" style="width:100%" data-options="required:true,validType:'length[0,5]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="const_name" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,30]'" label="Name:" style="width:100%">
+                            <input name="cost_name" class="easyui-textbox" label="Cost Name:" style="width:100%" data-options="required:true,validType:'length[0,150]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="const_order" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,3]'" label="Order (angka) :" style="width:100%">
+                            <select id="cc" class="easyui-combobox" required="true" name="cost_isactive" label="Active:" style="width:300px;">
+                                <option value="true" >yes</option>
+                                <option value="false">no</option>
+                            </select>
                         </div>
                     </form>
                 </div>
@@ -74,10 +77,10 @@
                 </div>
                 <!-- end form -->
 
-                <!-- content -->
-            </div>
-        </div>
-    </div>
+          		<!-- content -->
+        	</div>
+		</div>
+	</div>
 @endsection
 
 @section('footer-scripts')
@@ -85,11 +88,11 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Contract Status"; // nama si tabel, ditampilin di dialog
-        var get_url = "{{route('contractstatus.get')}}";
-        var insert_url = "{{route('contractstatus.insert')}}";
-        var update_url = "{{route('contractstatus.update')}}";
-        var delete_url = "{{route('contractstatus.delete')}}";
+        var entity = "Master Cost Item"; // nama si tabel, ditampilin di dialog
+        var get_url = "{{route('cost_item.get')}}";
+        var insert_url = "{{route('cost_item.insert')}}";
+        var update_url = "{{route('cost_item.update')}}";
+        var delete_url = "{{route('cost_item.delete')}}";
 
         $(function(){
             var dg = $('#dg').datagrid({
