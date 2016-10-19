@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Unit
+    Unit Owner
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Master Unit
+   Master Unit Owner
 @endsection
 
 <!-- tambahan script atas -->
@@ -20,7 +20,7 @@
 @section('contentheader_breadcrumbs')
 	<ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Master Unit</li>
+        <li class="active">Master Unit Owner</li>
     </ol>
 @stop
 
@@ -31,19 +31,15 @@
           		<!-- content -->
 
                 <!-- template tabel -->
-          		<table id="dg" title="Master Unit" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Master Unit Owner" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="unit_code" width="120" sortable="true">ID</th>
-                            <th field="unit_name" width="120" sortable="true">Unit Name</th>
-                            <th field="unit_sqrt" width="120" sortable="true">Luas</th>
-                            <th field="unit_virtual_accn" width="120" sortable="true">Virtual Account</th>
-                            <th field="untype_name" width="120" sortable="true">Unit Type</th>
-                            <th field="floor_name" width="120" sortable="true">Unit Floor</th>
-                            <th field="unit_isactive" width="120" sortable="true">Unit Active</th>
-                            <th field="created_by" width="120" sortable="true">Created By</th>
+                            <th field="unitow_id" width="120" sortable="true">ID</th>
+                            <th field="unitow_start_date" width="120" sortable="true">Start Date</th>
+                            <th field="unit_name" width="120" sortable="true">Unit</th>
+                            <th field="tenan_name" width="120" sortable="true">Tenant</th>
                         </tr>
                     </thead>
                 </table>
@@ -63,28 +59,13 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="unit_code" class="easyui-textbox" label="Unit Code:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                            <input id="dd" type="text" class="easyui-datebox" required="required" name="unitow_start_date" label="Start Date :" style="width:100%">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="unit_name" class="easyui-textbox" label="Unit Name:" style="width:100%" data-options="required:true,validType:'length[0,25]'">
+                            <input id="cc" class="easyui-combobox" required="true" name="unit_id" style="width:100%" label="Unit :" data-options="valueField:'id',textField:'text',url:'{{route('unit_owner.unitopt')}}'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="unit_sqrt" class="easyui-textbox" label="Unit Square:" style="width:100%" data-options="required:true">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="unit_virtual_accn" class="easyui-textbox" label="Unit Virtual Account:" style="width:100%" data-options="required:true,validType:'length[0,20]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="floor_id" style="width:100%" label="Unit Floor:" data-options="valueField:'id',textField:'text',url:'{{route('unit.fopt')}}'">
-                        </div> 
-                        <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="untype_id" style="width:100%" label="Unit Type:" data-options="valueField:'id',textField:'text',url:'{{route('unit.options')}}'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <select id="cc" class="easyui-combobox" required="true" name="unit_isactive" label="Active:" style="width:300px;">
-                                <option value="true">yes</option>
-                                <option value="false">no</option>
-                            </select>
+                            <input id="cc" class="easyui-combobox" required="true" name="tenan_id" style="width:100%" label="Unit :" data-options="valueField:'id',textField:'text',url:'{{route('unit_owner.tenanopt')}}'">
                         </div>  
                     </form>
                 </div>
@@ -105,11 +86,11 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Master Unit"; // nama si tabel, ditampilin di dialog
-        var get_url = "{{route('unit.get')}}";
-        var insert_url = "{{route('unit.insert')}}";
-        var update_url = "{{route('unit.update')}}";
-        var delete_url = "{{route('unit.delete')}}";
+        var entity = "Master Unit Owner"; // nama si tabel, ditampilin di dialog
+        var get_url = "{{route('unit_owner.get')}}";
+        var insert_url = "{{route('unit_owner.insert')}}";
+        var update_url = "{{route('unit_owner.update')}}";
+        var delete_url = "{{route('unit_owner.delete')}}";
 
         $(function(){
             var dg = $('#dg').datagrid({

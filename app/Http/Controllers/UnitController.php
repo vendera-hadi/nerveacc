@@ -9,6 +9,7 @@ use Auth;
 use App\Models\MsUnit;
 use App\Models\MsUnitType;
 use App\Models\User;
+use App\Models\MsFloor;
 
 class UnitController extends Controller
 {
@@ -31,7 +32,7 @@ class UnitController extends Controller
 
             // olah data
             $count = MsUnit::count();
-            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'));
+            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))->join('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'));
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -49,6 +50,14 @@ class UnitController extends Controller
                         default:
                             break;
                     }
+                    // special condition
+                    if($filter->field == 'unit_isactive'){
+                        if(strtolower($filter->value) == "yes") $filter->value = "true";
+                        else $filter->value = "false";
+                    }
+                    // end special condition
+                    if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                    else $fetch = $fetch->where($filter->field, $op, $filter->value);
                 }
             }
             $count = $fetch->count();
@@ -59,8 +68,16 @@ class UnitController extends Controller
                 $temp = [];
                 $temp['id'] = $value->id;
                 $temp['unit_id'] = $value->unit_id;
+                $temp['unit_code'] = $value->unit_code;
                 $temp['unit_name'] = $value->unit_name;
+                $temp['unit_sqrt'] = $value->unit_sqrt;
+                $temp['unit_virtual_accn'] = $value->unit_virtual_accn;
+                $temp['unit_isactive'] = $value->unit_isactive;
                 $temp['untype_name'] = $value->untype_name;
+                $temp['floor_name'] = $value->floor_name;
+                $temp['floor_id'] = $value->floor_id;
+                $temp['untype_id'] = $value->untype_id;
+                $temp['unit_isactive'] = !empty($value->unit_isactive) ? 'yes' : 'no';
                 try{
                     $temp['created_by'] = User::findOrFail($value->created_by)->name;
                 }catch(\Exception $e){
@@ -96,6 +113,21 @@ class UnitController extends Controller
             if(count($all) > 0){
                 foreach ($all as $value) {
                     $result[] = ['id'=>$value->id, 'text'=>$value->untype_name];
+                }
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function fopt(){
+        try{
+            $all = MsFloor::all();
+            $result = [];
+            if(count($all) > 0){
+                foreach ($all as $value) {
+                    $result[] = ['id'=>$value->id, 'text'=>$value->floor_name];
                 }
             }
             return response()->json($result);

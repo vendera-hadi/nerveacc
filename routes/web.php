@@ -115,6 +115,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unit/get', 'UnitController@get')->name('unit.get');
 	Route::get('unit/optUnit','UnitController@getOptUnit')->name('unit.select2');
 	Route::post('unit/options', 'UnitController@getOptions')->name('unit.options');
+	Route::post('unit/fopt', 'UnitController@fopt')->name('unit.fopt');
 	Route::post('unit/all', 'UnitController@getAll')->name('unit.all');
 	Route::post('unit/insert', 'UnitController@insert')->name('unit.insert');
 	Route::post('unit/update', 'UnitController@update')->name('unit.update');
@@ -195,6 +196,29 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('floor/insert', 'FloorController@insert')->name('floor.insert');
 	Route::post('floor/update', 'FloorController@update')->name('floor.update');
 	Route::post('floor/delete', 'FloorController@delete')->name('floor.delete');
+
+	//journal type
+	Route::get('journal_type','JournalTypeController@index');
+	Route::post('journal_type/get', 'JournalTypeController@get')->name('journal_type.get');
+	Route::post('journal_type/insert', 'JournalTypeController@insert')->name('journal_type.insert');
+	Route::post('journal_type/update', 'JournalTypeController@update')->name('journal_type.update');
+	Route::post('journal_type/delete', 'JournalTypeController@delete')->name('journal_type.delete');
+
+	//payment type
+	Route::get('payment_type','PaymentTypeController@index');
+	Route::post('payment_type/get', 'PaymentTypeController@get')->name('payment_type.get');
+	Route::post('payment_type/insert', 'PaymentTypeController@insert')->name('payment_type.insert');
+	Route::post('payment_type/update', 'PaymentTypeController@update')->name('payment_type.update');
+	Route::post('payment_type/delete', 'PaymentTypeController@delete')->name('payment_type.delete');
+
+	//unit owner
+	Route::get('unit_owner','UnitOwnerController@index');
+	Route::post('unit_owner/get', 'UnitOwnerController@get')->name('unit_owner.get');
+	Route::post('unit_owner/tenanopt', 'UnitOwnerController@tenanopt')->name('unit_owner.tenanopt');
+	Route::post('unit_owner/unitopt', 'UnitOwnerController@unitopt')->name('unit_owner.unitopt');
+	Route::post('unit_owner/insert', 'UnitOwnerController@insert')->name('unit_owner.insert');
+	Route::post('unit_owner/update', 'UnitOwnerController@update')->name('unit_owner.update');
+	Route::post('unit_owner/delete', 'UnitOwnerController@delete')->name('unit_owner.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');
