@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    COA
+    Fixed Assets
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Master COA
+   Master Fixed Assets
 @endsection
 
 <!-- tambahan script atas -->
@@ -20,7 +20,7 @@
 @section('contentheader_breadcrumbs')
 	<ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Master COA</li>
+        <li class="active">Master Fixed Assets</li>
     </ol>
 @stop
 
@@ -31,21 +31,20 @@
           		<!-- content -->
 
                 <!-- template tabel -->
-          		<table id="dg" title="Master COA" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Master Fixed Assets" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="coa_year" width="50" sortable="true">COA Year</th>
-                            <th field="coa_code" width="50" sortable="true">COA Code</th>
-                            <th field="coa_name" width="50" sortable="true">COA Name</th>
-                            <th field="coa_isparent" width="50" sortable="true">COA Parent</th>
-                            <th field="coa_level" width="50" sortable="true">COA Level</th>
-                            <th field="coa_type" width="50" sortable="true">COA Type</th>
-                            <th field="coa_beginning" width="50" sortable="true">COA Beginning</th>
-                            <th field="coa_debit" width="50" sortable="true">COA Debit</th>
-                            <th field="coa_credit" width="50" sortable="true">COA Credit</th>
-                            <th field="coa_ending" width="50" sortable="true">COA Ending</th>
+                            <th field="fixas_code" width="120" sortable="true">Fixed Assets Code</th>
+                            <th field="fixas_name" width="120" sortable="true">Fixed Assets Name</th>
+                            <th field="fixas_aqc_date" width="120" sortable="true">Required Date</th>
+                            <th field="fixas_age" width="120" sortable="true">Age</th>
+                            <th field="fixas_supplier" width="120" sortable="true">Supplier</th>
+                            <th field="fixas_pono" width="120" sortable="true">PO Number</th>
+                            <th field="fixas_total_depr" width="120" sortable="true">Total</th>
+                            <th field="fixas_isdelete" width="120" sortable="true">Deleted</th>
+                            <th field="catas_name" width="120" sortable="true">Category Name</th>
                         </tr>
                     </thead>
                 </table>
@@ -65,38 +64,35 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="coa_year" class="easyui-textbox" label="COA Year:" style="width:100%" data-options="required:true,validType:'length[0,4]'">
+                            <input name="fixas_code" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,15]'" label="Fixed Assets Code:" style="width:100%">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="coa_code" class="easyui-textbox" label="COA Code:" style="width:100%" data-options="required:true,validType:'length[0,5]'">
+                            <input name="fixas_name" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,50]'" label="Fixed Assets Name:" style="width:100%">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="coa_name" class="easyui-textbox" label="COA Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
+                            <input id="dd" type="text" class="easyui-datebox" required="required" name="fixas_aqc_date" label="Acquired Date :" style="width:100%">
                         </div>
                         <div style="margin-bottom:10px">
-                            <select id="cc" class="easyui-combobox" name="coa_isparent" label="Active:" style="width:300px;">
-                                <option value="true" selected>yes</option>
+                            <input name="fixas_age" class="easyui-textbox" required="true" data-options="required:true" label="Age:" style="width:100%">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input name="fixas_supplier" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,50]'" label="Supplier:" style="width:100%">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input name="fixas_pono" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,20]'" label="PO Number:" style="width:100%">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input name="fixas_total_depr" class="easyui-textbox" required="true" data-options="required:true" label="Total:" style="width:100%">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input id="cc" class="easyui-combobox" required="true" name="catas_id" style="width:100%" label="Category Assets:" data-options="valueField:'id',textField:'text',url:'{{route('fixed_asset.category_option')}}'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <select id="cc" class="easyui-combobox" required="true" name="fixas_isdelete" label="Deleted:" style="width:300px;">
+                                <option value="true">yes</option>
                                 <option value="false">no</option>
                             </select>
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="coa_level" class="easyui-textbox" label="COA Level:" style="width:100%" data-options="required:true,numeric:true">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="coa_type" class="easyui-textbox" label="COA Type:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="coa_beginning" class="easyui-textbox" label="COA Beginning:" style="width:100%" data-options="required:true,validType:'length[0,10]'" value="0">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="coa_debit" class="easyui-textbox" label="COA Debit:" style="width:100%" data-options="required:true">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="coa_credit" class="easyui-textbox" label="COA Credit:" style="width:100%" data-options="required:true">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="coa_ending" class="easyui-textbox" label="COA Ending:" style="width:100%" data-options="required:true">
-                        </div>
+                        </div> 
                     </form>
                 </div>
                 <div id="dlg-buttons">
@@ -116,11 +112,11 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Master COA"; // nama si tabel, ditampilin di dialog
-        var get_url = "{{route('coa.get')}}";
-        var insert_url = "{{route('coa.insert')}}";
-        var update_url = "{{route('coa.update')}}";
-        var delete_url = "{{route('coa.delete')}}";
+        var entity = "Master Fixed Assets"; // nama si tabel, ditampilin di dialog
+        var get_url = "{{route('fixed_asset.get')}}";
+        var insert_url = "{{route('fixed_asset.insert')}}";
+        var update_url = "{{route('fixed_asset.update')}}";
+        var delete_url = "{{route('fixed_asset.delete')}}";
 
         $(function(){
             var dg = $('#dg').datagrid({

@@ -62,10 +62,10 @@
                             <input id="dd" type="text" class="easyui-datebox" required="required" name="unitow_start_date" label="Start Date :" style="width:100%">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="unit_id" style="width:100%" label="Unit :" data-options="valueField:'id',textField:'text',url:'{{route('unit_owner.unitopt')}}'">
+                            <input id="cc" class="easyui-combobox" required="true" name="unit_id" style="width:100%" label="Unit Name :" data-options="valueField:'id',textField:'text',url:'{{route('unit_owner.unitopt')}}'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="tenan_id" style="width:100%" label="Unit :" data-options="valueField:'id',textField:'text',url:'{{route('unit_owner.tenanopt')}}'">
+                            <input id="cc" class="easyui-combobox" required="true" name="tenan_id" style="width:100%" label="Tenant Name :" data-options="valueField:'id',textField:'text',url:'{{route('unit_owner.tenanopt')}}'">
                         </div>  
                     </form>
                 </div>

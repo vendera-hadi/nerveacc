@@ -6,13 +6,13 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Auth;
 // load model
-use App\Models\MsContractStatus;
+use App\Models\TrPeriodMeter;
 use App\Models\User;
 
-class ContractStatusController extends Controller
+class PeriodMeterController extends Controller
 {
     public function index(){
-		return view('contractstatus');
+		return view('period_meter');
     }
 
     public function get(Request $request){
@@ -29,8 +29,8 @@ class ContractStatusController extends Controller
             if(!empty($filters)) $filters = json_decode($filters);
 
         	// olah data
-        	$count = MsContractStatus::count();
-        	$fetch = MsContractStatus::query();
+        	$count = TrPeriodMeter::count();
+        	$fetch = TrPeriodMeter::query();
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -48,8 +48,7 @@ class ContractStatusController extends Controller
                         default:
                             break;
                     }
-                    // special condition
-                    // end special condition
+
                     if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
                     else $fetch = $fetch->where($filter->field, $op, $filter->value);
                 }
@@ -61,9 +60,10 @@ class ContractStatusController extends Controller
         	foreach ($fetch as $key => $value) {
         		$temp = [];
         		$temp['id'] = $value->id;
-        		$temp['const_code'] = $value->const_code;
-                $temp['const_name'] = $value->const_name;
-        		$temp['const_order'] = $value->const_order;
+        		$temp['prdmet_id'] = $value->prdmet_id;
+                $temp['prdmet_start_date'] = $value->prdmet_start_date;
+        		$temp['prdmet_end_date'] = $value->prdmet_end_date;
+                $temp['prd_billing_date'] = $value->prd_billing_date;
         		try{
         			$temp['created_by'] = User::findOrFail($value->created_by)->name;
         		}catch(\Exception $e){
@@ -82,7 +82,7 @@ class ContractStatusController extends Controller
     		$input = $request->all();
     		$input['created_by'] = Auth::id();
     		$input['updated_by'] = Auth::id();
-    		return MsContractStatus::create($input);
+    		return TrPeriodMeter::create($input);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }     	
@@ -93,8 +93,8 @@ class ContractStatusController extends Controller
         	$id = $request->id;
         	$input = $request->all();
         	$input['updated_by'] = Auth::id();
-        	MsContractStatus::find($id)->update($input);
-        	return MsContractStatus::find($id);
+        	TrPeriodMeter::find($id)->update($input);
+        	return TrPeriodMeter::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
@@ -103,21 +103,11 @@ class ContractStatusController extends Controller
     public function delete(Request $request){
         try{
         	$id = $request->id;
-        	MsContractStatus::destroy($id);
+        	TrPeriodMeter::destroy($id);
         	return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
 
-    public function getOptionContractStatus(Request $request){
-        $key = $request->q;
-        $fetch = MsContractStatus::select('id','const_name')->where(\DB::raw('LOWER(const_name)'),'like','%'.$key.'%')->get();
-        $result['results'] = [];
-        foreach ($fetch as $key => $value) {
-            $temp = ['id'=>$value->id, 'text'=>$value->const_name];
-            array_push($result['results'], $temp);
-        }
-        return json_encode($result);
-    }
 }

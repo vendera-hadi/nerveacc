@@ -6,12 +6,13 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Auth;
 // load model
-use App\Models\MsMarketingAgent;
+use App\Models\MsCategoryAsset;
+use App\Models\User;
 
-class MarketingAgentController extends Controller
+class CategoryAssetController extends Controller
 {
     public function index(){
-        return view('marketing');
+        return view('category_asset');
     }
 
     public function get(Request $request){
@@ -28,8 +29,8 @@ class MarketingAgentController extends Controller
             if(!empty($filters)) $filters = json_decode($filters);
 
             // olah data
-            $count = MsMarketingAgent::count();
-            $fetch = MsMarketingAgent::query();
+            $count = MsCategoryAsset::count();
+            $fetch = MsCategoryAsset::select('ms_category_asset.*','users.name')->join('users',\DB::raw('ms_category_asset.created_by::integer'),"=",\DB::raw('users.id::integer'));
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -47,14 +48,6 @@ class MarketingAgentController extends Controller
                         default:
                             break;
                     }
-                    // special condition
-                    if($filter->field == 'mark_isactive'){
-                        if(strtolower($filter->value) == "yes") $filter->value = "true";
-                        else $filter->value = "false";
-                    }
-                    // end special condition
-                    if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
-                    else $fetch = $fetch->where($filter->field, $op, $filter->value);
                 }
             }
             $count = $fetch->count();
@@ -64,12 +57,12 @@ class MarketingAgentController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['mark_id'] = $value->mark_id;
-                $temp['mark_code'] = $value->mark_code;
-                $temp['mark_name'] = $value->mark_name;
-                $temp['mark_address'] = $value->mark_address;
-                $temp['mark_phone'] = $value->mark_phone;
-                $temp['mark_isactive'] = !empty($value->mark_isactive) ? 'yes' : 'no';
+                $temp['catas_id'] = $value->catas_id;
+                $temp['catas_name'] = $value->catas_name;
+                $temp['catas_age'] = $value->catas_age;
+                $temp['created_at'] = $value->created_at;
+                $temp['created_by'] = $value->created_by;
+                $temp['name'] = $value->name;
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
@@ -81,10 +74,9 @@ class MarketingAgentController extends Controller
     public function insert(Request $request){
         try{
             $input = $request->all();
-            $input['mark_id'] = md5(date('Y-m-d H:i:s'));
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
-            return MsMarketingAgent::create($input);        
+            return MsCategoryAsset::create($input);        
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
@@ -95,8 +87,8 @@ class MarketingAgentController extends Controller
             $id = $request->id;
             $input = $request->all();
             $input['updated_by'] = Auth::id();
-            MsMarketingAgent::find($id)->update($input);
-            return MsMarketingAgent::find($id);
+            MsCategoryAsset::find($id)->update($input);
+            return MsCategoryAsset::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
@@ -105,25 +97,10 @@ class MarketingAgentController extends Controller
     public function delete(Request $request){
         try{
             $id = $request->id;
-            MsMarketingAgent::destroy($id);
+            MsCategoryAsset::destroy($id);
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
-/*
-    public function getOptMarketing(Request $request){
-    	$key = $request->q;
-        $fetch = MsMarketingAgent::select('id','mark_code','mark_name')->where(function($query) use($key){
-            $query->where(\DB::raw('LOWER(mark_code)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(mark_name)'),'like','%'.$key.'%');
-        })->where('mark_isactive','TRUE')->get();
-        
-        $result['results'] = [];
-        foreach ($fetch as $key => $value) {
-            $temp = ['id'=>$value->id, 'text'=>$value->mark_code." (".$value->mark_name.")"];
-            array_push($result['results'], $temp);
-        }
-        return json_encode($result);
-    }
-    */
 }

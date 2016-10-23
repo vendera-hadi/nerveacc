@@ -135,7 +135,12 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('vaccount/delete', 'VirtualAccountController@delete')->name('vaccount.delete');
 
 	// marketing agent
-	Route::get('marketing','MarketingAgentController@getOptMarketing')->name('marketing.select2');
+	Route::get('marketing','MarketingAgentController@index');
+	Route::post('marketing/get', 'MarketingAgentController@get')->name('marketing.get');
+	Route::post('marketing/insert', 'MarketingAgentController@insert')->name('marketing.insert');
+	Route::post('marketing/update', 'MarketingAgentController@update')->name('marketing.update');
+	Route::post('marketing/delete', 'MarketingAgentController@delete')->name('marketing.delete');
+	Route::get('marketing/optmarketing','MarketingAgentController@getOptMarketing')->name('marketing.select2');
 
 	// unit complaints / tr complaint
 	Route::get('unitcomplaint','UnitComplaintController@index');
@@ -219,6 +224,29 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unit_owner/insert', 'UnitOwnerController@insert')->name('unit_owner.insert');
 	Route::post('unit_owner/update', 'UnitOwnerController@update')->name('unit_owner.update');
 	Route::post('unit_owner/delete', 'UnitOwnerController@delete')->name('unit_owner.delete');
+
+	//category asset
+	Route::get('cat_asset','CategoryAssetController@index');
+	Route::post('cat_asset/get', 'CategoryAssetController@get')->name('cat_asset.get');
+	Route::post('cat_asset/insert', 'CategoryAssetController@insert')->name('cat_asset.insert');
+	Route::post('cat_asset/update', 'CategoryAssetController@update')->name('cat_asset.update');
+	Route::post('cat_asset/delete', 'CategoryAssetController@delete')->name('cat_asset.delete');
+
+	//fixed assets
+	Route::get('fixed_asset','AssetsController@index');
+	Route::post('fixed_asset/get', 'AssetsController@get')->name('fixed_asset.get');
+	Route::post('fixed_asset/category_option', 'AssetsController@category_option')->name('fixed_asset.category_option');
+	Route::post('fixed_asset/insert', 'AssetsController@insert')->name('fixed_asset.insert');
+	Route::post('fixed_asset/update', 'AssetsController@update')->name('fixed_asset.update');
+	Route::post('fixed_asset/delete', 'AssetsController@delete')->name('fixed_asset.delete');
+
+	//period meter
+	Route::get('period_meter','PeriodMeterController@index');
+	Route::post('period_meter/get', 'PeriodMeterController@get')->name('period_meter.get');
+	Route::post('period_meter/insert', 'PeriodMeterController@insert')->name('period_meter.insert');
+	Route::post('period_meter/update', 'PeriodMeterController@update')->name('period_meter.update');
+	Route::post('period_meter/delete', 'PeriodMeterController@delete')->name('period_meter.delete');
+
 });
 
 Route::get('logout','Auth\AuthController@logout');
