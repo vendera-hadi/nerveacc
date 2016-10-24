@@ -6,12 +6,21 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\TrContract;
 use App\Models\MsCostItem;
+use App\Models\MsInvoiceType;
+use App\Models\MsCostDetail;
+use App\Models\TrContractInvoice;
 use Validator;
+use DB;
 
 class ContractController extends Controller
 {
     public function index(){
         $data['cost_items'] = MsCostItem::all();
+        $invoice_types = MsInvoiceType::all();
+        $data['invoice_types'] = '';
+        foreach ($invoice_types as $key => $val) {
+            $data['invoice_types'] = $data['invoice_types'].'<option value="'.$val->invtp_code.'">'.$val->invtp_name.'</option>';
+        }
         return view('contract', $data);
     }
 
@@ -149,7 +158,46 @@ class ContractController extends Controller
             'const_id' => $request->input('const_id'),
             'unit_id' => $request->input('unit_id')
         ];
-        TrContract::create($input);
+        $cost_id = $request->input('cost_id');
+        $costd_name = $request->input('costd_name');
+        $costd_unit = $request->input('costd_unit');
+        $costd_rate = $request->input('costd_rate');
+        $costd_burden = $request->input('costd_burden');
+        $costd_admin = $request->input('costd_admin');
+        $inv_type = $request->input('inv_type');
+        try{
+            DB::transaction(function () use($input, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type) {
+                $contract = TrContract::create($input);
+                foreach ($cost_id as $key => $value) {
+                    $costd_is = 'COSTD'.microtime(); 
+                    $input = [
+                        'costd_is' => $costd_is,
+                        'cost_id' => $value,
+                        'costd_name' => $costd_name[$key],
+                        'costd_unit' => $costd_unit[$key],
+                        'costd_rate' => $costd_rate[$key],
+                        'costd_burden' => $costd_burden[$key],
+                        'costd_admin' => $costd_admin[$key],
+                        'costd_isadmin' => 1
+                    ];
+                    $costdt = MsCostDetail::create($input);
+
+                    $total = 0;
+                    $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
+                    $inputContractInv = [
+                        'continv_id' => 'CONINV'.microtime(),
+                        'contr_id' => $contract->id,
+                        'invtp_code' => $inv_type[$key],
+                        'costd_is' => $costd_is,
+                        'continv_amount' => $total
+                    ];
+                    TrContractInvoice::create($inputContractInv);
+                }
+
+            });
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
         return ['status' => 1, 'message' => 'Insert Success'];
     }
 

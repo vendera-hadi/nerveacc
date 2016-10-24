@@ -44,7 +44,6 @@
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
               <li><a href="#tab_2" data-toggle="tab">Add Contract</a></li>
-              <li><a href="#tab_3" data-toggle="tab">Cost Items</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
@@ -154,24 +153,20 @@
                         </div>
 
                         <div id="contractStep2" style="display:none">
-                                
-                        </div>
-              </div>
-              <!-- /.tab-pane -->
-              <div class="tab-pane" id="tab_3">
-                  <h4>Cost Detail</h4>
+                        <!-- Form step 2 -->
+                                <h4>Cost Detail</h4>
                   <div class="form-group">
                       <label>Choose Cost Items</label>
-                      <select class="form-control" name="costdt[]">
+                      <select id="selectCostItem" class="form-control" name="costdt[]">
                           @foreach($cost_items as $citm)
                           <option value="{{$citm->id}}">{{$citm->cost_name}} ({{$citm->cost_code}})</option>
                           @endforeach
                       </select>
                   </div>
-                  <button id="">Add Cost Item</button>
+                  <button id="clickCostItem">Add Cost Item</button>
                   <br><br>
                   <form method="POST" id="formContract2">
-                  <table width="100%" class="table table-bordered">
+                  <table id="tableCost" width="100%" class="table table-bordered" style="display: none">
                     <tr class="text-center">
                       <td>Cost Item</td>
                       <td>Name</td>
@@ -179,29 +174,18 @@
                       <td>Cost Rate</td>
                       <td>Cost Burden</td>
                       <td>Cost Admin</td>
+                      <td>Invoice Type</td>
+                      <td></td>
                     </tr>
-                    <tr class="text-center">
-                      <td>Nama cost item</td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                    </tr>
-                    <tr class="text-center">
-                      <td>Nama cost item</td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                      <td><input type="text" name="costdt[]" class="form-control"></td>
-                    </tr>
+                    
                   </table>
                   <br><br>
                   <button type="submit" >Submit</button>
                   </form>
+                  <!-- form step 2 -->
+                        </div>
               </div>
-              <!-- /.tab-pane -->
+
             </div>
             <!-- /.tab-content -->
           </div>
@@ -382,25 +366,40 @@
               minimumInputLength: 1
         });
 
-        var dataStep1;
         $('#formContract').submit(function(e){
             e.preventDefault();
-            dataStep1 = $(this).serialize();
-
             $('#contractStep1').hide();
             $('#contractStep2').show();
             console.log('submit');
-            // $.post('{{route('contract.insert')}}',data, function(result){
-            //     alert(result.message);
-            //     if(result.status == 1) location.reload();
-            // });
         });
 
         $('#formContract2').submit(function(e){
             e.preventDefault();
-            dataStep2 = $(this).serialize();
-            console.log(dataStep2);
+            var allFormData = $('#formContract,#formContract2').serialize();
+            console.log(allFormData);
+            $.post('{{route('contract.insert')}}',allFormData, function(result){
+                alert(result.message);
+                if(result.status == 1) location.reload();
+            });
           });
+
+        var costItem, unit;
+        var invoiceTypes = '{!!$invoice_types!!}';
+        $('#clickCostItem').click(function(){
+            $('#tableCost').show();
+            unit = $('.choose-unit option:selected').text();
+            costItem = $('#selectCostItem').val();
+            costItemName = $('#selectCostItem option:selected').text();
+            $('#tableCost').append('<tr class="text-center"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><input type="text" name="costd_name[]" class="form-control costd_name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" required></td><td><input type="text" name="costd_rate[]" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" class="form-control costd_admin" required></td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+        });
+
+        $(document).delegate(".costd_rate,.costd_burden,.costd_admin", "keypress", function(e) {
+            var charCode = (e.which) ? e.which : event.keyCode;
+            if ((charCode < 48 || charCode > 57))
+                return false;
+
+            return true;
+        });
 
 
         $(document).delegate('.remove','click',function(){
@@ -412,6 +411,12 @@
                     if(result.success) location.reload();
                 });
                 // location.reload();
+            }
+        });
+
+        $(document).delegate('.removeCost','click',function(){
+            if(confirm('Are you sure want to remove this cost item?')){
+                $(this).parent().parent().remove();
             }
         });
 
