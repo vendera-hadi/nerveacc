@@ -38,9 +38,17 @@
     <div class="container spark-screen">
         <div class="row">
             <div class="col-md-11">
-                <!-- content -->
 
-                <!-- template tabel -->
+          <!-- Tabs -->
+          <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
+              <li><a href="#tab_2" data-toggle="tab">Add Contract</a></li>
+              <li><a href="#tab_3" data-toggle="tab">Cost Items</a></li>
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane active" id="tab_1">
+                  <!-- template tabel -->
                 <table id="dg" title="Contract" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
@@ -60,51 +68,16 @@
                 </table>
                 <!-- end table -->
                 
-                <!-- icon2 atas table -->
-                <div id="toolbar">
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" data-toggle="modal" data-target="#formModal">New</a>
-                    
-                </div>
-                <!-- end icon -->
-            
                 
-
-                <!-- Modal extra -->
-                <div id="detailModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
-
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Contract Information</h4>
-                      </div>
-                      <div class="modal-body" id="detailModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-                <!-- End Modal -->
-
-                <!-- modal form -->
-                <div id="formModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
-
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Add Contract</h4>
-                      </div>
-                      <div class="modal-body">
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="tab_2">
+                        <div id="contractStep1">
                         <form method="POST" id="formContract">
                             <div class="form-group">
                                 <label>Contract Parent</label>
                                 <select class="form-control contract-parent" style="width:100%" name="contr_parent" required="required">
+                                <option value="0">No Parent</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -161,11 +134,6 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Rental Period</label>
-                                <select class="form-control choose-rental" name="renprd_id" required="required" style="width:100%">
-                                </select>
-                            </div>
-                            <div class="form-group">
                                 <label>Virtual Account</label>
                                 <select class="form-control choose-vaccount" name="viracc_id" required="required" style="width:100%">
                                 </select>
@@ -183,6 +151,77 @@
                             </div>
                             <button type="submit" class="btn btn-default">Submit</button>
                         </form>
+                        </div>
+
+                        <div id="contractStep2" style="display:none">
+                                
+                        </div>
+              </div>
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="tab_3">
+                  <h4>Cost Detail</h4>
+                  <div class="form-group">
+                      <label>Choose Cost Items</label>
+                      <select class="form-control" name="costdt[]">
+                          @foreach($cost_items as $citm)
+                          <option value="{{$citm->id}}">{{$citm->cost_name}} ({{$citm->cost_code}})</option>
+                          @endforeach
+                      </select>
+                  </div>
+                  <button id="">Add Cost Item</button>
+                  <br><br>
+                  <form method="POST" id="formContract2">
+                  <table width="100%" class="table table-bordered">
+                    <tr class="text-center">
+                      <td>Cost Item</td>
+                      <td>Name</td>
+                      <td>Unit</td>
+                      <td>Cost Rate</td>
+                      <td>Cost Burden</td>
+                      <td>Cost Admin</td>
+                    </tr>
+                    <tr class="text-center">
+                      <td>Nama cost item</td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                    </tr>
+                    <tr class="text-center">
+                      <td>Nama cost item</td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                      <td><input type="text" name="costdt[]" class="form-control"></td>
+                    </tr>
+                  </table>
+                  <br><br>
+                  <button type="submit" >Submit</button>
+                  </form>
+              </div>
+              <!-- /.tab-pane -->
+            </div>
+            <!-- /.tab-content -->
+          </div>
+          <!-- Tabs -->
+       
+
+
+                <!-- content -->
+            
+                <!-- Modal extra -->
+                <div id="detailModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Contract Information</h4>
+                      </div>
+                      <div class="modal-body" id="detailModalContent">
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -191,7 +230,9 @@
 
                   </div>
                 </div>
-                <!-- end modal form -->
+                <!-- End Modal -->
+
+                
 
                 <!-- modal form -->
                 <div id="editModal" class="modal fade" role="dialog">
@@ -285,23 +326,7 @@
               minimumInputLength: 1
         });
 
-        $(".choose-rental").select2({
-              ajax: {
-                url: "{{route('rentalperiod.select2')}}",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                  return {
-                    q: params.term, // search term
-                    page: params.page
-                  };
-                },
-                
-                cache: true
-              },
-              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-              minimumInputLength: 1
-        });
+        
 
         $(".choose-vaccount").select2({
               ajax: {
@@ -357,14 +382,26 @@
               minimumInputLength: 1
         });
 
+        var dataStep1;
         $('#formContract').submit(function(e){
             e.preventDefault();
-            var data = $(this).serialize();
-            $.post('{{route('contract.insert')}}',data, function(result){
-                alert(result.message);
-                if(result.status == 1) location.reload();
-            });
+            dataStep1 = $(this).serialize();
+
+            $('#contractStep1').hide();
+            $('#contractStep2').show();
+            console.log('submit');
+            // $.post('{{route('contract.insert')}}',data, function(result){
+            //     alert(result.message);
+            //     if(result.status == 1) location.reload();
+            // });
         });
+
+        $('#formContract2').submit(function(e){
+            e.preventDefault();
+            dataStep2 = $(this).serialize();
+            console.log(dataStep2);
+          });
+
 
         $(document).delegate('.remove','click',function(){
             var r = confirm("Are you sure want to delete entry ?");

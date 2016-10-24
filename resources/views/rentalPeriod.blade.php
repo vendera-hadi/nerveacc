@@ -59,7 +59,7 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="renprd_name" class="easyui-textbox" label="Rental Period Name:" style="width:100%" data-options="required:true,validType:'length[0,4]'">
+                            <input name="renprd_name" class="easyui-textbox" label="Rental Period Name:" style="width:100%" data-options="required:true">
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="renprd_day" class="easyui-textbox" label="Rental Period Day:" style="width:100%" data-options="required:true,numeric:true">

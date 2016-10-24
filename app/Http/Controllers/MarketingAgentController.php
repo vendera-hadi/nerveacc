@@ -111,7 +111,7 @@ class MarketingAgentController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
-/*
+
     public function getOptMarketing(Request $request){
     	$key = $request->q;
         $fetch = MsMarketingAgent::select('id','mark_code','mark_name')->where(function($query) use($key){
@@ -125,5 +125,5 @@ class MarketingAgentController extends Controller
         }
         return json_encode($result);
     }
-    */
+    
 }

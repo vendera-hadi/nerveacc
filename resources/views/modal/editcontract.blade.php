@@ -61,12 +61,6 @@
         </select>
     </div>
     <div class="form-group">
-        <label>Rental Period</label>
-        <select class="form-control choose-rental" name="renprd_id" required="required" style="width:100%">
-            <option value="{{$fetch->renprd_id}}">{{$fetch->renprd_name}}</option>
-        </select>
-    </div>
-    <div class="form-group">
         <label>Virtual Account</label>
         <select class="form-control choose-vaccount" name="viracc_id" required="required" style="width:100%">
         <option value="{{$fetch->viracc_id}}">{{$fetch->viracc_no." (".$fetch->viracc_name.")"}}</option>
