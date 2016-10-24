@@ -175,11 +175,13 @@
                       <td>Cost Burden</td>
                       <td>Cost Admin</td>
                       <td>Invoice Type</td>
+                      <td>Use Meter</td>
                       <td></td>
                     </tr>
                     
                   </table>
                   <br><br>
+                  <button type="button" id="backStep1">Back</button>
                   <button type="submit" >Submit</button>
                   </form>
                   <!-- form step 2 -->
@@ -375,22 +377,32 @@
 
         $('#formContract2').submit(function(e){
             e.preventDefault();
-            var allFormData = $('#formContract,#formContract2').serialize();
-            console.log(allFormData);
-            $.post('{{route('contract.insert')}}',allFormData, function(result){
-                alert(result.message);
-                if(result.status == 1) location.reload();
-            });
-          });
+            if(!$('#formContract2').serialize()){
+                alert('Please fill the Cost Item first');
+            }else{
+                var allFormData = $('#formContract,#formContract2').serialize();
+                console.log(allFormData);
+                $.post('{{route('contract.insert')}}',allFormData, function(result){
+                    alert(result.message);
+                    // if(result.status == 1) location.reload();
+                });
+            }
+        });
+
+        $('#backStep1').click(function(){
+            $('#contractStep1').show();
+            $('#contractStep2').hide();
+        });
 
         var costItem, unit;
         var invoiceTypes = '{!!$invoice_types!!}';
         $('#clickCostItem').click(function(){
             $('#tableCost').show();
             unit = $('.choose-unit option:selected').text();
+            unit = unit.substring(unit.indexOf('(') + 1, unit.indexOf(')'));
             costItem = $('#selectCostItem').val();
             costItemName = $('#selectCostItem option:selected').text();
-            $('#tableCost').append('<tr class="text-center"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><input type="text" name="costd_name[]" class="form-control costd_name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" required></td><td><input type="text" name="costd_rate[]" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" class="form-control costd_admin" required></td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+            $('#tableCost').append('<tr class="text-center"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><input type="text" name="costd_name[]" class="form-control costd_name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" required></td><td><input type="text" name="costd_rate[]" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" class="form-control costd_admin" required></td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
         });
 
         $(document).delegate(".costd_rate,.costd_burden,.costd_admin", "keypress", function(e) {

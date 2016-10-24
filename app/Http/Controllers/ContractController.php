@@ -93,7 +93,12 @@ class ContractController extends Controller
         ->join('ms_virtual_account',\DB::raw('ms_virtual_account.id::integer'),"=",\DB::raw('tr_contract.viracc_id::integer'))
         ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
         ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->first();
-        return view('modal.contract', ['fetch' => $fetch]);
+        $costdetail = TrContractInvoice::select('ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter')
+                ->join('ms_invoice_type',\DB::raw('tr_contract_invoice.invtp_code'),"=",\DB::raw('ms_invoice_type.invtp_code'))
+                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is'),"=",\DB::raw('ms_cost_detail.costd_is'))
+                ->where('contr_id',$contractId)
+                ->get();
+        return view('modal.contract', ['fetch' => $fetch, 'costdetail' => $costdetail]);
     }
 
     public function editModal(Request $request){
@@ -142,7 +147,7 @@ class ContractController extends Controller
             return ['status' => 0, 'message' => $errors];
         }
         $input = [
-            'contr_id' => 'CTR'.microtime(),
+            'contr_id' => 'CTR'.str_replace(".", "", str_replace(" ", "",microtime())),
             'contr_parent' => $request->input('contr_parent'),
             'contr_code' => $request->input('contr_code'),
             'contr_no' => $request->input('contr_no'),
@@ -165,11 +170,12 @@ class ContractController extends Controller
         $costd_burden = $request->input('costd_burden');
         $costd_admin = $request->input('costd_admin');
         $inv_type = $request->input('inv_type');
+        $is_meter = $request->input('is_meter');
         try{
-            DB::transaction(function () use($input, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type) {
+            DB::transaction(function () use($input, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter) {
                 $contract = TrContract::create($input);
                 foreach ($cost_id as $key => $value) {
-                    $costd_is = 'COSTD'.microtime(); 
+                    $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
                     $input = [
                         'costd_is' => $costd_is,
                         'cost_id' => $value,
@@ -178,14 +184,14 @@ class ContractController extends Controller
                         'costd_rate' => $costd_rate[$key],
                         'costd_burden' => $costd_burden[$key],
                         'costd_admin' => $costd_admin[$key],
-                        'costd_isadmin' => 1
+                        'costd_ismeter' => $is_meter[$key] 
                     ];
                     $costdt = MsCostDetail::create($input);
 
                     $total = 0;
                     $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
                     $inputContractInv = [
-                        'continv_id' => 'CONINV'.microtime(),
+                        'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
                         'contr_id' => $contract->id,
                         'invtp_code' => $inv_type[$key],
                         'costd_is' => $costd_is,
