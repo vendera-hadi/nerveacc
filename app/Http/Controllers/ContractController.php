@@ -113,7 +113,17 @@ class ContractController extends Controller
             ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
             ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->first();
             $result = ['success'=>1, 'data'=>$fetch];
-            return view('modal.editcontract', ['fetch' => $fetch]);
+
+            $costdetail = TrContractInvoice::select('ms_cost_detail.cost_id','ms_invoice_type.invtp_code','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code')
+                ->join('ms_invoice_type',\DB::raw('tr_contract_invoice.invtp_code'),"=",\DB::raw('ms_invoice_type.invtp_code'))
+                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is'),"=",\DB::raw('ms_cost_detail.costd_is'))
+                ->join('ms_cost_item',\DB::raw('ms_cost_detail.cost_id::integer'),"=",\DB::raw('ms_cost_item.id::integer'))
+                ->where('contr_id',$contractId)
+                ->get();
+
+            $invoice_types = MsInvoiceType::all();
+            return view('modal.editcontract', ['fetch' => $fetch, 'costdetail' => $costdetail, 'invoice_types'=>$invoice_types
+                ]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }

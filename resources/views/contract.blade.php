@@ -175,7 +175,7 @@
                       <td>Cost Burden</td>
                       <td>Cost Admin</td>
                       <td>Invoice Type</td>
-                      <td>Use Meter</td>
+                      <td width="85">Use Meter</td>
                       <td></td>
                     </tr>
                     
@@ -222,7 +222,7 @@
 
                 <!-- modal form -->
                 <div id="editModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
+                  <div class="modal-dialog" style="width:80%">
 
                     <!-- Modal content-->
                     <div class="modal-content">
