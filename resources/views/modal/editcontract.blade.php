@@ -93,9 +93,17 @@
               </div>
               <!-- /.tab-pane -->
               <div class="tab-pane" id="modaltab_2">
-    <form method="POST" id="formEditCostItem">
-      <input type="hidden" name="contr_id" value="{{$fetch->contr_id}}">
-      <table id="tableCost" width="100%" class="table table-bordered">
+       <div class="form-group">
+                      <label>Choose Cost Items</label>
+                      <select id="selectCostItemEdit" class="form-control" name="costdt[]">
+                          @foreach($cost_items as $citm)
+                          <option value="{{$citm->id}}">{{$citm->cost_name}} ({{$citm->cost_code}})</option>
+                          @endforeach
+                      </select>
+                  </div>
+      <button type="button" id="clickCostItemEdit">Add Cost Item</button><br><br>
+      <form method="POST" id="formEditCostItem">
+      <table id="editTableCost" width="100%" class="table table-bordered">
           <tr class="text-center">
             <td>Cost Item</td>
             <td>Edit Details</td>
@@ -103,6 +111,7 @@
           </tr>
           @foreach($costdetail as $cdt)
           <tr class="text-center">
+            <input type="hidden" name="contr_id[]" value="{{$fetch->id}}">
             <input type="hidden" name="cost_id[]" value="{{$cdt->cost_id}}">
             <td>{{$cdt->cost_name}} ({{$cdt->cost_code}})</td>
             <td>
@@ -275,5 +284,28 @@
             alert(result.message);
             if(result.status == 1) location.reload();
         });
+    });
+
+    var invoiceTypes = '{!!$inv_types_options!!}';
+    var contractID = '{!!$fetch->id!!}';
+    $('#clickCostItemEdit').click(function(){
+
+            costItem = $('#selectCostItemEdit').val();
+            costItemName = $('#selectCostItemEdit option:selected').text();
+            $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><strong>Name :</strong> <input type="text" name="costd_name[]" class="form-control costd_name"  required><strong>Unit :</strong> <input type="text" name="costd_unit[]" class="form-control costd_unit" required><strong>Cost Rate :</strong> <input type="text" name="costd_rate[]" class="form-control costd_rate" required><strong>Cost Burden :</strong> <input type="text" name="costd_burden[]" class="form-control costd_burden" required><strong>Cost Admin :</strong> <input type="text" name="costd_admin[]" class="form-control costd_admin" required><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select><strong>Use Meter :</strong> <select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+    });
+
+    $('#formEditCostItem').submit(function(e){
+        e.preventDefault();
+        if(!$(this).serialize()){
+            alert('Please fill the Cost Item first');
+        }else{
+            var data = $(this).serialize();
+            // console.log(data);
+            $.post('{{route('contract.cdtupdate')}}',data, function(result){
+                alert(result.message);
+                if(result.status == 1) location.reload();
+            });
+        }
     });
     </script>

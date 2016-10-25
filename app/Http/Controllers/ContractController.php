@@ -111,7 +111,7 @@ class ContractController extends Controller
             // ->join('ms_rental_period',\DB::raw('ms_rental_period.id::integer'),"=",\DB::raw('tr_contract.renprd_id::integer'))
             ->join('ms_virtual_account',\DB::raw('ms_virtual_account.id::integer'),"=",\DB::raw('tr_contract.viracc_id::integer'))
             ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
-            ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->first();
+            ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->where('tr_contract.id', $contractId)->first();
             $result = ['success'=>1, 'data'=>$fetch];
 
             $costdetail = TrContractInvoice::select('ms_cost_detail.cost_id','ms_invoice_type.invtp_code','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code')
@@ -122,7 +122,12 @@ class ContractController extends Controller
                 ->get();
 
             $invoice_types = MsInvoiceType::all();
-            return view('modal.editcontract', ['fetch' => $fetch, 'costdetail' => $costdetail, 'invoice_types'=>$invoice_types
+            $inv_types_options = '';
+            foreach ($invoice_types as $key => $val) {
+                $inv_types_options = $inv_types_options.'<option value="'.$val->invtp_code.'">'.$val->invtp_name.'</option>';
+            }
+            $cost_items = MsCostItem::all();
+            return view('modal.editcontract', ['fetch' => $fetch, 'costdetail' => $costdetail, 'invoice_types'=>$invoice_types, 'cost_items' => $cost_items, 'inv_types_options' => $inv_types_options
                 ]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -250,6 +255,55 @@ class ContractController extends Controller
             'unit_id' => $request->input('unit_id')
         ];
         TrContract::where('id',$request->input('id'))->update($update);
+        return ['status' => 1, 'message' => 'Update Success'];
+    }
+
+    public function costdetailUpdate(Request $request){
+        $contractIDs = $request->input('contr_id');
+        $contractID = $contractIDs[0];
+        
+        $cost_id = $request->input('cost_id');
+        $costd_name = $request->input('costd_name');
+        $costd_unit = $request->input('costd_unit');
+        $costd_rate = $request->input('costd_rate');
+        $costd_burden = $request->input('costd_burden');
+        $costd_admin = $request->input('costd_admin');
+        $inv_type = $request->input('inv_type');
+        $is_meter = $request->input('is_meter');
+        try{
+            DB::transaction(function () use($cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $contractID){
+                // delete all of cost detail of current contract id
+                TrContractInvoice::where('contr_id',$contractID)->delete();               
+                // reinsert to cost detail and tr contract invoice
+                foreach ($cost_id as $key => $value) {
+                    $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
+                    $input = [
+                        'costd_is' => $costd_is,
+                        'cost_id' => $value,
+                        'costd_name' => $costd_name[$key],
+                        'costd_unit' => $costd_unit[$key],
+                        'costd_rate' => $costd_rate[$key],
+                        'costd_burden' => $costd_burden[$key],
+                        'costd_admin' => $costd_admin[$key],
+                        'costd_ismeter' => $is_meter[$key] 
+                    ];
+                    $costdt = MsCostDetail::create($input);
+
+                    $total = 0;
+                    $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
+                    $inputContractInv = [
+                        'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
+                        'contr_id' => $contractID,
+                        'invtp_code' => $inv_type[$key],
+                        'costd_is' => $costd_is,
+                        'continv_amount' => $total
+                    ];
+                    TrContractInvoice::create($inputContractInv);
+                }
+            });
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
         return ['status' => 1, 'message' => 'Update Success'];
     }
 
