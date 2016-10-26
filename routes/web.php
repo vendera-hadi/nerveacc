@@ -187,6 +187,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('cost_item/insert', 'CostItemController@insert')->name('cost_item.insert');
 	Route::post('cost_item/update', 'CostItemController@update')->name('cost_item.update');
 	Route::post('cost_item/delete', 'CostItemController@delete')->name('cost_item.delete');
+	Route::post('cost_item/getDetail', 'CostItemController@getDetail')->name('cost_item.getDetail');
 
 	//cost detail
 	Route::get('cost_detail','CostDetailController@index');
@@ -247,6 +248,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('period_meter/insert', 'PeriodMeterController@insert')->name('period_meter.insert');
 	Route::post('period_meter/update', 'PeriodMeterController@update')->name('period_meter.update');
 	Route::post('period_meter/delete', 'PeriodMeterController@delete')->name('period_meter.delete');
+
+	// journal
+	Route::get('journal','JournalController@index')->name('journal.index');
+	Route::get('journal/optLedger','JournalController@accountSelect2')->name('ledger.select2');
 
 });
 

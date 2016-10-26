@@ -7,6 +7,7 @@ use App\Http\Requests;
 use Auth;
 // load model
 use App\Models\MsCostItem;
+use App\Models\MsCostDetail;
 use App\Models\User;
 
 class CostItemController extends Controller
@@ -109,5 +110,17 @@ class CostItemController extends Controller
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
+    }
+
+    public function getDetail(Request $request){
+        $id = $request->id;
+        $data = MsCostDetail::where('cost_id',$id)->get();
+        if($data){
+            foreach ($data as $key => $value) {
+                if($value->costd_ismeter) $data[$key]->costd_ismeter = 'yes';
+                else $data[$key]->costd_ismeter = 'no';
+            }
+        }
+        return response()->json($data);
     }
 }

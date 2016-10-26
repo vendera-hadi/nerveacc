@@ -163,7 +163,7 @@
                           @endforeach
                       </select>
                   </div>
-                  <button id="clickCostItem">Add Cost Item</button>
+                  <button id="clickCostItem">Add Cost Item</button> <button id="clickManualCostItem">New Cost Item</button>
                   <br><br>
                   <form method="POST" id="formContract2">
                   <table id="tableCost" width="100%" class="table table-bordered" style="display: none">
@@ -174,8 +174,8 @@
                       <td>Cost Rate</td>
                       <td>Cost Burden</td>
                       <td>Cost Admin</td>
-                      <td>Invoice Type</td>
                       <td width="85">Use Meter</td>
+                      <td>Invoice Type</td>
                       <td></td>
                     </tr>
                     
@@ -396,13 +396,26 @@
 
         var costItem, unit;
         var invoiceTypes = '{!!$invoice_types!!}';
+        var choices = [];
         $('#clickCostItem').click(function(){
             $('#tableCost').show();
             unit = $('.choose-unit option:selected').text();
             unit = unit.substring(unit.indexOf('(') + 1, unit.indexOf(')'));
             costItem = $('#selectCostItem').val();
+            // choices.push(costItem);
             costItemName = $('#selectCostItem option:selected').text();
-            $('#tableCost').append('<tr class="text-center"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><input type="text" name="costd_name[]" class="form-control costd_name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" required></td><td><input type="text" name="costd_rate[]" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" class="form-control costd_admin" required></td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+            $.post('{{route('cost_item.getDetail')}}', {id: costItem}, function(result){
+                $.each( result, function( i, val ) {
+                    $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" value="'+val.id+'"><td>'+costItemName+'</td><td>'+val.costd_name+'</td><td>'+val.costd_unit+'</td><td>'+val.costd_rate+'</td><td>'+val.costd_burden+'</td><td>'+val.costd_admin+'</td><td>'+val.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+                });
+            });
+        });
+
+        $('#clickManualCostItem').click(function(){
+            $('#tableCost').show();
+            unit = $('.choose-unit option:selected').text();
+            unit = unit.substring(unit.indexOf('(') + 1, unit.indexOf(')'));
+            $('#tableCost').append('<tr class="text-center"><td><input type="text" name="cost_name[]" placeholder="New Cost Item Name" required><br><br><input type="text" name="cost_code[]" placeholder="New Cost Item Code" required></td><td><input type="text" name="costd_name[]" class="form-control costd_name" placeholder="Cost Detail Name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" placeholder="Unit" required></td><td><input type="text" name="costd_rate[]" placeholder="Rate" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" placeholder="Abonemen" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" placeholder="Biaya Admin" class="form-control costd_admin" required></td><td><select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><select name="inv_type_custom[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
         });
 
         $(document).delegate(".costd_rate,.costd_burden,.costd_admin", "keypress", function(e) {

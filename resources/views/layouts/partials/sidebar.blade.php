@@ -442,7 +442,7 @@
                 </span>
               </a>
               <ul class="treeview-menu">
-                <li><a href="#"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
+                <li><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> General Ledger</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Ledger</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Account List</a></li>

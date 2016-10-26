@@ -114,7 +114,7 @@ class ContractController extends Controller
             ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->where('tr_contract.id', $contractId)->first();
             $result = ['success'=>1, 'data'=>$fetch];
 
-            $costdetail = TrContractInvoice::select('ms_cost_detail.cost_id','ms_invoice_type.invtp_code','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code')
+            $costdetail = TrContractInvoice::select('ms_cost_detail.id','ms_cost_detail.cost_id','ms_invoice_type.invtp_code','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code')
                 ->join('ms_invoice_type',\DB::raw('tr_contract_invoice.invtp_code'),"=",\DB::raw('ms_invoice_type.invtp_code'))
                 ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
                 ->join('ms_cost_item',\DB::raw('ms_cost_detail.cost_id::integer'),"=",\DB::raw('ms_cost_item.id::integer'))
@@ -178,41 +178,78 @@ class ContractController extends Controller
             'const_id' => $request->input('const_id'),
             'unit_id' => $request->input('unit_id')
         ];
+        $costd_ids = $request->input('costd_is'); 
+        $inv_type = $request->input('inv_type');
+        $cost_name = $request->input('cost_name');
+        $cost_code = $request->input('cost_code');
+
         $cost_id = $request->input('cost_id');
         $costd_name = $request->input('costd_name');
         $costd_unit = $request->input('costd_unit');
         $costd_rate = $request->input('costd_rate');
         $costd_burden = $request->input('costd_burden');
         $costd_admin = $request->input('costd_admin');
-        $inv_type = $request->input('inv_type');
+        $inv_type_custom = $request->input('inv_type_custom');
         $is_meter = $request->input('is_meter');
         try{
-            DB::transaction(function () use($input, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter) {
+            DB::transaction(function () use($input, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $costd_ids, $inv_type_custom, $cost_name, $cost_code) {
                 $contract = TrContract::create($input);
-                foreach ($cost_id as $key => $value) {
-                    $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
-                    $input = [
-                        'costd_is' => $costd_is,
-                        'cost_id' => $value,
-                        'costd_name' => $costd_name[$key],
-                        'costd_unit' => $costd_unit[$key],
-                        'costd_rate' => $costd_rate[$key],
-                        'costd_burden' => $costd_burden[$key],
-                        'costd_admin' => $costd_admin[$key],
-                        'costd_ismeter' => $is_meter[$key] 
-                    ];
-                    $costdt = MsCostDetail::create($input);
-
+                
+                // insert
+                if(count($costd_ids) > 0){
                     $total = 0;
-                    $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
-                    $inputContractInv = [
-                        'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
-                        'contr_id' => $contract->id,
-                        'invtp_code' => $inv_type[$key],
-                        'costd_is' => $costdt->id,
-                        'continv_amount' => $total
-                    ];
-                    TrContractInvoice::create($inputContractInv);
+                    foreach ($costd_ids as $key => $value) {
+                        $inputContractInv = [
+                            'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
+                            'contr_id' => $contract->id,
+                            'invtp_code' => $inv_type[$key],
+                            'costd_is' => $costd_ids[$key],
+                            'continv_amount' => $total
+                        ];
+                        TrContractInvoice::create($inputContractInv);
+                    }
+                } 
+
+                // insert custom
+                if(count($cost_name) > 0){
+                    foreach ($cost_name as $key => $value) {
+                        // cost item
+                        $input = [
+                                    'cost_id' => 'COST'.str_replace(".", "", str_replace(" ", "",microtime())),
+                                    'cost_code' => $cost_code[$key],
+                                    'cost_name' => $cost_name[$key],
+                                    'created_by' => \Auth::id(),
+                                    'updated_by' => \Auth::id()
+                                ];
+                        $cost = MsCostItem::create($input);
+
+                        // cost detail
+                        $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
+                        $input = [
+                            'costd_is' => $costd_is,
+                            'cost_id' => $cost->id,
+                            'costd_name' => $costd_name[$key],
+                            'costd_unit' => $costd_unit[$key],
+                            'costd_rate' => $costd_rate[$key],
+                            'costd_burden' => $costd_burden[$key],
+                            'costd_admin' => $costd_admin[$key],
+                            'costd_ismeter' => $is_meter[$key] 
+                        ];
+                        $costdt = MsCostDetail::create($input);
+
+                        // contract invoice
+                        $total = 0;
+                        // $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
+                        $inputContractInv = [
+                            'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
+                            'contr_id' => $contract->id,
+                            'invtp_code' => $inv_type_custom[$key],
+                            'costd_is' => $costdt->id,
+                            'continv_amount' => $total
+                        ];
+                        TrContractInvoice::create($inputContractInv);
+                    }
+
                 }
 
             });
@@ -261,7 +298,12 @@ class ContractController extends Controller
     public function costdetailUpdate(Request $request){
         $contractIDs = $request->input('contr_id');
         $contractID = $contractIDs[0];
+
+        $cost_name = $request->input('cost_name');
+        $cost_code = $request->input('cost_code');
+        $inv_type_custom = $request->input('inv_type_custom');
         
+        $costd_ids = $request->input('costd_id');
         $cost_id = $request->input('cost_id');
         $costd_name = $request->input('costd_name');
         $costd_unit = $request->input('costd_unit');
@@ -271,35 +313,92 @@ class ContractController extends Controller
         $inv_type = $request->input('inv_type');
         $is_meter = $request->input('is_meter');
         try{
-            DB::transaction(function () use($cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $contractID){
+            DB::transaction(function () use($cost_id, $costd_ids, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $contractID, $cost_name, $cost_code, $inv_type_custom){
                 // delete all of cost detail of current contract id
                 TrContractInvoice::where('contr_id',$contractID)->delete();               
                 // reinsert to cost detail and tr contract invoice
-                foreach ($cost_id as $key => $value) {
-                    $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
-                    $input = [
-                        'costd_is' => $costd_is,
-                        'cost_id' => $value,
-                        'costd_name' => $costd_name[$key],
-                        'costd_unit' => $costd_unit[$key],
-                        'costd_rate' => $costd_rate[$key],
-                        'costd_burden' => $costd_burden[$key],
-                        'costd_admin' => $costd_admin[$key],
-                        'costd_ismeter' => $is_meter[$key] 
-                    ];
-                    $costdt = MsCostDetail::create($input);
-
+                // insert
+                if(count($costd_ids) > 0){
                     $total = 0;
-                    $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
-                    $inputContractInv = [
-                        'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
-                        'contr_id' => $contractID,
-                        'invtp_code' => $inv_type[$key],
-                        'costd_is' => $costdt->id,
-                        'continv_amount' => $total
-                    ];
-                    TrContractInvoice::create($inputContractInv);
+                    foreach ($costd_ids as $key => $value) {
+                        $inputContractInv = [
+                            'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
+                            'contr_id' => $contractID,
+                            'invtp_code' => $inv_type[$key],
+                            'costd_is' => $costd_ids[$key],
+                            'continv_amount' => $total
+                        ];
+                        TrContractInvoice::create($inputContractInv);
+                    }
+                } 
+
+                // insert custom
+                if(count($cost_name) > 0){
+                    foreach ($cost_name as $key => $value) {
+                        // cost item
+                        $input = [
+                                    'cost_id' => 'COST'.str_replace(".", "", str_replace(" ", "",microtime())),
+                                    'cost_code' => $cost_code[$key],
+                                    'cost_name' => $cost_name[$key],
+                                    'created_by' => \Auth::id(),
+                                    'updated_by' => \Auth::id()
+                                ];
+                        $cost = MsCostItem::create($input);
+
+                        // cost detail
+                        $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
+                        $input = [
+                            'costd_is' => $costd_is,
+                            'cost_id' => $cost->id,
+                            'costd_name' => $costd_name[$key],
+                            'costd_unit' => $costd_unit[$key],
+                            'costd_rate' => $costd_rate[$key],
+                            'costd_burden' => $costd_burden[$key],
+                            'costd_admin' => $costd_admin[$key],
+                            'costd_ismeter' => $is_meter[$key] 
+                        ];
+                        $costdt = MsCostDetail::create($input);
+
+                        // contract invoice
+                        $total = 0;
+                        // $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
+                        $inputContractInv = [
+                            'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
+                            'contr_id' => $contractID,
+                            'invtp_code' => $inv_type_custom[$key],
+                            'costd_is' => $costdt->id,
+                            'continv_amount' => $total
+                        ];
+                        TrContractInvoice::create($inputContractInv);
+                    }
+
                 }
+
+                // foreach ($cost_id as $key => $value) {
+                //     $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
+                //     $input = [
+                //         'costd_is' => $costd_is,
+                //         'cost_id' => $value,
+                //         'costd_name' => $costd_name[$key],
+                //         'costd_unit' => $costd_unit[$key],
+                //         'costd_rate' => $costd_rate[$key],
+                //         'costd_burden' => $costd_burden[$key],
+                //         'costd_admin' => $costd_admin[$key],
+                //         'costd_ismeter' => $is_meter[$key] 
+                //     ];
+                //     $costdt = MsCostDetail::create($input);
+
+                //     $total = 0;
+                //     // $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
+                //     $inputContractInv = [
+                //         'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
+                //         'contr_id' => $contractID,
+                //         'invtp_code' => $inv_type[$key],
+                //         'costd_is' => $costdt->id,
+                //         'continv_amount' => $total
+                //     ];
+                //     TrContractInvoice::create($inputContractInv);
+                // }
             });
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);

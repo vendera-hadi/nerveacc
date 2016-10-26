@@ -101,7 +101,10 @@
                           @endforeach
                       </select>
                   </div>
-      <button type="button" id="clickCostItemEdit">Add Cost Item</button><br><br>
+      <button type="button" id="clickCostItemEdit">Add Cost Item</button>
+      <button type="button" id="clickManualCostItemEdit">New Cost Item</button>
+
+      <br><br>
       <form method="POST" id="formEditCostItem">
       <table id="editTableCost" width="100%" class="table table-bordered">
           <tr class="text-center">
@@ -112,24 +115,20 @@
           @foreach($costdetail as $cdt)
           <tr class="text-center">
             <input type="hidden" name="contr_id[]" value="{{$fetch->id}}">
-            <input type="hidden" name="cost_id[]" value="{{$cdt->cost_id}}">
+            <input type="hidden" name="costd_id[]" value="{{$cdt->id}}">
             <td>{{$cdt->cost_name}} ({{$cdt->cost_code}})</td>
             <td>
-              <strong>Name :</strong> <input type="text" name="costd_name[]" class="form-control costd_name" value="{{$cdt->costd_name}}" required>
-              <strong>Unit :</strong> <input type="text" name="costd_unit[]" class="form-control costd_unit" value="{{$cdt->costd_unit}}" required>
-              <strong>Cost Rate :</strong> <input type="text" name="costd_rate[]" class="form-control costd_rate" value="{{$cdt->costd_rate}}" required>
-              <strong>Cost Burden :</strong> <input type="text" name="costd_burden[]" class="form-control costd_burden" value="{{$cdt->costd_burden}}" required>
-              <strong>Cost Admin :</strong> <input type="text" name="costd_admin[]" class="form-control costd_admin" value="{{$cdt->costd_admin}}" required>
+              <strong>Name :</strong> {{$cdt->costd_name}}<br>
+              <strong>Unit :</strong> {{$cdt->costd_unit}}<br>
+              <strong>Cost Rate :</strong> {{$cdt->costd_rate}}<br>
+              <strong>Cost Burden :</strong> {{$cdt->costd_burden}}<br>
+              <strong>Cost Admin :</strong> {{$cdt->costd_admin}}<br>
+              <strong>Use Meter :</strong> @if($cdt->costd_ismeter){{'yes'}}@else{{'no'}}@endif<br>
               
               <strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">
                 @foreach($invoice_types as $invtype)
-                <option value="{{$invtype->invtp_code}}" @if($fetch->invtp_code == $invtype->invtp_code){{'selected="selected"'}}@endif>{{$invtype->invtp_name}}</option>
+                <option value="{{$invtype->invtp_code}}" @if($cdt->invtp_code == $invtype->invtp_code){{'selected="selected"'}}@endif>{{$invtype->invtp_name}}</option>
                 @endforeach
-              </select>
-
-              <strong>Use Meter :</strong> <select name="is_meter[]" class="form-control">
-                <option value="1" @if($cdt->costd_ismeter){{'selected="selected"'}}@endif>yes</option>
-                <option value="0" @if(!$cdt->costd_ismeter){{'selected="selected"'}}@endif>no</option>
               </select>
             </td>
             <td>
@@ -292,8 +291,18 @@
 
             costItem = $('#selectCostItemEdit').val();
             costItemName = $('#selectCostItemEdit option:selected').text();
-            $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><strong>Name :</strong> <input type="text" name="costd_name[]" class="form-control costd_name"  required><strong>Unit :</strong> <input type="text" name="costd_unit[]" class="form-control costd_unit" required><strong>Cost Rate :</strong> <input type="text" name="costd_rate[]" class="form-control costd_rate" required><strong>Cost Burden :</strong> <input type="text" name="costd_burden[]" class="form-control costd_burden" required><strong>Cost Admin :</strong> <input type="text" name="costd_admin[]" class="form-control costd_admin" required><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select><strong>Use Meter :</strong> <select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+            $.post('{{route('cost_item.getDetail')}}', {id: costItem}, function(result){
+                $.each( result, function( i, val ) {
+                    $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="costd_id[]" value="'+val.id+'"><td>'+costItemName+'</td><td><strong>Name :</strong> '+val.costd_name+'<br><strong>Unit :</strong> '+val.costd_unit+'<br><strong>Cost Rate :</strong> '+val.costd_rate+'<br><strong>Cost Burden :</strong> '+val.costd_burden+'<br><strong>Cost Admin :</strong> '+val.costd_admin+'<br><strong>Use Meter :</strong> '+val.costd_ismeter+'<br><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+                });
+            });
+            // $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><strong>Name :</strong> <input type="text" name="costd_name[]" class="form-control costd_name"  required><strong>Unit :</strong> <input type="text" name="costd_unit[]" class="form-control costd_unit" required><strong>Cost Rate :</strong> <input type="text" name="costd_rate[]" class="form-control costd_rate" required><strong>Cost Burden :</strong> <input type="text" name="costd_burden[]" class="form-control costd_burden" required><strong>Cost Admin :</strong> <input type="text" name="costd_admin[]" class="form-control costd_admin" required><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select><strong>Use Meter :</strong> <select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
     });
+
+    $('#clickManualCostItemEdit').click(function(){
+        $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><td><input type="text" name="cost_name[]" class="form-control" placeholder="Cost Item Name" required><br><input type="text" name="cost_code[]" class="form-control" placeholder="Cost Item Code" required></td><td><input type="text" name="costd_name[]" class="form-control costd_name" placeholder="Cost Detail Name" required><br><input type="text" name="costd_unit[]" class="form-control costd_unit"  placeholder="Unit" required><br><input type="text" name="costd_rate[]" placeholder="Rate" class="form-control costd_rate" required><br><input type="text" name="costd_burden[]" placeholder="Abonemen" class="form-control costd_burden" required><br><input type="text" name="costd_admin[]" placeholder="Biaya Admin" class="form-control costd_admin" required><br><select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select><br><select name="inv_type_custom[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+    });
+
 
     $('#formEditCostItem').submit(function(e){
         e.preventDefault();
