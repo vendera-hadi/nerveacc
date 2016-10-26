@@ -95,7 +95,7 @@ class ContractController extends Controller
         ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->first();
         $costdetail = TrContractInvoice::select('ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter')
                 ->join('ms_invoice_type',\DB::raw('tr_contract_invoice.invtp_code'),"=",\DB::raw('ms_invoice_type.invtp_code'))
-                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is'),"=",\DB::raw('ms_cost_detail.costd_is'))
+                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::char'),"=",\DB::raw('ms_cost_detail.costd_is::char'))
                 ->where('contr_id',$contractId)
                 ->get();
         return view('modal.contract', ['fetch' => $fetch, 'costdetail' => $costdetail]);
@@ -116,7 +116,7 @@ class ContractController extends Controller
 
             $costdetail = TrContractInvoice::select('ms_cost_detail.cost_id','ms_invoice_type.invtp_code','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code')
                 ->join('ms_invoice_type',\DB::raw('tr_contract_invoice.invtp_code'),"=",\DB::raw('ms_invoice_type.invtp_code'))
-                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is'),"=",\DB::raw('ms_cost_detail.costd_is'))
+                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::char'),"=",\DB::raw('ms_cost_detail.costd_is::char'))
                 ->join('ms_cost_item',\DB::raw('ms_cost_detail.cost_id::integer'),"=",\DB::raw('ms_cost_item.id::integer'))
                 ->where('contr_id',$contractId)
                 ->get();
@@ -209,7 +209,7 @@ class ContractController extends Controller
                         'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
                         'contr_id' => $contract->id,
                         'invtp_code' => $inv_type[$key],
-                        'costd_is' => $costd_is,
+                        'costd_is' => $costdt->id,
                         'continv_amount' => $total
                     ];
                     TrContractInvoice::create($inputContractInv);

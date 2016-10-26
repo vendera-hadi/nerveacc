@@ -384,7 +384,7 @@
                 console.log(allFormData);
                 $.post('{{route('contract.insert')}}',allFormData, function(result){
                     alert(result.message);
-                    // if(result.status == 1) location.reload();
+                    if(result.status == 1) location.reload();
                 });
             }
         });
