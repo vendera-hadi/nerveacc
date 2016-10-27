@@ -1,0 +1,166 @@
+@extends('layouts.app')
+
+<!-- title tab -->
+@section('htmlheader_title')
+    Period Meter
+@endsection
+
+<!-- page title -->
+@section('contentheader_title')
+Period Meter
+@endsection
+
+<!-- tambahan script atas -->
+@section('htmlheader_scripts')
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/default/easyui.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
+@endsection
+
+@section('contentheader_breadcrumbs')
+    <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Period Meter</li>
+    </ol>
+@stop
+
+@section('main-content')
+    <div class="container spark-screen">
+        <div class="row">
+            <div class="col-md-11">
+                <!-- content -->
+
+                <!-- template tabel -->
+                <table id="dg" title="Contract Status" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                    <!-- kolom -->
+                    <thead>
+                        <tr>
+                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            <th field="prdmet_id" width="50" sortable="true">ID</th>
+                            <th field="prdmet_start_date" width="50" sortable="true">Start Date</th>
+                            <th field="prdmet_end_date" width="50" sortable="true">End Date</th>
+                            <th field="prd_billing_date" width="50" sortable="true">Period Billing</th>
+                            <th field="created_by" width="50" >Created By</th>
+                            <th field="status" width="50" sortable="true">Status</th>
+                        </tr>
+                    </thead>
+                </table>
+                <!-- end table -->
+                
+                <!-- icon2 atas table -->
+                <div id="toolbar">
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newUser()">New</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Edit</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="detail()">View</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="approve()">Approve</a>
+                </div>
+                <!-- end icon -->
+            
+                <!-- hidden form buat create edit -->
+                <div id="dlg" class="easyui-dialog" style="width:60%"
+                        closed="true" buttons="#dlg-buttons">
+                    <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
+                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Information</div>
+                        <div style="margin-bottom:10px">
+                            <input id="dd" type="text" class="easyui-datebox" required="required" name="prdmet_start_date" label="Start Date :" style="width:100%">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input id="dd" type="text" class="easyui-datebox" required="required" name="prdmet_end_date" label="End Date :" style="width:100%">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input id="dd" type="text" class="easyui-datebox" required="required" name="prd_billing_date" label="Periode Billing :" style="width:100%">
+                        </div>
+                    </form>
+                </div>
+                <div id="dlg-buttons">
+                    <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
+                </div>
+                <!-- end form -->
+
+                <!-- content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- modal form -->
+    <div id="editModal" class="modal fade" role="dialog">
+      <div class="modal-dialog" style="width:80%">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Period Meter</h4>
+          </div>
+          <div class="modal-body">
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- end modal form -->
+@endsection
+
+@section('footer-scripts')
+<script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
+<script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
+<script type="text/javascript">
+        var entity = "Period Meter"; // nama si tabel, ditampilin di dialog
+        var get_url = "{{route('period_meter.get')}}";
+        var insert_url = "{{route('period_meter.insert')}}";
+        var update_url = "{{route('period_meter.update')}}";
+        var delete_url = "{{route('period_meter.delete')}}";
+
+        $(function(){
+            var dg = $('#dg').datagrid({
+                url: get_url,
+                pagination: true,
+                remoteFilter: true, //utk jalanin search filter
+                rownumbers: true,
+                singleSelect: true,
+                fitColumns: true
+            });
+            dg.datagrid('enableFilter');
+        });
+</script>
+<script src="{{asset('js/jeasycrud.js')}}"></script>
+<script type="text/javascript">
+function detail(){
+    var row = $('#dg').datagrid('getSelected');
+    if (row){
+        id = row.id;
+        $.post('{{route('period_meter.detail')}}',{id:id},function(result){
+            if
+                (result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+            else
+                $('#editModal').find('.modal-body').html('');
+                $('#editModal').find('.modal-body').html(result);
+                $('#editModal').modal('show'); 
+            
+        });
+    }
+}
+
+function approve(){
+    var row = $('#dg').datagrid('getSelected');
+    if (row){
+        id = row.id;
+        $.post('{{route('period_meter.approve')}}',{id:id},function(result){
+            if
+                (result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+            else
+            alert('Sukses Approve');
+            location.reload();
+        });
+    }
+}
+
+</script>
+@endsection

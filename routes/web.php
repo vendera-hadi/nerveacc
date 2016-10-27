@@ -248,6 +248,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('period_meter/insert', 'PeriodMeterController@insert')->name('period_meter.insert');
 	Route::post('period_meter/update', 'PeriodMeterController@update')->name('period_meter.update');
 	Route::post('period_meter/delete', 'PeriodMeterController@delete')->name('period_meter.delete');
+	Route::post('period_meter/editModal', 'PeriodMeterController@editModal')->name('period_meter.detail');
+	Route::post('period_meter/cdtupdate', 'PeriodMeterController@meterdetailUpdate')->name('period_meter.cdtupdate');
+	Route::post('period_meter/approve', 'PeriodMeterController@approve')->name('period_meter.approve');
 
 	// journal
 	Route::get('journal','JournalController@index')->name('journal.index');
