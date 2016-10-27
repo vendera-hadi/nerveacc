@@ -81,10 +81,8 @@
                             <th field="ledg_date" width="120" sortable="true">Date</th>
                             <th field="ledg_refno" width="120" sortable="true">Ref No</th>
                             <th field="ledg_description" width="120" sortable="true">Description</th>
-                            <th field="ledg_debit" width="120" sortable="true">Debit</th>
-                            <th field="ledg_credit" width="120" sortable="true">Credit</th>
-                            
-                            <th field="contr_status" width="120" sortable="true">Status</th>
+                            <th field="debit" width="120" sortable="true">Debit</th>
+                            <th field="credit" width="120" sortable="true">Credit</th>
                             <th field="action">Action</th>
                         </tr>
                     </thead>
@@ -212,6 +210,27 @@
             <!-- /.tab-content -->
           </div>
           <!-- Tabs -->
+
+          <!-- Modal extra -->
+                <div id="detailModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Journal Detail</h4>
+                      </div>
+                      <div class="modal-body" id="detailModalContent">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <!-- End Modal -->
 @endsection
 
 @section('footer-scripts')
@@ -276,11 +295,13 @@ $(function(){
       }
  });
 
-var total, totalDebit, totalCredit;
+var total, totalDebit, totalCredit, val;
  function updateCounterDebit(){
     totalDebit = 0;
     $( ".debit" ).each(function() {
-        totalDebit+=parseFloat($(this).val());
+        val = $(this).val();
+        if(val=="") val = 0;
+        totalDebit+=parseFloat(val);
     });
     return totalDebit;
  }
@@ -288,7 +309,9 @@ var total, totalDebit, totalCredit;
  function updateCounterCredit(){
     totalCredit = 0;
     $( ".credit" ).each(function() {
-        totalCredit+=parseFloat($(this).val());
+        val = $(this).val();
+        if(val=="") val = 0;
+        totalCredit+=parseFloat(val);
     });
     return totalCredit;
  }
@@ -333,5 +356,30 @@ var formData;
 
     return true;
  });
+
+ $('.removeLedger').click(function(){
+      if(confirm('Are you sure want to remove this ledger?')){
+          $(this).parent().parent().remove();
+      }
+ });
+
+ $(document).delegate('.remove','click',function(){
+      var r = confirm("Are you sure want to delete entry ?");
+      if(r == true){
+          var id = $(this).data('id');
+          $.post('{{route('journal.delete')}}',{id:id},function(result){
+              if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+              if(result.success) location.reload();
+          });
+      }
+  });
+
+ $(document).delegate('.getDetail','click',function(){
+            $('#detailModalContent').html('<center><img src="{{ asset('img/loading.gif') }}"><p>Loading ...</p></center>');
+            var id = $(this).data('id');
+            $.post('{{route('journal.getdetail')}}',{id:id}, function(data){
+                $('#detailModalContent').html(data);
+            });
+        });
 </script>
 @endsection

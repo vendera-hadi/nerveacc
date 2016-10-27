@@ -56,7 +56,97 @@ class JournalController extends Controller
     }
 
     public function get(Request $request){
-        var_dump($request->all());
+        try{
+            // params
+            $date = $request->input('date');
+            if($date){
+                $date = explode(' - ',$date);
+                $startdate = date('Y-m-d',strtotime($date[0]));
+                $enddate = date('Y-m-d',strtotime($date[1]));
+            }
+
+            $page = $request->page;
+            $perPage = $request->rows; 
+            $page-=1;
+            $offset = $page * $perPage;
+            // @ -> isset(var) ? var : null
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+
+            // olah data
+            $count = TrLedger::select('ledg_date','ledg_refno','ledg_description',\DB::raw('sum(ledg_debit) as debit'),\DB::raw('sum(ledg_credit) as credit'))->groupBy('ledg_refno','ledg_date','ledg_description');
+            if($date) $count = $count->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
+            $count = $count->count();
+
+            $fetch = TrLedger::select('ledg_date','ledg_refno','ledg_description',\DB::raw('sum(ledg_debit) as debit'),\DB::raw('sum(ledg_credit) as credit'))->groupBy('ledg_refno','ledg_date','ledg_description');
+            if(!empty($filters) && count($filters) > 0){
+                foreach($filters as $filter){
+                    $op = "like";
+                    // tentuin operator
+                    switch ($filter->op) {
+                        case 'contains':
+                            $op = 'like';
+                            break;
+                        case 'less':
+                            $op = '<=';
+                            break;
+                        case 'greater':
+                            $op = '>=';
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['ledg_date'] = $value->ledg_date;
+                $temp['ledg_refno'] = $value->ledg_refno;
+                $temp['ledg_description'] = $value->ledg_description;
+                $temp['debit'] = $value->debit;
+                $temp['credit'] = $value->credit;
+                
+                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail">Detail</a> <a href="#" data-id="'.$value->ledg_refno.'" class="remove">Remove</a>';
+                
+                $result['rows'][] = $temp;
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function delete(Request $request){
+        try{
+            $refno = $request->id;
+            TrLedger::where('ledg_refno',$refno)->delete();
+            return response()->json(['success'=>true]);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    } 
+
+    public function getdetail(Request $request){
+        try{
+            $refno = $request->id;
+            $coayear = date('Y');
+            $fetch = TrLedger::select('ledg_date','ledg_refno','ledg_debit','ledg_credit','ledg_description','tr_ledger.coa_code','ms_master_coa.coa_name','tr_ledger.dept_code','ms_department.dept_name','ms_journal_type.jour_type_name')
+                    ->join('ms_master_coa','tr_ledger.coa_code','=','ms_master_coa.coa_code')
+                    ->join('ms_department','tr_ledger.dept_code','=','ms_department.dept_code')
+                    ->join('ms_journal_type',\DB::raw('tr_ledger.jour_type_id::integer'),'=','ms_journal_type.id')
+                    ->where('tr_ledger.coa_year',$coayear)
+                    ->get();
+            return view('modal.detailjournal', ['fetch' => $fetch]);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
     }
 
     public function accountSelect2(Request $request){
