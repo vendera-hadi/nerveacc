@@ -18,7 +18,7 @@ class CreateMsMasterCoasTable extends Migration
             $table->unique('coa_year');
             $table->unique('coa_code');
             $table->char('coa_year', 4);
-            $table->char('coa_code', 4);
+            $table->char('coa_code', 10);
             $table->string('coa_name', 100);
             $table->boolean('coa_isparent')->default(0);
             $table->tinyinteger('coa_level');

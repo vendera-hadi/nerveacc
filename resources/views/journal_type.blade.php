@@ -36,8 +36,9 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="jour_type_prefix" width="50" sortable="true">Invoice Type Prefix</th>
-                            <th field="jour_type_isactive" width="50" sortable="true">Invoice Type Active</th>
+                            <th field="jour_type_prefix" width="50" sortable="true">Journal Type Prefix</th>
+                            <th field="jour_type_name" width="50" sortable="true">Journal Type Name</th>
+                            <th field="jour_type_isactive" width="50" sortable="true">Journal Type Active</th>
                         </tr>
                     </thead>
                 </table>
@@ -58,6 +59,10 @@
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Information</div>
                         <div style="margin-bottom:10px">
                             <input name="jour_type_prefix" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,3]'" label="Prefix:" style="width:100%">
+                        </div>
+
+                        <div style="margin-bottom:10px">
+                            <input name="jour_type_name" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,255]'" label="Prefix:" style="width:100%">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="jour_type_isactive" label="Active:" style="width:300px;">

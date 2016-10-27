@@ -373,32 +373,6 @@ class ContractController extends Controller
                     }
 
                 }
-
-                // foreach ($cost_id as $key => $value) {
-                //     $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
-                //     $input = [
-                //         'costd_is' => $costd_is,
-                //         'cost_id' => $value,
-                //         'costd_name' => $costd_name[$key],
-                //         'costd_unit' => $costd_unit[$key],
-                //         'costd_rate' => $costd_rate[$key],
-                //         'costd_burden' => $costd_burden[$key],
-                //         'costd_admin' => $costd_admin[$key],
-                //         'costd_ismeter' => $is_meter[$key] 
-                //     ];
-                //     $costdt = MsCostDetail::create($input);
-
-                //     $total = 0;
-                //     // $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
-                //     $inputContractInv = [
-                //         'continv_id' => 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime())),
-                //         'contr_id' => $contractID,
-                //         'invtp_code' => $inv_type[$key],
-                //         'costd_is' => $costdt->id,
-                //         'continv_amount' => $total
-                //     ];
-                //     TrContractInvoice::create($inputContractInv);
-                // }
             });
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);

@@ -254,6 +254,8 @@ Route::group(['middleware' => 'auth'], function () {
 
 	// journal
 	Route::get('journal','JournalController@index')->name('journal.index');
+	Route::post('journal/get','JournalController@get')->name('journal.get');
+	Route::post('journal/insert','JournalController@insert')->name('journal.insert');
 	Route::get('journal/optLedger','JournalController@accountSelect2')->name('ledger.select2');
 
 });

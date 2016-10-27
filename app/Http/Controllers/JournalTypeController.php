@@ -66,6 +66,7 @@ class JournalTypeController extends Controller
                 $temp['id'] = $value->id;
                 $temp['jour_type_id'] = $value->jour_type_id;
                 $temp['jour_type_prefix'] = $value->jour_type_prefix;
+                $temp['jour_type_name'] = $value->jour_type_name;
                 $temp['jour_type_isactive'] = !empty($value->jour_type_isactive) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }
