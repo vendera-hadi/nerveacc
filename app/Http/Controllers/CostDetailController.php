@@ -70,7 +70,6 @@ class CostDetailController extends Controller
                 $temp['cost_id'] = $value->cost_id;
                 $temp['cost_name'] = $value->cost_name;
                 $temp['costd_name'] = $value->costd_name;
-                $temp['costd_unit'] = $value->costd_unit;
                 $temp['costd_rate'] = $value->costd_rate;
                 $temp['costd_burden'] = $value->costd_burden;
                 $temp['costd_admin'] = $value->costd_admin;
@@ -89,7 +88,7 @@ class CostDetailController extends Controller
             $result = [];
             if(count($all) > 0){
                 foreach ($all as $value) {
-                    $result[] = ['cost_code'=>$value->cost_id, 'text'=>$value->cost_name];
+                    $result[] = ['id'=>$value->id, 'text'=>$value->cost_name];
                 }
             }
             return response()->json($result);

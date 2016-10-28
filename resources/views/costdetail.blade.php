@@ -37,12 +37,10 @@
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="costd_name" width="50" sortable="true">Cost Detail Name</th>
-                            <th field="costd_unit" width="50" sortable="true">Unit</th>
                             <th field="costd_rate" width="50" sortable="true">Rate</th>
                             <th field="costd_burden" width="50" sortable="true">Biaya Abodemen</th>
                             <th field="costd_admin" width="50" sortable="true">Biaya Admin</th>
                             <th field="costd_ismeter" width="50" sortable="true">Status Meter</th>
-                            <th field="cost_id" width="50" sortable="true">Cost Item Code</th>
                             <th field="cost_name" width="50" sortable="true">Cost Item Name</th>      
                         </tr>
                     </thead>
@@ -64,9 +62,6 @@
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
                             <input name="costd_name" class="easyui-textbox" label="Cost Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_unit" class="easyui-textbox" label="Unit:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="costd_rate" class="easyui-textbox" label="Rate:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
