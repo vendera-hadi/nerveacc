@@ -23,7 +23,11 @@
     .datagrid-wrap{
         height: 400px;
     }
-    .datepicker{z-index:1151 !important;}
+    .datepicker{z-index:999 !important;}
+
+    .pagination > li > span{
+      padding-bottom: 9px;
+    }
     </style>
 @endsection
 
@@ -88,7 +92,7 @@
                                   <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
                                   </div>
-                                  <input type="text" name="contr_startdate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                  <input type="text" id="startDate" name="contr_startdate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -97,7 +101,7 @@
                                   <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
                                   </div>
-                                  <input type="text" name="contr_enddate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                  <input type="text" id="endDate" name="contr_enddate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -114,7 +118,7 @@
                                 <input type="text" name="contr_bast_by" required="required" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label>Note</label>
+                                <label>Note (optional)</label>
                                 <textarea name="contr_note" class="form-control"></textarea>
                             </div>
                             <div class="form-group">
@@ -123,14 +127,31 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Marketing Agent</label>
-                                <select class="form-control choose-marketing" name="mark_id" required="required" style="width:100%">
+                                <label>Marketing Agent (optional)</label>
+                                <select class="form-control choose-marketing" name="mark_id" style="width:100%">
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label>Virtual Account</label>
-                                <select class="form-control choose-vaccount" name="viracc_id" required="required" style="width:100%">
-                                </select>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <div class="form-group">
+                                        <label>Unit</label>
+                                            <div class="input-group">
+                                              <input type="hidden" name="unit_id" id="txtUnitId" required>
+                                              <input type="text" class="form-control" id="txtUnit" disabled>
+                                              <span class="input-group-btn">
+                                                <button class="btn btn-info" type="button" id="chooseUnitButton">Choose Unit</button>
+                                              </span>
+                                            </div><!-- /input-group -->
+                                    </div>
+                                </div>
+                                
+                                <div class="col-xs-6">
+                                    <div class="form-group">
+                                        <label>Virtual Account</label>
+                                        <input type="hidden" name="viracc_id" id="txtVAId" required>
+                                        <input type="text" class="form-control" id="txtVA" disabled>
+                                    </div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Contract Status</label>
@@ -138,12 +159,8 @@
                                 </select>
                             </div>
 
-                            <div class="form-group">
-                                <label>Unit</label>
-                                <select class="form-control choose-unit" name="unit_id" required="required" style="width:100%">
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-default">Submit</button>
+                            
+                            <button type="submit" class="btn btn-default">Next</button>
                         </form>
                         </div>
 
@@ -153,12 +170,16 @@
                   <div class="form-group">
                       <label>Choose Cost Items</label>
                       <select id="selectCostItem" class="form-control" name="costdt[]">
-                          @foreach($cost_items as $citm)
-                          <option value="{{$citm->id}}">{{$citm->cost_name}} ({{$citm->cost_code}})</option>
+                          <?php $tempGroup = ''; ?>
+                          @foreach($cost_items as $key => $citm)
+                            @if($citm->cost_name != $tempGroup && $key > 0){!!'</optgroup>'!!}@endif
+                            @if($citm->cost_name != $tempGroup){!!'<optgroup label="'.$citm->cost_name.' ('.$citm->cost_code.')">'!!}@endif
+                            <option value="{{$citm->id}}">{{$citm->costd_name}}</option>
                           @endforeach
                       </select>
                   </div>
-                  <button id="clickCostItem">Add Cost Item</button> <button id="clickManualCostItem">New Cost Item</button>
+                  <button id="clickCostItem">Add Cost Item</button>
+
                   <br><br>
                   <form method="POST" id="formContract2">
                   <table id="tableCost" width="100%" class="table table-bordered" style="display: none">
@@ -213,6 +234,23 @@
                 </div>
                 <!-- End Modal -->
 
+                <!-- Modal select unit -->
+                <div id="unitModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      
+                      <div class="modal-body" id="unitModalContent">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <!-- End Modal -->
                 
 
                 <!-- modal form -->
@@ -345,29 +383,20 @@
               minimumInputLength: 1
         });
 
-        $(".choose-unit").select2({
-              ajax: {
-                url: "{{route('unit.select2')}}",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                  return {
-                    q: params.term, // search term
-                    page: params.page
-                  };
-                },
-                
-                cache: true
-              },
-              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-              minimumInputLength: 1
-        });
-
         $('#formContract').submit(function(e){
             e.preventDefault();
-            $('#contractStep1').hide();
-            $('#contractStep2').show();
-            console.log('submit');
+            var startdate = $('#startDate').val();
+            var enddate = $('#endDate').val();
+            if(new Date(enddate) <= new Date(startdate)){
+                $.messager.alert('Warning','Start Date must be lower than End Date');
+            }else if($('#txtUnitId').val() == ""){
+              $.messager.alert('Warning','Unit is required');
+            }else if($('#txtVAId').val() == ""){
+              $.messager.alert('Warning','Virtual Account is required');
+            }else{
+              $('#contractStep1').hide();
+              $('#contractStep2').show();
+            }
         });
 
         $('#formContract2').submit(function(e){
@@ -394,32 +423,27 @@
         var choices = [];
         $('#clickCostItem').click(function(){
             $('#tableCost').show();
-            unit = $('.choose-unit option:selected').text();
-            unit = unit.substring(unit.indexOf('(') + 1, unit.indexOf(')'));
-            costItem = $('#selectCostItem').val();
-            // choices.push(costItem);
-            costItemName = $('#selectCostItem option:selected').text();
-            $.post('{{route('cost_item.getDetail')}}', {id: costItem}, function(result){
-                $.each( result, function( i, val ) {
-                    $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" value="'+val.id+'"><td>'+costItemName+'</td><td>'+val.costd_name+'</td><td>'+val.costd_unit+'</td><td>'+val.costd_rate+'</td><td>'+val.costd_burden+'</td><td>'+val.costd_admin+'</td><td>'+val.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
-                });
+            costDetail = $('#selectCostItem').val();
+            costDetailName = $('#selectCostItem option:selected').text();
+            $.post('{{route('cost_item.getDetail')}}', {id: costDetail}, function(result){
+                $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
             });
         });
 
-        $('#clickManualCostItem').click(function(){
-            $('#tableCost').show();
-            unit = $('.choose-unit option:selected').text();
-            unit = unit.substring(unit.indexOf('(') + 1, unit.indexOf(')'));
-            $('#tableCost').append('<tr class="text-center"><td><input type="text" name="cost_name[]" placeholder="New Cost Item Name" required><br><br><input type="text" name="cost_code[]" placeholder="New Cost Item Code" required></td><td><input type="text" name="costd_name[]" class="form-control costd_name" placeholder="Cost Detail Name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" placeholder="Unit" required></td><td><input type="text" name="costd_rate[]" placeholder="Rate" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" placeholder="Abonemen" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" placeholder="Biaya Admin" class="form-control costd_admin" required></td><td><select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><select name="inv_type_custom[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
-        });
+        // $('#clickManualCostItem').click(function(){
+        //     $('#tableCost').show();
+        //     unit = $('.choose-unit option:selected').text();
+        //     unit = unit.substring(unit.indexOf('(') + 1, unit.indexOf(')'));
+        //     $('#tableCost').append('<tr class="text-center"><td><input type="text" name="cost_name[]" placeholder="New Cost Item Name" required><br><br><input type="text" name="cost_code[]" placeholder="New Cost Item Code" required></td><td><input type="text" name="costd_name[]" class="form-control costd_name" placeholder="Cost Detail Name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" placeholder="Unit" required></td><td><input type="text" name="costd_rate[]" placeholder="Rate" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" placeholder="Abonemen" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" placeholder="Biaya Admin" class="form-control costd_admin" required></td><td><select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><select name="inv_type_custom[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+        // });
 
-        $(document).delegate(".costd_rate,.costd_burden,.costd_admin", "keypress", function(e) {
-            var charCode = (e.which) ? e.which : event.keyCode;
-            if ((charCode < 48 || charCode > 57))
-                return false;
+        // $(document).delegate(".costd_rate,.costd_burden,.costd_admin", "keypress", function(e) {
+        //     var charCode = (e.which) ? e.which : event.keyCode;
+        //     if ((charCode < 48 || charCode > 57))
+        //         return false;
 
-            return true;
-        });
+        //     return true;
+        // });
 
 
         $(document).delegate('.remove','click',function(){
@@ -473,6 +497,44 @@
             $.post('{{route('contract.getdetail')}}',{id:id}, function(data){
                 $('#detailModalContent').html(data);
             });
+        });
+
+        var currenturl; 
+        $('#chooseUnitButton').click(function(){
+            $('#unitModal').modal("show");
+            currenturl = '{{route('unit.popup')}}';
+            $.post(currenturl,null, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $(document).delegate('.pagination li a','click',function(e){
+            e.preventDefault();
+            currenturl = $(this).attr('href');
+            $.post(currenturl, null, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $(document).delegate('#searchUnit','submit',function(e){
+            e.preventDefault();
+            var data = $('#searchUnit').serialize();
+            currenturl = '{{route('unit.popup')}}';
+            $.post(currenturl, data, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $(document).delegate('#chooseUnit','click',function(e){
+            e.preventDefault();
+            var unitid = $('input[name="unit"]:checked').val();
+            var unitname = $('input[name="unit"]:checked').data('name');
+            $('#txtUnitId').val(unitid);
+            $('#txtUnit').val(unitname);
+            var unitvaccount = $('input[name="unit"]:checked').data('vaccount');
+            $('#txtVAId,#txtVA').val(unitvaccount);
+            $('#unitModalContent').text('');
+            $('#unitModal').modal("hide");
         });
 </script>
 @endsection

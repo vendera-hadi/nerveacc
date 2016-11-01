@@ -10,6 +10,7 @@ use App\Models\MsUnit;
 use App\Models\MsUnitType;
 use App\Models\User;
 use App\Models\MsFloor;
+use DB;
 
 class UnitController extends Controller
 {
@@ -181,5 +182,14 @@ class UnitController extends Controller
             array_push($result['results'], $temp);
         }
         return json_encode($result);
+    }
+
+    public function getPopupOptions(Request $request){
+        $keyword = $request->input('keyword');
+        if($keyword) $fetch = MsUnit::where('unit_isavailable',1)->where(function($query) use($keyword){
+                                        $query->where(DB::raw('LOWER(unit_code)'),'like','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'like','%'.$keyword.'%');
+                                    })->paginate(10);
+        else $fetch = MsUnit::where('unit_isavailable',1)->paginate(10);
+        return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword]);
     }
 }

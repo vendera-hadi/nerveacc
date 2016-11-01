@@ -115,6 +115,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unit/get', 'UnitController@get')->name('unit.get');
 	Route::get('unit/optUnit','UnitController@getOptUnit')->name('unit.select2');
 	Route::post('unit/options', 'UnitController@getOptions')->name('unit.options');
+	Route::post('unit/popup', 'UnitController@getPopupOptions')->name('unit.popup');
 	Route::post('unit/fopt', 'UnitController@fopt')->name('unit.fopt');
 	Route::post('unit/all', 'UnitController@getAll')->name('unit.all');
 	Route::post('unit/insert', 'UnitController@insert')->name('unit.insert');

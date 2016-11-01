@@ -22,7 +22,7 @@
               <div class="input-group-addon">
                 <i class="fa fa-calendar"></i>
               </div>
-              <input type="text" name="contr_startdate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" value="{{$fetch->contr_startdate}}">
+              <input type="text" id="startDate" name="contr_startdate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" value="{{$fetch->contr_startdate}}">
             </div>
         </div>
         <div class="form-group">
@@ -31,7 +31,7 @@
               <div class="input-group-addon">
                 <i class="fa fa-calendar"></i>
               </div>
-              <input type="text" name="contr_enddate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" value="{{$fetch->contr_enddate}}">
+              <input type="text" id="endDate" name="contr_enddate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" value="{{$fetch->contr_enddate}}">
             </div>
         </div>
         <div class="form-group">

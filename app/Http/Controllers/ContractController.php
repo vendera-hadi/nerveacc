@@ -15,7 +15,7 @@ use DB;
 class ContractController extends Controller
 {
     public function index(){
-        $data['cost_items'] = MsCostItem::all();
+        $data['cost_items'] = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
         $invoice_types = MsInvoiceType::all();
         $data['invoice_types'] = '';
         foreach ($invoice_types as $key => $val) {

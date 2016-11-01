@@ -114,12 +114,10 @@ class CostItemController extends Controller
 
     public function getDetail(Request $request){
         $id = $request->id;
-        $data = MsCostDetail::where('cost_id',$id)->get();
+        $data = MsCostDetail::with('costitem')->find($id);
         if($data){
-            foreach ($data as $key => $value) {
-                if($value->costd_ismeter) $data[$key]->costd_ismeter = 'yes';
-                else $data[$key]->costd_ismeter = 'no';
-            }
+            if($data->costd_ismeter) $data->costd_ismeter = 'yes';
+            else $data->costd_ismeter = 'no';
         }
         return response()->json($data);
     }
