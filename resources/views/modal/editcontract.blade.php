@@ -48,7 +48,7 @@
             <input type="text" name="contr_bast_by" required="required" class="form-control" value="{{$fetch->contr_bast_date}}">
         </div>
         <div class="form-group">
-            <label>Note</label>
+            <label>Note (optional)</label>
             <textarea name="contr_note" class="form-control" value="{{$fetch->note}}"></textarea>
         </div>
         <div class="form-group">
@@ -58,17 +58,12 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Marketing Agent</label>
-            <select class="form-control choose-marketing" name="mark_id" required="required" style="width:100%">
+            <label>Marketing Agent (optional)</label>
+            <select class="form-control choose-marketing" name="mark_id" style="width:100%">
             <option value="{{$fetch->mark_id}}">{{$fetch->mark_code." (".$fetch->mark_name.")"}}</option>
             </select>
         </div>
-        <div class="form-group">
-            <label>Virtual Account</label>
-            <select class="form-control choose-vaccount" name="viracc_id" required="required" style="width:100%">
-            <option value="{{$fetch->viracc_id}}">{{$fetch->viracc_no." (".$fetch->viracc_name.")"}}</option>
-            </select>
-        </div>
+        
         <div class="form-group">
             <label>Contract Status</label>
             <select class="form-control choose-ctrstatus" name="const_id" required="required" style="width:100%">
@@ -76,11 +71,28 @@
             </select>
         </div>
 
-        <div class="form-group">
-            <label>Unit</label>
-            <select class="form-control choose-unit" name="unit_id" required="required" style="width:100%">
-            <option value="{{$fetch->unit_id}}">{{$fetch->unit_name." (".$fetch->unit_code.")"}}</option>
-            </select>
+        <div class="row">
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <label>Unit</label>
+                        <div class="input-group">
+                          <input type="hidden" name="unit_id" id="txtUnitEditId" required>
+                          <input type="text" class="form-control" id="txtUnitEdit" disabled>
+                          <span class="input-group-btn">
+                            <button class="btn btn-info" type="button" id="chooseUnitButtonEdit">Choose Unit</button>
+                          </span>
+                        </div><!-- /input-group -->
+                </div>
+            </div>
+
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <label>Virtual Account</label>
+                    <input type="hidden" name="viracc_id" id="txtVAEditId" required>
+                    <input type="text" class="form-control" id="txtVAEdit" value="{{$fetch->viracc_id}}" disabled>
+                    
+                </div>
+            </div>
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
     </form>
@@ -312,4 +324,7 @@
             });
         }
     });
+
+
+        
     </script>

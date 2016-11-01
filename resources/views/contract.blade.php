@@ -536,5 +536,36 @@
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
+
+        $(document).delegate('#chooseUnitButtonEdit','click',function(){
+            $('#editModal').modal('hide');
+            $('#unitModal').modal("show");
+            currenturl = '{{route('unit.popup')}}';
+            $.post(currenturl, {edit:true}, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $(document).delegate('#searchUnitEdit','submit',function(e){
+            e.preventDefault();
+            var data = $('#searchUnitEdit').serialize();
+            currenturl = '{{route('unit.popup')}}?edit=true';
+            $.post(currenturl, data, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $(document).delegate('#chooseUnitEdit','click',function(e){
+            e.preventDefault();
+            var unitid = $('input[name="unitedit"]:checked').val();
+            var unitname = $('input[name="unitedit"]:checked').data('name');
+            $('#txtUnitEditId').val(unitid);
+            $('#txtUnitEdit').val(unitname);
+            var unitvaccount = $('input[name="unitedit"]:checked').data('vaccount');
+            $('#txtVAEditId,#txtVAEdit').val(unitvaccount);
+            $('#editModal').modal('show');
+            $('#unitModalContent').text('');
+            $('#unitModal').modal("hide");
+        });
 </script>
 @endsection

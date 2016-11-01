@@ -1,6 +1,6 @@
 <center><h3>Choose Unit</h3></center><br>
 
-<form action="post" id="searchUnit">
+<form action="post" id="@if($edit){{'searchUnitEdit'}}@else{{'searchUnit'}}@endif">
 <div class="col-xs-6 col-xs-offset-6">
 	<div class="input-group">
       <input type="text" name="keyword" class="form-control" placeholder="Search Unit" value="@if(!empty($keyword)){{$keyword}}@endif">
@@ -21,7 +21,7 @@
 	</tr>
 	@foreach($units as $unit)
 	<tr>
-		<td><center><input type="radio" name="unit" data-name="{{$unit->unit_code." ".$unit->unit_name}}" data-vaccount="{{$unit->unit_virtual_accn}}" value="{{$unit->id}}"></center></td>
+		<td><center><input type="radio" name="@if($edit){{'unitedit'}}@else{{'unit'}}@endif" data-name="{{$unit->unit_code." ".$unit->unit_name}}" data-vaccount="{{$unit->unit_virtual_accn}}" value="{{$unit->id}}"></center></td>
 		<td>{{$unit->unit_code}}</td>
 		<td>{{$unit->unit_name}}</td>
 		<td>{{(int)$unit->unit_sqrt." m2"}}</td>
@@ -30,7 +30,7 @@
 	@if(count($units) > 0)
 	<tr>
 		<td colspan="4">
-			<center><button type="button" class="btn btn-info" id="chooseUnit">Choose</button></center>
+			<center><button type="button" class="btn btn-info" id="@if($edit){{'chooseUnitEdit'}}@else{{'chooseUnit'}}@endif">Choose</button></center>
 		</td>
 	</tr>
 	@endif

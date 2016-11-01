@@ -186,10 +186,11 @@ class UnitController extends Controller
 
     public function getPopupOptions(Request $request){
         $keyword = $request->input('keyword');
+        $edit = $request->input('edit');
         if($keyword) $fetch = MsUnit::where('unit_isavailable',1)->where(function($query) use($keyword){
                                         $query->where(DB::raw('LOWER(unit_code)'),'like','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'like','%'.$keyword.'%');
                                     })->paginate(10);
         else $fetch = MsUnit::where('unit_isavailable',1)->paginate(10);
-        return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword]);
+        return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit]);
     }
 }

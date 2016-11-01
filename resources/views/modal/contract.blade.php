@@ -19,8 +19,7 @@
 					<tr><td><strong>Tenant Id No</strong></td><td>:</td><td>{{$fetch['tenan_idno']}}</td></tr>
 					<tr><td><strong>Agent Code</strong></td><td>:</td><td>{{$fetch['mark_code']}}</td></tr>
 					<tr><td><strong>Agent Name</strong></td><td>:</td><td>{{$fetch['mark_name']}}</td></tr>
-					<tr><td><strong>Rental Period Name</strong></td><td>:</td><td>{{$fetch['renprd_name']}}</td></tr>
-					<tr><td><strong>Rental Period Day</strong></td><td>:</td><td>{{$fetch['renprd_day']}}</td></tr>
+					
 					<tr><td><strong>Virtual Account No</strong></td><td>:</td><td>{{$fetch['viracc_no']}}</td></tr>
 					<tr><td><strong>Virtual Account Name</strong></td><td>:</td><td>{{$fetch['viracc_name']}}</td></tr>
 					<tr><td><strong>VA Active Status</strong></td><td>:</td><td>{{!empty($fetch['viracc_isactive']) ? 'active' : 'not active' }}</td></tr>
@@ -38,7 +37,6 @@
                 	<table width="100%">
 					<tr><td width="40%"><strong>Invoice Type</strong></td><td>:</td><td>{{$cdt->invtp_name}}</td></tr>
 					<tr><td><strong>Cost Name</strong></td><td>:</td><td>{{$cdt->costd_name}}</td></tr>
-					<tr><td><strong>Unit</strong></td><td>:</td><td>{{$cdt->costd_unit}}</td></tr>
 					<tr><td><strong>Biaya Rate</strong></td><td>:</td><td>{{$cdt->costd_rate}}</td></tr>
 					<tr><td><strong>Biaya Burden</strong></td><td>:</td><td>{{$cdt->costd_burden}}</td></tr>
 					<tr><td><strong>Biaya Admin</strong></td><td>:</td><td>{{$cdt->costd_admin}}</td></tr>
