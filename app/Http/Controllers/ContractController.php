@@ -163,7 +163,7 @@ class ContractController extends Controller
         }
         $input = [
             'contr_id' => 'CTR'.str_replace(".", "", str_replace(" ", "",microtime())),
-            'contr_parent' => $request->input('contr_parent'),
+            // 'contr_parent' => $request->input('contr_parent'),
             'contr_code' => $request->input('contr_code'),
             'contr_no' => $request->input('contr_no'),
             'contr_startdate' => $request->input('contr_startdate'),
@@ -173,7 +173,6 @@ class ContractController extends Controller
             'contr_note' => $request->input('contr_note'),
             'tenan_id' => $request->input('tenan_id'),
             'mark_id' => $request->input('mark_id'),
-            // 'renprd_id' => $request->input('renprd_id'),
             'viracc_id' => $request->input('viracc_id'),
             'const_id' => $request->input('const_id'),
             'unit_id' => $request->input('unit_id')
@@ -276,7 +275,7 @@ class ContractController extends Controller
         }
 
         $update = [
-            'contr_parent' => $request->input('contr_parent'),
+            // 'contr_parent' => $request->input('contr_parent'),
             'contr_code' => $request->input('contr_code'),
             'contr_no' => $request->input('contr_no'),
             'contr_startdate' => $request->input('contr_startdate'),
@@ -286,7 +285,6 @@ class ContractController extends Controller
             'contr_note' => $request->input('contr_note'),
             'tenan_id' => $request->input('tenan_id'),
             'mark_id' => $request->input('mark_id'),
-            // 'renprd_id' => $request->input('renprd_id'),
             'viracc_id' => $request->input('viracc_id'),
             'const_id' => $request->input('const_id'),
             'unit_id' => $request->input('unit_id')

@@ -7,12 +7,7 @@
               <div class="tab-pane active" id="modaltab_1">    
     <!-- form edit -->
     <form method="POST" id="formEditContract">
-        <div class="form-group">
-            <label>Contract Parent</label>
-            <select class="form-control contract-parent" style="width:100%" name="contr_parent" required="required">
-            <option value="@if($fetch->contr_parent!=0)){{$fetch->contr_parent}}@else{{'0'}}@endif">@if($fetch->contr_parent!=0){{$fetch->parent_code.' ('.$fetch->parent_no.')'}}@else{{'No Parent'}}@endif</option>
-            </select>
-        </div>
+        
         <div class="form-group">
             <label>Contract Code</label>
             <input type="text" name="contr_code" required="required" class="form-control" value="{{$fetch->contr_code}}">

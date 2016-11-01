@@ -17,7 +17,7 @@ class CreateTrContractsTable extends Migration
             $table->increments('id');
             $table->unique('contr_id');
             $table->char('contr_id', 36);
-            $table->char('contr_parent', 36);
+            $table->char('contr_parent', 36)->nullable();
             $table->string('contr_code', 15);
             $table->string('contr_no', 15);
             $table->date('contr_startdate');

@@ -73,12 +73,7 @@
               <div class="tab-pane" id="tab_2">
                         <div id="contractStep1">
                         <form method="POST" id="formContract">
-                            <div class="form-group">
-                                <label>Contract Parent</label>
-                                <select class="form-control contract-parent" style="width:100%" name="contr_parent" required="required">
-                                <option value="0">No Parent</option>
-                                </select>
-                            </div>
+                            
                             <div class="form-group">
                                 <label>Contract Code</label>
                                 <input type="text" name="contr_code" required="required" class="form-control">
