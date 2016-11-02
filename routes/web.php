@@ -170,7 +170,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('contract','ContractController@index');
 	Route::post('contract/get', 'ContractController@get')->name('contract.get');
 	Route::post('contract/detail', 'ContractController@getdetail')->name('contract.getdetail');
-	Route::post('contract/editModal', 'ContractController@editModal')->name('contract.detail');
+	Route::post('contract/ctrDetail', 'ContractController@ctrDetail')->name('contract.ctrdetail');
 	Route::get('contract/optParent', 'ContractController@optionParent')->name('contract.optParent');
 	Route::post('contract/cdtupdate','ContractController@costdetailUpdate')->name('contract.cdtupdate');
 	Route::post('contract/insert', 'ContractController@insert')->name('contract.insert');

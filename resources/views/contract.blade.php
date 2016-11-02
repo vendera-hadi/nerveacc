@@ -48,6 +48,7 @@
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
               <li><a href="#tab_2" data-toggle="tab">Add Contract</a></li>
+              <li><a href="#tab_3" data-toggle="tab">Edit Contract</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
@@ -204,8 +205,111 @@
                         </div>
               </div>
 
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="tab_3">
+                
+                   <!-- form -->
+                    <form method="POST" id="formEditContract">
+                        <input type="hidden" name="id">
+                        <div class="form-group">
+                            <label>Contract Code</label>
+                            <input type="text" name="contr_code" required="required" class="form-control" >
+                        </div>
+                        <div class="form-group">
+                            <label>Contract No</label>
+                            <input type="text" name="contr_no" required="required" class="form-control" >
+                        </div>
+                        <div class="form-group">
+                            <label>Contract Start Date</label>
+                            <div class="input-group date">
+                              <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                              </div>
+                              <input type="text" id="startDate" name="contr_startdate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Contract End Date</label>
+                            <div class="input-group date">
+                              <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                              </div>
+                              <input type="text" id="endDate" name="contr_enddate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Berita Acara Serah Terima Date</label>
+                            <div class="input-group date">
+                              <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                              </div>
+                              <input type="text" name="contr_bast_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Berita Acara Serah Terima By</label>
+                            <input type="text" name="contr_bast_by" required="required" class="form-control" >
+                        </div>
+                        <div class="form-group">
+                            <label>Note (optional)</label>
+                            <textarea name="contr_note" class="form-control" ></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Tenant</label>
+                            <br><strong>Current Tenant : <span id="tenantValue">-</span></strong>
+                            <select class="form-control choose-tenant" name="tenan_id"  style="width:100%">
+                            <option value="">Ignore if don't want to change value</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Marketing Agent (optional)</label>
+                            <br><strong>Current Marketing : <span id="markValue">-</span></strong>
+                            <select class="form-control choose-marketing" name="mark_id" style="width:100%">
+                            <option value="">Ignore if don't want to change value</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Contract Status</label>
+                            <br><strong>Current Contract Status : <span id="ctrStatusValue">-</span></strong>
+                            <select class="form-control choose-ctrstatus" name="const_id"  style="width:100%">
+                            <option value="">Ignore if don't want to change value</option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <div class="form-group">
+                                    <label>Unit</label>
+                                        <div class="input-group">
+                                          <input type="hidden" name="unit_id" id="txtUnitEditId" required>
+                                          <input type="text" class="form-control" id="txtUnitEdit" disabled>
+                                          <span class="input-group-btn">
+                                            <button class="btn btn-info" type="button" id="chooseUnitButtonEdit">Choose Unit</button>
+                                          </span>
+                                        </div><!-- /input-group -->
+                                </div>
+                            </div>
+
+                            <div class="col-xs-6">
+                                <div class="form-group">
+                                    <label>Virtual Account</label>
+                                    <input type="hidden" name="viracc_id" id="txtVAEditId" required>
+                                    <input type="text" class="form-control" id="txtVAEdit" disabled>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </form>
+                   <!-- form -->
+
+              </div>
+            <!-- /.tab-content -->
+
             </div>
             <!-- /.tab-content -->
+
           </div>
           <!-- Tabs -->
        
@@ -464,14 +568,6 @@
             }
         });
 
-        $(document).delegate('.edit','click',function(){
-            var id = $(this).data('id');
-            $.post('{{route('contract.detail')}}',{id:id},function(result){
-                if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-                else $('#editModal').find('.modal-body').html(result);
-            });
-        });
-
         $('.datepicker').datepicker({
             autoclose: true
         });
@@ -563,9 +659,46 @@
             $('#txtUnitEdit').val(unitname);
             var unitvaccount = $('input[name="unitedit"]:checked').data('vaccount');
             $('#txtVAEditId,#txtVAEdit').val(unitvaccount);
-            $('#editModal').modal('show');
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
+
+        // edit
+        $(document).delegate(".editctr","click",function() {
+            var id = $(this).data('id');
+            $.post('{{route('contract.ctrdetail')}}',{id:id},function(result){
+                if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
+                else{ 
+                  console.log(result);
+                    var data = result.data;
+                    var form = $('#formEditContract');
+                    form.find('input[name=id]').val(data.id);
+                    form.find('input[name=contr_code]').val(data.contr_code);
+                    form.find('input[name=contr_no]').val(data.contr_no);
+                    form.find('input[name=contr_startdate]').val(data.contr_startdate);
+                    form.find('input[name=contr_enddate]').val(data.contr_enddate);
+                    form.find('input[name=contr_bast_date]').val(data.contr_enddate);
+                    form.find('input[name=contr_bast_by]').val(data.contr_bast_by);
+                    form.find('textarea[name=contr_note]').val(data.contr_note);
+                    form.find('#tenantValue').text(data.tenan_code+" "+data.tenan_name);
+                    form.find('#markValue').text(data.mark_code+" "+data.mark_name);
+                    form.find('#ctrStatusValue').text(data.const_code+" "+data.const_name);
+                    form.find('#txtUnitEdit').val(data.unit_code+" "+data.unit_name);
+                    form.find('#txtVAEdit').val(data.unit_virtual_accn);
+
+                }
+                console.log(result);
+            });
+            $('.nav-tabs a[href="#tab_3"]').tab('show');
+        });
+
+        $('#formEditContract').submit(function(e){
+                e.preventDefault();
+                var data = $(this).serialize();
+                $.post('{{route('contract.update')}}',data, function(result){
+                    alert(result.message);
+                    if(result.status == 1) location.reload();
+                });
+            });
 </script>
 @endsection

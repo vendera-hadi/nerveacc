@@ -74,7 +74,7 @@ class ContractController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['contr_status'] = $value->contr_status;
                 $temp['contr_terminate_date'] = $value->contr_terminate_date;
-                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail">Detail</a> <a href="#" data-toggle="modal" data-target="#editModal" data-id="'.$value->id.'" class="edit">Edit</a> <a href="#" data-id="'.$value->id.'" class="remove">Remove</a>';
+                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> <a href="#"  data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i><small>Contract</small></a> <a href="#"  data-id="'.$value->id.'" class="editcitm"><i class="fa fa-pencil" aria-hidden="true"></i><small>Cost Items</small></a> <a href="#" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
                 
                 $result['rows'][] = $temp;
             }
@@ -100,6 +100,24 @@ class ContractController extends Controller
                 ->get();
         return view('modal.contract', ['fetch' => $fetch, 'costdetail' => $costdetail]);
     }
+
+    public function ctrDetail(Request $request){
+        try{
+            $contractId = $request->id;
+            $fetch = TrContract::select('tr_contract.*',\DB::raw('parent.contr_code as parent_code'),\DB::raw('parent.contr_no as parent_no'),'ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_contract_status.const_code','ms_contract_status.const_name','ms_unit.unit_code','ms_unit.unit_virtual_accn','ms_unit.unit_name','ms_unit.unit_isactive')
+            ->leftJoin(\DB::raw('tr_contract as parent'),\DB::raw('parent.id::integer'),"=",\DB::raw('tr_contract.contr_parent::integer'))
+            ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
+            ->join('ms_marketing_agent',\DB::raw('ms_marketing_agent.id::integer'),"=",\DB::raw('tr_contract.mark_id::integer'))
+            // ->join('ms_rental_period',\DB::raw('ms_rental_period.id::integer'),"=",\DB::raw('tr_contract.renprd_id::integer'))
+            // ->join('ms_virtual_account',\DB::raw('ms_virtual_account.id::integer'),"=",\DB::raw('tr_contract.viracc_id::integer'))
+            ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
+            ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->where('tr_contract.id', $contractId)->first();
+            $result = ['success'=>1, 'data'=>$fetch];
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+    }    
 
     public function editModal(Request $request){
         try{
@@ -282,13 +300,14 @@ class ContractController extends Controller
             'contr_enddate' => $request->input('contr_enddate'),
             'contr_bast_date' => $request->input('contr_bast_date'),
             'contr_bast_by' => $request->input('contr_bast_by'),
-            'contr_note' => $request->input('contr_note'),
-            'tenan_id' => $request->input('tenan_id'),
-            'mark_id' => $request->input('mark_id'),
-            'viracc_id' => $request->input('viracc_id'),
-            'const_id' => $request->input('const_id'),
-            'unit_id' => $request->input('unit_id')
+            'contr_note' => $request->input('contr_note')
         ];
+        if($request->input('tenan_id')) $update['tenan_id'] = $request->input('tenan_id');
+        if($request->input('mark_id')) $update['mark_id'] = $request->input('mark_id');
+        if($request->input('const_id')) $update['const_id'] = $request->input('const_id');
+        if($request->input('viracc_id')) $update['viracc_id'] = $request->input('viracc_id');
+        if($request->input('unit_id')) $update['unit_id'] = $request->input('unit_id');
+
         TrContract::where('id',$request->input('id'))->update($update);
         return ['status' => 1, 'message' => 'Update Success'];
     }
