@@ -117,6 +117,29 @@ class ContractController extends Controller
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }
+    }
+
+    public function citmDetail(Request $request){
+        try{
+            $contractId = $request->id;
+            $costdetail = TrContractInvoice::select('ms_cost_detail.id','ms_cost_detail.cost_id','ms_invoice_type.invtp_code','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code')
+                ->join('ms_invoice_type',\DB::raw('tr_contract_invoice.invtp_code'),"=",\DB::raw('ms_invoice_type.invtp_code'))
+                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
+                ->join('ms_cost_item',\DB::raw('ms_cost_detail.cost_id::integer'),"=",\DB::raw('ms_cost_item.id::integer'))
+                ->where('contr_id',$contractId)
+                ->get();
+
+            $invoice_types = MsInvoiceType::all();
+            $inv_types_options = '';
+            foreach ($invoice_types as $key => $val) {
+                $inv_types_options = $inv_types_options.'<option value="'.$val->invtp_code.'">'.$val->invtp_name.'</option>';
+            }
+            $cost_items = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
+            return view('modal.editcontract', ['id'=>$contractId, 'costdetail' => $costdetail, 'invoice_types'=>$invoice_types, 'cost_items' => $cost_items, 'inv_types_options' => $inv_types_options
+                ]);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
     }    
 
     public function editModal(Request $request){

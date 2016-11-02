@@ -49,6 +49,7 @@
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
               <li><a href="#tab_2" data-toggle="tab">Add Contract</a></li>
               <li><a href="#tab_3" data-toggle="tab">Edit Contract</a></li>
+              <li><a href="#tab_4" data-toggle="tab">Edit Cost Item</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
@@ -305,7 +306,11 @@
                    <!-- form -->
 
               </div>
-            <!-- /.tab-content -->
+
+              <!-- /.tab-pane -->
+              <div class="tab-pane" id="tab_4">
+                  
+              </div>
 
             </div>
             <!-- /.tab-content -->
@@ -690,6 +695,17 @@
                 console.log(result);
             });
             $('.nav-tabs a[href="#tab_3"]').tab('show');
+        });
+
+        $(document).delegate(".editcitm","click",function() {
+            var id = $(this).data('id');
+            $.post('{{route('contract.citmdetail')}}',{id:id},function(result){
+                if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
+                else{
+                    $('#tab_4').html(result);
+                }
+            });
+            $('.nav-tabs a[href="#tab_4"]').tab('show');
         });
 
         $('#formEditContract').submit(function(e){
