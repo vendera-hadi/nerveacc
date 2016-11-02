@@ -8,6 +8,7 @@ use App\Models\TrContract;
 use App\Models\MsCostItem;
 use App\Models\MsInvoiceType;
 use App\Models\MsCostDetail;
+use App\Models\MsUnit;
 use App\Models\TrContractInvoice;
 use Validator;
 use DB;
@@ -248,7 +249,10 @@ class ContractController extends Controller
                         ];
                         TrContractInvoice::create($inputContractInv);
                     }
-                } 
+                }
+
+                 // unit jadi unavailable
+                 MsUnit::where('id',$request->input('unit_id'))->update(['unit_isavailable'=>0]); 
 
                 // insert custom
                 if(count($cost_name) > 0){
@@ -329,7 +333,11 @@ class ContractController extends Controller
         if($request->input('mark_id')) $update['mark_id'] = $request->input('mark_id');
         if($request->input('const_id')) $update['const_id'] = $request->input('const_id');
         if($request->input('viracc_id')) $update['viracc_id'] = $request->input('viracc_id');
-        if($request->input('unit_id')) $update['unit_id'] = $request->input('unit_id');
+        if($request->input('unit_id')){ 
+            $update['unit_id'] = $request->input('unit_id');
+            // unit jadi unavailable
+            MsUnit::where('id',$request->input('unit_id'))->update(['unit_isavailable'=>0]);
+        }
 
         TrContract::where('id',$request->input('id'))->update($update);
         return ['status' => 1, 'message' => 'Update Success'];
