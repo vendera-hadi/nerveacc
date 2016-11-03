@@ -59,7 +59,6 @@ class TenantController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['tenan_id'] = $value->tenan_id;
                 $temp['tenan_code'] = $value->tenan_code;
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['tenan_idno'] = $value->tenan_idno;
@@ -107,7 +106,6 @@ class TenantController extends Controller
             }
 
             $input = $request->all();
-            $input['tenan_id'] = 'TNT-'.md5(date('Y-m-d H:i:s'));
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
             return MsTenant::create($input);        

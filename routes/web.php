@@ -262,6 +262,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('journal/delete','JournalController@delete')->name('journal.delete');
 	Route::get('journal/optLedger','JournalController@accountSelect2')->name('ledger.select2');
 
+	// invoice list
+	Route::get('invoice','InvoiceController@index')->name('invoice.index');
+	Route::post('invoice/get','InvoiceController@get')->name('invoice.get');
+	Route::post('invoice/getdetail','InvoiceController@getdetail')->name('invoice.getdetail');
 });
 
 Route::get('logout','Auth\AuthController@logout');

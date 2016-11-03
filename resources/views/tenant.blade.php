@@ -36,7 +36,6 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="tenan_id" width="50" sortable="true">ID</th>
                             <th field="tenan_code" width="50" sortable="true">Tenant Code</th>
                             <th field="tenan_name" width="50" sortable="true">Tenant Name</th>
                             <th field="tenan_idno" width="50" sortable="true">No Unit</th>
