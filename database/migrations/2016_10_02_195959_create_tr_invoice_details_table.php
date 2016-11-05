@@ -15,11 +15,11 @@ class CreateTrInvoiceDetailsTable extends Migration
     {
         Schema::create('tr_invoice_detail', function (Blueprint $table) {
             $table->increments('id');
-            $table->char('invdt_id',36)->unique();
             $table->decimal('invdt_amount', 10, 2);
             $table->string('invdt_note', 200);
             $table->char('costd_is', 36);
             $table->char('inv_id', 36);
+            $table->integer('meter_id')->nullable();
         });
     }
 

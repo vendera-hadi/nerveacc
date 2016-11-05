@@ -266,6 +266,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('invoice','InvoiceController@index')->name('invoice.index');
 	Route::post('invoice/get','InvoiceController@get')->name('invoice.get');
 	Route::post('invoice/getdetail','InvoiceController@getdetail')->name('invoice.getdetail');
+	Route::get('generateinvoice','InvoiceController@generateInvoice');
+	Route::post('generateinvoice','InvoiceController@postGenerateInvoice')->name('invoice.generate');
+
 });
 
 Route::get('logout','Auth\AuthController@logout');

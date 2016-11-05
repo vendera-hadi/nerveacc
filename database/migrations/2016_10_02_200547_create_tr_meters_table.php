@@ -22,8 +22,8 @@ class CreateTrMetersTable extends Migration
             $table->decimal('meter_cost', 12, 2);
             $table->decimal('meter_burden', 10, 2);
             $table->decimal('meter_admin', 10, 2);
-            $table->char('cosid_is',36);
-            $table->char('unit_id',36);
+            $table->integer('costd_is');
+            $table->integer('contr_id');
             $table->char('prdmet_id',36);
         });
     }

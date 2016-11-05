@@ -233,7 +233,7 @@ class ContractController extends Controller
         $inv_type_custom = $request->input('inv_type_custom');
         $is_meter = $request->input('is_meter');
         try{
-            DB::transaction(function () use($input, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $costd_ids, $inv_type_custom, $cost_name, $cost_code) {
+            DB::transaction(function () use($input, $request, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $costd_ids, $inv_type_custom, $cost_name, $cost_code) {
                 $contract = TrContract::create($input);
                 
                 // insert

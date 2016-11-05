@@ -26,9 +26,9 @@ class CreateTrContractsTable extends Migration
             $table->string('contr_bast_by', 20)->nullable();
             $table->string('contr_note', 150)->nullable();
             $table->enum('contr_status',['inputed','confirmed','updated'])->default('inputed');  
+            $table->date('contr_terminate_date')->nullable();
             $table->char('tenan_id', 36);
             $table->char('mark_id', 36);
-            $table->char('renprd_id', 36);
             $table->char('viracc_id', 36);
             $table->char('const_id', 5);
             $table->char('unit_id', 36);

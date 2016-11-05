@@ -18,7 +18,7 @@ class CreateTrInvoicesTable extends Migration
             $table->char('inv_id', 36)->unique();
             $table->char('tenan_id', 36);
             $table->string('inv_number', 20);
-            $table->date('inv_data');
+            $table->date('inv_date');
             $table->date('inv_duedate');
             $table->decimal('inv_amount', 12, 2);
             $table->decimal('inv_ppn', 5, 2);
