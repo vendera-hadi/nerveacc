@@ -2,12 +2,7 @@
 	<div class="col-sm-6">
 		<strong>Date :</strong> {{date('d F Y',strtotime($fetch[0]->ledg_date))}}<br>
 		<strong>Ref No :</strong> {{$fetch[0]->ledg_refno}}<br>
-		<strong>Department :</strong> {{$fetch[0]->dept_name}}<br>
 		<strong>Journal Type :</strong> {{$fetch[0]->jour_type_name}}<br>
-	</div>
-
-	<div class="col-sm-6">
-		<strong>Description :</strong><br>{{$fetch[0]->ledg_description}}
 	</div>
 
 </div>
@@ -19,6 +14,8 @@
 				<tr>
 	              <td>COA Code</td>
 	              <td>COA Name</td>
+	              <td>Description</td>
+	              <td>Department</td>
 	              <td>Debit</td>
 	              <td>Credit</td>
           		</tr>
@@ -27,8 +24,10 @@
             <tr>
             	<td>{{$ledger->coa_code}}</td>
             	<td>{{$ledger->coa_name}}</td>
-            	<td>{{$ledger->ledg_debit}}</td>
-            	<td>{{$ledger->ledg_credit}}</td>
+            	<td>{{$ledger->ledg_description}}</td>
+            	<td>{{$ledger->dept_name}}</td>
+            	<td>@if(empty($ledger->ledg_debit)){{'-'}}@else{{$ledger->ledg_debit}}@endif</td>
+            	<td>@if(empty($ledger->ledg_credit)){{'-'}}@else{{$ledger->ledg_credit}}@endif</td>
             </tr>
             @endforeach
 		</table>

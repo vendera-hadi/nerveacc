@@ -72,17 +72,25 @@
               </div> 
             </form>
 
+            @if(Request::input('filterdate'))
+            <div class="row">
+              <div class="col-xs-12">
+                <h3>Searh Journal by : {{Request::input('filterdate')}}</h3>
+              </div>
+            </div>
+            @endif
+
                   <!-- template tabel -->
                 <table id="dg" title="Latest Journal Entry" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            <th field="ledg_number" width="120" sortable="true">JournalNo</th>
                             <th field="ledg_date" width="120" sortable="true">Date</th>
                             <th field="ledg_refno" width="120" sortable="true">Ref No</th>
                             <th field="ledg_description" width="120" sortable="true">Description</th>
-                            <th field="debit" width="120" sortable="true">Debit</th>
-                            <th field="credit" width="120" sortable="true">Credit</th>
+                            <th field="debit" width="120" sortable="true">Debit/Credit</th>
                             <th field="action">Action</th>
                         </tr>
                     </thead>
@@ -115,23 +123,10 @@
                     </div>
                   </div>
                   <div class="row">
-                      <div class="col-sm-6">
-                        <div class="form-group">
-                          <label>Description</label>
-                          <textarea class="form-control" name="ledg_description" required></textarea>
-                        </div>
-                      </div>
+                      
 
                       <div class="col-sm-6">
-                        <div class="form-group">
-                          <label>Department</label>
-                          <select class="form-control" name="dept_code" required>
-                            <option value="">Choose Department</option>
-                            @foreach($departments as $dept)
-                            <option value="{{$dept->dept_code}}">{{$dept->dept_name}}</option>
-                            @endforeach
-                          </select>
-                        </div>
+                        
 
                         <div class="form-group">
                           <label>Journal Type</label>
@@ -151,7 +146,7 @@
                   <div class="AccountList" style="margin-top:30px">
                       <div class="row">
                         <div class="col-sm-6">
-                            <select class="form-control" id="selectAccount" style="width:100%">
+                            <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
                               <option value="">Choose Account</option>
                               <?php $tempGroup = ''; ?>
                               @foreach($accounts as $key => $coa)
@@ -175,21 +170,28 @@
                               <tr class="text-center">
                                 <td>Account Code</td>
                                 <td>Account Name</td>
-                                <td>Debit</td>
-                                <td>Credit</td>
+                                <td>Description</td>
+                                <td>Department</td>
+                                <td>Debit/Credit</td>
+                                <td>Value</td>
                                 <td></td>
                               </tr>
                               
                               <tr id="rowEmpty">
-                                <td colspan="5"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
+                                <td colspan="7"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
                               </tr>
+                            </table>
 
+                            <table width="50%" class="table table-bordered">
                               <tr class="text-center">
-                                <td></td>
-                                <td id="ledgerStatus"></td>
+                                <td>Status</td>
+                                <td>Total Debit</td>
+                                <td>Total Credit</td>
+                              </tr>
+                              <tr class="text-center">
+                                <td id="ledgerStatus" style="font-weight:bold;"></td>
                                 <td id="totalDebit" style="font-weight:bold; color:red">0</td>
-                                <td id="totalCredit" style="font-weight:bold; color:green">0</td>
-                                <td></td>
+                                <td id="totalCredit" style="font-weight:bold; color:blue">0</td>
                               </tr>
                             </table>
                       </div>
@@ -216,7 +218,7 @@
                   <div class="modal-dialog">
 
                     <!-- Modal content-->
-                    <div class="modal-content">
+                    <div class="modal-content" style="width:100%">
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                         <h4 class="modal-title">Journal Detail</h4>
@@ -246,6 +248,9 @@
 
 <script type="text/javascript">
 $('#reservation').daterangepicker();
+$(document).ready(function() {
+  $(".js-example-basic-single").select2();
+});
 
 var entity = "Journal"; // nama si tabel, ditampilin di dialog
 var get_url = "{{route('journal.get', ['date'=> Request::get('filterdate')])}}";
@@ -285,53 +290,63 @@ $(function(){
       minimumInputLength: 1
   });
 
- var coacode, coaname;
+ var coacode, coaname, depts;
  $("#addAccount").click(function(){
       coacode = $('#selectAccount option:selected').val();
       if(coacode != ""){
         $('#rowEmpty').hide();
         coaname = $('#selectAccount option:selected').data('name');
-        $('#tableJournal').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="text" class="numeric form-control debit" name="debit[]" value=0 required></td><td><input type="text" class="numeric form-control credit" name="credit[]" value=0 required></td><td><a href="#" class="removeLedger"><i class="fa fa-times text-danger"></i></a></td></tr>');
+        depts = '<option value="">Choose Department</option> @foreach($departments as $dept)<option value="{{$dept->dept_code}}">{{$dept->dept_name}}</option>@endforeach';
+        $('#tableJournal').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="text" class="form-control" placeholder="description" name="ledg_description[]" required></td><td><select class="form-control" name="dept_code[]" required>'+depts+'</select></td><td><select name="type[]" class="form-control type"><option>debit</option><option>credit</option></select></td><td><input type="text" class="numeric form-control typeVal" name="typeVal[]" value=0 required></td><td><a href="#" class="removeLedger"><i class="fa fa-times text-danger"></i></a></td></tr>');
       }
  });
 
-var total, totalDebit, totalCredit, val;
+var total, totalDebit, totalCredit, val, type;
  function updateCounterDebit(){
     totalDebit = 0;
-    $( ".debit" ).each(function() {
-        val = $(this).val();
-        if(val=="") val = 0;
-        totalDebit+=parseFloat(val);
+    $( ".type" ).each(function() {
+        if($(this).val() == 'debit'){
+          val = $(this).parent().parent().find('.typeVal').val();
+          if(val=="") val = 0;
+          totalDebit+=parseFloat(val);
+        }
     });
     return totalDebit;
  }
 
  function updateCounterCredit(){
     totalCredit = 0;
-    $( ".credit" ).each(function() {
-        val = $(this).val();
-        if(val=="") val = 0;
-        totalCredit+=parseFloat(val);
+    $( ".type" ).each(function() {
+        if($(this).val() == 'credit'){
+          val = $(this).parent().parent().find('.typeVal').val();
+          if(val=="") val = 0;
+          totalCredit+=parseFloat(val);
+        }
     });
     return totalCredit;
  }
 
- $(document).delegate('.debit','keyup',function(){
-    total = updateCounterDebit();
-    $('#totalDebit').text(total);
-    totalCredit = parseFloat($('#totalCredit').text());
-    
-    if(total != totalCredit) $('#ledgerStatus').html('<strong class="text-danger">unbalanced</strong>');
-    else $('#ledgerStatus').html('<strong class="text-success">balanced</strong>');
- });
+ function balanceStatus(){
+    if($('#totalDebit').text() != $('#totalCredit').text()) $('#ledgerStatus').html('<span class="text-danger">unbalanced</span>');
+    else $('#ledgerStatus').html('<span class="text-success">balanced</span>');
+ }
 
- $(document).delegate('.credit','keyup',function(){
-    total = updateCounterCredit();
-    $('#totalCredit').text(total);
-    totalDebit = parseFloat($('#totalDebit').text());
-
-    if(total != totalDebit) $('#ledgerStatus').html('<strong class="text-danger">unbalanced</strong>');
-    else $('#ledgerStatus').html('<strong class="text-success">balanced</strong>');
+ $(document).delegate('.typeVal','keyup',function(){
+      type = $(this).parent().parent().find('.type').val();
+      if(type == 'debit'){
+        total = updateCounterDebit();
+        $('#totalDebit').text(total);
+      }else{
+        total = updateCounterCredit();
+        $('#totalCredit').text(total);
+      }
+      balanceStatus();
+ }).delegate('.type','change',function(){
+      total = updateCounterDebit();
+        $('#totalDebit').text(total);
+      total = updateCounterCredit();
+        $('#totalCredit').text(total);
+      balanceStatus();
  });
 
 var formData;
@@ -340,12 +355,17 @@ var formData;
     var status = $('#ledgerStatus').text();
     if(status === 'unbalanced'){
         $.messager.alert('Warning', 'Make sure Journal entries is Balanced first');
-    }else{
+    }else if(status === 'balanced'){
         formData = $(this).serialize();
         $.post('{{route('journal.insert')}}', formData, function(result){
             if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-            if(result.success) location.reload();
+            if(result.status){ 
+              $.messager.alert('Warning',result.message);
+              location.reload();
+            }
         });
+    }else{
+        $.messager.alert('Warning', 'Make sure Journal entries is Balanced first');
     }
  });
 

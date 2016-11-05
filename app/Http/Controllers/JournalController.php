@@ -27,23 +27,55 @@ class JournalController extends Controller
         if($checkRefno) return response()->json(['errorMsg' => 'Refno is already exist']);
 
         $coa_code = $request->input('coa_code');
-        $debit = $request->input('debit');
-        $credit = $request->input('credit');
+        $typeVal = $request->input('typeVal');
+        $type = $request->input('type');
+
+        $debit = [];
+        $credit = [];
+        foreach ($type as $key => $val) {
+            if($val == 'debit'){ 
+                $debit[] = $typeVal[$key];
+                $credit[] = 0;
+            }else{
+                $debit[] = 0;
+                $credit[] = $typeVal[$key];
+            }
+        }
+
+        $description = $request->input('ledg_description');
+        $department = $request->input('dept_code');
+        $journalType = MsJournalType::find($request->jour_type_id);
+        $journalPrefix = $journalType->jour_type_prefix;
+        
+        // cari last prefix
+        $lastJournal = TrLedger::latest()->first();
+        if($lastJournal){
+            $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
+            $lastJournalNumber = (int) end($lastJournalNumber);
+            $nextJournalNumber = $lastJournalNumber + 1;
+        }else{
+            $nextJournalNumber = 1;
+        }
+        $nextJournalNumber = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+
         if(count($coa_code) > 0){
-            DB::transaction(function () use($request, $coa_code, $debit, $credit){
+            DB::transaction(function () use($request, $coa_code, $debit, $credit, $description, $department, $journalPrefix, $nextJournalNumber){
+                $month = str_pad(date('m'), 2, 0, STR_PAD_LEFT);
+                $year = date('y');
+                $journalNumber = $journalPrefix." ".$year.$month." ".$nextJournalNumber;
                 foreach ($coa_code as $key => $value) {
                     $input = [
-                            'ledg_id' => 'JRNL'.str_replace(".", "", str_replace(" ", "",microtime())),
+                            'ledg_id' => "JRNL".str_replace(".", "", str_replace(" ", "",microtime())),
                             'ledge_fisyear' => date('Y'),
-                            'ledg_number' => $coa_code[$key], //ini sementara coa code dulu
+                            'ledg_number' => $journalNumber, //ini sementara coa code dulu
                             'ledg_date' => $request->ledg_date,
                             'ledg_refno' => $request->ledg_refno,
                             'ledg_debit' => $debit[$key],
                             'ledg_credit' => $credit[$key],
-                            'ledg_description' => $request->ledg_description,
+                            'ledg_description' => $description[$key],
                             'coa_year' => date('Y'),
                             'coa_code' => $coa_code[$key],
-                            'dept_code' => $request->dept_code,
+                            'dept_code' => $department[$key],
                             'created_by' => \Auth::id(),
                             'updated_by' => \Auth::id(),
                             'jour_type_id' => $request->jour_type_id
@@ -51,12 +83,12 @@ class JournalController extends Controller
                     TrLedger::create($input);
                 }
             });
-            return ['status' => 1, 'message' => 'Update Success'];
+            return ['status' => 1, 'message' => 'Insert Journal Success'];
         }
     }
 
     public function get(Request $request){
-        try{
+        // try{
             // params
             $date = $request->input('date');
             if($date){
@@ -76,11 +108,12 @@ class JournalController extends Controller
             if(!empty($filters)) $filters = json_decode($filters);
 
             // olah data
-            $count = TrLedger::select('ledg_date','ledg_refno','ledg_description',\DB::raw('sum(ledg_debit) as debit'),\DB::raw('sum(ledg_credit) as credit'))->groupBy('ledg_refno','ledg_date','ledg_description');
+            $count = TrLedger::from(DB::raw('(select distinct on("ledg_refno") "id", "ledg_number", "ledg_date", "ledg_refno", "ledg_description", sum(ledg_debit) as debit, sum(ledg_credit) as credit from "tr_ledger" group by "id", "ledg_number", "ledg_refno", "ledg_date", "ledg_description") as test'));
             if($date) $count = $count->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
             $count = $count->count();
 
-            $fetch = TrLedger::select('ledg_date','ledg_refno','ledg_description',\DB::raw('sum(ledg_debit) as debit'),\DB::raw('sum(ledg_credit) as credit'))->groupBy('ledg_refno','ledg_date','ledg_description');
+            $fetch = TrLedger::from(DB::raw('(select distinct on("ledg_refno") "id", "ledg_number", "ledg_date", "ledg_refno", "ledg_description", sum(ledg_debit) as debit, sum(ledg_credit) as credit from "tr_ledger" group by "id", "ledg_number", "ledg_refno", "ledg_date", "ledg_description") as test'));
+            if($date) $fetch = $fetch->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -88,6 +121,7 @@ class JournalController extends Controller
                     switch ($filter->op) {
                         case 'contains':
                             $op = 'like';
+                            $fetch = $fetch->where(DB::raw("LOWER(".$filter->field.")"),$op,'%'.$filter->value.'%');
                             break;
                         case 'less':
                             $op = '<=';
@@ -103,24 +137,27 @@ class JournalController extends Controller
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
             $fetch = $fetch->skip($offset)->take($perPage)->get();
+            // echo $fetch; die();
+
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
                 $temp = [];
-                $temp['id'] = $value->id;
-                $temp['ledg_date'] = $value->ledg_date;
+                // $temp['id'] = $value->id;
+                $temp['ledg_number'] = $value->ledg_number;
+                $temp['ledg_date'] = date('d/m/Y',strtotime($value->ledg_date));
                 $temp['ledg_refno'] = $value->ledg_refno;
                 $temp['ledg_description'] = $value->ledg_description;
-                $temp['debit'] = $value->debit;
-                $temp['credit'] = $value->credit;
+                $temp['debit'] = ($value->debit > 0) ? $value->debit : $value->credit;
+                // $temp['credit'] = $value->credit;
                 
-                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail">Detail</a> <a href="#" data-id="'.$value->ledg_refno.'" class="remove">Remove</a>';
+                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> <a href="#" data-id="'.$value->ledg_refno.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
                 
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        // }catch(\Exception $e){
+        //     return response()->json(['errorMsg' => $e->getMessage()]);
+        // } 
     }
 
     public function delete(Request $request){
@@ -141,7 +178,7 @@ class JournalController extends Controller
                     ->join('ms_master_coa','tr_ledger.coa_code','=','ms_master_coa.coa_code')
                     ->join('ms_department','tr_ledger.dept_code','=','ms_department.dept_code')
                     ->join('ms_journal_type',\DB::raw('tr_ledger.jour_type_id::integer'),'=','ms_journal_type.id')
-                    ->where('tr_ledger.coa_year',$coayear)
+                    ->where('tr_ledger.coa_year',$coayear)->where('tr_ledger.ledg_refno',$refno)
                     ->get();
             return view('modal.detailjournal', ['fetch' => $fetch]);
         }catch(\Exception $e){
