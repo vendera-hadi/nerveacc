@@ -46,11 +46,12 @@
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
               <li><a href="#tab_2" data-toggle="tab">Add Journal Entry</a></li>
+              <li><a href="#tab_3">Edit Journal</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
                 <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                     <!-- date range -->
                 <form action="" method="GET">
                 <div class="form-group">
@@ -66,6 +67,24 @@
                 </div>
 
                 <div class="col-sm-3">
+                  <select name="dept" class="form-control">
+                    <option value="">All Department</option> 
+                    @foreach($departments as $dept)
+                    <option value="{{$dept->dept_code}}" @if(Request::input('dept') == $dept->dept_code){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+
+                <div class="col-sm-3">
+                    <select class="form-control" name="jour_type_id">
+                      <option value="">All Journal Type</option>
+                      @foreach($journal_types as $jourtype)
+                      <option value="{{$jourtype->id}}" @if(Request::input('jour_type_id') == $jourtype->id){{'selected="selected"'}}@endif>{{$jourtype->jour_type_name}}</option>
+                      @endforeach
+                    </select>
+                </div>
+
+                <div class="col-sm-2">
                     <button type="submit" class="btn btn-success">Filter</button>
                 </div>
 
@@ -206,6 +225,10 @@
                 </form>
                 <!-- add journal -->
               </div>
+
+              <div class="tab-pane" id="tab_3">
+              </div>
+
               </div>
 
             </div>
@@ -253,7 +276,7 @@ $(document).ready(function() {
 });
 
 var entity = "Journal"; // nama si tabel, ditampilin di dialog
-var get_url = "{{route('journal.get', ['date'=> Request::get('filterdate')])}}";
+var get_url = "{!!route('journal.get', ['date'=> Request::get('filterdate'), 'dept'=> Request::get('dept'), 'jour_type_id'=> Request::get('jour_type_id')])!!}";
 
 $(function(){
     var dg = $('#dg').datagrid({
@@ -401,5 +424,17 @@ var formData;
                 $('#detailModalContent').html(data);
             });
         });
+
+      // edit
+      $(document).delegate(".edit","click",function() {
+          var id = $(this).data('id');
+          $.post('{{route('journal.edittab')}}',{id:id},function(result){
+              if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
+              else{
+                $('#tab_3').html(result);
+              }
+          });
+          $('.nav-tabs a[href="#tab_3"]').tab('show');
+      });
 </script>
 @endsection

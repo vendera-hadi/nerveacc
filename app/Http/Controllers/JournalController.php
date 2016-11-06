@@ -88,7 +88,10 @@ class JournalController extends Controller
     }
 
     public function get(Request $request){
-        // try{
+        try{
+            $deptParam = $request->input('dept');
+            $jourTypeParam = $request->input('jour_type_id');
+
             // params
             $date = $request->input('date');
             if($date){
@@ -108,12 +111,14 @@ class JournalController extends Controller
             if(!empty($filters)) $filters = json_decode($filters);
 
             // olah data
-            $count = TrLedger::from(DB::raw('(select distinct on("ledg_refno") "id", "ledg_number", "ledg_date", "ledg_refno", "ledg_description", sum(ledg_debit) as debit, sum(ledg_credit) as credit from "tr_ledger" group by "id", "ledg_number", "ledg_refno", "ledg_date", "ledg_description") as test'));
+            $count = TrLedger::from(DB::raw('(select distinct on("ledg_refno") "id", "ledg_number", "ledg_date", "ledg_refno", "ledg_description", "dept_code", "jour_type_id", sum(ledg_debit) as debit, sum(ledg_credit) as credit from "tr_ledger" group by "id", "ledg_number", "ledg_refno", "ledg_date", "ledg_description", "dept_code","jour_type_id") as test'));
             if($date) $count = $count->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
             $count = $count->count();
 
-            $fetch = TrLedger::from(DB::raw('(select distinct on("ledg_refno") "id", "ledg_number", "ledg_date", "ledg_refno", "ledg_description", sum(ledg_debit) as debit, sum(ledg_credit) as credit from "tr_ledger" group by "id", "ledg_number", "ledg_refno", "ledg_date", "ledg_description") as test'));
+            $fetch = TrLedger::from(DB::raw('(select distinct on("ledg_refno") "id", "ledg_number", "ledg_date", "ledg_refno", "ledg_description", "dept_code", "jour_type_id", sum(ledg_debit) as debit, sum(ledg_credit) as credit from "tr_ledger" group by "id", "ledg_number", "ledg_refno", "ledg_date", "ledg_description", "dept_code", "jour_type_id") as test'));
             if($date) $fetch = $fetch->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
+            if($deptParam) $fetch = $fetch->where('dept_code',$deptParam);
+            if($jourTypeParam) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -155,9 +160,9 @@ class JournalController extends Controller
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
-        // }catch(\Exception $e){
-        //     return response()->json(['errorMsg' => $e->getMessage()]);
-        // } 
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
     }
 
     public function delete(Request $request){
@@ -200,4 +205,83 @@ class JournalController extends Controller
         }
         return json_encode($result);
     }
+
+    public function edit(Request $request){
+        try{
+            $refno = $request->id;
+            $coayear = date('Y');
+            $data['id'] = $refno;
+            $data['fetch'] = TrLedger::select('ledg_number','ledg_date','ledg_refno','ledg_debit','ledg_credit','ledg_description','tr_ledger.jour_type_id','tr_ledger.coa_code','ms_master_coa.coa_name','tr_ledger.dept_code','ms_department.dept_name','ms_journal_type.jour_type_name')
+                    ->join('ms_master_coa','tr_ledger.coa_code','=','ms_master_coa.coa_code')
+                    ->join('ms_department','tr_ledger.dept_code','=','ms_department.dept_code')
+                    ->join('ms_journal_type',\DB::raw('tr_ledger.jour_type_id::integer'),'=','ms_journal_type.id')
+                    ->where('tr_ledger.coa_year',$coayear)->where('tr_ledger.ledg_refno',$refno)
+                    ->get();
+            $data['accounts'] = MsMasterCoa::where('coa_year',$coayear)->orderBy('coa_type')->get();
+            $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+            $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
+            return view('editjournal', $data);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }        
+    }
+
+    public function update(Request $request){
+        try{
+            // delete journal details
+            $refno = $request->id;
+            TrLedger::where('ledg_refno',$refno)->delete();
+
+            // reinsert all
+            $coa_code = $request->input('coa_code');
+            $typeVal = $request->input('typeVal');
+            $type = $request->input('type');
+
+            $debit = [];
+            $credit = [];
+            foreach ($type as $key => $val) {
+                if($val == 'debit'){ 
+                    $debit[] = $typeVal[$key];
+                    $credit[] = 0;
+                }else{
+                    $debit[] = 0;
+                    $credit[] = $typeVal[$key];
+                }
+            }
+
+            $description = $request->input('ledg_description');
+            $department = $request->input('dept_code');
+            $journalNumber = $request->input('ledg_number');
+
+            if(count($coa_code) > 0){
+                DB::transaction(function () use($request, $coa_code, $debit, $credit, $description, $department, $journalNumber){
+                    foreach ($coa_code as $key => $value) {
+                        $input = [
+                                'ledg_id' => "JRNL".str_replace(".", "", str_replace(" ", "",microtime())),
+                                'ledge_fisyear' => date('Y'),
+                                'ledg_number' => $journalNumber, //ini sementara coa code dulu
+                                'ledg_date' => $request->ledg_date,
+                                'ledg_refno' => $request->ledg_refno,
+                                'ledg_debit' => $debit[$key],
+                                'ledg_credit' => $credit[$key],
+                                'ledg_description' => $description[$key],
+                                'coa_year' => date('Y'),
+                                'coa_code' => $coa_code[$key],
+                                'dept_code' => $department[$key],
+                                'created_by' => \Auth::id(),
+                                'updated_by' => \Auth::id(),
+                                'jour_type_id' => $request->jour_type_id
+                            ];
+                        TrLedger::create($input);
+                    }
+                });
+            }
+            return ['status' => 1, 'message' => 'Update Journal Success'];
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }  
+    }
+
+
+
 }
