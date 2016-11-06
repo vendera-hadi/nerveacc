@@ -73,6 +73,7 @@ class CostDetailController extends Controller
                 $temp['costd_rate'] = $value->costd_rate;
                 $temp['costd_burden'] = $value->costd_burden;
                 $temp['costd_admin'] = $value->costd_admin;
+                $temp['costd_unit'] = $value->costd_unit;
                 $temp['costd_ismeter'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }

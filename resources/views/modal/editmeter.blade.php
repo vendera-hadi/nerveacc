@@ -1,14 +1,17 @@
+@if ($st[0]->status === false)
 <form method="POST" id="formEditMeter">
-  <table  width="100%" class="table table-bordered">
+<div class="table-responsive">
+  <table  width="100%" class="table table-bordered" style="font-size:12px !important;">
       <tr class="text-center">
-        <td>No Contact</td>
-        <td>No Unit</td>
-        <td>Meter Start</td>
-        <td>Meter End</td>
-        <td>Meter Used</td>
-        <td>Meter Cost</td>
-        <td>Abodemen</td>
-        <td>Biaya Admin</td>
+        <th>No Contact</th>
+        <th>No Unit</th>
+        <th>Cost</th>
+        <th>Meter Start</th>
+        <th>Meter End</th>
+        <th>Meter Used</th>
+        <th>Meter Cost</th>
+        <th>Abodemen</th>
+        <th>Biaya Admin</th>
       </tr>
       @foreach($meter as $cdt)
       <tr class="text-center">
@@ -17,11 +20,12 @@
         <input type="hidden" name="meter_rate[]" value="{{$cdt->costd_rate}}">
         <input type="hidden" name="meter_burden[]" value="{{$cdt->meter_burden}}">
         <input type="hidden" name="meter_admin[]" value="{{$cdt->meter_admin}}">
-        <td>{{$cdt->contr_id}}</td>
+        <td>{{$cdt->contr_no}}</td>
         <td>{{$cdt->contr_code}}</td>
+        <td>{{$cdt->costd_name}}</td>
         <td>{{$cdt->meter_start}}</td>
         <td>
-          <input type="text" name="meter_end[]" class="form-control meter_e" value="{{$cdt->meter_end}}">
+          <input type="text" name="meter_end[]" class="numeric meter_e" value="{{$cdt->meter_end}}">
         </td>
         <td>{{$cdt->meter_used}}</td>
         <td>{{number_format($cdt->meter_cost)}}</td>
@@ -30,7 +34,11 @@
       </tr>
       @endforeach
   </table>
-  <center><button type="submit">Submit</button></center>
+</div>
+<div class="text-left">
+  <button type="button" id="upload" class="btn btn-xs btn-primary">Upload Excel</button>
+  <button type="submit" class="btn btn-xs btn-info">Submit</button>
+</div>
 </form>
 
 <script type="text/javascript">
@@ -50,3 +58,34 @@
 });
 
 </script>
+
+@else
+<div class="table-responsive">
+  <table  width="100%" class="table table-bordered" style="font-size:12px !important;">
+      <tr class="text-center">
+        <th>No Contact</th>
+        <th>No Unit</th>
+        <th>Cost</th>
+        <th>Meter Start</th>
+        <th>Meter End</th>
+        <th>Meter Used</th>
+        <th>Meter Cost</th>
+        <th>Abodemen</th>
+        <th>Biaya Admin</th>
+      </tr>
+      @foreach($meter as $cdt)
+      <tr class="text-center">
+        <td>{{$cdt->contr_no}}</td>
+        <td>{{$cdt->contr_code}}</td>
+        <td>{{$cdt->costd_name}}</td>
+        <td>{{$cdt->meter_start}}</td>
+        <td>{{$cdt->meter_end}}</td>
+        <td>{{$cdt->meter_used}}</td>
+        <td>{{number_format($cdt->meter_cost)}}</td>
+        <td>{{number_format($cdt->meter_burden)}}</td>
+        <td>{{number_format($cdt->meter_admin)}}</td>
+      </tr>
+      @endforeach
+  </table>
+</div>
+@endif

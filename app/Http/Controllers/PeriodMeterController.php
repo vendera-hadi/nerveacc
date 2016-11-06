@@ -99,13 +99,15 @@ class PeriodMeterController extends Controller
                 $meter = TrPeriodMeter::select('prdmet_id')->where('status',true)->orderBy('prd_billing_date','desc')->limit(1)->get();
                 if(count($meter) == 0){
                     $tanggal = $request->input('prd_billing_date');
-                     $kontrak = TrContract::select('tr_contract.contr_code','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
-                    ->join('tr_contract_invoice',\DB::raw('tr_contract_invoice.contr_id::char'),"=",\DB::raw('tr_contract.id::char'))
+                     $kontrak = TrContract::select('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
+                    ->join('tr_contract_invoice',\DB::raw('tr_contract_invoice.contr_id::integer'),"=",\DB::raw('tr_contract.id::integer'))
                     ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
                     ->where('tr_contract.contr_startdate', '<=', $tanggal)
                     ->where('tr_contract.contr_enddate', '>=', $tanggal)
                     ->where('tr_contract.contr_status','confirmed')
-                    ->groupBy('tr_contract.contr_code','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
+                    ->where('tr_contract.contr_terminate_date',NULL)
+                    ->where('ms_cost_detail.costd_ismeter',TRUE)
+                    ->groupBy('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
                     ->get();
                     for($i=0; $i<count($kontrak); $i++){
                         $inputs = [ 
@@ -115,8 +117,8 @@ class PeriodMeterController extends Controller
                             'meter_cost'=> '0',
                             'meter_burden'=> $kontrak[$i]->costd_burden,
                             'meter_admin'=> $kontrak[$i]->costd_admin,
-                            'cosid_is'=>  $kontrak[$i]->costd_is,
-                            'contract_id' => $kontrak[$i]->contr_code,
+                            'costd_is'=>  $kontrak[$i]->costd_is,
+                            'contr_id' => $kontrak[$i]->id,
                             'prdmet_id'=> $insertedId
                         ];
                         $costd_is = TrMeter::create($inputs);
@@ -136,13 +138,14 @@ class PeriodMeterController extends Controller
     public function editModal(Request $request){
         try{
             $prdmet = $request->id;
-            $fetch = TrMeter::select('tr_contract.contr_id','tr_contract.contr_code','tr_meter.*','ms_cost_detail.costd_rate')
-                    ->join('tr_contract',\DB::raw('tr_contract.contr_code::char'),"=",\DB::raw('tr_meter.contract_id::char'))
-                    ->join('ms_cost_detail',\DB::raw('tr_meter.cosid_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
+            $fetch = TrMeter::select('tr_contract.contr_no','ms_cost_detail.costd_name','tr_contract.contr_code','tr_meter.*','ms_cost_detail.costd_rate')
+                    ->join('tr_contract',\DB::raw('tr_contract.id::integer'),"=",\DB::raw('tr_meter.contr_id::integer'))
+                    ->join('ms_cost_detail',\DB::raw('tr_meter.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
                     ->where('tr_meter.prdmet_id', $prdmet)
                     ->orderBy('tr_meter.id','ASC')
                     ->get();
-            return view('modal.editmeter', ['meter' => $fetch]);
+            $status = TrPeriodMeter::select('status')->where('id',$prdmet)->get();
+            return view('modal.editmeter', ['meter' => $fetch,'st'=>$status]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }

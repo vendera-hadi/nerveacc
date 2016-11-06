@@ -29,6 +29,14 @@ Period Meter
         <div class="row">
             <div class="col-md-11">
                 <!-- content -->
+                <!-- Tabs -->
+                <div class="nav-tabs-custom">
+                <ul class="nav nav-tabs">
+                  <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
+                  <li><a href="#tab_2" data-toggle="tab">Meter</a></li>
+                </ul>
+                <div class="tab-content">
+                  <div class="tab-pane active" id="tab_1">
 
                 <!-- template tabel -->
                 <table id="dg" title="Contract Status" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
@@ -80,6 +88,13 @@ Period Meter
                 <!-- end form -->
 
                 <!-- content -->
+                </div>
+                <!-- /.tab-pane -->
+                <div class="tab-pane" id="tab_2">
+                <div id="editData" style="height: 100%; width: 100%; overflow: hidden;">
+                 <div class="data-body"></div>
+                </div>
+                </div>
             </div>
         </div>
     </div>
@@ -132,6 +147,7 @@ Period Meter
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 <script type="text/javascript">
+/*
 function detail(){
     var row = $('#dg').datagrid('getSelected');
     if (row){
@@ -147,7 +163,23 @@ function detail(){
         });
     }
 }
+*/
+function detail(){
+    var row = $('#dg').datagrid('getSelected');
+    if (row){
+        id = row.id;
+        status = row.status;
+        $.post('{{route('period_meter.detail')}}',{id:id},function(result){
+            if
+                (result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+            else
+                $('#editData').find('.data-body').html('');
+                $('#editData').find('.data-body').html(result);
+        });
+        $('.nav-tabs a[href="#tab_2"]').tab('show');
 
+    }
+}
 function approve(){
     var row = $('#dg').datagrid('getSelected');
     if (row){
@@ -161,6 +193,14 @@ function approve(){
         });
     }
 }
+
+$(document).delegate('.numeric', 'keypress', function(e){
+var charCode = (e.which) ? e.which : event.keyCode;
+if ((charCode < 48 || charCode > 57))
+    return false;
+
+return true;
+});
 
 </script>
 @endsection

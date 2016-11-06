@@ -73,6 +73,9 @@
                             <input name="costd_admin" class="easyui-textbox" label="Biaya Admin:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
                         </div>
                         <div style="margin-bottom:10px">
+                            <input name="costd_unit" class="easyui-textbox" label="Satuan:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
+                        </div>
+                        <div style="margin-bottom:10px">
                             <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Cost Item:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
                         </div>
                         <div style="margin-bottom:10px">
