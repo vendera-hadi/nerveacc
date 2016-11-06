@@ -88,46 +88,80 @@ class PeriodMeterController extends Controller
     }
 
     public function insert(Request $request){
-		$input = $request->all();
-        $input['prdmet_id'] = 'PRD'.date('Ymd');
-		$input['created_by'] = Auth::id();
-		$input['updated_by'] = Auth::id();
+        $input = $request->all();
+        $count = TrPeriodMeter::count();
+        $ms = $count+1;
+        $input['prdmet_id'] = 'PRD-'.date('Ymd').'-'.$ms;
+        $input['created_by'] = Auth::id();
+        $input['updated_by'] = Auth::id();
         try{
             DB::transaction(function () use($input, $request) {
-                $last_id =  TrPeriodMeter::create($input);
-                $insertedId = $last_id->id;
-                $meter = TrPeriodMeter::select('prdmet_id')->where('status',true)->orderBy('prd_billing_date','desc')->limit(1)->get();
-                if(count($meter) == 0){
+                $meter = TrPeriodMeter::select('id','prdmet_id','prd_billing_date')->where('status',true)->orderBy('prd_billing_date','desc')->limit(1)->get();
+                if(($meter[0]->prd_billing_date > $request->prd_billing_date) || (count($meter) == 0)){
+                    $last_id =  TrPeriodMeter::create($input);
+                    $insertedId = $last_id->id;
                     $tanggal = $request->input('prd_billing_date');
-                     $kontrak = TrContract::select('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
-                    ->join('tr_contract_invoice',\DB::raw('tr_contract_invoice.contr_id::integer'),"=",\DB::raw('tr_contract.id::integer'))
-                    ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
-                    ->where('tr_contract.contr_startdate', '<=', $tanggal)
-                    ->where('tr_contract.contr_enddate', '>=', $tanggal)
-                    ->where('tr_contract.contr_status','confirmed')
-                    ->where('tr_contract.contr_terminate_date',NULL)
-                    ->where('ms_cost_detail.costd_ismeter',TRUE)
-                    ->groupBy('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
-                    ->get();
-                    for($i=0; $i<count($kontrak); $i++){
-                        $inputs = [ 
-                            'meter_start'=> '0',
-                            'meter_end'=> '0',
-                            'meter_used'=> '0',
-                            'meter_cost'=> '0',
-                            'meter_burden'=> $kontrak[$i]->costd_burden,
-                            'meter_admin'=> $kontrak[$i]->costd_admin,
-                            'costd_is'=>  $kontrak[$i]->costd_is,
-                            'contr_id' => $kontrak[$i]->id,
-                            'prdmet_id'=> $insertedId
-                        ];
-                        $costd_is = TrMeter::create($inputs);
+                    if(count($meter) == 0){
+                        $kontrak = TrContract::select('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
+                        ->join('tr_contract_invoice',\DB::raw('tr_contract_invoice.contr_id::integer'),"=",\DB::raw('tr_contract.id::integer'))
+                        ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
+                        ->where('tr_contract.contr_startdate', '<=', $tanggal)
+                        ->where('tr_contract.contr_enddate', '>=', $tanggal)
+                        ->where('tr_contract.contr_status','confirmed')
+                        ->where('tr_contract.contr_terminate_date',NULL)
+                        ->where('ms_cost_detail.costd_ismeter',TRUE)
+                        ->groupBy('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
+                        ->get();
+                        for($i=0; $i<count($kontrak); $i++){
+                            $inputs = [ 
+                                'meter_start'=> '0',
+                                'meter_end'=> '0',
+                                'meter_used'=> '0',
+                                'meter_cost'=> '0',
+                                'meter_burden'=> $kontrak[$i]->costd_burden,
+                                'meter_admin'=> $kontrak[$i]->costd_admin,
+                                'costd_is'=>  $kontrak[$i]->costd_is,
+                                'contr_id' => $kontrak[$i]->id,
+                                'prdmet_id'=> $insertedId
+                            ];
+                            $costd_is = TrMeter::create($inputs);
+                        }     
+                    }else{
+                        $kontrak = TrContract::select('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
+                        ->join('tr_contract_invoice',\DB::raw('tr_contract_invoice.contr_id::integer'),"=",\DB::raw('tr_contract.id::integer'))
+                        ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
+                        ->where('tr_contract.contr_startdate', '<=', $tanggal)
+                        ->where('tr_contract.contr_enddate', '>=', $tanggal)
+                        ->where('tr_contract.contr_status','confirmed')
+                        ->where('tr_contract.contr_terminate_date',NULL)
+                        ->where('ms_cost_detail.costd_ismeter',TRUE)
+                        ->groupBy('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
+                        ->get();
+                        $last_meter = TrMeter::select('meter_end','costd_is','contr_id')->where('prdmet_id',$meter[0]->id)->get();
+                        for($i=0; $i<count($kontrak); $i++){
+                            $ls = 0;
+                            for($j=0; $j<count($last_meter); $j++){
+                                if(($last_meter[$j]->contr_id === $kontrak[$i]->id) && ($last_meter[$j]->costd_is === $kontrak[$i]->costd_is)){
+                                    $ls = $last_meter[$j]->meter_end;
+                                }
+                            }
+                            $inputs = [ 
+                                'meter_start'=> $ls,
+                                'meter_end'=> '0',
+                                'meter_used'=> '0',
+                                'meter_cost'=> '0',
+                                'meter_burden'=> $kontrak[$i]->costd_burden,
+                                'meter_admin'=> $kontrak[$i]->costd_admin,
+                                'costd_is'=>  $kontrak[$i]->costd_is,
+                                'contr_id' => $kontrak[$i]->id,
+                                'prdmet_id'=> $insertedId
+                            ];
+                            $costd_is = TrMeter::create($inputs);
+                        }
                     }
-                    
                 }else{
-
+                    return response()->json(['success'=>false,'errorMsg' => "Periode Billing Cannot Backdate"]);
                 }
-
             });
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -189,10 +223,15 @@ class PeriodMeterController extends Controller
     public function update(Request $request){
         try{
         	$id = $request->id;
-        	$input = $request->all();
-        	$input['updated_by'] = Auth::id();
-        	TrPeriodMeter::find($id)->update($input);
-        	return TrPeriodMeter::find($id);
+            $status = TrPeriodMeter::select('status')->where('id',$id)->get();
+            if($status[0]->status == FALSE){
+                $input = $request->all();
+                $input['updated_by'] = Auth::id();
+                TrPeriodMeter::find($id)->update($input);
+                return TrPeriodMeter::find($id);
+            }else{
+                return response()->json(['success'=>false,'errorMsg' => "Sorry Meter already Posted"]);
+            }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
@@ -201,8 +240,14 @@ class PeriodMeterController extends Controller
     public function delete(Request $request){
         try{
         	$id = $request->id;
-        	TrPeriodMeter::destroy($id);
-        	return response()->json(['success'=>true]);
+            $status = TrPeriodMeter::select('status')->where('id',$id)->get();
+            if($status[0]->status == FALSE){
+                TrPeriodMeter::destroy($id);
+                TrMeter::where('prdmet_id', $id)->delete();
+                return response()->json(['success'=>true]);
+            }else{
+                return response()->json(['success'=>false,'errorMsg' => "Sorry Meter already Posted"]);
+            }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 

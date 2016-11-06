@@ -183,13 +183,17 @@ function detail(){
 function approve(){
     var row = $('#dg').datagrid('getSelected');
     if (row){
-        id = row.id;
-        $.post('{{route('period_meter.approve')}}',{id:id},function(result){
-            if
-                (result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-            else
-            alert('Sukses Approve');
-            location.reload();
+        $.messager.confirm('Confirm','Are you sure you want to approve this '+entity+'?',function(r){
+            if (r){
+                id = row.id;
+                $.post('{{route('period_meter.approve')}}',{id:id},function(result){
+                    if (result.success){
+                        $('#dg').datagrid('reload');    // reload the user data
+                    } else {
+                        $.messager.alert('Warning','The warning message');
+                    }
+                },'json');
+            }
         });
     }
 }
