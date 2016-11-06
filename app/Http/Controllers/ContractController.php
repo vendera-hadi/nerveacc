@@ -436,5 +436,174 @@ class ContractController extends Controller
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
-    }   
+    }
+
+    public function confirmation(){
+        $data['pageType'] = 'Confirmation';
+        return view('contract_other_template', $data);
+    }
+
+    public function addendum(){
+        $data['pageType'] = 'Addendum';
+        return view('contract_other_template', $data);
+    }
+
+    public function termination(){
+        $data['pageType'] = 'Termination';
+        return view('contract_other_template', $data);
+    }
+
+    public function renewal(){
+        $data['pageType'] = 'Renewal';
+        return view('contract_other_template', $data);
+    }
+
+    public function getOther(Request $request, $pageName = null){
+        try{
+            // params
+            $page = $request->page;
+            $perPage = $request->rows; 
+            $page-=1;
+            $offset = $page * $perPage;
+            // @ -> isset(var) ? var : null
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+
+            // olah data
+            $count = TrContract::count();
+            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name')
+                    ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
+                    ->whereNull('tr_contract.contr_terminate_date');
+            // filter page
+            if(strtolower($pageName) == 'confirmation'){
+                $fetch = $fetch->where('tr_contract.contr_status','inputed');
+            }else{
+                $fetch = $fetch->where('tr_contract.contr_status','confirmed');
+            }
+
+            if(!empty($filters) && count($filters) > 0){
+                foreach($filters as $filter){
+                    $op = "like";
+                    // tentuin operator
+                    switch ($filter->op) {
+                        case 'contains':
+                            $op = 'like';
+                            break;
+                        case 'less':
+                            $op = '<=';
+                            break;
+                        case 'greater':
+                            $op = '>=';
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['contr_code'] = $value->contr_code;
+                $temp['contr_no'] = $value->contr_no;
+                $temp['contr_startdate'] = $value->contr_startdate;
+                $temp['contr_enddate'] = $value->contr_enddate;
+                $temp['tenan_name'] = $value->tenan_name;
+                $temp['contr_status'] = $value->contr_status;
+                $temp['contr_terminate_date'] = $value->contr_terminate_date;
+                if(strtolower($pageName) == 'confirmation'){
+                    $temp['action'] = '<a href="#" data-id="'.$value->id.'" class="confirmStatus"><i class="fa fa-check" aria-hidden="true"></i></a>';
+                }else if(strtolower($pageName) == 'addendum'){
+                    $temp['action'] = '<a href="#" data-id="'.$value->id.'" class="rollbackStatus"><i class="fa fa-ban" aria-hidden="true"></i></a>';
+                }else if(strtolower($pageName) == 'termination'){
+                    $temp['action'] = '<a href="#" data-id="'.$value->id.'" class="terminateStatus"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                }else if(strtolower($pageName) == 'renewal'){
+                    $temp['action'] = '<a href="#" data-id="'.$value->id.'" data-code="'.$value->contr_code.'" data-no="'.$value->contr_no.'" data-start="'.$value->contr_startdate.'" data-end="'.$value->contr_enddate.'" class="renewStatus"><i class="fa fa-copy" aria-hidden="true"></i></a>';       
+                }
+                // $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> <a href="#"  data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i><small>Contract</small></a> <a href="#"  data-id="'.$value->id.'" class="editcitm"><i class="fa fa-pencil" aria-hidden="true"></i><small>Cost Items</small></a> <a href="#" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                
+                $result['rows'][] = $temp;
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function confirm(Request $request){
+        $id = $request->id;
+        TrContract::where('id',$id)->update(['contr_status'=>'confirmed']);
+        return response()->json(['success'=>true]);
+    }
+
+    public function terminate(Request $request){
+        $id = $request->id;
+        TrContract::where('id',$id)->update(['contr_terminate_date'=>date('Y-m-d')]);
+        return response()->json(['success'=>true]);
+    }
+
+    public function inputed(Request $request){
+        $id = $request->id;
+        $note = $request->note;
+        TrContract::where('id',$id)->update(['contr_status'=>'inputed', 'contr_note'=>$note]);
+        return response()->json(['success'=>true]);
+    }
+
+    public function renew(Request $request){
+        $messages = [
+            'contr_code.unique' => 'Contract Code must be unique',
+            'contr_no.unique' => 'Contract No must be unique',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'contr_code' => 'required|unique:tr_contract,contr_code,'.$request->input('id'),
+            'contr_no' => 'required|unique:tr_contract,contr_no,'.$request->input('id'),
+        ], $messages);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->first();
+            return ['errorMsg' => $errors];
+        }
+
+        // new contract date must be after old one
+        $id = $request->id;
+        $startdate = $request->contr_startdate;
+        $enddate = $request->contr_enddate;
+        $current = TrContract::find($id);
+        if($startdate < $current->contr_enddate) return ['errorMsg' => 'New Contract must be after the end date of the old contract one (after '.date('d/m/Y',strtotime($current->contr_enddate)).')'];
+        if($startdate >= $enddate) return ['errorMsg' => 'Start date must be less than End Date'];
+
+        try{
+            DB::transaction(function () use($current, $startdate, $enddate, $request, $id){
+                $newdata = $current->replicate();
+                $newdata->contr_id = 'CTR'.str_replace(".", "", str_replace(" ", "",microtime()));
+                $newdata->contr_startdate = $startdate;
+                $newdata->contr_enddate = $enddate;
+                $newdata->contr_code = $request->contr_code;
+                $newdata->contr_no = $request->contr_no;
+                $newdata->save();
+                $newContractId = $newdata->id;
+
+                $ctrInvoices = TrContractInvoice::where('contr_id',$id)->get();
+                if($ctrInvoices->count() > 0){
+                    foreach ($ctrInvoices as $key => $ctrInvoice) {
+                        unset($ctrInvoice->id);
+                        unset($ctrInvoice->continv_id);
+                        $ctrInvoice->continv_id = 'CONINV'.str_replace(".", "", str_replace(" ", "",microtime()));
+                        $ctrInvoice->contr_id = $newContractId;
+                        $ctrInvoice = json_decode(json_encode($ctrInvoice), true);
+                        TrContractInvoice::create($ctrInvoice);
+                    }
+                }
+            });
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+        return response()->json(['success'=>true]);
+    }
 }

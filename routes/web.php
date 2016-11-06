@@ -76,7 +76,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('contohdelete', 'HomeController@contohdelete')->name('contoh.delete');
 
 	// master coa
-	Route::get('coa','CoaController@index');
+	Route::get('coa','CoaController@index')->name('coa.index');
 	Route::post('coa/get', 'CoaController@get')->name('coa.get');
 	Route::post('coa/years', 'CoaController@getCoaYear')->name('coa.year');
 	Route::post('coa/code', 'CoaController@getCoaCode')->name('coa.code');
@@ -128,7 +128,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unittype/update', 'UnitTypeController@update')->name('unittype.update');
 	Route::post('unittype/delete', 'UnitTypeController@delete')->name('unittype.delete');
 	// master virtual account
-	Route::get('vaccount','VirtualAccountController@index');
+	Route::get('vaccount','VirtualAccountController@index')->name('vaccount.index');
 	Route::get('vaccount/optVA','VirtualAccountController@getOptVaccount')->name('vaccount.select2');
 	Route::post('vaccount/get', 'VirtualAccountController@get')->name('vaccount.get');
 	Route::post('vaccount/insert', 'VirtualAccountController@insert')->name('vaccount.insert');
@@ -136,7 +136,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('vaccount/delete', 'VirtualAccountController@delete')->name('vaccount.delete');
 
 	// marketing agent
-	Route::get('marketing','MarketingAgentController@index');
+	Route::get('marketing','MarketingAgentController@index')->name('marketing.index');
 	Route::post('marketing/get', 'MarketingAgentController@get')->name('marketing.get');
 	Route::post('marketing/insert', 'MarketingAgentController@insert')->name('marketing.insert');
 	Route::post('marketing/update', 'MarketingAgentController@update')->name('marketing.update');
@@ -144,7 +144,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('marketing/optmarketing','MarketingAgentController@getOptMarketing')->name('marketing.select2');
 
 	// unit complaints / tr complaint
-	Route::get('unitcomplaint','UnitComplaintController@index');
+	Route::get('unitcomplaint','UnitComplaintController@index')->name('unitcomplaint.index');
 	Route::post('unitcomplaint/get', 'UnitComplaintController@get')->name('unitcomplaint.get');
 	Route::post('unitcomplaint/insert', 'UnitComplaintController@insert')->name('unitcomplaint.insert');
 	Route::post('unitcomplaint/update', 'UnitComplaintController@update')->name('unitcomplaint.update');
@@ -167,7 +167,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('company/delete', 'CompanyController@delete')->name('company.delete');
 
 	// tr contract
-	Route::get('contract','ContractController@index');
+	Route::get('contract','ContractController@index')->name('contract.index');
 	Route::post('contract/get', 'ContractController@get')->name('contract.get');
 	Route::post('contract/detail', 'ContractController@getdetail')->name('contract.getdetail');
 	Route::post('contract/ctrDetail', 'ContractController@ctrDetail')->name('contract.ctrdetail');
@@ -177,7 +177,15 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('contract/insert', 'ContractController@insert')->name('contract.insert');
 	Route::post('contract/update', 'ContractController@update')->name('contract.update');
 	Route::post('contract/delete', 'ContractController@delete')->name('contract.delete');
-
+	Route::get('contract/confirmation','ContractController@confirmation')->name('contract.confirmation');
+	Route::get('contract/addendum','ContractController@addendum')->name('contract.addendum');
+	Route::get('contract/renewal','ContractController@renewal')->name('contract.renewal');
+	Route::get('contract/termination','ContractController@termination')->name('contract.termination');
+	Route::post('contract/getother/{page}','ContractController@getOther')->name('contract.getother');
+	Route::post('contract/confirm','ContractController@confirm')->name('contract.confirm');
+	Route::post('contract/inputed','ContractController@inputed')->name('contract.inputed');
+	Route::post('contract/terminate','ContractController@terminate')->name('contract.terminate');
+	Route::post('contract/renew','ContractController@renew')->name('contract.renew');
 	// period meter
 
 	// tr meter
@@ -200,7 +208,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('cost_detail/delete', 'CostDetailController@delete')->name('cost_detail.delete');
 
 	//floor
-	Route::get('floor','FloorController@index');
+	Route::get('floor','FloorController@index')->name('floor.index');
 	Route::post('floor/get', 'FloorController@get')->name('floor.get');
 	Route::post('floor/insert', 'FloorController@insert')->name('floor.insert');
 	Route::post('floor/update', 'FloorController@update')->name('floor.update');

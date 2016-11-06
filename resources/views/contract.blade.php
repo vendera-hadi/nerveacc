@@ -119,10 +119,10 @@
                                 <label>Berita Acara Serah Terima By</label>
                                 <input type="text" name="contr_bast_by" required="required" class="form-control">
                             </div>
-                            <div class="form-group">
+                           <!--  <div class="form-group">
                                 <label>Note (optional)</label>
                                 <textarea name="contr_note" class="form-control"></textarea>
-                            </div>
+                            </div> -->
                             <div class="form-group">
                                 <label>Tenant</label>
                                 <select class="form-control choose-tenant" name="tenan_id" required="required" style="width:100%">
@@ -251,10 +251,10 @@
                             <label>Berita Acara Serah Terima By</label>
                             <input type="text" name="contr_bast_by" required="required" class="form-control" >
                         </div>
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label>Note (optional)</label>
                             <textarea name="contr_note" class="form-control" ></textarea>
-                        </div>
+                        </div> -->
                         <div class="form-group">
                             <label>Tenant</label>
                             <br><strong>Current Tenant : <span id="tenantValue">-</span></strong>

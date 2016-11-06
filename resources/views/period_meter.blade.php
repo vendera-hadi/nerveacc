@@ -187,10 +187,12 @@ function approve(){
             if (r){
                 id = row.id;
                 $.post('{{route('period_meter.approve')}}',{id:id},function(result){
+                    // console.log(result);
                     if (result.success){
-                        $('#dg').datagrid('reload');    // reload the user data
+                        $.messager.alert('Warning','Approve Success');
+                        $('#dg').datagrid('reload');
                     } else {
-                        $.messager.alert('Warning','The warning message');
+                        $.messager.alert('Warning',result.errorMsg);
                     }
                 },'json');
             }

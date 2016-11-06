@@ -34,16 +34,131 @@
 
             <li class="treeview">
               <a href="#">
-                <i class="fa fa-gears"></i> <span>ACCOUNT RECEIVABLE</span>
+                <i class="fa fa-building-o"></i> <span>TENANCY</span>
                 <span class="pull-right-container">
                   <i class="fa fa-angle-left pull-right"></i>
                 </span>
               </a>
               <ul class="treeview-menu">
-                <li><a href="{{url('contract')}}"><i class="fa fa-circle-o"></i> Contract</a></li>
+                <li>
+                  <a href="#"><i class="fa fa-circle"></i> Contract
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                    <li><a href="{{route('contract.index')}}"><i class="fa fa-circle-o"></i> Contract</a></li>
+                    <li><a href="{{route('contract.confirmation')}}"><i class="fa fa-circle-o"></i> Contract Confirmation</a></li>
+                    <li><a href="{{route('contract.addendum')}}"><i class="fa fa-circle-o"></i> Contract Addendum</a></li>
+                    <li><a href="{{route('contract.renewal')}}"><i class="fa fa-circle-o"></i> Contract Renewal</a></li>
+                    <li><a href="{{route('contract.termination')}}"><i class="fa fa-circle-o"></i> Contract Termination</a></li>
+                  </ul>
+                </li>
+                <li><a href="#"><i class="fa fa-circle-o"></i> Deposit</a></li>
+                <li>
+                  <a href="#"><i class="fa fa-circle"></i> Report
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                    <li><a href="#"><i class="fa fa-circle-o"></i> List Billing</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> List Billing Schedule</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#"><i class="fa fa-circle-o"></i> Complain
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                    <li><a href="{{ url('complaint') }}"><i class="fa fa-circle-o"></i> Complain Entry</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Complain Handling</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Chart Of Complain</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Price List Of Work</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Request</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Request Handling</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Order</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#"><i class="fa fa-circle"></i> Setup Tenancy
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                    <li>
+                      <a href="#"><i class="fa fa-circle"></i> Units
+                        <span class="pull-right-container">
+                          <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                      </a>
+                      <ul class="treeview-menu">
+                        <li><a href="{{ url('unit') }}"><i class="fa fa-circle-o"></i> Create Unit</a></li>
+                        <li><a href="{{ url('unittype') }}"><i class="fa fa-circle-o"></i> Unit Type</a></li>
+                        <li><a href="#"><i class="fa fa-circle-o"></i> Business Unit</a></li>
+                        <li><a href="{{route('floor.index')}}"><i class="fa fa-circle-o"></i> Floor</a></li>
+                        <li><a href="#"><i class="fa fa-circle-o"></i> Floor Plan</a></li>
+                      </ul>
+                    </li>
+                    <li><a href="{{ url('tenant') }}"><i class="fa fa-circle-o"></i> Tenant/Owner</a></li>
+                    <li><a href="{{route('marketing.get')}}"><i class="fa fa-circle-o"></i> Marketing/Agent</a></li>
+                    <li><a href="{{ url('typetenant') }}"><i class="fa fa-circle-o"></i> Owner/Tenant Type</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Complains</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Division</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Works</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Sub of Works</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Running Code</a></li>
+                    <li><a href="{{ url('vaccount') }}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
+                  </ul>
+                </li>
               </ul>
             </li>
+
+
             <li class="treeview">
+              <a href="#">
+                <i class="fa fa-fire-extinguisher"></i> <span>ENGINEERING</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li><a href="{{url('period_meter')}}"><i class="fa fa-circle-o"></i> Meter Input</a></li>
+                <!-- <li><a href="#"><i class="fa fa-circle-o"></i> Master Entry</a></li>
+                <li><a href="#"><i class="fa fa-circle-o"></i> Check Meter</a></li> -->
+                <li>
+                  <a href="#"><i class="fa fa-circle"></i> Report
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Invoice Meter</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Form Pemakaian Meter</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> History Meter</a></li>
+                  </ul>
+                </li>
+                <li>
+                  <a href="#"><i class="fa fa-circle"></i> Setup
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+                  <ul class="treeview-menu">
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate Detail</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate Overtime</a></li>
+                    <li><a href="#"><i class="fa fa-circle-o"></i> Edit Rate</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+
+
+            <!-- <li class="treeview">
               <a href="#">
                 <i class="fa fa-gears"></i> <span>SETUP</span>
                 <span class="pull-right-container">
@@ -53,7 +168,7 @@
               <ul class="treeview-menu">
                 <li><a href="{{url('meter')}}"><i class="fa fa-circle-o"></i> Meter Setup</a></li>
               </ul>
-            </li>
+            </li> -->
             <li class="treeview">
               <a href="#">
                 <i class="fa fa-gears"></i> <span>MASTER DATA</span>
@@ -130,141 +245,16 @@
               </ul>
             </li>
 
-            <li class="treeview">
-              <a href="#">
-                <i class="fa fa-building-o"></i> <span>TENANCY</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Contract
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Contract</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Contract Confirmation</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Contract Addendum</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Contract Renewal</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Contract Termination</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Contract Follow up Status</a></li>
-                  </ul>
-                </li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Deposit</a></li>
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Report
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="#"><i class="fa fa-circle-o"></i> List Billing</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> List Billing Schedule</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="#"><i class="fa fa-circle-o"></i> Complain
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="{{ url('complaint') }}"><i class="fa fa-circle-o"></i> Complain Entry</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Complain Handling</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Chart Of Complain</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Price List Of Work</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Request</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Request Handling</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Order</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Setup Tenancy
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li>
-                      <a href="#"><i class="fa fa-circle"></i> Units
-                        <span class="pull-right-container">
-                          <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                      </a>
-                      <ul class="treeview-menu">
-                        <li><a href="{{ url('unit') }}"><i class="fa fa-circle-o"></i> Create Unit</a></li>
-                        <li><a href="{{ url('unittype') }}"><i class="fa fa-circle-o"></i> Unit Type</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> Business Unit</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> Floor</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> Floor Plan</a></li>
-                      </ul>
-                    </li>
-                    <li><a href="{{ url('tenant') }}"><i class="fa fa-circle-o"></i> Tenant/Owner</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Marketing/Agent</a></li>
-                    <li><a href="{{ url('typetenant') }}"><i class="fa fa-circle-o"></i> Owner/Tenant Type</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Complains</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Division</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Works</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Sub of Works</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Running Code</a></li>
-                    <li><a href="{{ url('vaccount') }}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
+            
+
+            
 
             <li class="treeview">
-              <a href="#">
-                <i class="fa fa-fire-extinguisher"></i> <span>ENGINEERING</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
+  
               <ul class="treeview-menu">
-                <li><a href="#"><i class="fa fa-circle-o"></i> Master Entry</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Check Meter</a></li>
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Report
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Invoice Meter</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Form Pemakaian Meter</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> History Meter</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Setup
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate Detail</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate Overtime</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Edit Rate</a></li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
-
-            <li class="treeview">
-              <a href="#">
-                <i class="fa fa-line-chart"></i> <span>ACCOUNT RECEIVABLE</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li><a href="#"><i class="fa fa-circle-o"></i> Generate Invoice</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Invoice Entry</a></li>
-                <li>
+                <li><a href="{{route('invoice.generate')}}"><i class="fa fa-circle-o"></i> Generate Invoice</a></li>
+                <li><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
+                <!-- <li>
                   <a href="#"><i class="fa fa-circle"></i> Form
                     <span class="pull-right-container">
                       <i class="fa fa-angle-left pull-right"></i>
@@ -277,7 +267,7 @@
                     <li><a href="#"><i class="fa fa-circle-o"></i> Tax</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i> Reminder Letter</a></li>
                   </ul>
-                </li>
+                </li> -->
                 <li>
                   <a href="#"><i class="fa fa-circle"></i> Report
                     <span class="pull-right-container">
@@ -477,7 +467,7 @@
                   </a>
                   <ul class="treeview-menu">
                     <li><a href="#"><i class="fa fa-circle-o"></i> Period</a></li>
-                    <li><a href="{{ url('coa') }}"><i class="fa fa-circle-o"></i> Chart Of Account</a></li>
+                    <li><a href="{{ route('coa.index') }}"><i class="fa fa-circle-o"></i> Chart Of Account</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i> Journal Posting Billing</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Journal</a></li>

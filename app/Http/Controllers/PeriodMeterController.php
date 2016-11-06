@@ -214,7 +214,7 @@ class PeriodMeterController extends Controller
             $id = $request->id;
             $input['status'] = true;
             TrPeriodMeter::find($id)->update($input);
-            return TrPeriodMeter::find($id);
+            return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
