@@ -36,7 +36,6 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="viracc_id" width="50" sortable="true">ID</th>
                             <th field="viracc_no" width="50" sortable="true">Virtual Account No</th>
                             <th field="viracc_name" width="50" sortable="true">Virtual Account Name</th>
                             <th field="viracc_isactive" width="50" sortable="true">Virtual Account Active</th>

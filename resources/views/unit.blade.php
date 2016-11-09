@@ -72,8 +72,8 @@
                             <input name="unit_sqrt" class="easyui-textbox" label="Unit Square:" style="width:100%" data-options="required:true">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="unit_virtual_accn" class="easyui-textbox" label="Unit Virtual Account:" style="width:100%" data-options="required:true,validType:'length[0,20]'">
-                        </div>
+                            <input id="cc" class="easyui-combobox" required="true" name="unit_virtual_accn" style="width:100%" label="Unit Virtual Account:" data-options="valueField:'id',textField:'text',url:'{{route('unit.option2')}}'">
+                        </div> 
                         <div style="margin-bottom:10px">
                             <input id="cc" class="easyui-combobox" required="true" name="floor_id" style="width:100%" label="Unit Floor:" data-options="valueField:'id',textField:'text',url:'{{route('unit.fopt')}}'">
                         </div> 

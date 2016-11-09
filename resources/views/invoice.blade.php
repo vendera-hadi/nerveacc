@@ -101,7 +101,7 @@
 <script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
-<script type="text/javascript" src="http://www.jeasyui.com/easyui/datagrid-detailview.js"></script>
+<script type="text/javascript" src="{{ asset('js/datagrid-detailview.js') }}"></script>
 <script type="text/javascript">
 var entity = "List Invoice"; // nama si tabel, ditampilin di dialog
 var get_url = "{{route('invoice.get')}}";
@@ -129,17 +129,11 @@ $(function(){
                 loadMsg:'',
                 height:'auto',
                 columns:[[
-                    {field:'invdt_amount',title:'Invoice Amount',width:100},
-                    {field:'invdt_note',title:'Invoice Note',width:100},
-                    {field:'prdmet_id',title:'Period Meter',width:100},
-                    {field:'prd_billing_date',title:'Billing Date',width:100},
-                    {field:'meter_start',title:'Meter Start',width:100},
-                    {field:'meter_end',title:'Meter End',width:100},
-                    {field:'meter_used',title:'Meter Used',width:100},
-                    {field:'meter_cost',title:'Meter Cost',width:100}
-                ]],
-                onResize:function(){
-                    $('#dg').datagrid('fixDetailRowHeight',index);
+                    {field:'costd_name',title:'Cost Name',width:100},
+                    {field:'costd_rate',title:'Cost Rate',width:100},
+                    {field:'costd_burden',title:'Abodemen',width:100},
+                    {field:'costd_admin',title:'Admin',width:100},
+                    {field:'cost_unit',title:'Satuan',width:100}
                 },
                 onLoadSuccess:function(){
                     setTimeout(function(){

@@ -10,6 +10,7 @@ use App\Models\MsUnit;
 use App\Models\MsUnitType;
 use App\Models\User;
 use App\Models\MsFloor;
+use App\Models\MsVirtualAccount;
 use DB;
 
 class UnitController extends Controller
@@ -192,5 +193,20 @@ class UnitController extends Controller
                                     })->paginate(10);
         else $fetch = MsUnit::where('unit_isavailable',1)->paginate(10);
         return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit]);
+    }
+
+    public function getOptions_account(){
+        try{
+            $all = MsVirtualAccount::all()->where('viracc_isactive',TRUE);
+            $result = [];
+            if(count($all) > 0){
+                foreach ($all as $value) {
+                    $result[] = ['id'=>$value->id, 'text'=>$value->viracc_no.' - '.$value->viracc_name];
+                }
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
     }
 }

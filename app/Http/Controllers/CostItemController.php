@@ -121,4 +121,14 @@ class CostItemController extends Controller
         }
         return response()->json($data);
     }
+
+    public function cost_detail(Request $request){
+        try{
+            $id = $request->id;
+            $result = MsCostDetail::select('*')->where('cost_id',$id)->get();
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
 }

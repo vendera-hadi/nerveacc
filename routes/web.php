@@ -121,6 +121,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unit/insert', 'UnitController@insert')->name('unit.insert');
 	Route::post('unit/update', 'UnitController@update')->name('unit.update');
 	Route::post('unit/delete', 'UnitController@delete')->name('unit.delete');
+	Route::post('unit/option2', 'UnitController@getOptions_account')->name('unit.option2');
 	// master unit type
 	Route::get('unittype','UnitTypeController@index');
 	Route::post('unittype/get', 'UnitTypeController@get')->name('unittype.get');
@@ -198,6 +199,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('cost_item/update', 'CostItemController@update')->name('cost_item.update');
 	Route::post('cost_item/delete', 'CostItemController@delete')->name('cost_item.delete');
 	Route::post('cost_item/getDetail', 'CostItemController@getDetail')->name('cost_item.getDetail');
+	Route::post('cost_item/cost_detail','CostItemController@cost_detail')->name('cost_item.cost_detail');
 
 	//cost detail
 	Route::get('cost_detail','CostDetailController@index');
