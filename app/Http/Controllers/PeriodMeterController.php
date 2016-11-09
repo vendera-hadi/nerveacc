@@ -97,7 +97,7 @@ class PeriodMeterController extends Controller
         try{
             DB::transaction(function () use($input, $request) {
                 $meter = TrPeriodMeter::select('id','prdmet_id','prd_billing_date')->where('status',true)->orderBy('prd_billing_date','desc')->limit(1)->get();
-                if(($meter[0]->prd_billing_date > $request->prd_billing_date) || (count($meter) == 0)){
+                if((count($meter) == 0) || ($meter[0]->prd_billing_date > $request->prd_billing_date)){
                     $last_id =  TrPeriodMeter::create($input);
                     $insertedId = $last_id->id;
                     $tanggal = $request->input('prd_billing_date');

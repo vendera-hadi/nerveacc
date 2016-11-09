@@ -54,66 +54,26 @@
                     <li><a href="{{route('contract.termination')}}"><i class="fa fa-circle-o"></i> Contract Termination</a></li>
                   </ul>
                 </li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Deposit</a></li>
                 <li>
-                  <a href="#"><i class="fa fa-circle"></i> Report
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="#"><i class="fa fa-circle-o"></i> List Billing</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> List Billing Schedule</a></li>
-                  </ul>
+                    <a href="#"><i class="fa fa-circle"></i> Units
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+                    <ul class="treeview-menu">
+                      <li><a href="{{ url('unit') }}"><i class="fa fa-circle-o"></i> Unit</a></li>
+                      <li><a href="{{ url('unittype') }}"><i class="fa fa-circle-o"></i> Unit Type</a></li>
+                      <li><a href="{{route('floor.index')}}"><i class="fa fa-circle-o"></i> Floor</a></li>
+
+                    </ul>
                 </li>
-                <li>
-                  <a href="#"><i class="fa fa-circle-o"></i> Complain
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="{{ url('complaint') }}"><i class="fa fa-circle-o"></i> Complain Entry</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Complain Handling</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Chart Of Complain</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Price List Of Work</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Request</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Request Handling</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Work Order</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Setup Tenancy
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li>
-                      <a href="#"><i class="fa fa-circle"></i> Units
-                        <span class="pull-right-container">
-                          <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                      </a>
-                      <ul class="treeview-menu">
-                        <li><a href="{{ url('unit') }}"><i class="fa fa-circle-o"></i> Create Unit</a></li>
-                        <li><a href="{{ url('unittype') }}"><i class="fa fa-circle-o"></i> Unit Type</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> Business Unit</a></li>
-                        <li><a href="{{route('floor.index')}}"><i class="fa fa-circle-o"></i> Floor</a></li>
-                        <li><a href="#"><i class="fa fa-circle-o"></i> Floor Plan</a></li>
-                      </ul>
-                    </li>
-                    <li><a href="{{ url('tenant') }}"><i class="fa fa-circle-o"></i> Tenant/Owner</a></li>
-                    <li><a href="{{route('marketing.get')}}"><i class="fa fa-circle-o"></i> Marketing/Agent</a></li>
-                    <li><a href="{{ url('typetenant') }}"><i class="fa fa-circle-o"></i> Owner/Tenant Type</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Complains</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Division</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Works</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Type Sub of Works</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Running Code</a></li>
-                    <li><a href="{{ url('vaccount') }}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
-                  </ul>
-                </li>
+                <li><a href="{{url('cost_item')}}"><i class="fa fa-circle-o"></i> Cost Items</a></li>
+                <li><a href="{{ url('tenant') }}"><i class="fa fa-circle-o"></i> Tenant/Owner</a></li>
+                <li><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant Type</a></li>
+                <li><a href="{{route('marketing.get')}}"><i class="fa fa-circle-o"></i> Marketing/Agent</a></li>
+                <li><a href="{{ url('typetenant') }}"><i class="fa fa-circle-o"></i> Owner/Tenant Type</a></li>
+                <li><a href="{{ url('vaccount') }}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
+              
               </ul>
             </li>
 
@@ -127,100 +87,11 @@
               </a>
               <ul class="treeview-menu">
                 <li><a href="{{url('period_meter')}}"><i class="fa fa-circle-o"></i> Meter Input</a></li>
-                <!-- <li><a href="#"><i class="fa fa-circle-o"></i> Master Entry</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Check Meter</a></li> -->
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Report
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Invoice Meter</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Form Pemakaian Meter</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> History Meter</a></li>
-                  </ul>
-                </li>
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Setup
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate Detail</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Rate Overtime</a></li>
-                    <li><a href="#"><i class="fa fa-circle-o"></i> Edit Rate</a></li>
-                  </ul>
-                </li>
+                <li><a href="{{ url('complaint') }}"><i class="fa fa-circle-o"></i> Complain Entry</a></li>
               </ul>
             </li>
-
 
             <!-- <li class="treeview">
-              <a href="#">
-                <i class="fa fa-gears"></i> <span>SETUP</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li><a href="{{url('meter')}}"><i class="fa fa-circle-o"></i> Meter Setup</a></li>
-              </ul>
-            </li> -->
-            <li class="treeview">
-              <a href="#">
-                <i class="fa fa-gears"></i> <span>MASTER DATA</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu">
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Tenant/Owner
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                    <li><a href="{{url('tenant')}}"><i class="fa fa-circle-o"></i> Tenant</a></li>
-                    <li><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant Type</a></li>
-                  </ul>
-                </li>
-                <li><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
-
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Unit
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu">
-                      <li><a href="{{url('unit')}}"><i class="fa fa-circle-o"></i> Unit</a></li>
-                      <li><a href="{{url('unittype')}}"><i class="fa fa-circle-o"></i> Unit Type</a></li>
-                  </ul>
-                </li>
-
-                <li><a href="{{url('vaccount')}}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
-
-
-                <li><a href="{{url('currency')}}"><i class="fa fa-circle-o"></i> Currency</a></li>
-                <li><a href="{{url('complaint')}}"><i class="fa fa-circle-o"></i> Complaint</a></li>
-                <li><a href="{{url('contractstatus')}}"><i class="fa fa-circle-o"></i> Contract Status</a></li>
-                <li><a href="{{url('department')}}"><i class="fa fa-circle-o"></i> Department</a></li>
-                <li><a href="{{url('invtype')}}"><i class="fa fa-circle-o"></i> Invoice Type</a></li>
-                <li><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li>
-                <li><a href="{{url('groupaccdetail')}}"><i class="fa fa-circle-o"></i> Group Account Detail</a></li>
-                
-                <li><a href="{{url('rentalperiod')}}"><i class="fa fa-circle-o"></i> Rental Period</a></li>
-                <li><a href="{{url('supplier')}}"><i class="fa fa-circle-o"></i> Supplier</a></li>
-                
-                
-              </ul>
-            </li>
-
-            <li class="treeview">
               <a href="#">
                 <i class="fa fa-gears"></i> <span>FILE</span>
                 <span class="pull-right-container">
@@ -243,17 +114,24 @@
                 <li><a href="#"><i class="fa fa-circle-o"></i> System Configuration</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Printer Setup</a></li>
               </ul>
-            </li>
+            </li> -->
 
             
 
             
 
             <li class="treeview">
-  
+              <a href="#">
+                <i class="fa fa-book"></i> <span>ACCOUNT RECEIVABLES</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
               <ul class="treeview-menu">
                 <li><a href="{{route('invoice.generate')}}"><i class="fa fa-circle-o"></i> Generate Invoice</a></li>
                 <li><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
+                <li><a href="#"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>
+                <li><a href="#"><i class="fa fa-circle-o"></i> Outstanding</a></li>
                 <!-- <li>
                   <a href="#"><i class="fa fa-circle"></i> Form
                     <span class="pull-right-container">
@@ -268,7 +146,7 @@
                     <li><a href="#"><i class="fa fa-circle-o"></i> Reminder Letter</a></li>
                   </ul>
                 </li> -->
-                <li>
+                <!-- <li>
                   <a href="#"><i class="fa fa-circle"></i> Report
                     <span class="pull-right-container">
                       <i class="fa fa-angle-left pull-right"></i>
@@ -304,16 +182,16 @@
                     </li>
                   </ul>
                 </li>
-                <li>
+  -->               <!-- <li>
                   <a href="#"><i class="fa fa-circle"></i> Utility
                     <span class="pull-right-container">
                       <i class="fa fa-angle-left pull-right"></i>
                     </span>
-                  </a>
-                  <ul class="treeview-menu">
+                  </a> -->
+                  <!-- <ul class="treeview-menu">
                     <li><a href="#"><i class="fa fa-circle-o"></i> Cancel Invoice</a></li>
-                  </ul>
-                </li>
+                  </ul> -->
+                <!-- </li>
                 <li>
                   <a href="#"><i class="fa fa-circle"></i> Setup
                     <span class="pull-right-container">
@@ -324,13 +202,13 @@
                     <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Bill</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i> Fine/Denda Settings</a></li>
                   </ul>
-                </li>
+                </li> -->
               </ul>
             </li>
 
             <li class="treeview">
               <a href="#">
-                <i class="fa fa-tasks"></i> <span>ACCOUNT PAYABLE</span>
+                <i class="fa fa-book"></i> <span>ACCOUNT PAYABLE</span>
                 <span class="pull-right-container">
                   <i class="fa fa-angle-left pull-right"></i>
                 </span>
@@ -359,6 +237,26 @@
                     <li><a href="{{ url('supplier') }}"><i class="fa fa-circle-o"></i> Supplier</a></li>
                   </ul>
                 </li>
+              </ul>
+            </li>
+
+            <li class="treeview">
+              <a href="#">
+                <i class="fa fa-gears"></i> <span>MASTER DATA</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
+                <li><a href="{{url('currency')}}"><i class="fa fa-circle-o"></i> Currency</a></li>
+                <li><a href="{{url('contractstatus')}}"><i class="fa fa-circle-o"></i> Contract Status</a></li>
+                <li><a href="{{url('department')}}"><i class="fa fa-circle-o"></i> Department</a></li>
+                <li><a href="{{url('invtype')}}"><i class="fa fa-circle-o"></i> Invoice Type</a></li>
+                <li><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li>
+                <li><a href="{{url('groupaccdetail')}}"><i class="fa fa-circle-o"></i> Group Account Detail</a></li>
+                <li><a href="{{url('rentalperiod')}}"><i class="fa fa-circle-o"></i> Rental Period</a></li>
+                <li><a href="{{url('supplier')}}"><i class="fa fa-circle-o"></i> Supplier</a></li>
               </ul>
             </li>
 
@@ -424,23 +322,22 @@
               </ul>
             </li>
 
+            <li><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
+
             <li class="treeview">
               <a href="#">
-                <i class="fa fa-archive"></i> <span>LEDGER</span>
+                <i class="fa fa-archive"></i> <span>Report</span>
                 <span class="pull-right-container">
                   <i class="fa fa-angle-left pull-right"></i>
                 </span>
               </a>
               <ul class="treeview-menu">
-                <li><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> General Ledger</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Ledger</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Account List</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Profit and Loss</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Trial Balance</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Budget</a></li>
-                <li>
+                <!-- <li>
                   <a href="#"><i class="fa fa-circle"></i> Posting
                     <span class="pull-right-container">
                       <i class="fa fa-angle-left pull-right"></i>
@@ -472,7 +369,7 @@
                     <li><a href="#"><i class="fa fa-circle-o"></i> Journal Posting Billing</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i> Type Of Journal</a></li>
                   </ul>
-                </li>
+                </li> -->
               </ul>
             </li>
 

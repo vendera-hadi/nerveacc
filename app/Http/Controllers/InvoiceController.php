@@ -178,7 +178,8 @@ class InvoiceController extends Controller
                                 // note masi minus rumus
                                 $note = $meter->costd_name." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));   
                                 // rumus masih standar, rate * meter used + burden + admin
-                                $amount = ($meter->meter_used * $meter->meter_cost) + $meter->meter_burden + $meter->meter_admin;
+                                // $amount = ($meter->meter_used * $meter->meter_cost) + $meter->meter_burden + $meter->meter_admin;
+                                $amount = $meter->meter_cost;
                                 $invDetail[] = [
                                     'invdt_amount' => $amount,
                                     'invdt_note' => $note,
