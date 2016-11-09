@@ -129,7 +129,8 @@
                 remoteFilter: true, //utk jalanin search filter
                 rownumbers: true,
                 singleSelect: true,
-                fitColumns: true
+                fitColumns: true,
+                pageSize:30
             });
             dg.datagrid('enableFilter');
         });

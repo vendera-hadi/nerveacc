@@ -108,43 +108,47 @@ var get_url = "{{route('invoice.get')}}";
 var get_url2 = "{{route('invoice.getdetail')}}";
 
 $(function(){
-    $('#dg').datagrid({
-        view: detailview,
-        url: get_url,
-        pagination: true,
-        remoteFilter: true,
-        rownumbers: true,
-        singleSelect: true,
-        fitColumns: true,
-        detailFormatter:function(index,row){
-            return '<div style="padding:2px"><table class="ddv"></table></div>';
-        },
-        onExpandRow: function(index,row){
-            var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
-            ddv.datagrid({
-                url: get_url2+"?id="+row.id,
-                fitColumns:true,
-                singleSelect:true,
-                rownumbers:true,
-                loadMsg:'',
-                height:'auto',
-                columns:[[
-                    {field:'costd_name',title:'Cost Name',width:100},
-                    {field:'costd_rate',title:'Cost Rate',width:100},
-                    {field:'costd_burden',title:'Abodemen',width:100},
-                    {field:'costd_admin',title:'Admin',width:100},
-                    {field:'cost_unit',title:'Satuan',width:100}
-                },
-                onLoadSuccess:function(){
-                    setTimeout(function(){
-                        $('#dg').datagrid('fixDetailRowHeight',index);
-                    },0);
-                }
-            });
-            $('#dg').datagrid('fixDetailRowHeight',index);
-        }
-    });
-});        
+$('#dg').datagrid({
+    view: detailview,
+    url: get_url,
+    pagination: true,
+    remoteFilter: true,
+    rownumbers: true,
+    singleSelect: true,
+    fitColumns: true,
+    detailFormatter:function(index,row){
+        return '<div style="padding:2px"><table class="ddv"></table></div>';
+    },
+    onExpandRow: function(index,row){
+        var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
+        ddv.datagrid({
+            url: get_url2+"?id="+row.id,
+            fitColumns:true,
+            singleSelect:true,
+            rownumbers:true,
+            loadMsg:'Loading',
+            height:'auto',
+            toolbar:toolbar,
+            columns:[[
+                {field:'costd_name',title:'Cost Name',width:100},
+                {field:'costd_rate',title:'Cost Rate',width:100},
+                {field:'costd_burden',title:'Abodemen',width:100},
+                {field:'costd_admin',title:'Admin',width:100},
+                {field:'cost_unit',title:'Satuan',width:100}
+            ]],
+            onResize:function(){
+                $('#dg').datagrid('fixDetailRowHeight',index);
+            },
+            onLoadSuccess:function(){
+                setTimeout(function(){
+                    $('#dg').datagrid('fixDetailRowHeight',index);
+                },0);
+            }
+        });
+        $('#dg').datagrid('fixDetailRowHeight',index);
+    }
+});
+});       
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection
