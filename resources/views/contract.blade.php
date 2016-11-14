@@ -686,7 +686,8 @@
                     form.find('input[name=contr_bast_by]').val(data.contr_bast_by);
                     form.find('textarea[name=contr_note]').val(data.contr_note);
                     form.find('#tenantValue').text(data.tenan_code+" "+data.tenan_name);
-                    form.find('#markValue').text(data.mark_code+" "+data.mark_name);
+                    if(data.mark_code != null) form.find('#markValue').text(data.mark_code+" "+data.mark_name);
+                    else form.find('#markValue').text('-');
                     form.find('#ctrStatusValue').text(data.const_code+" "+data.const_name);
                     form.find('#txtUnitEdit').val(data.unit_code+" "+data.unit_name);
                     form.find('#txtVAEdit').val(data.unit_virtual_accn);
