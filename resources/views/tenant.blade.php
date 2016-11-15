@@ -20,7 +20,7 @@
 @section('contentheader_breadcrumbs')
 	<ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Master Tenant</li>
+        <li class="active">Tenant / Owner</li>
     </ol>
 @stop
 
@@ -30,8 +30,20 @@
 			<div class="col-md-11">
           		<!-- content -->
 
+                <div class="row">
+                    <div class="col-sm-4">
+                        <table width="100%">
+                            <tr>
+                                <td><label class="radio-inline"><input type="radio" name="type" value="owner">Owner</label></td>
+                                <td><label class="radio-inline"><input type="radio" name="type" value="tenant">Tenant</label></td>
+                                <td><button type="button" class="btn btn-info" id="filterTenant">filter</button></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <br>
                 <!-- template tabel -->
-          		<table id="dg" title="Master Tenant" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Tenant / Owner" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
@@ -61,28 +73,31 @@
                 <!-- hidden form buat create edit -->
                 <div id="dlg" class="easyui-dialog" style="width:60%"
                         closed="true" buttons="#dlg-buttons">
-                    <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
+                    <form id="fm" method="post" style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_code" class="easyui-textbox" label="Tenant/Owner Code:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                            <input name="tenan_code" class="easyui-textbox" label="Code:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_name" class="easyui-textbox" label="Tenant/Owner Name:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
+                            <input name="tenan_name" class="easyui-textbox" label="Name:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_idno" class="easyui-textbox" label="KTP No:" style="width:100%" data-options="required:true,validType:'length[0,20]'">
+                            <input name="tenan_idno" class="easyui-textbox" label="KTP No (Identity No):" style="width:100%" data-options="required:true,validType:'length[0,20]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_phone" class="easyui-textbox" label="Tenant/Owner Phone:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                            <input name="tenan_phone" class="easyui-textbox" label="Phone:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_email" class="easyui-textbox" label="Tenant/Owner Email:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
+                            <input name="tenan_fax" class="easyui-textbox" label="Fax:" style="width:100%" data-options="validType:'length[0,20]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_address" class="easyui-textbox" label="Tenant/Owner Address:" style="width:100%" data-options="required:true,validType:'length[0,150]'">
+                            <input name="tenan_email" class="easyui-textbox" label="Email:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="tenan_npwp" class="easyui-textbox" label="Tenant/Owner NPWP:" style="width:100%" data-options="validType:'length[0,15]'">
+                            <input name="tenan_address" class="easyui-textbox" label="Address:" style="width:100%" data-options="required:true,validType:'length[0,150]'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input name="tenan_npwp" class="easyui-textbox" label="NPWP:" style="width:100%" data-options="validType:'length[0,15]'">
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="tenan_taxname" class="easyui-textbox" label="Tax Name:" style="width:100%" data-options="validType:'length[0,50]'">
@@ -91,7 +106,26 @@
                             <input name="tenan_tax_address" class="easyui-textbox" label="Tax Address:" style="width:100%" data-options="validType:'length[0,150]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="tent_id" style="width:100%" label="Tenant/Owner Type:" data-options="valueField:'id',textField:'text',url:'{{route('tenant.options')}}'">
+                            <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">Tenant Type</label>
+                            <select id="tentype" name="tent_id" style="width: 50%; height: 30px; border-radius: 4px; border-color: #95B8E7;" required>
+                                @foreach($tenantTypes as $tent)
+                                <option value="{{$tent->id}}" data-owner="{{$tent->tent_isowner}}">{{$tent->tent_name}}</option>
+                                @endforeach           
+                            </select>
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">Use PPN</label>
+                            <input type="checkbox" name="tenan_isppn" value="1" >
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">Use PKP</label>
+                            <input type="checkbox" name="tenan_ispkp" value="1" >    
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">Unit Owned</label>
+                            <input type="hidden" name="unit_id">
+                            <input type="text" id="unitView" disabled style="height: 35px;">
+                            <button type="button" class="btn btn-info" id="unitButton" disabled style="height: 35px; margin-top: -4px; border-radius: 0; margin-left: -4px;">Search Unit</button>
                         </div>
                         
                     </form>
@@ -101,6 +135,25 @@
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
                 </div>
                 <!-- end form -->
+
+
+                 <!-- Modal select tenant -->
+                <div id="unitModal" class="modal fade" role="dialog" style="z-index:9999">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      
+                      <div class="modal-body" id="unitModalContent">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <!-- End Modal -->
 
           		<!-- content -->
         	</div>
@@ -130,6 +183,143 @@
             });
             dg.datagrid('enableFilter');
         });
+
+        $('#filterTenant').click(function(){
+            $('#dg').datagrid('load', {
+                type:$('input[name=type]:checked').val()
+            });
+            $('#dg').datagrid('reload');
+        });
+
+        $('#tentype').change(function(){
+            if($(this).find('option:checked').data('owner') == 1){
+                $('#unitButton').removeAttr('disabled');
+            }else{
+                $('#unitButton').attr('disabled','disabled');
+                $('#unitView').val('');
+                $('input[name=unit_id]').val('');
+            }
+        });
+
+        var currenturl;
+        $('#unitButton').click(function(){
+            $('#unitModal').modal('show');
+            currenturl = '{{route('unit.popup',['all'=>1])}}';
+            $.post(currenturl,null, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $(document).delegate('#searchUnit','submit',function(e){
+            e.preventDefault();
+            var data = $('#searchUnit').serialize();
+            currenturl = '{{route('unit.popup',['all'=>1])}}';
+            $.post(currenturl, data, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $(document).delegate('#chooseUnit','click',function(e){
+            e.preventDefault();
+            var unitid = $('input[name="unit"]:checked').val();
+            var unitname = $('input[name="unit"]:checked').data('name');
+            $('#unitView').val(unitname);
+            $('input[name=unit_id]').val(unitid);
+
+            $('#unitModalContent').text('');
+            $('#unitModal').modal("hide");
+        });
+
+        function newUser(){
+            console.log('create');
+            $('#dlg').dialog('open').dialog('center').dialog('setTitle','New '+entity);
+            $('#fm').form('clear');
+            url = insert_url;
+        }
+        function editUser(){
+            console.log('edit');
+            var row = $('#dg').datagrid('getSelected');
+            if (row){
+                // ajax
+                $.post('{{route('tenant.edit')}}',{id:row.id},function(data){
+                    console.log(data);
+                    if(data.tenan_isppn) $('input[name=tenan_isppn]').prop('checked', true);
+                    if(data.tenan_ispkp) $('input[name=tenan_ispkp]').prop('checked', true);
+                    $('#tentype').val(data.tent_id);
+                    if(data.unit_id){ 
+                        $('#unitView').val(data.unit_code+" "+data.unit_name);
+                        $('input[name=unit_id]').val(data.unit_id);
+                        $('#unitButton').removeAttr('disabled');
+                    }else{
+                        $('#unitView').val('');
+                        $('input[name=unit_id]').val('');
+                        $('#unitButton').attr('disabled','disabled');
+                    }
+                });
+
+                $('#dlg').dialog('open').dialog('center').dialog('setTitle','Edit '+entity);
+                $('#fm').form('load',row);
+                url = update_url+'?id='+row.id;
+            }
+        }
+        function saveUser(){
+            console.log('save or edit');
+            var owned = $('#tentype').find('option:checked').data('owner');
+            var unitid = $('input[name=unit_id]').val();
+            var lanjut = false;
+            if(owned == 1){
+                if(unitid == "" || unitid == null) $.messager.alert('Warning','Unit must be choosed first');
+                else lanjut = true;
+            }else{
+                lanjut = true;
+            }
+
+            if(lanjut){
+                $('#fm').form('submit',{
+                    url: url,
+                    onSubmit: function(){
+                        return $(this).form('validate');
+                    },
+                    success: function(result){
+                        var result = eval('('+result+')');
+                        if (result.errorMsg){
+                            $.messager.show({
+                                title: 'Error',
+                                msg: result.errorMsg
+                            });
+                        } else {
+                            $.messager.alert('Warning','Insert Success');
+                            $('#dlg').dialog('close');      // close the dialog
+                            $('#dg').datagrid('reload');    // reload the user data
+                        }
+                    },
+                    error: function (request, status, error) {
+                        alert(request.responseText);
+                      }
+                });
+            }
+        }
+        function destroyUser(){
+            console.log('destroy');
+            var row = $('#dg').datagrid('getSelected');
+            if (row){
+                $.messager.confirm('Confirm','Are you sure you want to destroy this '+entity+'?',function(r){
+                    if (r){
+                        $.post(delete_url,{id:row.id},function(result){
+                            if (result.success){
+                                $('#dg').datagrid('reload');    // reload the user data
+                            } else {
+                                // $.messager.show({   // show error message
+                                //     title: 'Error',
+                                //     msg: result.errorMsg
+                                // });
+                                $.messager.alert('Warning','The warning message');
+                            }
+                        },'json');
+                    }
+                });
+            }
+        }
 </script>
-<script src="{{asset('js/jeasycrud.js')}}"></script>
+
 @endsection

@@ -48,8 +48,8 @@
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
               <li><a href="#tab_2" data-toggle="tab">Add Contract</a></li>
-              <li><a href="#tab_3" data-toggle="tab">Edit Contract</a></li>
-              <li><a href="#tab_4" data-toggle="tab">Edit Cost Item</a></li>
+              <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Contract</a></li>
+              <li class="hidden"><a href="#tab_4" data-toggle="tab">Edit Cost Item</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
@@ -155,11 +155,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>Contract Status</label>
-                                <select class="form-control choose-ctrstatus" name="const_id" required="required" style="width:100%">
-                                </select>
-                            </div>
+                            
 
                             
                             <button type="submit" class="btn btn-default">Next</button>
@@ -208,9 +204,15 @@
 
               <!-- /.tab-pane -->
               <div class="tab-pane" id="tab_3">
-                
+                    <h3><center>Edit Contract</center></h3>
+                    <div class ="row" style="margin: 100px 0;" id="editLoading">
+                        <div class="col-sm-12 text-center" >
+                          <img src="{{asset('img/facebook.gif')}}">
+                          <p><b>Loading ...</b></p>
+                        </div>
+                    </div>
                    <!-- form -->
-                    <form method="POST" id="formEditContract">
+                    <form method="POST" id="formEditContract" style="display:none">
                         <input type="hidden" name="id">
                         <div class="form-group">
                             <label>Contract Code</label>
@@ -270,19 +272,14 @@
                             </select>
                         </div>
                         
-                        <div class="form-group">
-                            <label>Contract Status</label>
-                            <br><strong>Current Contract Status : <span id="ctrStatusValue">-</span></strong>
-                            <select class="form-control choose-ctrstatus" name="const_id"  style="width:100%">
-                            <option value="">Ignore if don't want to change value</option>
-                            </select>
-                        </div>
+                        
 
                         <div class="row">
                             <div class="col-xs-6">
                                 <div class="form-group">
                                     <label>Unit</label>
                                         <div class="input-group">
+                                          <input type="hidden" name="current_unit_id" id="txtCrUnitId" required>
                                           <input type="hidden" name="unit_id" id="txtUnitEditId" required>
                                           <input type="text" class="form-control" id="txtUnitEdit" disabled>
                                           <span class="input-group-btn">
@@ -474,23 +471,23 @@
               minimumInputLength: 1
         });
 
-        $(".choose-ctrstatus").select2({
-              ajax: {
-                url: "{{route('contractstatus.select2')}}",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                  return {
-                    q: params.term, // search term
-                    page: params.page
-                  };
-                },
+        // $(".choose-ctrstatus").select2({
+        //       ajax: {
+        //         url: "{{route('contractstatus.select2')}}",
+        //         dataType: 'json',
+        //         delay: 250,
+        //         data: function (params) {
+        //           return {
+        //             q: params.term, // search term
+        //             page: params.page
+        //           };
+        //         },
                 
-                cache: true
-              },
-              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-              minimumInputLength: 1
-        });
+        //         cache: true
+        //       },
+        //       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        //       minimumInputLength: 1
+        // });
 
         $('#formContract').submit(function(e){
             e.preventDefault();
@@ -626,6 +623,7 @@
             });
         });
 
+        // popup unit
         $(document).delegate('#chooseUnit','click',function(e){
             e.preventDefault();
             var unitid = $('input[name="unit"]:checked').val();
@@ -667,14 +665,20 @@
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
+        
+        // popup tenant
 
         // edit
         $(document).delegate(".editctr","click",function() {
             var id = $(this).data('id');
+            $('#editLoading').show();
+            $('#formEditContract').hide();
             $.post('{{route('contract.ctrdetail')}}',{id:id},function(result){
                 if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
                 else{ 
                   console.log(result);
+                    $('#editLoading').hide();
+                    $('#formEditContract').show();
                     var data = result.data;
                     var form = $('#formEditContract');
                     form.find('input[name=id]').val(data.id);
@@ -688,10 +692,9 @@
                     form.find('#tenantValue').text(data.tenan_code+" "+data.tenan_name);
                     if(data.mark_code != null) form.find('#markValue').text(data.mark_code+" "+data.mark_name);
                     else form.find('#markValue').text('-');
-                    form.find('#ctrStatusValue').text(data.const_code+" "+data.const_name);
                     form.find('#txtUnitEdit').val(data.unit_code+" "+data.unit_name);
-                    form.find('#txtVAEdit').val(data.unit_virtual_accn);
-
+                    form.find('#txtVAEdit').val(data.viracc_no);
+                    form.find('#txtCrUnitId').val(data.unit_id);
                 }
                 console.log(result);
             });

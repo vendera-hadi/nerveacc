@@ -100,7 +100,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('tenant','TenantController@index');
 	Route::post('tenant/get', 'TenantController@get')->name('tenant.get');
 	Route::get('tenant/optTenant', 'TenantController@getOptTenant')->name('tenant.select2');
+	Route::post('tenant/popup', 'TenantController@getPopupOptions')->name('tenant.popup');
 	Route::post('tenant/options', 'TenantController@getOptions')->name('tenant.options');
+	Route::post('tenant/edit', 'TenantController@edit')->name('tenant.edit');
 	Route::post('tenant/insert', 'TenantController@insert')->name('tenant.insert');
 	Route::post('tenant/update', 'TenantController@update')->name('tenant.update');
 	Route::post('tenant/delete', 'TenantController@delete')->name('tenant.delete');

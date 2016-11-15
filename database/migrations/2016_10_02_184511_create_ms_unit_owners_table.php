@@ -15,10 +15,9 @@ class CreateMsUnitOwnersTable extends Migration
     {
         Schema::create('ms_unit_owner', function (Blueprint $table) {
             $table->increments('id');
-            $table->char('unitow_id',36)->unique();
-            $table->date('unitow_start_date');
-            $table->char('unit_id',36);
-            $table->char('tenan_id',36);
+            $table->date('unitow_start_date')->nullable();
+            $table->integer('unit_id');
+            $table->integer('tenan_id');
         });
     }
 
