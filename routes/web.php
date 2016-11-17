@@ -99,6 +99,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// master tenant
 	Route::get('tenant','TenantController@index');
 	Route::post('tenant/get', 'TenantController@get')->name('tenant.get');
+	Route::post('tenant/modaldt', 'TenantController@modaldt')->name('tenant.modaldt');
 	Route::get('tenant/optTenant', 'TenantController@getOptTenant')->name('tenant.select2');
 	Route::post('tenant/popup', 'TenantController@getPopupOptions')->name('tenant.popup');
 	Route::post('tenant/options', 'TenantController@getOptions')->name('tenant.options');
@@ -106,6 +107,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('tenant/insert', 'TenantController@insert')->name('tenant.insert');
 	Route::post('tenant/update', 'TenantController@update')->name('tenant.update');
 	Route::post('tenant/delete', 'TenantController@delete')->name('tenant.delete');
+	Route::post('tenant/deleteunit', 'TenantController@deleteunit')->name('tenant.deleteunit');
+	Route::post('tenant/addunit', 'TenantController@addunit')->name('tenant.addunit');
+
 	// master tenant type
 	Route::get('typetenant','TenantTypeController@index');
 	Route::post('typetenant/get', 'TenantTypeController@get')->name('typetenant.get');

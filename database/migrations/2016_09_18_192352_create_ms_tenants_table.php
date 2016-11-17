@@ -31,6 +31,7 @@ class CreateMsTenantsTable extends Migration
             $table->string('created_by', 15);
             $table->string('updated_by', 15);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
