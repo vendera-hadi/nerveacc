@@ -99,11 +99,17 @@ Route::group(['middleware' => 'auth'], function () {
 	// master tenant
 	Route::get('tenant','TenantController@index');
 	Route::post('tenant/get', 'TenantController@get')->name('tenant.get');
+	Route::post('tenant/modaldt', 'TenantController@modaldt')->name('tenant.modaldt');
 	Route::get('tenant/optTenant', 'TenantController@getOptTenant')->name('tenant.select2');
+	Route::post('tenant/popup', 'TenantController@getPopupOptions')->name('tenant.popup');
 	Route::post('tenant/options', 'TenantController@getOptions')->name('tenant.options');
+	Route::post('tenant/edit', 'TenantController@edit')->name('tenant.edit');
 	Route::post('tenant/insert', 'TenantController@insert')->name('tenant.insert');
 	Route::post('tenant/update', 'TenantController@update')->name('tenant.update');
 	Route::post('tenant/delete', 'TenantController@delete')->name('tenant.delete');
+	Route::post('tenant/deleteunit', 'TenantController@deleteunit')->name('tenant.deleteunit');
+	Route::post('tenant/addunit', 'TenantController@addunit')->name('tenant.addunit');
+
 	// master tenant type
 	Route::get('typetenant','TenantTypeController@index');
 	Route::post('typetenant/get', 'TenantTypeController@get')->name('typetenant.get');
@@ -263,6 +269,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('period_meter/editModal', 'PeriodMeterController@editModal')->name('period_meter.detail');
 	Route::post('period_meter/cdtupdate', 'PeriodMeterController@meterdetailUpdate')->name('period_meter.cdtupdate');
 	Route::post('period_meter/approve', 'PeriodMeterController@approve')->name('period_meter.approve');
+	Route::get('period_meter/downloadExcel/{type}', 'PeriodMeterController@downloadExcel');
+	Route::post('period_meter/importExcel', 'PeriodMeterController@importExcel')->name('period_meter.importExcel');
 
 	// journal
 	Route::get('journal','JournalController@index')->name('journal.index');

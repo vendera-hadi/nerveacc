@@ -105,14 +105,13 @@ class ContractController extends Controller
     public function ctrDetail(Request $request){
         try{
             $contractId = $request->id;
-            $fetch = TrContract::select('tr_contract.*',\DB::raw('parent.contr_code as parent_code'),\DB::raw('parent.contr_no as parent_no'),'ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_contract_status.const_code','ms_contract_status.const_name','ms_unit.unit_code','ms_unit.unit_virtual_accn','ms_unit.unit_name','ms_unit.unit_isactive')
-            ->leftJoin(\DB::raw('tr_contract as parent'),\DB::raw('parent.id::integer'),"=",\DB::raw('tr_contract.contr_parent::integer'))
-            ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
-            ->join('ms_marketing_agent',\DB::raw('ms_marketing_agent.id::integer'),"=",\DB::raw('tr_contract.mark_id::integer'))
-            // ->join('ms_rental_period',\DB::raw('ms_rental_period.id::integer'),"=",\DB::raw('tr_contract.renprd_id::integer'))
-            // ->join('ms_virtual_account',\DB::raw('ms_virtual_account.id::integer'),"=",\DB::raw('tr_contract.viracc_id::integer'))
-            ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
-            ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->where('tr_contract.id', $contractId)->first();
+            $fetch = TrContract::select('tr_contract.*','ms_virtual_account.viracc_no','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.unit_code','ms_unit.unit_virtual_accn','ms_unit.unit_name','ms_unit.unit_isactive')
+            ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
+            ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
+            ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+            ->join('ms_virtual_account','ms_virtual_account.id',"=",'ms_unit.unit_virtual_accn')
+            // ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
+            ->where('tr_contract.id', $contractId)->first();
             $result = ['success'=>1, 'data'=>$fetch];
             return response()->json($result);
         }catch(\Exception $e){
@@ -204,8 +203,6 @@ class ContractController extends Controller
             return ['status' => 0, 'message' => $errors];
         }
         $input = [
-            'contr_id' => 'CTR'.str_replace(".", "", str_replace(" ", "",microtime())),
-            // 'contr_parent' => $request->input('contr_parent'),
             'contr_code' => $request->input('contr_code'),
             'contr_no' => $request->input('contr_no'),
             'contr_startdate' => $request->input('contr_startdate'),
@@ -216,7 +213,7 @@ class ContractController extends Controller
             'tenan_id' => $request->input('tenan_id'),
             'mark_id' => $request->input('mark_id'),
             'viracc_id' => $request->input('viracc_id'),
-            'const_id' => $request->input('const_id'),
+            'const_id' => $request->input('const_id',0),
             'unit_id' => $request->input('unit_id')
         ];
         $costd_ids = $request->input('costd_is'); 
@@ -320,7 +317,6 @@ class ContractController extends Controller
         }
 
         $update = [
-            // 'contr_parent' => $request->input('contr_parent'),
             'contr_code' => $request->input('contr_code'),
             'contr_no' => $request->input('contr_no'),
             'contr_startdate' => $request->input('contr_startdate'),
@@ -331,10 +327,12 @@ class ContractController extends Controller
         ];
         if($request->input('tenan_id')) $update['tenan_id'] = $request->input('tenan_id');
         if($request->input('mark_id')) $update['mark_id'] = $request->input('mark_id');
-        if($request->input('const_id')) $update['const_id'] = $request->input('const_id');
+        // if($request->input('const_id')) $update['const_id'] = $request->input('const_id');
         if($request->input('viracc_id')) $update['viracc_id'] = $request->input('viracc_id');
-        if($request->input('unit_id')){ 
+        if(!empty($request->input('unit_id')) && $request->input('current_unit_id') != $request->input('unit_id')){ 
             $update['unit_id'] = $request->input('unit_id');
+            // unit lama jadi available
+            MsUnit::where('id',$request->input('current_unit_id'))->update(['unit_isavailable'=>1]);
             // unit jadi unavailable
             MsUnit::where('id',$request->input('unit_id'))->update(['unit_isavailable'=>0]);
         }
@@ -581,7 +579,7 @@ class ContractController extends Controller
         try{
             DB::transaction(function () use($current, $startdate, $enddate, $request, $id){
                 $newdata = $current->replicate();
-                $newdata->contr_id = 'CTR'.str_replace(".", "", str_replace(" ", "",microtime()));
+                // $newdata->contr_id = 'CTR'.str_replace(".", "", str_replace(" ", "",microtime()));
                 $newdata->contr_startdate = $startdate;
                 $newdata->contr_enddate = $enddate;
                 $newdata->contr_code = $request->contr_code;

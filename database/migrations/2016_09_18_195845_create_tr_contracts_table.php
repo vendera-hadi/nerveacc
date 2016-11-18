@@ -15,9 +15,6 @@ class CreateTrContractsTable extends Migration
     {
         Schema::create('tr_contract', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('contr_id');
-            $table->char('contr_id', 36);
-            $table->char('contr_parent', 36)->nullable();
             $table->string('contr_code', 15);
             $table->string('contr_no', 15);
             $table->date('contr_startdate');
@@ -25,13 +22,15 @@ class CreateTrContractsTable extends Migration
             $table->date('contr_bast_date')->nullable();
             $table->string('contr_bast_by', 20)->nullable();
             $table->string('contr_note', 150)->nullable();
-            $table->enum('contr_status',['inputed','confirmed','updated'])->default('inputed');  
+            $table->boolean('contr_iscancel')->default(0);
+            $table->enum('contr_status',['inputed','confirmed','updated','closed'])->default('inputed');  
+            $table->date('contr_cancel_date')->nullable();
             $table->date('contr_terminate_date')->nullable();
-            $table->char('tenan_id', 36);
-            $table->char('mark_id', 36);
-            $table->char('viracc_id', 36);
-            $table->char('const_id', 5);
-            $table->char('unit_id', 36);
+            $table->integer('tenan_id');
+            $table->integer('mark_id')->nullable();
+            $table->integer('viracc_id');
+            $table->integer('const_id');
+            $table->integer('unit_id');
         });
     }
 

@@ -15,8 +15,6 @@ class CreateMsTenantTypesTable extends Migration
     {
         Schema::create('ms_tenant_type', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('tent_id');
-            $table->char('tent_id', 36);
             $table->string('tent_name', 15);
             $table->boolean('tent_isowner')->default(0);
             $table->string('created_by',15);

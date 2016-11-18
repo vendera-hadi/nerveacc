@@ -188,10 +188,16 @@ class UnitController extends Controller
     public function getPopupOptions(Request $request){
         $keyword = $request->input('keyword');
         $edit = $request->input('edit');
-        if($keyword) $fetch = MsUnit::where('unit_isavailable',1)->where(function($query) use($keyword){
+        $getAll = @$request->input('all');
+        // $isowner = $request->input('isowner', 0);
+        if($keyword) $fetch = MsUnit::select('ms_unit.*','ms_virtual_account.viracc_no')->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
+                                    ->where(function($query) use($keyword){
                                         $query->where(DB::raw('LOWER(unit_code)'),'like','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'like','%'.$keyword.'%');
-                                    })->paginate(10);
-        else $fetch = MsUnit::where('unit_isavailable',1)->paginate(10);
+                                    });
+        else $fetch = MsUnit::select('ms_unit.*','ms_virtual_account.viracc_no')->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id');
+
+        if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
+        $fetch = $fetch->paginate(10);
         return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit]);
     }
 
