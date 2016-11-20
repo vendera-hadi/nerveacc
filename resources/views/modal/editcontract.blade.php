@@ -1,4 +1,4 @@
-
+<center><h3>Edit Cost Item</h3></center>
        <div class="form-group">
                       <label>Choose Cost Items</label>
                       <select id="selectCostItemEdit" class="form-control" name="costdt[]">
@@ -23,21 +23,33 @@
           @foreach($costdetail as $cdt)
           <tr class="text-center">
             <input type="hidden" name="contr_id[]" value="{{$id}}">
-            <input type="hidden" name="costd_id[]" value="{{$cdt->id}}">
+            <input type="hidden" name="costd_id[]" class="costdid" value="{{$cdt->id}}">
             <td>{{$cdt->cost_name}} ({{$cdt->cost_code}})</td>
             <td>
-              <strong>Name :</strong> {{$cdt->costd_name}}<br>
-              <strong>Unit :</strong> {{$cdt->costd_unit}}<br>
-              <strong>Cost Rate :</strong> {{$cdt->costd_rate}}<br>
-              <strong>Cost Burden :</strong> {{$cdt->costd_burden}}<br>
-              <strong>Cost Admin :</strong> {{$cdt->costd_admin}}<br>
-              <strong>Use Meter :</strong> @if($cdt->costd_ismeter){{'yes'}}@else{{'no'}}@endif<br>
-              
-              <strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">
+              <table style="width:100%">
+                  <tr><td style="text-align:right"><strong>Name</strong></td><td width="40">:</td><td style="text-align:left">{{$cdt->costd_name}}</td></tr>
+                  <tr><td style="text-align:right"><strong>Unit</strong></td><td>:</td><td style="text-align:left">{{$cdt->costd_unit}}</td></tr>
+                  <tr><td style="text-align:right"><strong>Cost Rate</strong></td><td>:</td><td style="text-align:left">{{$cdt->costd_rate}}</td></tr>
+                  <tr><td style="text-align:right"><strong>Cost Burden</strong></td><td>:</td><td style="text-align:left">{{$cdt->costd_burden}}</td></tr>
+                  <tr><td style="text-align:right"><strong>Cost Admin</strong></td><td>:</td><td style="text-align:left">{{$cdt->costd_admin}}</td></tr>
+                  <tr><td style="text-align:right"><strong>Use Meter</strong></td><td>:</td><td style="text-align:left">@if($cdt->costd_ismeter){{'yes'}}@else{{'no'}}@endif</td> </tr>
+                  <tr><td style="text-align:right"><strong>Invoice Type</strong></td><td>:</td>
+                    <td><select name="inv_type[]" class="form-control">
                 @foreach($invoice_types as $invtype)
                 <option value="{{$invtype->invtp_code}}" @if($cdt->invtp_code == $invtype->invtp_code){{'selected="selected"'}}@endif>{{$invtype->invtp_name}}</option>
                 @endforeach
-              </select>
+                </select></td></tr>
+                  <tr><td style="text-align:right"><strong>Billing Period</strong></td><td>:</td>
+                    <td><select name="period[]" class="form-control">
+                      <option value="1" @if($cdt->continv_period == 1){{'selected="selected"'}}@endif>1 Month</option>
+                      <option value="2" @if($cdt->continv_period == 2){{'selected="selected"'}}@endif>2 Months</option>
+                      <option value="3" @if($cdt->continv_period == 3){{'selected="selected"'}}@endif>3 Months</option>
+                      <option value="4" @if($cdt->continv_period == 4){{'selected="selected"'}}@endif>4 Months</option>
+                      <option value="6" @if($cdt->continv_period == 5){{'selected="selected"'}}@endif>6 Months</option>
+                      <option value="12" @if($cdt->continv_period == 6){{'selected="selected"'}}@endif>12 Months</option>
+                    </select>
+                    </select></td>
+              </table>
             </td>
             <td>
               <a href="#" class="removeCost">
@@ -56,14 +68,24 @@
 
     <script>
     var invoiceTypes = '{!!$inv_types_options!!}';
+    var periods = '<option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="4">4 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select>';
     var contractID = '{!!$id!!}';
     $('#clickCostItemEdit').click(function(){
-
-            costItem = $('#selectCostItemEdit').val();
-            costItemName = $('#selectCostItemEdit option:selected').text();
+          var flag = false;
+          costItem = $('#selectCostItemEdit').val();
+          $('.costdid').each(function(){
+              if($(this).val() == costItem){ 
+                $.messager.alert('Warning', "Cost Item already exist in the list below");
+                flag = true;
+              }
+          });
+          if(!flag){
+            costItemName = $('#selectCostItemEdit option:selected').parent().attr('label');
             $.post('{{route('cost_item.getDetail')}}', {id: costItem}, function(result){
-                $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="costd_id[]" value="'+result.id+'"><td>'+costItemName+'</td><td><strong>Name :</strong> '+result.costd_name+'<br><strong>Unit :</strong> '+result.costd_unit+'<br><strong>Cost Rate :</strong> '+result.costd_rate+'<br><strong>Cost Burden :</strong> '+result.costd_burden+'<br><strong>Cost Admin :</strong> '+result.costd_admin+'<br><strong>Use Meter :</strong> '+result.costd_ismeter+'<br><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+                $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="costd_id[]" class="costdid" value="'+result.id+'"><td>'+costItemName+'</td><td><table style="width:100%"><tr><td style="text-align:right"><strong>Name</strong></td><td width="40">:</td><td style="text-align:left">'+result.costd_name+'</td></tr><tr><td style="text-align:right"><strong>Unit</strong></td><td>:</td><td style="text-align:left">'+result.costd_unit+'</td></tr><tr><td style="text-align:right"><strong>Cost Rate</strong></td><td>:</td><td style="text-align:left">'+result.costd_rate+'</td></tr><tr><td style="text-align:right"><strong>Cost Burden</strong></td><td>:</td><td style="text-align:left">'+result.costd_burden+'</td></tr><tr><td style="text-align:right"><strong>Cost Admin</strong></td><td>:</td><td style="text-align:left">'+result.costd_admin+'</td></tr><tr><td style="text-align:right"><strong>Use Meter</strong></td><td>:</td><td style="text-align:left">'+result.costd_ismeter+'</td> </tr><tr><td style="text-align:right"><strong>Invoice Type</strong></td><td>:</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td></tr><tr><td style="text-align:right"><strong>Billing Period</strong></td><td>:</td><td><select name="period[]" class="form-control">'+periods+'</select></td></tr></table></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+                
             });
+          }
             // $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><strong>Name :</strong> <input type="text" name="costd_name[]" class="form-control costd_name"  required><strong>Unit :</strong> <input type="text" name="costd_unit[]" class="form-control costd_unit" required><strong>Cost Rate :</strong> <input type="text" name="costd_rate[]" class="form-control costd_rate" required><strong>Cost Burden :</strong> <input type="text" name="costd_burden[]" class="form-control costd_burden" required><strong>Cost Admin :</strong> <input type="text" name="costd_admin[]" class="form-control costd_admin" required><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select><strong>Use Meter :</strong> <select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
     });
 

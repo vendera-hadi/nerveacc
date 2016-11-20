@@ -15,8 +15,11 @@ class CreateTrContractInvoicesTable extends Migration
     {
         Schema::create('tr_contract_invoice', function (Blueprint $table) {
             $table->increments('id');
-            $table->char('continv_id',36)->unique();
             $table->decimal('continv_amount', 10, 2);
+            $table->integer('continv_period')->default(1);
+            $table->date('continv_start_inv')->nullable();
+            $table->date('continv_next_inv')->nullable();
+            $table->date('created_at');
             $table->char('contr_id', 36);
             $table->char('invtp_code', 5);
             $table->char('costd_is', 36);

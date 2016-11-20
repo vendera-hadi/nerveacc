@@ -123,15 +123,30 @@
                                 <label>Note (optional)</label>
                                 <textarea name="contr_note" class="form-control"></textarea>
                             </div> -->
-                            <div class="form-group">
-                                <label>Tenant</label>
-                                <select class="form-control choose-tenant" name="tenan_id" required="required" style="width:100%">
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Marketing Agent (optional)</label>
-                                <select class="form-control choose-marketing" name="mark_id" style="width:100%">
-                                </select>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <div class="form-group">
+                                        <label>Tenant</label>
+                                        <div class="input-group">
+                                          <input type="hidden" name="tenan_id" id="txtTenanId" required>
+                                          <input type="text" class="form-control" id="txtTenan" disabled>
+                                          <span class="input-group-btn">
+                                            <button class="btn btn-info" type="button" id="chooseTenanButton">Choose Tenant</button>
+                                          </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-6">    
+                                    <div class="form-group">
+                                        <label>Marketing Agent (optional)</label>
+                                        <select class="form-control choose-marketing" name="mark_id" style="width:100%">
+                                          <option value="">-</option>
+                                          @foreach($marketing_agents as $ma)
+                                          <option value="{{$ma->id}}">{{$ma->mark_code." ".$ma->mark_name}}</option>
+                                          @endforeach
+                                        </select>
+                                    </div>
+                                  </div>
                             </div>
                             <div class="row">
                                 <div class="col-xs-6">
@@ -163,6 +178,7 @@
                         </div>
 
                         <div id="contractStep2" style="display:none">
+                          
                         <!-- Form step 2 -->
                                 <h4>Cost Detail</h4>
                   <div class="form-group">
@@ -190,6 +206,7 @@
                       <td>Cost Admin</td>
                       <td width="85">Use Meter</td>
                       <td>Invoice Type</td>
+                      <td>Billing Period</td>
                       <td></td>
                     </tr>
                     
@@ -257,19 +274,31 @@
                             <label>Note (optional)</label>
                             <textarea name="contr_note" class="form-control" ></textarea>
                         </div> -->
-                        <div class="form-group">
-                            <label>Tenant</label>
-                            <br><strong>Current Tenant : <span id="tenantValue">-</span></strong>
-                            <select class="form-control choose-tenant" name="tenan_id"  style="width:100%">
-                            <option value="">Ignore if don't want to change value</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Marketing Agent (optional)</label>
-                            <br><strong>Current Marketing : <span id="markValue">-</span></strong>
-                            <select class="form-control choose-marketing" name="mark_id" style="width:100%">
-                            <option value="">Ignore if don't want to change value</option>
-                            </select>
+                        <div class="row">
+                                <div class="col-xs-6">
+                                    <div class="form-group">
+                                        <label>Tenant</label>
+                                        <div class="input-group">
+                                            
+                                            <input type="hidden" name="tenan_id" id="txtTenanEditId" required>
+                                            <input type="text" class="form-control" id="txtTenanEdit" disabled>
+                                            <span class="input-group-btn">
+                                              <button class="btn btn-info" type="button" id="chooseTenanButtonEdit">Choose Tenant</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="form-group">
+                                        <label>Marketing Agent (optional)</label>
+                                        <select class="form-control choose-marketing" name="mark_id" style="width:100%">
+                                        <option value="">-</option>
+                                        @foreach($marketing_agents as $ma)
+                                        <option value="{{$ma->id}}">{{$ma->mark_code." ".$ma->mark_name}}</option>
+                                        @endforeach
+                                        </select>
+                                    </div>
+                                </div>
                         </div>
                         
                         
@@ -433,23 +462,7 @@
               minimumInputLength: 1
         });
 
-        $(".choose-marketing").select2({
-              ajax: {
-                url: "{{route('marketing.select2')}}",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                  return {
-                    q: params.term, // search term
-                    page: params.page
-                  };
-                },
-                
-                cache: true
-              },
-              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-              minimumInputLength: 1
-        });
+        $(".choose-marketing").select2();
 
         
 
@@ -532,7 +545,7 @@
             costDetail = $('#selectCostItem').val();
             costDetailName = $('#selectCostItem option:selected').text();
             $.post('{{route('cost_item.getDetail')}}', {id: costDetail}, function(result){
-                $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+                $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><select name="period[]" class="form-control"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="4">4 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
             });
         });
 
@@ -553,7 +566,7 @@
 
 
         $(document).delegate('.remove','click',function(){
-            var r = confirm("Are you sure want to delete entry ?");
+            var r = confirm("Are you sure want to cancel Contract ?");
             if(r == true){
                 var id = $(this).data('id');
                 $.post('{{route('contract.delete')}}',{id:id},function(result){
@@ -597,10 +610,19 @@
             });
         });
 
-        var currenturl; 
+        var currenturl, tenanid; 
         $('#chooseUnitButton').click(function(){
             $('#unitModal').modal("show");
             currenturl = '{{route('unit.popup')}}';
+            tenanid = $('input[name=tenan_id]').val();
+            $.post(currenturl, {tenan:tenanid}, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $('#chooseTenanButton').click(function(){
+            $('#unitModal').modal("show");
+            currenturl = '{{route('tenant.popup')}}';
             $.post(currenturl,null, function(data){
                 $('#unitModalContent').html(data);
             });
@@ -623,6 +645,15 @@
             });
         });
 
+        $(document).delegate('#searchTenant','submit',function(e){
+            e.preventDefault();
+            var data = $('#searchTenant').serialize();
+            currenturl = '{{route('tenant.popup')}}';
+            $.post(currenturl, data, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
         // popup unit
         $(document).delegate('#chooseUnit','click',function(e){
             e.preventDefault();
@@ -636,10 +667,30 @@
             $('#unitModal').modal("hide");
         });
 
+        $(document).delegate('#chooseTenant','click',function(e){
+            e.preventDefault();
+            var tenanid = $('input[name="tenant"]:checked').val();
+            var tenanname = $('input[name="tenant"]:checked').data('name');
+            $('#txtTenanId').val(tenanid);
+            $('#txtTenan').val(tenanname);
+            $('#unitModalContent').text('');
+            $('#unitModal').modal("hide");
+        });
+
         $(document).delegate('#chooseUnitButtonEdit','click',function(){
             $('#editModal').modal('hide');
             $('#unitModal').modal("show");
+            tenanid = $('input[name=tenan_id]').val();
             currenturl = '{{route('unit.popup')}}';
+            $.post(currenturl, {edit:true, tenan:tenanid}, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+        $(document).delegate('#chooseTenanButtonEdit','click',function(){
+            $('#editModal').modal('hide');
+            $('#unitModal').modal("show");
+            currenturl = '{{route('tenant.popup')}}';
             $.post(currenturl, {edit:true}, function(data){
                 $('#unitModalContent').html(data);
             });
@@ -654,6 +705,15 @@
             });
         });
 
+        $(document).delegate('#searchTenantEdit','submit',function(e){
+            e.preventDefault();
+            var data = $('#searchTenantEdit').serialize();
+            currenturl = '{{route('tenant.popup')}}?edit=true';
+            $.post(currenturl, data, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
         $(document).delegate('#chooseUnitEdit','click',function(e){
             e.preventDefault();
             var unitid = $('input[name="unitedit"]:checked').val();
@@ -662,6 +722,16 @@
             $('#txtUnitEdit').val(unitname);
             var unitvaccount = $('input[name="unitedit"]:checked').data('vaccount');
             $('#txtVAEditId,#txtVAEdit').val(unitvaccount);
+            $('#unitModalContent').text('');
+            $('#unitModal').modal("hide");
+        });
+
+        $(document).delegate('#chooseTenantEdit','click',function(e){
+            e.preventDefault();
+            var tenanid = $('input[name="tenantedit"]:checked').val();
+            var tenanname = $('input[name="tenantedit"]:checked').data('name');
+            $('#txtTenanEditId').val(tenanid);
+            $('#txtTenanEdit').val(tenanname);
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
@@ -689,9 +759,9 @@
                     form.find('input[name=contr_bast_date]').val(data.contr_enddate);
                     form.find('input[name=contr_bast_by]').val(data.contr_bast_by);
                     form.find('textarea[name=contr_note]').val(data.contr_note);
-                    form.find('#tenantValue').text(data.tenan_code+" "+data.tenan_name);
-                    if(data.mark_code != null) form.find('#markValue').text(data.mark_code+" "+data.mark_name);
-                    else form.find('#markValue').text('-');
+                    form.find('input[name=tenan_id]').val(data.tenan_id);
+                    form.find('#txtTenanEdit').val(data.tenan_code+" "+data.tenan_name);
+                    if(data.mark_id != null) form.find('input[name=mark_id]').val(data.mark_id);
                     form.find('#txtUnitEdit').val(data.unit_code+" "+data.unit_name);
                     form.find('#txtVAEdit').val(data.viracc_no);
                     form.find('#txtCrUnitId').val(data.unit_id);

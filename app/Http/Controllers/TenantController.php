@@ -112,7 +112,7 @@ class TenantController extends Controller
         if($keyword) $fetch = MsTenant::select('ms_tenant.*','ms_tenant_type.tent_name','ms_tenant_type.tent_isowner')
                                     ->join('ms_tenant_type','ms_tenant.tent_id','=','ms_tenant_type.id')
                                     ->where(function($query) use($keyword){
-                                        $query->where(DB::raw('LOWER(tenan_name)'),'like','%'.$keyword.'%')->orWhere(DB::raw('LOWER(tenan_code)'),'like','%'.$keyword.'%');
+                                        $query->where(\DB::raw('LOWER(tenan_name)'),'like','%'.$keyword.'%')->orWhere(\DB::raw('LOWER(tenan_code)'),'like','%'.$keyword.'%');
                                     })->paginate(10);
         else $fetch = MsTenant::select('ms_tenant.*','ms_tenant_type.tent_name','ms_tenant_type.tent_isowner')
                                 ->join('ms_tenant_type','ms_tenant.tent_id','=','ms_tenant_type.id')
@@ -155,7 +155,7 @@ class TenantController extends Controller
 
             if(isset($input['unit_id'])){
                 // insert ke unit owner
-                MsUnitOwner::create(['unit_id'=>$input['unit_id'], 'tenan_id'=>$tenant->id]);
+                MsUnitOwner::create(['unit_id'=>$input['unit_id'], 'tenan_id'=>$tenant->id, 'unitow_start_date'=>@$input['unitow_start_date']]);
             }
             
             return $tenant;        

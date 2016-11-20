@@ -53,8 +53,8 @@
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="tenan_code" width="50" sortable="true">Tenant Code</th>
                             <th field="tenan_name" width="50" sortable="true">Tenant Name</th>
-                            <th field="tenan_idno" width="50" sortable="true">No Unit</th>
-                            
+                            <th field="tenan_phone" width="50" sortable="true">Phone</th>
+                            <th field="tenan_email" width="50" sortable="true">Email</th>
                             <th field="tent_name" width="50" sortable="true">Tenant Type</th>
                             <th field="action" width="50">Action</th>
                         </tr>

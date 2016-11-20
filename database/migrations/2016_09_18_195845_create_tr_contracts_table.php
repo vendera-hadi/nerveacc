@@ -23,7 +23,7 @@ class CreateTrContractsTable extends Migration
             $table->string('contr_bast_by', 20)->nullable();
             $table->string('contr_note', 150)->nullable();
             $table->boolean('contr_iscancel')->default(0);
-            $table->enum('contr_status',['inputed','confirmed','updated','closed'])->default('inputed');  
+            $table->string('contr_status')->default('inputed');  
             $table->date('contr_cancel_date')->nullable();
             $table->date('contr_terminate_date')->nullable();
             $table->integer('tenan_id');
