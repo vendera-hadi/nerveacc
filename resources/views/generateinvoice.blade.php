@@ -29,7 +29,7 @@
 		<div class="row">
 			<div class="col-md-11">
           		<!-- content -->
-                <div class="box" style="height:500px">
+                <div class="box" style="min-height:500px">
                     <div class="box-body">
                         <h4>Invoice Filter</h4>
                         <form action="post" id="formGenerate">
@@ -79,7 +79,8 @@
         var data = $(this).serialize();
         $('#generateResult').html('<img src="{{asset('img/facebook.gif')}}">');
         $.post('{{route('invoice.generate')}}',data, function(result){
-            $('#generateResult').html(result);
+            if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
+            else{ $('#generateResult').html(result); }
         });
     });
 </script>

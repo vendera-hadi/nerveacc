@@ -208,20 +208,28 @@ class PeriodMeterController extends Controller
     }
 
     public function editModal(Request $request){
-        try{
-            $prdmet = $request->id;
+        // try{
+            $id = $request->id;
+            $currentPrd = TrPeriodMeter::find($id);
+
+            $availableContract = DB::select('select id from "tr_contract" where "contr_terminate_date" is null and \''.$currentPrd->prdmet_end_date.'\' >= "contr_startdate" and \''.$currentPrd->prdmet_end_date.'\' <= "contr_enddate" and "contr_status" = \'confirmed\' ');
+            $contractOfThisMonth = [];
+            foreach ($availableContract as $k => $v) {
+                $contractOfThisMonth[] = $v->id;
+            }
+            // Select all contract yang berlaku selama periode yang bersangkutan
             $fetch = TrMeter::select('ms_unit.unit_code','tr_contract.contr_no','ms_cost_detail.costd_name','tr_contract.contr_code','tr_meter.*','ms_cost_detail.costd_rate')
-                    ->leftJoin('tr_contract',\DB::raw('tr_contract.id::integer'),"=",\DB::raw('tr_meter.contr_id::integer'))
-                    ->join('ms_cost_detail',\DB::raw('tr_meter.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
-                    ->join('ms_unit',\DB::raw('tr_meter.unit_id::integer'),"=",\DB::raw('ms_unit.id::integer'))
-                    ->where('tr_meter.prdmet_id', $prdmet)
+                    ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
+                    ->join('ms_cost_detail','tr_meter.costd_is',"=",'ms_cost_detail.id')
+                    ->join('ms_unit','tr_meter.unit_id',"=",'ms_unit.id')
+                    ->whereIn('tr_meter.contr_id', $contractOfThisMonth)
                     ->orderBy('tr_meter.id','ASC')
                     ->get();
-            $status = TrPeriodMeter::select('status')->where('id',$prdmet)->get();
-            return view('modal.editmeter', ['meter' => $fetch,'st'=>$status, 'prd'=>$prdmet]);
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
-        }
+            // echo $fetch; die();
+            return view('modal.editmeter', ['meter' => $fetch,'st'=>$currentPrd, 'prd'=>$id]);
+        // }catch(\Exception $e){
+        //     return response()->json(['errorMsg' => $e->getMessage()]);
+        // }
     }
 
     public function meterdetailUpdate(Request $request){

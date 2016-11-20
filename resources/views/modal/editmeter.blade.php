@@ -1,4 +1,4 @@
-@if ($st[0]->status === false)
+@if ($st->status === false)
 <form method="POST" id="formEditMeter">
 <div class="table-responsive">
   <table  width="100%" class="table table-bordered" style="font-size:12px !important;">
