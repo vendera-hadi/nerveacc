@@ -290,6 +290,13 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('generateinvoice','InvoiceController@generateInvoice');
 	Route::post('generateinvoice','InvoiceController@postGenerateInvoice')->name('invoice.generate');
 
+	// aging piutang
+	Route::get('aging','AgingController@index')->name('aging.index');
+	Route::post('aging/get','AgingController@get')->name('aging.get');
+	Route::post('aging/getdetail','AgingController@getdetail')->name('aging.getdetail');
+	Route::get('aging/tes','AgingController@tes')->name('aging.tes');
+	Route::get('aging/tes2','AgingController@tes2')->name('aging.tes2');
+
 });
 
 Route::get('logout','Auth\AuthController@logout');

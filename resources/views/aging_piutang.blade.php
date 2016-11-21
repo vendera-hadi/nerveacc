@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    List Invoice
+    Aging Invoice
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   List Invoice
+   Aging Invoice
 @endsection
 
 <!-- tambahan script atas -->
@@ -20,7 +20,7 @@
 @section('contentheader_breadcrumbs')
 	<ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">List Invoice</li>
+        <li class="active">Aging Invoice</li>
     </ol>
 @stop
 
@@ -31,21 +31,16 @@
           		<!-- content -->
 
                 <!-- template tabel -->
-          		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Aging Invoice" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="inv_number" width="100" sortable="true">No.Invoice</th>
-                            <th field="contr_id" width="100" sortable="true">No Kontrak</th>
-                            <th field="tenan_name" width="100" sortable="true">Nama Tenan</th>  
-                            <th field="inv_data" width="50" sortable="true">Tgl Invoice</th>
-                            <th field="inv_duedate" width="50" sortable="true">Jatuh Tempo</th>
-                            <th field="inv_amount" width="50" sortable="true">Amount</th>
-                            <th field="inv_ppn" width="50" sortable="true">PPN</th>
-                            <th field="inv_ppn_amount" width="50" sortable="true">PPN Amount</th> 
-                            <th field="invtp_name" width="100" sortable="true">Jenis Invoice</th>
-                            <th field="inv_post" width="50" sortable="true">Posting</th>       
+                            <th field="contr_no" width="100" sortable="true">No. Contract</th>
+                            <th field="contr_startdate" width="100" sortable="true">Start Date</th>
+                            <th field="contr_enddate" width="100" sortable="true">End Date</th>  
+                            <th field="contr_status" width="50" sortable="true">Contract Status</th>
+                            <th field="tenan_code" width="50" sortable="true">No Tenan</th>       
                         </tr>
                     </thead>
                 </table>
@@ -103,12 +98,12 @@
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-detailview.js') }}"></script>
 <script type="text/javascript">
-var entity = "List Invoice"; // nama si tabel, ditampilin di dialog
-var get_url = "{{route('invoice.get')}}";
-var get_url2 = "{{route('invoice.getdetail')}}";
+var entity = "List Aging Invoice"; // nama si tabel, ditampilin di dialog
+var get_url = "{{route('aging.get')}}";
+var get_url2 = "{{route('aging.getdetail')}}";
 
 $(function(){
-    $('#dg').datagrid({
+   $('#dg').datagrid({
         view: detailview,
         url: get_url,
         pagination: true,
@@ -123,17 +118,26 @@ $(function(){
             var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
             ddv.datagrid({
                 url: get_url2+"?id="+row.id,
-                fitColumns:true,
                 singleSelect:true,
                 rownumbers:true,
                 loadMsg:'',
                 height:'auto',
                 columns:[[
-                    {field:'costd_name',title:'Cost Name',width:100},
-                    {field:'costd_rate',title:'Cost Rate',width:100},
-                    {field:'costd_burden',title:'Abodemen',width:100},
-                    {field:'costd_admin',title:'Admin',width:100},
-                    {field:'cost_unit',title:'Satuan',width:100}
+                    {field:'inv_number',title:'Inv Number',width:100},
+                    {field:'inv_date',title:'Inv Date',width:100},
+                    {field:'inv_duedate',title:'Inv Due Date',width:100},
+                    {field:'inv_amount',title:'Amount',width:100},
+                    {field:'tenan_code',title:'No. Tenan',width:100},
+                    {field:'invtp_name',title:'Invoice Type',width:150},
+                    {field:'inv_post',title:'Posting',width:50,align:'center',formatter:formatPost},
+                    {field:'ag',title:'(1-30) Hari',align:'center',width:100,formatter:check30},
+                    {field:'ag1',title:'(31-60) Hari',align:'center',width:100,formatter:check60},
+                    {field:'ag2',title:'(61-90) Hari',align:'center',width:100,formatter:check90},
+                    {field:'ag3',title:'(91-180) Hari',align:'center',width:100,formatter:check180},
+                    {field:'ag4',title:'> 180 Hari',align:'center',width:150,formatter:check0}
+                ]],
+                onResize:function(){
+                    $('#dg').datagrid('fixDetailRowHeight',index);
                 },
                 onLoadSuccess:function(){
                     setTimeout(function(){
@@ -144,7 +148,49 @@ $(function(){
             $('#dg').datagrid('fixDetailRowHeight',index);
         }
     });
-});        
+});
+function formatPost(val,row){
+    if (val == true){
+        return '<span style="color:red;">Yes</span>';
+    } else {
+        return 'No';
+    }
+}
+function check30(val,row){
+    if (val >0 && val <=30){
+        return '<span style="color:red;">V</span>';
+    } else {
+        return '';
+    }
+}
+function check60(val,row){
+    if (val >30 && val <=60){
+        return '<span style="color:red;">V</span>';
+    } else {
+        return '';
+    }
+}
+function check90(val,row){
+    if (val >60 && val <=90){
+        return '<span style="color:red;">V</span>';
+    } else {
+        return '';
+    }
+}
+function check180(val,row){
+    if (val >90 && val <=180){
+        return '<span style="color:red;">V</span>';
+    } else {
+        return '';
+    }
+}
+function check0(val,row){
+    if (val >180){
+        return '<span style="color:red;">V</span>';
+    } else {
+        return '';
+    }
+}      
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection

@@ -85,6 +85,22 @@
     }
 });
 
+$(".addbtn").click(function(){
+$.ajax({
+      url:'add-catagory',
+      data:{
+        data:new FormData($("#upload_form")[0]),
+      },
+      dataType:'json',
+      async:false,
+      type:'post',
+      processData: false,
+      contentType: false,
+      success:function(response){
+        console.log(response);
+      },
+    });
+ });
 </script>
 
 @else
