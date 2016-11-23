@@ -87,6 +87,32 @@
                   </div>
                 </div>
 
+                 <div id="terminateModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      
+                      <div class="modal-body text-center">
+                        <h3>Input Terminate Date :</h3>
+                        <form method="post" id="terminateForm">
+                            <input type="hidden" name="id" id="terminateId">
+                            <br><br>
+                            <center>
+                                <input type="text" name="contr_terminate_date" class="form-control datepicker" style="width:50%" data-date-format="yyyy-mm-dd" required>
+                            </center>
+                            <br>
+                            <button class="btn btn-info">Submit</button>
+                        </form>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
                 <div id="renewModal" class="modal fade" role="dialog">
                   <div class="modal-dialog">
 
@@ -186,17 +212,19 @@
             $('#addendumId').val($(this).data('id'));
             $('#addendumModal').modal('show');
         }).delegate('.terminateStatus','click',function(){
-            var r = confirm("Are you sure want to terminate this Contract ?");
-            if(r == true){
-                var id = $(this).data('id');
-                $.post('{{route('contract.terminate')}}',{id:id},function(result){
-                    if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-                    if(result.success){ 
-                        $.messager.alert('Warning','Contract Terminated');
-                        location.reload();
-                    }
-                });
-            }
+            $('#terminateId').val($(this).data('id'));
+            $('#terminateModal').modal('show');
+            // var r = confirm("Are you sure want to terminate this Contract ?");
+            // if(r == true){
+            //     var id = $(this).data('id');
+            //     $.post('{{route('contract.terminate')}}',{id:id},function(result){
+            //         if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+            //         if(result.success){ 
+            //             $.messager.alert('Warning','Contract Terminated');
+            //             location.reload();
+            //         }
+            //     });
+            // }
         }).delegate('.renewStatus','click',function(){
             $('#renewId').val($(this).data('id'));
             $('#renewForm').find('input[name="contr_code"]').val($(this).data('code'));
@@ -211,7 +239,18 @@
             $.post('{{route('contract.inputed')}}',$(this).serialize(),function(result){
                     if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
                     if(result.success){ 
-                        $.messager.alert('Warning','Status rolled back to Inputed');
+                        $.messager.alert('Success','Status rolled back to Inputed');
+                        location.reload();
+                    }
+                });
+        });
+
+        $('#terminateForm').submit(function(e){
+            e.preventDefault();
+            $.post('{{route('contract.terminate')}}',$(this).serialize(),function(result){
+                    if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+                    if(result.success){ 
+                        $.messager.alert('Success','Contract Terminated');
                         location.reload();
                     }
                 });
