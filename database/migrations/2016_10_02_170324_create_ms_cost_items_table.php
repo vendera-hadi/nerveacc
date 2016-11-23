@@ -15,10 +15,10 @@ class CreateMsCostItemsTable extends Migration
     {
         Schema::create('ms_cost_item', function (Blueprint $table) {
             $table->increments('id');
-            $table->char('cost_id',36);
             $table->char('cost_code',5)->unique();
             $table->string('cost_name',50);
             $table->boolean('cost_isactive')->default(0);
+            $table->boolean('is_service_charge')->default(0);
             $table->string('created_by',15);
             $table->string('updated_by',15);
             $table->timestamps();
