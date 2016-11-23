@@ -203,6 +203,8 @@ class InvoiceController extends Controller
                                     $invDetail[] = [
                                         'invdt_amount' => $amount,
                                         'invdt_note' => $note,
+                                        'continv_start_inv' => $tempTimeStart,
+                                        'continv_next_inv' => date('Y-m-d',strtotime("+1 months", $tempTimeStart)),
                                         'costd_is' => $meter->costd_is,
                                         'meter_id' => $meter->tr_meter_id
                                     ];
@@ -216,38 +218,44 @@ class InvoiceController extends Controller
                             // YG NOT USING METER (AGK TRICKY), MUSTI CEK STATUS KONTRAK, KALO END GA SAMPE AKHIR BULAN MUSTI PRO RATE
                             // echo "<br>not using meter<br>";
                             $totalPay = 0;
-                            if($value->is_service_charge){
-                                // pake rumus service charge
-                                $note = $value->costd_name." (".(int)$value->unit_sqrt." m2) Per ".date('F',strtotime($tempTimeStart))." ".$year;
-                                // cek akhir period dari kontrak dia
-                                $totalDayCertainMonth = date('t',strtotime($tempTimeEnd));
-                                if(!empty($value->contr_terminate_date) && ($tempTimeEnd > $value->contr_terminate_date)){
-                                    $dayUsed = date('d',strtotime($value->contr_terminate_date));
-                                    // LOGIKA PRO RATE
-                                    $amount = ($dayUsed / $totalDayCertainMonth * $value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;
-                                    // echo "<br>PRO RATE BY TERMINATE DATE<br>";
-                                }else if($tempTimeEnd > $value->contr_enddate){
-                                    $dayUsed = date('d',strtotime($value->contr_enddate));
-                                    // LOGIKA PRO RATE
-                                    $amount = ($dayUsed / $totalDayCertainMonth * $value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;
-                                    // echo "<br>PRO RATE END CONTRACT<br>";
-                                }else{
-                                    // HITUNG FULL
-                                    // echo "<br>FULL RATE<br>";
-                                    $amount = ($value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;    
-                                }
+                            // CEK INV PERIOD DULU, UDA LWT NEXT INVOICE NYA BARU CREATE NEW INVOICE
+                            if($tempTimeStart >= $value->continv_next_inv){
+                                if($value->is_service_charge){
+                                    // pake rumus service charge
+                                    $note = $value->costd_name." (".(int)$value->unit_sqrt." m2) Per ".date('F',strtotime($tempTimeStart))." ".$year;
+                                    // cek akhir period dari kontrak dia
+                                    $totalDayCertainMonth = date('t',strtotime($tempTimeEnd));
+                                    if(!empty($value->contr_terminate_date) && ($tempTimeEnd > $value->contr_terminate_date)){
+                                        $dayUsed = date('d',strtotime($value->contr_terminate_date));
+                                        // LOGIKA PRO RATE
+                                        $amount = ($dayUsed / $totalDayCertainMonth * $value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;
+                                        // echo "<br>PRO RATE BY TERMINATE DATE<br>";
+                                    }else if($tempTimeEnd > $value->contr_enddate){
+                                        $dayUsed = date('d',strtotime($value->contr_enddate));
+                                        // LOGIKA PRO RATE
+                                        $amount = ($dayUsed / $totalDayCertainMonth * $value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;
+                                        // echo "<br>PRO RATE END CONTRACT<br>";
+                                    }else{
+                                        // HITUNG FULL
+                                        // echo "<br>FULL RATE<br>";
+                                        $amount = ($value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;    
+                                    }
 
-                            }else{
-                                $note = $value->costd_name." Per ".date('F',strtotime($tempTimeStart))." ".$year;   
-                                // rumus cost + burden + admin
-                                $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
+                                }else{
+                                    $note = $value->costd_name." Per ".date('F',strtotime($tempTimeStart))." ".$year;   
+                                    // rumus cost + burden + admin
+                                    $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
+                                }
+                                $invDetail[] = [
+                                    'invdt_amount' => $amount,
+                                    'invdt_note' => $note,
+                                    'continv_start_inv' => $tempTimeStart,
+                                    'continv_next_inv' => date('Y-m-d',strtotime("+".$value->continv_period." months", $tempTimeStart)),
+                                    'costd_is' => $value->costd_id
+                                ];
+                                $totalPay+=$amount;
                             }
-                            $invDetail[] = [
-                                'invdt_amount' => $amount,
-                                'invdt_note' => $note,
-                                'costd_is' => $value->costd_id
-                            ];
-                            $totalPay+=$amount;
+                            
                         }
 
                     }
