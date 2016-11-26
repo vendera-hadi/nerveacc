@@ -21,6 +21,9 @@ class CreateMsCostItemsTable extends Migration
             $table->boolean('cost_isactive')->default(0);
             $table->integer('created_by');
             $table->integer('updated_by');
+            $table->integer('is_service_charge');
+            $table->integer('is_insurance');
+            $table->integer('is_sinking_fund');
             $table->timestamps();
         });
     }
