@@ -83,6 +83,12 @@
                             <input name="coa_level" class="easyui-textbox" label="COA Level:" style="width:100%" data-options="required:true,numeric:true">
                         </div>
                         <div style="margin-bottom:10px">
+                            <select id="cc" class="easyui-combobox" name="coa_isparent" label="Parent:" style="width:300px;">
+                                <option value="true" selected>yes</option>
+                                <option value="false">no</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom:10px">
                             <input name="coa_type" class="easyui-textbox" label="COA Type:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
                         </div>
                         <div style="margin-bottom:10px">

@@ -15,10 +15,9 @@ class CreateMsCostDetailsTable extends Migration
     {
         Schema::create('ms_cost_detail', function (Blueprint $table) {
             $table->increments('id');
-            $table->char('costd_is',36)->unique();
-            $table->char('cost_id',36);
+            $table->integer('cost_id');
             $table->string('costd_name',100);
-            $table->string('costd_unit',10);
+            $table->string('costd_unit',10)->nullable();
             $table->decimal('costd_rate', 7, 2);
             $table->decimal('costd_burden', 7, 2);
             $table->decimal('costd_admin', 7, 2);

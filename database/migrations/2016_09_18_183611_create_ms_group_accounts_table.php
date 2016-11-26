@@ -16,6 +16,8 @@ class CreateMsGroupAccountsTable extends Migration
         Schema::create('ms_group_account', function (Blueprint $table) {
             $table->increments('id');
             $table->string('grpaccn_name',40);
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }

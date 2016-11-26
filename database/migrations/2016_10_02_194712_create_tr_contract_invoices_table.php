@@ -19,10 +19,9 @@ class CreateTrContractInvoicesTable extends Migration
             $table->integer('continv_period')->default(1);
             $table->date('continv_start_inv')->nullable();
             $table->date('continv_next_inv')->nullable();
-            $table->date('created_at');
-            $table->char('contr_id', 36);
-            $table->char('invtp_code', 5);
-            $table->char('costd_is', 36);
+            $table->integer('contr_id');
+            $table->integer('invtp_code');
+            $table->integer('costd_is');
         });
     }
 

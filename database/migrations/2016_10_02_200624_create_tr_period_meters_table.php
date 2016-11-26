@@ -19,8 +19,8 @@ class CreateTrPeriodMetersTable extends Migration
             $table->date('prdmet_start_date');
             $table->date('prdmet_end_date');
             $table->date('prd_billing_date');
-            $table->string('created_by', 15);
-            $table->string('updated_by', 15);
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }

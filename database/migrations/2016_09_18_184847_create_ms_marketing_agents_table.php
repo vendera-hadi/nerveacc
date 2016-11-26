@@ -15,15 +15,13 @@ class CreateMsMarketingAgentsTable extends Migration
     {
         Schema::create('ms_marketing_agent', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('mark_id');
-            $table->char('mark_id', 36);
             $table->string('mark_code', 5);
             $table->string('mark_name', 50);
             $table->string('mark_address', 150);
             $table->string('mark_phone', 20);
             $table->boolean('mark_isactive')->default(0);
-            $table->string('created_by', 15);
-            $table->string('updated_by', 15);
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }

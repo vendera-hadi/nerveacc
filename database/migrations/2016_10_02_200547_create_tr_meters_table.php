@@ -15,7 +15,6 @@ class CreateTrMetersTable extends Migration
     {
         Schema::create('tr_meter', function (Blueprint $table) {
             $table->increments('id');
-            $table->char('meter_id',36)->unique();
             $table->decimal('meter_start', 10, 2);
             $table->decimal('meter_end', 10, 2);
             $table->decimal('meter_used', 10, 2);
@@ -24,7 +23,8 @@ class CreateTrMetersTable extends Migration
             $table->decimal('meter_admin', 10, 2);
             $table->integer('costd_is');
             $table->integer('contr_id');
-            $table->char('prdmet_id',36);
+            $table->integer('prdmet_id')->nullable();
+            $table->integer('unit_id');
         });
     }
 

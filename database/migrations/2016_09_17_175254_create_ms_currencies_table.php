@@ -15,12 +15,10 @@ class CreateMsCurrenciesTable extends Migration
     {
         Schema::create('ms_currency', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('curr_code');
-            $table->char('curr_code',3);
             $table->string('curr_name',25);
             $table->boolean('curr_isactive')->default(0);
-            $table->string('created_by', 15);
-            $table->string('updated_by', 15);
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }

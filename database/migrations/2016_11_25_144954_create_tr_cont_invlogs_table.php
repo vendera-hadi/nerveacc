@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMsContractStatusesTable extends Migration
+class CreateTrContInvlogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,12 @@ class CreateMsContractStatusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('ms_contract_status', function (Blueprint $table) {
+        Schema::create('tr_cont_invlog', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('const_name',30);
-            $table->tinyInteger('const_order');
-            $table->integer('created_by');
-            $table->integer('updated_by');
-            $table->timestamps();
+            $table->decimal('continv_amount',10,2);
+            $table->integer('contr_id');
+            $table->integer('invtp_code');
+            $table->integer('costd_is');
         });
     }
 
@@ -30,6 +29,6 @@ class CreateMsContractStatusesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ms_contract_status');
+        Schema::dropIfExists('tr_cont_invlog');
     }
 }

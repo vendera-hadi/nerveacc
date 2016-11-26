@@ -22,7 +22,11 @@ class CreateMsCompaniesTable extends Migration
             $table->string('comp_sign_inv_name',40);
             $table->decimal('comp_build_insurance', 18, 2);
             $table->decimal('comp_npp_insurance', 12, 8);
-            $table->char('cashbk_id',36);
+            $table->decimal('comp_materai1', 4, 0);
+            $table->decimal('comp_materai1_amount', 10, 2);
+            $table->decimal('comp_materai2', 4, 0);
+            $table->decimal('comp_materai2_amount', 10, 2);
+            $table->integer('cashbk_id');
         });
     }
 

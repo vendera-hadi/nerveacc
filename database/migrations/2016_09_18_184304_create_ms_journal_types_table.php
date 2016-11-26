@@ -15,8 +15,6 @@ class CreateMsJournalTypesTable extends Migration
     {
         Schema::create('ms_journal_type', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('jour_type_id');
-            $table->char('jour_type_id',36);
             $table->string('jour_type_name');
             $table->char('jour_type_prefix',3);
             $table->boolean('jour_type_isactive')->default(0);

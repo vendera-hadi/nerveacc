@@ -15,12 +15,10 @@ class CreateMsUnitTypesTable extends Migration
     {
         Schema::create('ms_unit_type', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('untype_id');
-            $table->char('untype_id', 36);
             $table->string('untype_name', 15);
             $table->boolean('untype_isactive')->default(0);
-            $table->string('created_by', 15);
-            $table->string('updated_by', 15);
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }

@@ -19,8 +19,8 @@ class CreateMsComplaintsTable extends Migration
             $table->char('compl_code',5);
             $table->string('compl_name', 50);
             $table->boolean('compl_isactive')->default(0);
-            $table->string('created_by', 15);
-            $table->string('updated_by', 15);
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }

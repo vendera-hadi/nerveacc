@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class MsFloor extends Model
 {
    protected $table ='ms_floor';
-   protected $fillable =['floor_id','floor_name','created_by','updated_by'];
+   protected $fillable =['floor_name','created_by','updated_by'];
 }

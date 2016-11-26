@@ -19,8 +19,8 @@ class CreateMsCostItemsTable extends Migration
             $table->char('cost_code',5)->unique();
             $table->string('cost_name',50);
             $table->boolean('cost_isactive')->default(0);
-            $table->string('created_by',15);
-            $table->string('updated_by',15);
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }

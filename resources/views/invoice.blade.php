@@ -37,14 +37,13 @@
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="inv_number" width="100" sortable="true">No.Invoice</th>
-                            <th field="contr_id" width="100" sortable="true">No Kontrak</th>
-                            <th field="tenan_name" width="100" sortable="true">Nama Tenan</th>  
-                            <th field="inv_data" width="50" sortable="true">Tgl Invoice</th>
-                            <th field="inv_duedate" width="50" sortable="true">Jatuh Tempo</th>
-                            <th field="inv_amount" width="50" sortable="true">Amount</th>
-                            <th field="inv_ppn" width="50" sortable="true">PPN</th>
-                            <th field="inv_ppn_amount" width="50" sortable="true">PPN Amount</th> 
-                            <th field="invtp_name" width="100" sortable="true">Jenis Invoice</th>
+                            <th field="inv_date" width="100" sortable="true">Inv Date</th>
+                            <th field="inv_duedate" width="100" sortable="true">Inv Due Date</th>  
+                            <th field="inv_amount" width="50" sortable="true">Inv Amount</th>
+                            <th field="inv_ppn" width="50" sortable="true">Inv PPN</th>
+                            <th field="inv_ppn_amount" width="50" sortable="true">Amount</th>
+                            <th field="invtp_name" width="50" sortable="true">Inv Type</th>
+                            <th field="tenan_name" width="50" sortable="true">Nama Tenan</th>
                             <th field="inv_post" width="50" sortable="true">Posting</th>       
                         </tr>
                     </thead>
@@ -123,17 +122,21 @@ $(function(){
             var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
             ddv.datagrid({
                 url: get_url2+"?id="+row.id,
-                fitColumns:true,
                 singleSelect:true,
                 rownumbers:true,
                 loadMsg:'',
                 height:'auto',
                 columns:[[
-                    {field:'costd_name',title:'Cost Name',width:100},
-                    {field:'costd_rate',title:'Cost Rate',width:100},
-                    {field:'costd_burden',title:'Abodemen',width:100},
-                    {field:'costd_admin',title:'Admin',width:100},
-                    {field:'cost_unit',title:'Satuan',width:100}
+                    {field:'invdt_amount',title:'Inv Number',width:100},
+                    {field:'invdt_note',title:'Inv Date',width:100},
+                    {field:'prd_billing_date',title:'Inv Due Date',width:100},
+                    {field:'meter_start',title:'Amount',width:100},
+                    {field:'meter_end',title:'No. Tenan',width:100},
+                    {field:'meter_used',title:'Invoice Type',width:150},
+                    {field:'meter_cost',title:'Posting',width:50}
+                ]],
+                onResize:function(){
+                    $('#dg').datagrid('fixDetailRowHeight',index);
                 },
                 onLoadSuccess:function(){
                     setTimeout(function(){

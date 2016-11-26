@@ -27,9 +27,9 @@ class CreateTrLedgersTable extends Migration
             $table->char('coa_year', 4);
             $table->char('coa_code', 4);
             $table->char('dept_code', 4);
-            $table->string('created_by', 15);
-            $table->string('updated_by', 15);
-            $table->char('jour_type_id', 36);
+            $table->integer('created_by');
+            $table->integer('updated_by');
+            $table->integer('jour_type_id');
             $table->timestamps();
         });
     }

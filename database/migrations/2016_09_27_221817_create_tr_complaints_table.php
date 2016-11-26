@@ -22,10 +22,10 @@ class CreateTrComplaintsTable extends Migration
             $table->string('comtr_handling_by',25)->nullable();
             $table->dateTime('comtr_finish_date')->nullable();
             $table->text('comtr_handling_note')->nullable();
-            $table->bigInteger('compl_id');
-            $table->bigInteger('unit_id');
-            $table->string('created_by');
-            $table->string('updated_by');
+            $table->integer('compl_id');
+            $table->integer('unit_id');
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
         });
     }

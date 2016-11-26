@@ -15,16 +15,24 @@ class CreateTrInvoicesTable extends Migration
     {
         Schema::create('tr_invoice', function (Blueprint $table) {
             $table->increments('id');
-            $table->char('inv_id', 36)->unique();
-            $table->char('tenan_id', 36);
+            $table->integer('tenan_id');
             $table->string('inv_number', 20);
             $table->date('inv_date');
             $table->date('inv_duedate');
             $table->decimal('inv_amount', 12, 2);
             $table->decimal('inv_ppn', 5, 2);
             $table->decimal('inv_ppn_amount', 12, 2);
+            $table->decimal('inv_outstanding', 12, 2);
+            $table->string('inv_faktur_no',25);
+            $table->date('inv_faktur_date');
+            $table->boolean('inv_iscancel')->default(false);
+            $table->boolean('inv_post')->default(false);
+            $table->string('invtp_name',30);
             $table->char('invtp_code', 5);
-            $table->char('contr_id', 36);
+            $table->integer('contr_id');
+            $table->integer('created_by');
+            $table->integer('updated_by');
+            $table->timestamps();
         });
     }
 

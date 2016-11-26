@@ -15,11 +15,9 @@ class CreateTrCurrencyRatesTable extends Migration
     {
         Schema::create('tr_currency_rate', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('curr_rate_id');
-            $table->char('curr_rate_id', 36);
             $table->date('curr_rate_date');
             $table->decimal('curr_rate_value', 10, 2);
-            $table->char('curr_code', 3);
+            $table->integer('curr_code');
         });
     }
 

@@ -28,8 +28,8 @@ class CreateMsTenantsTable extends Migration
             $table->boolean('tenan_isppn')->default(false);
             $table->boolean('tenan_ispkp')->default(false);
             $table->integer('tent_id');
-            $table->string('created_by', 15);
-            $table->string('updated_by', 15);
+            $table->integer('created_by');
+            $table->integer('updated_by');
             $table->timestamps();
             $table->softDeletes();
         });

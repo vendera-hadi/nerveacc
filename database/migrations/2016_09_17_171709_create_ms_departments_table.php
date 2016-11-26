@@ -15,8 +15,6 @@ class CreateMsDepartmentsTable extends Migration
     {
         Schema::create('ms_department', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('dept_code');
-            $table->char('dept_code',3);
             $table->string('dept_name', 40);
             $table->boolean('dept_isactive')->default(0);
             $table->timestamps();

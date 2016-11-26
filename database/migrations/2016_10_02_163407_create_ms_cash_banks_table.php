@@ -17,9 +17,14 @@ class CreateMsCashBanksTable extends Migration
             $table->increments('id');
             $table->unique('cashbk_code');
             $table->string('cashbk_code',10);
+            $table->string('cashbk_name',50);
             $table->boolean('cashbk_isbank')->default(0);
             $table->string('cashbk_accn_no',15);
-            $table->char('curr_code',3);
+            $table->char('coa_code',10);
+            $table->integer('curr_code');
+            $table->integer('created_by');
+            $table->integer('updated_by');
+            $table->timestamps();
         });
     }
 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMsContractStatusesTable extends Migration
+class CreateCutoffHistoriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateMsContractStatusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('ms_contract_status', function (Blueprint $table) {
+        Schema::create('cutoff_history', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('const_name',30);
-            $table->tinyInteger('const_order');
-            $table->integer('created_by');
-            $table->integer('updated_by');
+            $table->integer('unit_id');
+            $table->decimal('meter_start',10,2);
+            $table->decimal('meter_end',10,2);
+            $table->date('close_date');
+            $table->integer('costd_is');
             $table->timestamps();
         });
     }
@@ -30,6 +31,6 @@ class CreateMsContractStatusesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ms_contract_status');
+        Schema::dropIfExists('cutoff_history');
     }
 }
