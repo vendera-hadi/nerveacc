@@ -19,7 +19,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 7,
             'prdmet_id' => 1,
             'unit_id' => 1
@@ -31,7 +31,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 7,
             'prdmet_id' => 1,
             'unit_id' => 1
@@ -43,7 +43,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '750000',
             'meter_burden' => '70000',
             'meter_admin' => '2500',
-            'costd_is' => 3,
+            'costd_id' => 3,
             'contr_id' => 8,
             'prdmet_id' => 1,
             'unit_id' => 2
@@ -55,7 +55,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 8,
             'prdmet_id' => 1,
             'unit_id' => 2
@@ -67,7 +67,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '350000',
             'meter_burden' => '50000',
             'meter_admin' => '2500',
-            'costd_is' => 1,
+            'costd_id' => 1,
             'contr_id' => 9,
             'prdmet_id' => 1,
             'unit_id' => 3
@@ -79,7 +79,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 9,
             'prdmet_id' => 1,
             'unit_id' => 3
@@ -91,7 +91,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 10,
             'prdmet_id' => 1,
             'unit_id' => 4
@@ -103,7 +103,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 10,
             'prdmet_id' => 1,
             'unit_id' => 4
@@ -115,7 +115,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 11,
             'prdmet_id' => 1,
             'unit_id' => 5
@@ -127,7 +127,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 11,
             'prdmet_id' => 1,
             'unit_id' => 5
@@ -139,7 +139,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '750000',
             'meter_burden' => '70000',
             'meter_admin' => '2500',
-            'costd_is' => 3,
+            'costd_id' => 3,
             'contr_id' => 12,
             'prdmet_id' => 1,
             'unit_id' => 6
@@ -151,7 +151,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 12,
             'prdmet_id' => 1,
             'unit_id' => 6
@@ -163,7 +163,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 7,
             'prdmet_id' => 2,
             'unit_id' => 1
@@ -175,7 +175,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 7,
             'prdmet_id' => 2,
             'unit_id' => 1
@@ -187,7 +187,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '750000',
             'meter_burden' => '70000',
             'meter_admin' => '2500',
-            'costd_is' => 3,
+            'costd_id' => 3,
             'contr_id' => 8,
             'prdmet_id' => 2,
             'unit_id' => 2
@@ -199,7 +199,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 8,
             'prdmet_id' => 2,
             'unit_id' => 2
@@ -211,7 +211,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '350000',
             'meter_burden' => '50000',
             'meter_admin' => '2500',
-            'costd_is' => 1,
+            'costd_id' => 1,
             'contr_id' => 9,
             'prdmet_id' => 2,
             'unit_id' => 3
@@ -223,7 +223,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 9,
             'prdmet_id' => 2,
             'unit_id' => 3
@@ -235,7 +235,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 10,
             'prdmet_id' => 2,
             'unit_id' => 4
@@ -247,7 +247,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 10,
             'prdmet_id' => 2,
             'unit_id' => 4
@@ -259,7 +259,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 11,
             'prdmet_id' => 2,
             'unit_id' => 5
@@ -271,7 +271,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 11,
             'prdmet_id' => 2,
             'unit_id' => 5
@@ -283,7 +283,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '750000',
             'meter_burden' => '70000',
             'meter_admin' => '2500',
-            'costd_is' => 3,
+            'costd_id' => 3,
             'contr_id' => 12,
             'prdmet_id' => 2,
             'unit_id' => 6
@@ -295,7 +295,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 12,
             'prdmet_id' => 2,
             'unit_id' => 6
@@ -307,7 +307,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 7,
             'prdmet_id' => 3,
             'unit_id' => 1
@@ -319,7 +319,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 7,
             'prdmet_id' => 3,
             'unit_id' => 1
@@ -331,7 +331,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '750000',
             'meter_burden' => '70000',
             'meter_admin' => '2500',
-            'costd_is' => 3,
+            'costd_id' => 3,
             'contr_id' => 8,
             'prdmet_id' => 3,
             'unit_id' => 2
@@ -343,7 +343,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 8,
             'prdmet_id' => 3,
             'unit_id' => 2
@@ -355,7 +355,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '350000',
             'meter_burden' => '50000',
             'meter_admin' => '2500',
-            'costd_is' => 1,
+            'costd_id' => 1,
             'contr_id' => 9,
             'prdmet_id' => 3,
             'unit_id' => 3
@@ -367,7 +367,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 9,
             'prdmet_id' => 3,
             'unit_id' => 3
@@ -379,7 +379,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 10,
             'prdmet_id' => 3,
             'unit_id' => 4
@@ -391,7 +391,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 10,
             'prdmet_id' => 3,
             'unit_id' => 4
@@ -403,7 +403,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '550000',
             'meter_burden' => '55000',
             'meter_admin' => '2500',
-            'costd_is' => 2,
+            'costd_id' => 2,
             'contr_id' => 11,
             'prdmet_id' => 3,
             'unit_id' => 5
@@ -415,7 +415,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 11,
             'prdmet_id' => 3,
             'unit_id' => 5
@@ -427,7 +427,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '750000',
             'meter_burden' => '70000',
             'meter_admin' => '2500',
-            'costd_is' => 3,
+            'costd_id' => 3,
             'contr_id' => 12,
             'prdmet_id' => 3,
             'unit_id' => 6
@@ -439,7 +439,7 @@ class TrMeterSeeder extends Seeder
             'meter_cost' => '1500',
             'meter_burden' => '45000',
             'meter_admin' => '2500',
-            'costd_is' => 4,
+            'costd_id' => 4,
             'contr_id' => 12,
             'prdmet_id' => 3,
             'unit_id' => 6

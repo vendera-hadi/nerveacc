@@ -98,7 +98,7 @@
                   <td>
                     <select class="form-control" name="dept_code[]" required> 
                       @foreach($departments as $dept)
-                      <option value="{{$dept->dept_code}}" @if($ledger->dept_code == $dept->dept_code){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
+                      <option value="{{$dept->id}}" @if($ledger->dept_id == $dept->id){!!'selected="selected"'!!}@endif>{{$dept->dept_name}}</option>
                       @endforeach
                     </select>
                   </td>
@@ -112,7 +112,7 @@
                     <input type="text" class="numeric form-control typeValEdit" name="typeVal[]" value="@if($ledger->ledg_debit > 0){{number_format($ledger->ledg_debit,0,',','')}}@else{{number_format($ledger->ledg_credit,0,',','')}}@endif" required>
                   </td>
                   <td>
-                    <a href="#" class="removeLedger"><i class="fa fa-times text-danger"></i></a>
+                    <a href="#" class="removeLedgerEdit"><i class="fa fa-times text-danger"></i></a>
                   </td>
                 </tr>
                 <?php if($ledger->ledg_debit > 0) $totalDebit+=$ledger->ledg_debit; else $totalCredit+=$ledger->ledg_credit; ?>
@@ -127,8 +127,8 @@
                 </tr>
                 <tr class="text-center">
                   <td id="ledgerStatusEdit" style="font-weight:bold;"><span class="text-success">balanced</span></td>
-                  <td id="totalDebitEdit" style="font-weight:bold; color:red">{{$totalDebit}}</td>
-                  <td id="totalCreditEdit" style="font-weight:bold; color:blue">{{$totalCredit}}</td>
+                  <td id="totalDebitEdit" style="font-weight:bold; color:red">{{"Rp. ".number_format($totalDebit,0)}}</td>
+                  <td id="totalCreditEdit" style="font-weight:bold; color:blue">{{"Rp. ".number_format($totalCredit,0)}}</td>
                 </tr>
               </table>
         </div>
@@ -158,8 +158,8 @@ var coacode, coaname, depts;
       if(coacode != ""){
         $('#rowEmptyEdit').hide();
         coaname = $('#selectAccountEdit option:selected').data('name');
-        depts = '<option value="">Choose Department</option> @foreach($departments as $dept)<option value="{{$dept->dept_code}}">{{$dept->dept_name}}</option>@endforeach';
-        $('#tableJournalEdit').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="text" class="form-control" placeholder="description" name="ledg_description[]" required></td><td><select class="form-control" name="dept_code[]" required>'+depts+'</select></td><td><select name="type[]" class="form-control typeEdit"><option>debit</option><option>credit</option></select></td><td><input type="text" class="numeric form-control typeValEdit" name="typeVal[]" value=0 required></td><td><a href="#" class="removeLedger"><i class="fa fa-times text-danger"></i></a></td></tr>');
+        depts = '<option value="">Choose Department</option> @foreach($departments as $dept)<option value="{{$dept->id}}">{{$dept->dept_name}}</option>@endforeach';
+        $('#tableJournalEdit').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="text" class="form-control" placeholder="description" name="ledg_description[]" required></td><td><select class="form-control" name="dept_code[]" required>'+depts+'</select></td><td><select name="type[]" class="form-control typeEdit"><option>debit</option><option>credit</option></select></td><td><input type="text" class="numeric form-control typeValEdit" name="typeVal[]" value=0 required></td><td><a href="#" class="removeLedgerEdit"><i class="fa fa-times text-danger"></i></a></td></tr>');
       }
  });
 
@@ -197,17 +197,17 @@ var coacode, coaname, depts;
       type = $(this).parent().parent().find('.typeEdit').val();
       if(type == 'debit'){
         total = updateCounterDebit();
-        $('#totalDebitEdit').text(total);
+        $('#totalDebitEdit').text("Rp. "+number_format(total));
       }else{
         total = updateCounterCredit();
-        $('#totalCreditEdit').text(total);
+        $('#totalCreditEdit').text("Rp. "+number_format(total));
       }
       balanceStatus();
  }).delegate('.typeEdit','change',function(){
       total = updateCounterDebit();
-        $('#totalDebitEdit').text(total);
+        $('#totalDebitEdit').text("Rp. "+number_format(total));
       total = updateCounterCredit();
-        $('#totalCreditEdit').text(total);
+        $('#totalCreditEdit').text("Rp. "+number_format(total));
       balanceStatus();
  });
 
@@ -239,9 +239,14 @@ var coacode, coaname, depts;
     return true;
  });
 
- $('.removeLedger').click(function(){
+ $('.removeLedgerEdit').click(function(){
       if(confirm('Are you sure want to remove this ledger?')){
           $(this).parent().parent().remove();
+          total = updateCounterDebit();
+            $('#totalDebitEdit').text("Rp. "+number_format(total));
+          total = updateCounterCredit();
+            $('#totalCreditEdit').text("Rp. "+number_format(total));
+          balanceStatus();
       }
  });
   </script>

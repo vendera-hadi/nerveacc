@@ -25,8 +25,8 @@ class CreateTrLedgersTable extends Migration
             $table->decimal('ledg_credit', 14, 2);
             $table->string('ledg_description', 200);
             $table->char('coa_year', 4);
-            $table->char('coa_code', 4);
-            $table->char('dept_code', 4);
+            $table->char('coa_code', 10);
+            $table->integer('dept_id');
             $table->integer('created_by');
             $table->integer('updated_by');
             $table->integer('jour_type_id');

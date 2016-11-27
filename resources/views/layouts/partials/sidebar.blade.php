@@ -52,6 +52,9 @@
                     <li><a href="{{route('contract.addendum')}}"><i class="fa fa-circle-o"></i> Contract Addendum</a></li>
                     <li><a href="{{route('contract.renewal')}}"><i class="fa fa-circle-o"></i> Contract Renewal</a></li>
                     <li><a href="{{route('contract.termination')}}"><i class="fa fa-circle-o"></i> Contract Termination</a></li>
+                    <li><a href="{{route('contract.termination')}}"><i class="fa fa-circle-o"></i> Unclosed Contract <span class="pull-right-container">
+              <span class="label label-primary pull-right">1</span>
+            </span></a></li>
                   </ul>
                 </li>
                 <li>
@@ -69,9 +72,8 @@
                 </li>
                 <li><a href="{{url('cost_item')}}"><i class="fa fa-circle-o"></i> Cost Items</a></li>
                 <li><a href="{{ url('tenant') }}"><i class="fa fa-circle-o"></i> Tenant/Owner</a></li>
-                <li><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant Type</a></li>
-                <li><a href="{{route('marketing.get')}}"><i class="fa fa-circle-o"></i> Marketing/Agent</a></li>
-                <li><a href="{{ url('typetenant') }}"><i class="fa fa-circle-o"></i> Owner/Tenant Type</a></li>
+                <li><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant/Owner Type</a></li>
+                <li><a href="{{route('marketing.index')}}"><i class="fa fa-circle-o"></i> Marketing/Agent</a></li>
                 <li><a href="{{ url('vaccount') }}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
               
               </ul>
@@ -131,7 +133,7 @@
                 <li><a href="{{route('invoice.generate')}}"><i class="fa fa-circle-o"></i> Generate Invoice</a></li>
                 <li><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Outstanding</a></li>
+                <!-- <li><a href="#"><i class="fa fa-circle-o"></i> Outstanding</a></li> -->
                 <!-- <li>
                   <a href="#"><i class="fa fa-circle"></i> Form
                     <span class="pull-right-container">
@@ -213,7 +215,7 @@
                   <i class="fa fa-angle-left pull-right"></i>
                 </span>
               </a>
-              <ul class="treeview-menu">
+              <!-- <ul class="treeview-menu">
                 <li><a href="#"><i class="fa fa-circle-o"></i> Purchase Order</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Receiving</a></li>
                 <li>
@@ -237,7 +239,7 @@
                     <li><a href="{{ url('supplier') }}"><i class="fa fa-circle-o"></i> Supplier</a></li>
                   </ul>
                 </li>
-              </ul>
+              </ul> -->
             </li>
 
             <li class="treeview">
@@ -249,14 +251,14 @@
               </a>
               <ul class="treeview-menu">
                 <li><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
-                <li><a href="{{url('currency')}}"><i class="fa fa-circle-o"></i> Currency</a></li>
-                <li><a href="{{url('contractstatus')}}"><i class="fa fa-circle-o"></i> Contract Status</a></li>
+                <!-- <li><a href="{{url('currency')}}"><i class="fa fa-circle-o"></i> Currency</a></li> -->
+                <!-- <li><a href="{{url('contractstatus')}}"><i class="fa fa-circle-o"></i> Contract Status</a></li> -->
                 <li><a href="{{url('department')}}"><i class="fa fa-circle-o"></i> Department</a></li>
                 <li><a href="{{url('invtype')}}"><i class="fa fa-circle-o"></i> Invoice Type</a></li>
                 <li><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li>
-                <li><a href="{{url('groupaccdetail')}}"><i class="fa fa-circle-o"></i> Group Account Detail</a></li>
-                <li><a href="{{url('rentalperiod')}}"><i class="fa fa-circle-o"></i> Rental Period</a></li>
-                <li><a href="{{url('supplier')}}"><i class="fa fa-circle-o"></i> Supplier</a></li>
+                <!-- <li><a href="{{url('groupaccdetail')}}"><i class="fa fa-circle-o"></i> Group Account Detail</a></li> -->
+                <!-- <li><a href="{{url('rentalperiod')}}"><i class="fa fa-circle-o"></i> Rental Period</a></li> -->
+                <!-- <li><a href="{{url('supplier')}}"><i class="fa fa-circle-o"></i> Supplier</a></li> -->
               </ul>
             </li>
 
@@ -268,8 +270,8 @@
                 </span>
               </a>
               <ul class="treeview-menu">
-                <li><a href="#"><i class="fa fa-circle-o"></i> OR Entry</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Advance Entry</a></li>
+                <li><a href="#"><i class="fa fa-circle-o"></i> Cash Bank List</a></li>
+                <!-- <li><a href="#"><i class="fa fa-circle-o"></i> Advance Entry</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Unidentified Entry</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Virtual Account Entry</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Voucher IN</a></li>
@@ -318,7 +320,7 @@
                     <li><a href="#"><i class="fa fa-circle-o"></i> Master Transaction</a></li>
                     <li><a href="#"><i class="fa fa-circle-o"></i> Master Pph</a></li>
                   </ul>
-                </li>
+                </li> -->
               </ul>
             </li>
 

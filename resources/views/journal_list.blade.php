@@ -70,7 +70,7 @@
                   <select name="dept" class="form-control">
                     <option value="">All Department</option> 
                     @foreach($departments as $dept)
-                    <option value="{{$dept->dept_code}}" @if(Request::input('dept') == $dept->dept_code){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
+                    <option value="{{$dept->id}}" @if(Request::input('dept') == $dept->id){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
                     @endforeach
                   </select>
                 </div>
@@ -319,7 +319,7 @@ $(function(){
       if(coacode != ""){
         $('#rowEmpty').hide();
         coaname = $('#selectAccount option:selected').data('name');
-        depts = '<option value="">Choose Department</option> @foreach($departments as $dept)<option value="{{$dept->dept_code}}">{{$dept->dept_name}}</option>@endforeach';
+        depts = '<option value="">Choose Department</option> @foreach($departments as $dept)<option value="{{$dept->id}}">{{$dept->dept_name}}</option>@endforeach';
         $('#tableJournal').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="text" class="form-control" placeholder="description" name="ledg_description[]" required></td><td><select class="form-control" name="dept_code[]" required>'+depts+'</select></td><td><select name="type[]" class="form-control type"><option>debit</option><option>credit</option></select></td><td><input type="text" class="numeric form-control typeVal" name="typeVal[]" value=0 required></td><td><a href="#" class="removeLedger"><i class="fa fa-times text-danger"></i></a></td></tr>');
       }
  });
@@ -354,21 +354,34 @@ var total, totalDebit, totalCredit, val, type;
     else $('#ledgerStatus').html('<span class="text-success">balanced</span>');
  }
 
+function number_format(nStr)
+{
+    nStr += '';
+    x = nStr.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return x1 + x2;
+}
+
  $(document).delegate('.typeVal','keyup',function(){
       type = $(this).parent().parent().find('.type').val();
       if(type == 'debit'){
         total = updateCounterDebit();
-        $('#totalDebit').text(total);
+        $('#totalDebit').text("Rp. "+number_format(total));
       }else{
         total = updateCounterCredit();
-        $('#totalCredit').text(total);
+        $('#totalCredit').text("Rp. "+number_format(total));
       }
       balanceStatus();
  }).delegate('.type','change',function(){
       total = updateCounterDebit();
-        $('#totalDebit').text(total);
+        $('#totalDebit').text("Rp. "+number_format(total));
       total = updateCounterCredit();
-        $('#totalCredit').text(total);
+        $('#totalCredit').text("Rp. "+number_format(total));
       balanceStatus();
  });
 
@@ -400,9 +413,14 @@ var formData;
     return true;
  });
 
- $('.removeLedger').click(function(){
+ $(document).delegate('.removeLedger','click',function(){
       if(confirm('Are you sure want to remove this ledger?')){
           $(this).parent().parent().remove();
+          total = updateCounterDebit();
+            $('#totalDebit').text("Rp. "+number_format(total));
+          total = updateCounterCredit();
+            $('#totalCredit').text("Rp. "+number_format(total));
+          balanceStatus();
       }
  });
 
@@ -412,7 +430,10 @@ var formData;
           var id = $(this).data('id');
           $.post('{{route('journal.delete')}}',{id:id},function(result){
               if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-              if(result.success) location.reload();
+              if(result.success){ 
+                $.messager.alert('Success','Delete journal success');
+                  location.reload();
+              }
           });
       }
   });
