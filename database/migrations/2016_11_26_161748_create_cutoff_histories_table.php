@@ -19,7 +19,7 @@ class CreateCutoffHistoriesTable extends Migration
             $table->decimal('meter_start',10,2);
             $table->decimal('meter_end',10,2);
             $table->date('close_date');
-            $table->integer('costd_is');
+            $table->integer('costd_id');
             $table->timestamps();
         });
     }

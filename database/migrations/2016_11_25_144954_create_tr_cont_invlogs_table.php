@@ -15,10 +15,10 @@ class CreateTrContInvlogsTable extends Migration
     {
         Schema::create('tr_cont_invlog', function (Blueprint $table) {
             $table->increments('id');
-            $table->decimal('continv_amount',10,2);
+            $table->decimal('continv_amount',10,2)->default(0);
             $table->integer('contr_id');
-            $table->integer('invtp_code');
-            $table->integer('costd_is');
+            $table->integer('invtp_id');
+            $table->integer('costd_id');
         });
     }
 

@@ -21,7 +21,7 @@ class CreateTrMetersTable extends Migration
             $table->decimal('meter_cost', 12, 2);
             $table->decimal('meter_burden', 10, 2);
             $table->decimal('meter_admin', 10, 2);
-            $table->integer('costd_is');
+            $table->integer('costd_id');
             $table->integer('contr_id');
             $table->integer('prdmet_id')->nullable();
             $table->integer('unit_id');
