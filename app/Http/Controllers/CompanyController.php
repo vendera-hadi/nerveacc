@@ -8,6 +8,7 @@ use Auth;
 // load model
 use App\Models\MsCashBank;
 use App\Models\MsCompany;
+use Form;
 
 class CompanyController extends Controller
 {
@@ -16,7 +17,9 @@ class CompanyController extends Controller
     }
 
     public function index2(){
-        return view('company2');
+        $data['company'] = MsCompany::first();
+        $data['cashbanks'] = MsCashBank::all();
+        return view('company2', $data);
     }
 
     public function get(Request $request){
@@ -103,6 +106,37 @@ class CompanyController extends Controller
     }
 
     public function update(Request $request){
+        $this->validate($request, [
+            'comp_name' => 'required|max:100',
+            'comp_address' => 'required|max:150',
+            'comp_phone' => 'required|max:20',
+            'comp_fax' => 'max:20',
+            'comp_build_insurance' => 'digits_between:1,18',
+            'comp_npp_insurance' => 'digits_between:1,12',
+            'comp_materai1' => 'required|digits_between:1,4',
+            'comp_materai2' => 'required|digits_between:1,4',
+            'comp_materai1_amount' => 'digits_between:1,10',
+            'comp_materai2_amount' => 'digits_between:1,10',
+        ]);
+
+        $input = $request->except(['image']);
+        $company = MsCompany::first();
+        if ($request->hasFile('image')) {
+            $extension = $request->image->extension();
+            if(strtolower($extension)!='jpg' && strtolower($extension)!='png'){ 
+                $request->session()->flash('error', 'Image Format must be jpg or png');
+                return redirect()->back();
+            }
+            $path = $request->image->move(public_path('upload'), 'company.'.$extension);
+            // dd($path);
+            $input['comp_image'] = 'upload/company.'.$extension;
+        }
+        $company->update($input);
+        $request->session()->flash('success', 'Update company data success');
+        return redirect()->back();
+    }
+
+    public function update2(Request $request){
         try{
             $id = $request->id;
             $input = $request->all();

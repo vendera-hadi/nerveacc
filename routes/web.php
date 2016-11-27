@@ -167,8 +167,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('cash_bank/delete', 'CashBankController@delete')->name('cash_bank.delete');
 
 	// company
-	Route::get('company','CompanyController@index');
-	Route::get('company2','CompanyController@index2');
+	Route::get('company2','CompanyController@index');
+	Route::get('company','CompanyController@index2');
 	Route::post('company/get', 'CompanyController@get')->name('company.get');
 	Route::post('company/options', 'CompanyController@getOptions')->name('company.options');
 	Route::post('company/insert', 'CompanyController@insert')->name('company.insert');
