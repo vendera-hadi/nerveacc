@@ -11,6 +11,8 @@ use App\Models\MsCostDetail;
 use App\Models\MsUnit;
 use App\Models\MsMarketingAgent;
 use App\Models\TrContractInvoice;
+use App\Models\TrContractLog;
+use App\Models\TrContractInvLog;
 use Validator;
 use DB;
 
@@ -556,7 +558,36 @@ class ContractController extends Controller
 
     public function terminate(Request $request){
         $id = $request->id;
-        TrContract::where('id',$id)->update(['contr_terminate_date'=>date('Y-m-d')]);
+        $date = $request->contr_terminate_date;
+        // TrContract::where('id',$id)->update(['contr_terminate_date'=>date('Y-m-d')]);
+        TrContract::where('id',$id)->update(['contr_terminate_date'=> $date]);
+
+        $contract = TrContract::find($id);
+        // update log juga
+        TrContractLog::create([
+                'contlog_code' => $contract->contr_code,
+                'contlog_no' => $contract->contr_no,
+                'contlog_startdate' => $contract->contr_startdate,
+                'contlog_enddate' => $contract->contr_enddate,
+                'contlog_bast_date' => $contract->contr_bast_date,
+                'contlog_bast_by' => $contract->contr_bast_by,
+                'contlog_note' => $contract->note,
+                'contr_id' => $contract->id,
+                'tenan_id' => $contract->tenan_id,
+                'viracc_id' => $contract->viracc_id
+            ]);
+        // tr contract inv log
+        $continv = TrContractInvoice::where('contr_id',$id)->get();
+        if(count($continv) > 0){
+            foreach ($continv as $value) {
+                TrContractInvLog::create([
+                        'continv_amount' => $value->continv_amount,
+                        'contr_id' => $id,
+                        'invtp_code' => $value->invtp_code,
+                        'costd_is' => $value->costd_is
+                    ]);
+            }
+        }
         return response()->json(['success'=>true]);
     }
 
@@ -564,6 +595,33 @@ class ContractController extends Controller
         $id = $request->id;
         $note = $request->note;
         TrContract::where('id',$id)->update(['contr_status'=>'inputed', 'contr_note'=>$note]);
+
+        $contract = TrContract::find($id);
+        // update log juga
+        TrContractLog::create([
+                'contlog_code' => $contract->contr_code,
+                'contlog_no' => $contract->contr_no,
+                'contlog_startdate' => $contract->contr_startdate,
+                'contlog_enddate' => $contract->contr_enddate,
+                'contlog_bast_date' => $contract->contr_bast_date,
+                'contlog_bast_by' => $contract->contr_bast_by,
+                'contlog_note' => $contract->note,
+                'contr_id' => $contract->id,
+                'tenan_id' => $contract->tenan_id,
+                'viracc_id' => $contract->viracc_id
+            ]);
+        // tr contract inv log
+        $continv = TrContractInvoice::where('contr_id',$id)->get();
+        if(count($continv) > 0){
+            foreach ($continv as $value) {
+                TrContractInvLog::create([
+                        'continv_amount' => $value->continv_amount,
+                        'contr_id' => $id,
+                        'invtp_code' => $value->invtp_code,
+                        'costd_is' => $value->costd_is
+                    ]);
+            }
+        }
         return response()->json(['success'=>true]);
     }
 

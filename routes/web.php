@@ -168,6 +168,7 @@ Route::group(['middleware' => 'auth'], function () {
 
 	// company
 	Route::get('company','CompanyController@index');
+	Route::get('company2','CompanyController@index2');
 	Route::post('company/get', 'CompanyController@get')->name('company.get');
 	Route::post('company/options', 'CompanyController@getOptions')->name('company.options');
 	Route::post('company/insert', 'CompanyController@insert')->name('company.insert');
