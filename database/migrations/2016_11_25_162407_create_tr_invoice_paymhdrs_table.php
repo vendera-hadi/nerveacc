@@ -16,19 +16,19 @@ class CreateTrInvoicePaymhdrsTable extends Migration
         Schema::create('tr_invoice_paymhdr', function (Blueprint $table) {
             $table->increments('id');
             $table->date('invpayh_date');
-            $table->string('invpayh_checkno',15);
-            $table->date('invpayh_giro');
-            $table->string('invpayh_note',50);
+            $table->string('invpayh_checkno',15)->nullable();
+            $table->date('invpayh_giro')->nullable();
+            $table->string('invpayh_note',50)->nullable();
             $table->decimal('invpayh_amount',12,2);
             $table->decimal('invpayh_settlamt',12,2);
             $table->decimal('invpayh_adjustamt',12,2);
             $table->boolean('invpayh_post')->default(0);
             $table->integer('created_by');
             $table->integer('updated_by');
-            $table->datetime('posting_at');
-            $table->integer('paymtp_code');
-            $table->integer('posting_by');
-            $table->integer('cashbk_id');
+            $table->datetime('posting_at')->nullable();
+            $table->integer('paymtp_code')->nullable();
+            $table->integer('posting_by')->nullable();
+            $table->integer('cashbk_id')->nullable();
             $table->integer('contr_id');
             $table->timestamps();
         });
