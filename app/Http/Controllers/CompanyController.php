@@ -15,6 +15,10 @@ class CompanyController extends Controller
         return view('company');
     }
 
+    public function index2(){
+        return view('company2');
+    }
+
     public function get(Request $request){
         try{
             // params

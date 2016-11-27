@@ -134,7 +134,7 @@ $(function(){
                     {field:'costd_burden',title:'Abodemen',width:100},
                     {field:'costd_admin',title:'Admin',width:100},
                     {field:'cost_unit',title:'Satuan',width:100}
-                },
+                ]],
                 onLoadSuccess:function(){
                     setTimeout(function(){
                         $('#dg').datagrid('fixDetailRowHeight',index);
