@@ -29,7 +29,6 @@ class CreateTrContractsTable extends Migration
             $table->integer('tenan_id');
             $table->integer('mark_id')->nullable();
             $table->integer('viracc_id');
-            $table->integer('const_id');
             $table->integer('unit_id');
         });
     }

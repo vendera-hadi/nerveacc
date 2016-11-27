@@ -21,6 +21,7 @@ class CreateTrPeriodMetersTable extends Migration
             $table->date('prd_billing_date');
             $table->integer('created_by');
             $table->integer('updated_by');
+            $table->boolean('status')->default(false);
             $table->timestamps();
         });
     }

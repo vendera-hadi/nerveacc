@@ -27,7 +27,6 @@ class CreateTrInvoicesTable extends Migration
             $table->date('inv_faktur_date');
             $table->boolean('inv_iscancel')->default(false);
             $table->boolean('inv_post')->default(false);
-            $table->string('invtp_name',30);
             $table->char('invtp_code', 5);
             $table->integer('contr_id');
             $table->integer('created_by');

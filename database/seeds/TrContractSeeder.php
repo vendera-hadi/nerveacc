@@ -1,0 +1,222 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class TrContractSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('tr_contract')->insert([
+        [
+            'contr_code' => 'PSMR/1601/001',
+            'contr_no' => 'NO001/01P',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2030-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 7,
+            'mark_id' => 1,
+            'viracc_id' => 1,
+            'unit_id' => 1
+        ],
+        [
+            'contr_code' => 'PSMR/1601/002',
+            'contr_no' => 'NO002/01S',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2030-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 7,
+            'mark_id' => 1,
+            'viracc_id' => 2,
+            'unit_id' => 2
+        ],
+        [
+            'contr_code' => 'PSMR/1601/003',
+            'contr_no' => 'NO003/02P',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2030-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 8,
+            'mark_id' => NULL,
+            'viracc_id' => 3,
+            'unit_id' => 3
+        ],
+        [
+            'contr_code' => 'PSMR/1601/004',
+            'contr_no' => 'NO004/03M',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2030-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 8,
+            'mark_id' => NULL,
+            'viracc_id' => 4,
+            'unit_id' => 4
+        ],
+        [
+            'contr_code' => 'PSMR/1601/005',
+            'contr_no' => 'NO005/04K',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2030-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 9,
+            'mark_id' => NULL,
+            'viracc_id' => 5,
+            'unit_id' =>5
+        ],
+        [
+            'contr_code' => 'PSMR/1601/006',
+            'contr_no' => 'NO006/05Z',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2030-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 9,
+            'mark_id' => NULL,
+            'viracc_id' => 6,
+            'unit_id' => 6
+        ],
+        [
+            'contr_code' => 'PSMR/1601/007',
+            'contr_no' => 'NO007/01P',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2016-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 1,
+            'mark_id' => NULL,
+            'viracc_id' => 1,
+            'unit_id' => 1
+        ],
+        [
+            'contr_code' => 'PSMR/1601/008',
+            'contr_no' => 'NO008/01S',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2016-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 2,
+            'mark_id' => NULL,
+            'viracc_id' => 2,
+            'unit_id' => 2
+        ],
+        [
+            'contr_code' => 'PSMR/1601/009',
+            'contr_no' => 'NO009/02P',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2016-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 3,
+            'mark_id' => NULL,
+            'viracc_id' => 3,
+            'unit_id' => 3
+        ],
+        [
+            'contr_code' => 'PSMR/1601/010',
+            'contr_no' => 'NO010/03M',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2016-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 4,
+            'mark_id' => NULL,
+            'viracc_id' => 4,
+            'unit_id' => 4
+        ],
+        [
+            'contr_code' => 'PSMR/1601/011',
+            'contr_no' => 'NO011/04K',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2016-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 5,
+            'mark_id' => NULL,
+            'viracc_id' => 5,
+            'unit_id' =>5
+        ],
+        [
+            'contr_code' => 'PSMR/1601/012',
+            'contr_no' => 'NO012/05Z',
+            'contr_startdate' => '2016-01-01',
+            'contr_enddate' => '2016-12-31',
+            'contr_bast_date' => '2016-01-01',
+            'contr_bast_by' => 'DOMINGGUS BIREHERE',
+            'contr_note' => NULL,
+            'contr_iscancel' => FALSE,
+            'contr_status' => 'confirmed',
+            'contr_cancel_date' => NULL,
+            'contr_terminate_date' => NULL,
+            'tenan_id' => 6,
+            'mark_id' => NULL,
+            'viracc_id' => 6,
+            'unit_id' => 6
+        ]
+
+        ]);
+    }
+}

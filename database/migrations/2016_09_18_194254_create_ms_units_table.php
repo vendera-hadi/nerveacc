@@ -18,8 +18,9 @@ class CreateMsUnitsTable extends Migration
             $table->string('unit_code', 15);
             $table->string('unit_name', 25);
             $table->decimal('unit_sqrt', 6, 2);
-            $table->string('unit_virtual_accn', 20);
+            $table->integer('unit_virtual_accn');
             $table->boolean('unit_isactive')->default(0);
+            $table->boolean('unit_isavailable')->default(0);
             $table->integer('created_by');
             $table->integer('updated_by');
             $table->integer('untype_id');

@@ -18,9 +18,9 @@ class CreateMsCostDetailsTable extends Migration
             $table->integer('cost_id');
             $table->string('costd_name',100);
             $table->string('costd_unit',10)->nullable();
-            $table->decimal('costd_rate', 7, 2);
-            $table->decimal('costd_burden', 7, 2);
-            $table->decimal('costd_admin', 7, 2);
+            $table->decimal('costd_rate', 10, 2);
+            $table->decimal('costd_burden', 10, 2);
+            $table->decimal('costd_admin', 10, 2);
             $table->boolean('costd_ismeter')->default(0);
         });
     }

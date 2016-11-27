@@ -15,8 +15,7 @@ class CreateMsPaymentTypesTable extends Migration
     {
         Schema::create('ms_payment_type', function (Blueprint $table) {
             $table->increments('id');
-            $table->char('paymtp_code',2);
-            $table->string('paymtp_name',15);
+            $table->string('paymtp_name',50);
             $table->integer('created_by');
             $table->integer('updated_by');
             $table->timestamps();
