@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class MsPaymentTypeSeeder extends Seeder
+class MsCurrencySeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -11,23 +11,18 @@ class MsPaymentTypeSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('ms_payment_type')->insert([
+        DB::table('ms_currency')->insert([
         [
-            'paymtp_name' => 'CASH/TUNAI',
+            'curr_name' => 'RUPIAH',
+            'curr_isactive' => TRUE,
             'created_by' => 1,
             'updated_by' => 1,
             'created_at' => date("Y-m-d H:i:s"),
             'updated_at' => date("Y-m-d H:i:s")
         ],
         [
-            'paymtp_name' => 'BANK',
-            'created_by' => 1,
-            'updated_by' => 1,
-            'created_at' => date("Y-m-d H:i:s"),
-            'updated_at' => date("Y-m-d H:i:s")
-        ],
-        [
-            'paymtp_name' => 'CHECK',
+            'curr_name' => 'DOLLAR',
+            'curr_isactive' => FALSE,
             'created_by' => 1,
             'updated_by' => 1,
             'created_at' => date("Y-m-d H:i:s"),

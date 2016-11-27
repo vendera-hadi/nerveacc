@@ -15,8 +15,6 @@ class CreateMsCashBanksTable extends Migration
     {
         Schema::create('ms_cash_bank', function (Blueprint $table) {
             $table->increments('id');
-            $table->unique('cashbk_code');
-            $table->string('cashbk_code',10);
             $table->string('cashbk_name',50);
             $table->boolean('cashbk_isbank')->default(0);
             $table->string('cashbk_accn_no',15);

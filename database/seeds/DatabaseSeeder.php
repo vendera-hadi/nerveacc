@@ -32,5 +32,10 @@ class DatabaseSeeder extends Seeder
         $this->call(TrInvoiceSeeder::class);
         $this->call(TrInvoiceDetailSeeder::class);
         $this->call(MsJournalTypeSeeder::class);
+        $this->call(MsCurrencySeeder::class);
+        $this->call(TrCurrencyRateSeeder::class);
+        $this->call(MsCashBankSeeder::class);
+        $this->call(TrInvoicePaymhdrSeeder::class);
+        $this->call(TrInvoicePaymdtlSeeder::class);
     }
 }
