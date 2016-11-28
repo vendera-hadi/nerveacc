@@ -96,31 +96,32 @@ class PeriodMeterController extends Controller
         $count = TrPeriodMeter::count();
         $ms = $count+1;
         $input['prdmet_id'] = 'PRD-'.date('Ymd').'-'.$ms;
+
+        $tempStartDate = explode('/', $input['prdmet_start_date']);
+        $input['prdmet_start_date'] = implode('-', [$tempStartDate[2],$tempStartDate[0],$tempStartDate[1]]); 
+        $tempEndDate = explode('/', $input['prdmet_end_date']);
+        $input['prdmet_end_date'] = implode('-', [$tempEndDate[2],$tempEndDate[0],$tempEndDate[1]]); 
+        // $tempBillingDate = explode('/', $input['prdmet_billing_date']);
+        // $input['prdmet_billing_date'] = implode('-', [$tempBillingDate[2],$tempBillingDate[0],$tempBillingDate[1]]); 
+
         $input['created_by'] = Auth::id();
         $input['updated_by'] = Auth::id();
-        try{
+        // try{
             DB::transaction(function () use($input, $request) {
-                $meter = TrPeriodMeter::select('id','prdmet_id','prd_billing_date')->where('status',true)->orderBy('prd_billing_date','desc')->limit(1)->get();
-                if((count($meter) == 0) || ($meter[0]->prd_billing_date > $request->prd_billing_date)){
+                $meter = TrPeriodMeter::select('id','prdmet_id','prd_billing_date')->where('status',true)->orderBy('prd_billing_date','desc')->first();
+                if(empty($meter) || ($meter->prd_billing_date > $request->prd_billing_date)){
                     $last_id =  TrPeriodMeter::create($input);
                     $insertedId = $last_id->id;
                     $tanggal = $request->input('prd_billing_date');
-                    if(count($meter) == 0){
-                        /*
-                        $kontrak = TrContract::select('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
-                        ->join('tr_contract_invoice',\DB::raw('tr_contract_invoice.contr_id::integer'),"=",\DB::raw('tr_contract.id::integer'))
-                        ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
-                        ->where('tr_contract.contr_startdate', '<=', $tanggal)
-                        ->where('tr_contract.contr_enddate', '>=', $tanggal)
-                        ->where('tr_contract.contr_status','confirmed')
-                        ->where('tr_contract.contr_terminate_date',NULL)
-                        ->where('ms_cost_detail.costd_ismeter',TRUE)
-                        ->groupBy('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
-                        ->get();
-                        */
+                    // JIKA METER KOSONGAN
+                    if(empty($meter)){
+                        // all units
                         $kontrak = MsUnit::select('id')->get();
+                        // semua cost detail yg ada meteran nya 
                         $cost = MsCostDetail::where('costd_ismeter',TRUE)->get();
+                        // setiap unit
                         for($i=0; $i<count($kontrak); $i++){
+                            // setiap costdt
                             for($j=0; $j<count($cost); $j++){
                                 $kontrak_unit = TrContract::where('unit_id',$kontrak[$i]->id)
                                 ->where('contr_startdate', '<=', $tanggal)
@@ -139,7 +140,7 @@ class PeriodMeterController extends Controller
                                     'meter_cost'=> '0',
                                     'meter_burden'=> $cost[$j]->costd_burden,
                                     'meter_admin'=> $cost[$j]->costd_admin,
-                                    'costd_is'=>  $cost[$j]->id,
+                                    'costd_id'=>  $cost[$j]->id,
                                     'prdmet_id'=> $insertedId,
                                     'contr_id'=> $kontrak_id,
                                     'unit_id'=>$kontrak[$i]->id
@@ -148,26 +149,26 @@ class PeriodMeterController extends Controller
                             }
                         }     
                     }else{
-                        /*
-                        $kontrak = TrContract::select('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
-                        ->join('tr_contract_invoice',\DB::raw('tr_contract_invoice.contr_id::integer'),"=",\DB::raw('tr_contract.id::integer'))
-                        ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
-                        ->where('tr_contract.contr_startdate', '<=', $tanggal)
-                        ->where('tr_contract.contr_enddate', '>=', $tanggal)
-                        ->where('tr_contract.contr_status','confirmed')
-                        ->where('tr_contract.contr_terminate_date',NULL)
-                        ->where('ms_cost_detail.costd_ismeter',TRUE)
-                        ->groupBy('tr_contract.id','tr_contract_invoice.costd_is','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin')
-                        ->get();
-                        */
-                        $kontrak = MsUnit::select('id')->get();
+                        // JIKA METERAN SBLMNYA ADA
+                        $units = MsUnit::select('id')->get();
                         $cost = MsCostDetail::where('costd_ismeter',TRUE)->get();
-                        $last_meter = TrMeter::select('meter_end','costd_is','contr_id','unit_id')->where('prdmet_id',$meter[0]->id)->get();
+                        $last_meter = TrMeter::select('meter_end','costd_id','contr_id','unit_id')->where('prdmet_id',$meter->id)->get();
+                        echo $last_meter; die();       
+                        foreach ($units as $key => $unt) {
+                            foreach ($cost as $key2 => $cst) {
+                                foreach ($last_meter as $key3 => $lst) {
+                                    // cocokin last meter dengan cost yg ada
+                                    if($lst->unit_id == $contr->unit_id && $lst->costd_id == $cst->id) $meterEnd = $lst->meter_end;
+                                    else $meterEnd = 0;
+                                }   
+                            }
+                        }
+
                         for($i=0; $i<count($kontrak); $i++){
                             for($j=0; $j<count($cost); $j++){
                                 $ls = 0;
                                 for($k=0; $k<count($last_meter); $k++){
-                                    if(($last_meter[$k]->unit_id === $kontrak[$i]->id) && ($last_meter[$k]->costd_is === $cost[$j]->id)){
+                                    if(($last_meter[$k]->unit_id === $kontrak[$i]->id) && ($last_meter[$k]->costd_id === $cost[$j]->id)){
                                         $ls = $last_meter[$k]->meter_end;
                                     }
                                 }
@@ -188,7 +189,7 @@ class PeriodMeterController extends Controller
                                     'meter_cost'=> '0',
                                     'meter_burden'=> $cost[$j]->costd_burden,
                                     'meter_admin'=> $cost[$j]->costd_admin,
-                                    'costd_is'=>  $cost[$j]->id,
+                                    'costd_id'=>  $cost[$j]->id,
                                     'contr_id' => $kontrak_id,
                                     'prdmet_id'=> $insertedId,
                                     'unit_id'=>$kontrak[$i]->id
@@ -201,9 +202,9 @@ class PeriodMeterController extends Controller
                     return response()->json(['success'=>false,'errorMsg' => "Periode Billing Cannot Backdate"]);
                 }
             });
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
-        }
+        // }catch(\Exception $e){
+        //     return response()->json(['errorMsg' => $e->getMessage()]);
+        // }
         return ['status' => 1, 'message' => 'Insert Success'];        	
     }
 

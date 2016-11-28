@@ -83,10 +83,10 @@
 
 
                 <div id="closeCtrModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
+                  <div class="modal-dialog" style="width: 850px;">
 
                     <!-- Modal content-->
-                    <div class="modal-content" style="width: 750px;">
+                    <div class="modal-content" style="width: 850px;">
                       
                       <div class="modal-body text-center" id="closeCtrModalContent">
                       </div>
@@ -128,22 +128,21 @@
                 fitColumns: true,
                 rowStyler:function(index,row){
                     if(!isEmpty(row)){
-                        console.log(row);
                         // priority 1 terminate
-                        if(row.terminate_diff > -4 && row.terminate_diff != ""){
+                        if(row.terminate_diff > -4 && !isNaN(parseInt(row.terminate_diff)) ){
                             return 'background-color:red';
-                        }else if(row.terminate_diff > -8 && row.terminate_diff != ""){
-                            return 'background-color:pink';
-                        }else if (row.terminate_diff > -31 && row.terminate_diff != ""){
+                        }else if(row.terminate_diff > -8 && row.terminate_diff <= -4 && !isNaN(parseInt(row.terminate_diff)) ){
                             return 'background-color:yellow';
+                        }else if (row.terminate_diff > -31 && row.terminate_diff <= -8 && !isNaN(parseInt(row.terminate_diff)) ){
+                            return 'background-color:lightyellow';
                         }
                         // priority 2 end date
-                        if(row.enddate_diff > -4){
+                        if(row.enddate_diff > -4 && !isNaN(parseInt(row.enddate_diff)) ){
                             return 'background-color:red';
-                        }else if(row.enddate_diff > -8){
-                            return 'background-color:pink';
-                        }else if (row.enddate_diff > -31){
+                        }else if(row.enddate_diff > -8 && row.enddate_diff <= -4 && !isNaN(parseInt(row.enddate_diff))){
                             return 'background-color:yellow';
+                        }else if (row.enddate_diff > -31 && row.enddate_diff <= -8 && !isNaN(parseInt(row.enddate_diff)) ){
+                            return 'background-color:lightyellow';
                         }
                     }
                 }

@@ -13,6 +13,7 @@ use App\Models\MsMarketingAgent;
 use App\Models\TrContractInvoice;
 use App\Models\TrContractLog;
 use App\Models\TrContractInvLog;
+use App\Models\TrPeriodMeter;
 use Validator;
 use DB;
 use Carbon\Carbon;
@@ -735,7 +736,7 @@ class ContractController extends Controller
                 $temp['contr_no'] = $value->contr_no;
                 $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
                 $created = new Carbon($value->contr_enddate);
-                $now = Carbon::now();
+                $now = new Carbon(date('Y-m-d'));
                 $datediff = ($created->diff($now)->days < 1) ? 'today' : $created->diffInDays($now, false);
                 if($created->diffInDays($now, false) < 0 && $created->diffInDays($now, false) > -31) $datediff = " <strong>(H".$datediff.")</strong>";
                 else if($created->diffInDays($now, false) > 0 || $created->diffInDays($now, false) < -31) $datediff = "";
@@ -748,13 +749,13 @@ class ContractController extends Controller
                 $temp['contr_status'] = $status;
 
                 $terminate = !empty($value->contr_terminate_date) ? new Carbon($value->contr_terminate_date) : '';
-                $now = Carbon::now();
-                if(!empty($terminate)){ 
+                $now = new Carbon(date('Y-m-d'));
+                if($terminate != ''){ 
                     $datediffCount = $terminate->diffInDays($now, false);
-                    if($datediffCount > 0) $datediffCount = '+'.$datediff;
+                    if($datediffCount > 0) $datediffCount = '+'.$datediffCount." LATE";
                     $datediff = ($terminate->diff($now)->days < 1) ? 'today' : 'H'.$datediffCount;
                     $datediff = "<strong>(".$datediff.")</strong>";
-                    $temp['terminate_diff'] = $datediffCount;
+                    $temp['terminate_diff'] = $terminate->diffInDays($now, false);
                 }else{ 
                     $datediff = "";
                     $temp['terminate_diff'] = "";
@@ -773,7 +774,17 @@ class ContractController extends Controller
     public function closeCtrModal(Request $request){
         $id = $request->id;
         // get all meter yang ada di unit si tenant
-        echo TrContractInvoice::where('contr_id',$id)->get();
+        $data['contInv'] = TrContractInvoice::join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
+                                ->join('tr_contract','tr_contract.id','=','tr_contract_invoice.contr_id')
+                                ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                                ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
+                                ->where('contr_id',$id)->where('costd_ismeter',1)->get();
+        // LAST MONTH PERIOD METER
+        $tempTimeStart = date("Y-m-01", strtotime("-1 months"));
+        $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
+        $lastMonthPeriod = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();                 
+        echo $lastMonthPeriod;
+        return view('modal.closecontract', $data);
     }
 
 
