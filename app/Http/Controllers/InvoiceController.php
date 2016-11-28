@@ -220,6 +220,7 @@ class InvoiceController extends Controller
                             $totalPay = 0;
                             // CEK INV PERIOD DULU, UDA LWT NEXT INVOICE NYA BARU CREATE NEW INVOICE
                             if($tempTimeStart >= $value->continv_next_inv){
+                                // SERVICE CHARGE
                                 if($value->is_service_charge){
                                     // pake rumus service charge
                                     $note = $value->costd_name." (".(int)$value->unit_sqrt." m2) Per ".date('F',strtotime($tempTimeStart))." ".$year;
@@ -240,7 +241,14 @@ class InvoiceController extends Controller
                                         // echo "<br>FULL RATE<br>";
                                         $amount = ($value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;    
                                     }
-
+                                }else if($value->is_sinking_fund){
+                                    $note = $value->costd_name." Per ".date('F',strtotime($tempTimeStart))." ".$year;   
+                                    // rumus cost + burden + admin
+                                    $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
+                                }else if($value->is_insurance){
+                                    $note = $value->costd_name." Per ".date('F',strtotime($tempTimeStart))." ".$year;   
+                                    // rumus cost + burden + admin
+                                    $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
                                 }else{
                                     $note = $value->costd_name." Per ".date('F',strtotime($tempTimeStart))." ".$year;   
                                     // rumus cost + burden + admin

@@ -15,6 +15,7 @@ use App\Models\TrContractLog;
 use App\Models\TrContractInvLog;
 use Validator;
 use DB;
+use Carbon\Carbon;
 
 class ContractController extends Controller
 {
@@ -100,16 +101,14 @@ class ContractController extends Controller
 
     public function getdetail(Request $request){
         $contractId = $request->id;
-        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_virtual_account.viracc_no','ms_virtual_account.viracc_name','ms_virtual_account.viracc_isactive','ms_contract_status.const_code','ms_contract_status.const_name','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
-        ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
-        ->join('ms_marketing_agent',\DB::raw('ms_marketing_agent.id::integer'),"=",\DB::raw('tr_contract.mark_id::integer'))
-        // ->join('ms_rental_period',\DB::raw('ms_rental_period.id::integer'),"=",\DB::raw('tr_contract.renprd_id::integer'))
-        ->join('ms_virtual_account',\DB::raw('ms_virtual_account.viracc_no'),"=",\DB::raw('tr_contract.viracc_id'))
-        ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
-        ->join('ms_unit',\DB::raw('ms_unit.id::integer'),"=",\DB::raw('tr_contract.unit_id::integer'))->first();
+        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_virtual_account.viracc_no','ms_virtual_account.viracc_name','ms_virtual_account.viracc_isactive','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
+        ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
+        ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
+        ->join('ms_virtual_account','ms_virtual_account.id',"=",'tr_contract.viracc_id')
+        ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')->first();
         $costdetail = TrContractInvoice::select('ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter')
-                ->join('ms_invoice_type',\DB::raw('tr_contract_invoice.invtp_code'),"=",\DB::raw('ms_invoice_type.invtp_code'))
-                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
+                ->join('ms_invoice_type','tr_contract_invoice.invtp_id',"=",'ms_invoice_type.id')
+                ->join('ms_cost_detail','tr_contract_invoice.costd_id',"=",'ms_cost_detail.id')
                 ->where('contr_id',$contractId)
                 ->get();
         return view('modal.contract', ['fetch' => $fetch, 'costdetail' => $costdetail]);
@@ -677,4 +676,105 @@ class ContractController extends Controller
         } 
         return response()->json(['success'=>true]);
     }
+
+    public function unclosed(){
+        return view('contract_unclosed');
+    }
+
+    public function unclosedList(Request $request){
+        try{
+            // params
+            $page = $request->page;
+            $perPage = $request->rows; 
+            $page-=1;
+            $offset = $page * $perPage;
+            // @ -> isset(var) ? var : null
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+
+            // olah data
+            $count = TrContract::count();
+            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name')
+                    ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')->where(function($query){
+                        $query->where('contr_terminate_date','<=', date("Y-m-d", strtotime("+1 week")))->where('contr_status','confirmed');
+                    })->orWhere(function($query){
+                        $query->where('contr_enddate','<=', date("Y-m-d", strtotime("+1 week")))->whereNull('contr_terminate_date')->where('contr_status','confirmed');
+                    });
+            // pake ini utk list yg semingguan 
+            // whereBetween('contr_terminate_date', [date('Y-m-d'), date("Y-m-d", strtotime("+1 week"))])
+
+            if(!empty($filters) && count($filters) > 0){
+                foreach($filters as $filter){
+                    $op = "like";
+                    // tentuin operator
+                    switch ($filter->op) {
+                        case 'contains':
+                            $op = 'like';
+                            break;
+                        case 'less':
+                            $op = '<=';
+                            break;
+                        case 'greater':
+                            $op = '>=';
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['contr_code'] = $value->contr_code;
+                $temp['contr_no'] = $value->contr_no;
+                $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
+                $created = new Carbon($value->contr_enddate);
+                $now = Carbon::now();
+                $datediff = ($created->diff($now)->days < 1) ? 'today' : $created->diffInDays($now, false);
+                if($created->diffInDays($now, false) < 0 && $created->diffInDays($now, false) > -31) $datediff = " <strong>(H".$datediff.")</strong>";
+                else if($created->diffInDays($now, false) > 0 || $created->diffInDays($now, false) < -31) $datediff = "";
+                $temp['contr_enddate'] = date('d/m/Y',strtotime($value->contr_enddate)).$datediff;
+                $temp['enddate_diff'] = $created->diffInDays($now, false);
+                $temp['tenan_name'] = $value->tenan_name;
+                if($value->contr_status == 'confirmed') $status = '<strong class="text-success">'.$value->contr_status.'</strong>';
+                else if($value->contr_status == 'cancelled' || $value->contr_status == 'closed') $status = '<strong class="text-danger">'.$value->contr_status.'</strong>';
+                else $status = '<strong>'.$value->contr_status.'</strong>';
+                $temp['contr_status'] = $status;
+
+                $terminate = !empty($value->contr_terminate_date) ? new Carbon($value->contr_terminate_date) : '';
+                $now = Carbon::now();
+                if(!empty($terminate)){ 
+                    $datediffCount = $terminate->diffInDays($now, false);
+                    if($datediffCount > 0) $datediffCount = '+'.$datediff;
+                    $datediff = ($terminate->diff($now)->days < 1) ? 'today' : 'H'.$datediffCount;
+                    $datediff = "<strong>(".$datediff.")</strong>";
+                    $temp['terminate_diff'] = $datediffCount;
+                }else{ 
+                    $datediff = "";
+                    $temp['terminate_diff'] = "";
+                }
+
+                $temp['contr_terminate_date'] = !empty($value->contr_terminate_date) ? date('d/m/Y',strtotime($value->contr_terminate_date))." ".$datediff : '';                
+                $temp['action'] = '<a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>&nbsp; <a href="#" title="Close Contract" data-toggle="modal" data-target="#closeCtrModal" data-id="'.$value->id.'" class="closeContract"><i class="fa fa-sign-out" aria-hidden="true"></i></a>';
+                $result['rows'][] = $temp;
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+    }
+
+    public function closeCtrModal(Request $request){
+        $id = $request->id;
+        // get all meter yang ada di unit si tenant
+        echo TrContractInvoice::where('contr_id',$id)->get();
+    }
+
+
 }
