@@ -10,12 +10,18 @@ use App\Models\MsInvoiceType;
 use App\Models\MsCostDetail;
 use App\Models\MsUnit;
 use App\Models\MsMarketingAgent;
+use App\Models\MsUnitOwner;
 use App\Models\TrContractInvoice;
 use App\Models\TrContractLog;
 use App\Models\TrContractInvLog;
 use App\Models\TrPeriodMeter;
+use App\Models\TrMeter;
+use App\Models\TrInvoice;
+use App\Models\CutoffHistory;
+use App\Models\MsCompany;
 use Validator;
 use DB;
+use Auth;
 use Carbon\Carbon;
 
 class ContractController extends Controller
@@ -773,19 +779,117 @@ class ContractController extends Controller
 
     public function closeCtrModal(Request $request){
         $id = $request->id;
+        $contract = TrContract::find($id);
+        // cek apakah si contract ini adalah si owner
+        $cekOwner = MsUnitOwner::where('unit_id',$contract->unit_id)->where('tenan_id',$contract->tenan_id)->first();
+        $data['cutoffFlag'] = 0;
+        // klo owner, tetep generate tapi minta renew contract. kalo bukan owner, generate dan cutoff nya dilimpahin 
+        if(!$cekOwner) $data['cutoffFlag'] = 1;
+
+        // cari kontrak pairing, owner dari unit tersebut
+
         // get all meter yang ada di unit si tenant
-        $data['contInv'] = TrContractInvoice::join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
+        $data['contInvMeter'] = TrContractInvoice::join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
                                 ->join('tr_contract','tr_contract.id','=','tr_contract_invoice.contr_id')
                                 ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                 ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                                 ->where('contr_id',$id)->where('costd_ismeter',1)->get();
+        $data['contInvNoMeter'] = TrContractInvoice::join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
+                                ->join('tr_contract','tr_contract.id','=','tr_contract_invoice.contr_id')
+                                ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                                ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
+                                ->where('contr_id',$id)->where('costd_ismeter',0)->get();
+        if(count($data['contInvMeter']) > 0){
+            $data['contractNo'] = $data['contInvMeter'][0]->contr_no;
+            $data['unitCode'] = $data['contInvMeter'][0]->unit_code;
+        }else{
+            $data['contractNo'] = $data['contInvNoMeter'][0]->contr_no;
+            $data['unitCode'] = $data['contInvNoMeter'][0]->unit_code;
+        }
+        $data['contr_id'] = $id;
+        $data['tenan_id'] = $contract->tenan_id;
         // LAST MONTH PERIOD METER
         $tempTimeStart = date("Y-m-01", strtotime("-1 months"));
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
         $lastMonthPeriod = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();                 
-        echo $lastMonthPeriod;
+        // kalau last month period ketemu, tampung meter start nya adalah meter end dari period kmaren
+        $lastMeterLog = [];
+        if($lastMonthPeriod){
+            $lastMeter = TrMeter::where('prdmet_id',$lastMonthPeriod->id)->get();
+            if($lastMeter){
+                foreach ($lastMeter as $lmtr) {
+                    $lastMeterLog[$lmtr->costd_id] = $lmtr->meter_end;
+                }
+            }  
+        }
+        $data['lastMeter'] = $lastMeterLog;
         return view('modal.closecontract', $data);
     }
 
+    public function closeCtrProcess(Request $request){
+        // var_dump($request->all());
+        $meter_units = @$request->unit_id;
+        $meter_costdids = @$request->costd_id;
+        $meter_start = @$request->meter_start;
+        $meter_end = @$request->meter_end;
+        $meter_rate = @$request->meter_rate;
+        $meter_burden = @$request->meter_burden;
+        $meter_admin = @$request->meter_admin;
+        $contr_id = @$request->contr_id;
+        $tenan_id = @$request->tenan_id;
+
+        $insertCutoff = [];
+        $insertTrMeter = [];
+        $insertInvDetail = [];
+        $year = date('Y');
+        $month = date('m');
+
+        $companyData = MsCompany::first();
+
+        // if meter input exist
+        if(count($meter_units) > 0){
+            $proRateMeterRatio = date('d') / date('t');
+            $totalAmount = 0;
+            $contrInv = TrContractInvoice::join('ms_invoice_type','tr_contract_invoice.invtp_id','=','ms_invoice_type.id')
+                        ->where('contr_id',$contr_id)->where('costd_id',$meter_costdids[0])->first();
+            // siapin buat inv type
+            $invType = $contrInv->invtp_code;
+
+            foreach($meter_units as $key => $unit) {
+                // input ke cutoff meter
+                $insertCutoff[] = ['unit_id'=>$unit, 'costd_id'=>$meter_costdids[$key], 'meter_start' => $meter_start[$key], 'meter_end'=>$meter_end[$key], 'close_date'=>date('Y-m-d')];
+                // input ke tr meter(optional)
+                $tempMeterUsed = $meter_end[$key] - $meter_start[$key];
+                $tempMeterCost = ($proRateMeterRatio * $tempMeterUsed * $meter_rate[$key]) + $meter_burden[$key] + $meter_admin[$key];
+                $totalAmount+=$tempMeterCost;
+                $insertTrMeter[] = ['meter_start' => $meter_start[$key], 'meter_end'=>$meter_end[$key], 'meter_used'=>$tempMeterUsed, 'meter_cost' => $tempMeterCost, 'meter_burden' => $meter_burden[$key], 'meter_admin' => $meter_admin[$key], 'costd_id' => $meter_costdids[$key], 'prdmet_id' => 0, 'contr_id' => $contr_id, 'unit_id'=>$unit ];    
+                // buat inv detail
+                $tempCostdt = MsCostDetail::find($meter_costdids[$key]);
+                $insertInvDetail[] = ['invdt_amount' => $tempMeterCost, 'invdt_note' => $tempCostdt->costd_name." Periode ".date('01-m-Y')." s/d ".date('d-m-Y')." (Closed)",
+                                        'costd_id'=>$meter_costdids[$key]];
+            }
+            if($companyData->comp_materai1_amount)
+            
+            $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like','CL-'.substr($year, -2).$month.'-%')->orderBy('id','desc')->first();
+            if($lastInvoiceofMonth){
+                $lastPrefix = explode('-', $lastInvoiceofMonth->inv_number);
+                $lastPrefix = (int) $lastPrefix[2];               
+            }else{
+                $lastPrefix = 0;
+            }
+            $newPrefix = $lastPrefix + 1;
+            $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
+            $invNo = "CL-".substr($year, -2).$month."-".$newPrefix;
+            // generate invoice meter
+            $insertInvMeter = [
+                                'tenan_id'=>$tenan_id, 'inv_number'=>$invNo, 'inv_date'=>date('Y-m-d'), 
+                                'inv_duedate'=>date('Y-m-d', strtotime('+1 month')), 'inv_amount'=>$totalAmount,
+                                'inv_ppn'=>0.1, 'inv_ppn_amount'=> 1.1*$totalAmount, 'inv_outstanding'=>0, 'inv_faktur_no' => $invNo,
+                                'inv_faktur_date'=>date('Y-m-d'), 'invtp_id' => $contrInv->invtp_id, 'contr_id' => $contr_id, 'created_by' => Auth::id(), 'updated_by' => Auth::id()
+                            ];
+            var_dump($insertInvMeter);
+
+        }
+    }
 
 }
