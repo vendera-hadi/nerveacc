@@ -195,6 +195,11 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('contract/inputed','ContractController@inputed')->name('contract.inputed');
 	Route::post('contract/terminate','ContractController@terminate')->name('contract.terminate');
 	Route::post('contract/renew','ContractController@renew')->name('contract.renew');
+
+	Route::get('contract/unclosed','ContractController@unclosed')->name('contract.unclosed');
+	Route::post('contract/getUnclosed', 'ContractController@unclosedList')->name('contract.getunclosed');
+	Route::post('contract/closeCtrModal', 'ContractController@closeCtrModal')->name('contract.closeCtrModal');
+	Route::post('contract/closeCtr', 'ContractController@closeCtrProcess')->name('contract.closectr');
 	// period meter
 
 	// tr meter
