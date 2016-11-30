@@ -29,6 +29,16 @@
 		<div class="row">
 			<div class="col-md-11">
           		<!-- content -->
+                <form id="search">
+                <div class="row" style="margin-bottom:20px">
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Contract or Tenan Name">
+                    </div>
+                    <div class="col-sm-4">
+                        <button class="btn btn-info">Cari</button>
+                    </div>
+                </div>
+                </form>
 
                 <!-- template tabel -->
           		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
@@ -37,13 +47,13 @@
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="inv_number" width="100" sortable="true">No.Invoice</th>
-                            <th field="contr_id" width="100" sortable="true">No Kontrak</th>
-                            <th field="tenan_name" width="100" sortable="true">Nama Tenan</th>  
-                            <th field="inv_data" width="50" sortable="true">Tgl Invoice</th>
+                            <th field="contr_no" width="100" sortable="true">No Kontrak</th>
+                            <th field="tenan_name" width="100" sortable="true">Nama Tenan</th>
+                            <th field="unit" width="100" sortable="true">Unit</th>  
+                            <th field="inv_date" width="50" sortable="true">Tgl Invoice</th>
                             <th field="inv_duedate" width="50" sortable="true">Jatuh Tempo</th>
                             <th field="inv_amount" width="50" sortable="true">Amount</th>
-                            <th field="inv_ppn" width="50" sortable="true">PPN</th>
-                            <th field="inv_ppn_amount" width="50" sortable="true">PPN Amount</th> 
+                            <th field="inv_ppn_amount" width="50" sortable="true">+ 10% PPN Amount</th> 
                             <th field="invtp_name" width="100" sortable="true">Jenis Invoice</th>
                             <th field="inv_post" width="50" sortable="true">Posting</th>       
                         </tr>
@@ -128,17 +138,16 @@ $(function(){
                 loadMsg:'',
                 height:'auto',
                 columns:[[
-                    {field:'invdt_amount',title:'Inv Number',width:100},
-                    {field:'invdt_note',title:'Inv Date',width:100},
-                    {field:'prd_billing_date',title:'Inv Due Date',width:100},
-                    {field:'meter_start',title:'Amount',width:100},
-                    {field:'meter_end',title:'No. Tenan',width:100},
-                    {field:'meter_used',title:'Invoice Type',width:150},
-                    {field:'meter_cost',title:'Posting',width:50}
+                    {field:'costd_name',title:'Cost Item'},
+                    {field:'invdt_note',title:'Note'},
+                    {field:'meter_start',title:'Start'},
+                    {field:'meter_end',title:'End'},
+                    {field:'meter_used',title:'Consumption'},
+                    {field:'invdt_amount',title:'Amount'}
                 ]],
                 onResize:function(){
                     $('#dg').datagrid('fixDetailRowHeight',index);
-                ]],
+                },
                 onLoadSuccess:function(){
                     setTimeout(function(){
                         $('#dg').datagrid('fixDetailRowHeight',index);
@@ -146,6 +155,20 @@ $(function(){
                 }
             });
             $('#dg').datagrid('fixDetailRowHeight',index);
+        }
+    });
+    // $('#dg').datagrid('enableFilter');
+
+    var query;
+    $('#search').submit(function(e){
+        e.preventDefault();
+        query = $(this).find('input[name=q]').val();
+        if(query!=''){
+            // refresh page
+            $('#dg').datagrid('load', {
+                q: query,
+            });
+            $('#dg').datagrid('reload');
         }
     });
 });        
