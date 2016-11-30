@@ -20,7 +20,7 @@
         <input type="hidden" name="meter_rate[]" value="{{$cdt->costd_rate}}">
         <input type="hidden" name="meter_burden[]" value="{{$cdt->meter_burden}}">
         <input type="hidden" name="meter_admin[]" value="{{$cdt->meter_admin}}">
-        <td>{{$cdt->contr_no}}</td>
+        <td>{{$cdt->contr_code}}</td>
         <td>{{$cdt->unit_code}}</td>
         <td>{{$cdt->costd_name}}</td>
         <td>{{$cdt->meter_start}}</td>
@@ -38,6 +38,7 @@
 <div class="text-left">
   <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">Upload Excel</button>
   <button type="submit" class="btn btn-xs btn-info">Submit</button>
+  <a href="{{ url('period_meter/downloadExcel',[$st->id]) }}" class="btn btn-warning btn-xs">Download Template Excel</a>
 </div>
 </form>
 
@@ -119,7 +120,7 @@ $.ajax({
       </tr>
       @foreach($meter as $cdt)
       <tr class="text-center">
-        <td>{{$cdt->contr_no}}</td>
+        <td>{{$cdt->contr_code}}</td>
         <td>{{$cdt->unit_code}}</td>
         <td>{{$cdt->costd_name}}</td>
         <td>{{$cdt->meter_start}}</td>
