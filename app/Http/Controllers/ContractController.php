@@ -17,6 +17,7 @@ use App\Models\TrContractInvLog;
 use App\Models\TrPeriodMeter;
 use App\Models\TrMeter;
 use App\Models\TrInvoice;
+use App\Models\TrInvoiceDetail;
 use App\Models\CutoffHistory;
 use App\Models\MsCompany;
 use Validator;
@@ -837,10 +838,12 @@ class ContractController extends Controller
         $meter_admin = @$request->meter_admin;
         $contr_id = @$request->contr_id;
         $tenan_id = @$request->tenan_id;
+        $cutoffStatus = @$request->cutoff;
 
         $insertCutoff = [];
         $insertTrMeter = [];
         $insertInvDetail = [];
+        $meterIds = [];
         $year = date('Y');
         $month = date('m');
 
@@ -863,12 +866,14 @@ class ContractController extends Controller
                 $tempMeterCost = ($proRateMeterRatio * $tempMeterUsed * $meter_rate[$key]) + $meter_burden[$key] + $meter_admin[$key];
                 $totalAmount+=$tempMeterCost;
                 $insertTrMeter[] = ['meter_start' => $meter_start[$key], 'meter_end'=>$meter_end[$key], 'meter_used'=>$tempMeterUsed, 'meter_cost' => $tempMeterCost, 'meter_burden' => $meter_burden[$key], 'meter_admin' => $meter_admin[$key], 'costd_id' => $meter_costdids[$key], 'prdmet_id' => 0, 'contr_id' => $contr_id, 'unit_id'=>$unit ];    
+                
                 // buat inv detail
                 $tempCostdt = MsCostDetail::find($meter_costdids[$key]);
                 $insertInvDetail[] = ['invdt_amount' => $tempMeterCost, 'invdt_note' => $tempCostdt->costd_name." Periode ".date('01-m-Y')." s/d ".date('d-m-Y')." (Closed)",
                                         'costd_id'=>$meter_costdids[$key]];
             }
-            if($companyData->comp_materai1_amount)
+            if($totalAmount <= $companyData->comp_materai1_amount) $insertInvDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
+            else $insertInvDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
             
             $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like','CL-'.substr($year, -2).$month.'-%')->orderBy('id','desc')->first();
             if($lastInvoiceofMonth){
@@ -887,8 +892,24 @@ class ContractController extends Controller
                                 'inv_ppn'=>0.1, 'inv_ppn_amount'=> 1.1*$totalAmount, 'inv_outstanding'=>0, 'inv_faktur_no' => $invNo,
                                 'inv_faktur_date'=>date('Y-m-d'), 'invtp_id' => $contrInv->invtp_id, 'contr_id' => $contr_id, 'created_by' => Auth::id(), 'updated_by' => Auth::id()
                             ];
-            var_dump($insertInvMeter);
+            // ubah tipe data  invtp_id
+            // alter table "public"."tr_invoice" alter column invtp_id type integer using invtp_id::numeric
 
+            DB::transaction(function () use($insertCutoff, $insertTrMeter, $insertInvMeter, $insertInvDetail) {
+                $invoice = TrInvoice::create($insertInvMeter);
+                foreach ($insertCutoff as $coff) {
+                    CutoffHistory::create($coff);
+                }
+                foreach ($insertTrMeter as $mtr) {
+                    $meterIds[] = TrMeter::create($mtr);   
+                }
+                foreach ($insertInvDetail as $key => $invDt) {
+                    $invDt['inv_id'] = $invoice->id;
+                    if(isset($meterIds[$key])) $invDt['meter_id'] = $meterIds[$key]->id;
+                    TrInvoiceDetail::create($invDt);
+                }
+            });
+            echo 'Invoice Meter Generated';
         }
     }
 

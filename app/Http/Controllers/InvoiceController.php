@@ -24,8 +24,9 @@ class InvoiceController extends Controller
     }
 
     public function get(Request $request){
-        try{
+        // try{
             // params
+            $keyword = @$request->q;
             $page = $request->page;
             $perPage = $request->rows; 
             $page-=1;
@@ -38,10 +39,12 @@ class InvoiceController extends Controller
 
             // olah data
             $count = TrInvoice::count();
-            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name')
-                    ->join('ms_invoice_type','ms_invoice_type.invtp_code',"=",'tr_invoice.invtp_code')
+            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
+                    ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
-                    ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_invoice.tenan_id::integer'));
+                    ->join('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
+                    ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
+                    ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -69,38 +72,48 @@ class InvoiceController extends Controller
                     else $fetch = $fetch->where($filter->field, $op, $filter->value);
                 }
             }
+            // jika ada keyword
+            if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
+                                        $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'like','%'.$keyword.'%');
+                                    });
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+            
             $fetch = $fetch->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
+                $temp['contr_no'] = $value->contr_no;
+                $temp['unit'] = $value->unit_name." (".$value->floor_name.")";
                 $temp['inv_number'] = $value->inv_number;
-                $temp['inv_data'] = $value->inv_data;
-                $temp['inv_duedate'] = $value->inv_duedate;
-                $temp['inv_amount'] = $value->inv_amount;
-                $temp['inv_ppn'] = $value->inv_ppn;
-                $temp['inv_ppn_amount'] = $value->inv_ppn_amount;
+                $temp['inv_date'] = date('d/m/Y',strtotime($value->inv_date));
+                $temp['inv_duedate'] = date('d/m/Y',strtotime($value->inv_duedate));
+                $temp['inv_amount'] = "Rp. ".$value->inv_amount;
+                $temp['inv_ppn'] = $value->inv_ppn * 100;
+                $temp['inv_ppn'] = $temp['inv_ppn']."%";
+                $temp['inv_ppn_amount'] = "Rp. ".$value->inv_ppn_amount;
                 $temp['invtp_name'] = $value->invtp_name;
                 $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['inv_post'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
+                // $temp['daysLeft']
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        // }catch(\Exception $e){
+        //     return response()->json(['errorMsg' => $e->getMessage()]);
+        // } 
     }
 
     public function getdetail(Request $request){
         try{
             $inv_id = $request->id;
-            $nilai = TrInvoiceDetail::select('costd_is')->where('inv_id',$inv_id)->get();
+            $nilai = TrInvoiceDetail::select('costd_id')->where('inv_id',$inv_id)->get();
             $cost_id = $nilai[0]->costd_is;
-            $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost')
-                ->join('tr_invoice',\DB::raw('tr_invoice.id::integer'),"=",\DB::raw('tr_invoice_detail.inv_id::integer'))
+            $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
+                ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
+                ->leftJoin('ms_cost_detail','tr_invoice_detail.costd_id',"=",'ms_cost_detail.id')
                 ->leftJoin('tr_meter','tr_meter.id',"=",'tr_invoice_detail.meter_id')
                 ->leftJoin('tr_period_meter','tr_period_meter.id',"=",'tr_meter.prdmet_id')
                 ->where('tr_invoice_detail.inv_id',$inv_id)
