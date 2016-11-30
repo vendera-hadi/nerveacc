@@ -298,6 +298,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('aging/tes','AgingController@tes')->name('aging.tes');
 	Route::get('aging/tes2','AgingController@tes2')->name('aging.tes2');
 
+	// Faktur
+	Route::get('faktur','FakturController@index')->name('faktur.index');
+	Route::post('faktur/get', 'FakturController@get')->name('faktur.get');
 });
 
 Route::get('logout','Auth\AuthController@logout');
