@@ -15,6 +15,7 @@ use App\Models\TrContract;
 use App\Models\TrContractInvoice;
 use App\Models\TrPeriodMeter;
 use App\Models\TrMeter;
+use App\Models\MsCompany;
 use DB;
 
 class InvoiceController extends Controller
@@ -137,6 +138,8 @@ class InvoiceController extends Controller
         $year = $request->input('year');
         $tempTimeStart = implode('-', [$year,$month,'01']);
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
+        $companyData = MsCompany::first();
+
         $maxTime = date('Y-m-d',strtotime("first day of previous month"));
         // invoice dpt di generate paling lama bulan sekarang, generate utk bulan kmaren
         if($tempTimeStart > $maxTime) return response()->json(['errorMsg' => 'Invoice can\'t be generated more than this month']);
@@ -171,72 +174,79 @@ class InvoiceController extends Controller
         foreach ($availableContract as $key => $contract) {
             if(!in_array($contract->id, $invExceptions)){
                 // generate invoice, tentuin berapa invoice yg digenerate PER CONTRACT group by Invoice type
-                $totalInv = TrContractInvoice::select('tr_contract_invoice.contr_id','tr_contract_invoice.invtp_code')->join('ms_cost_detail','tr_contract_invoice.costd_is','=','ms_cost_detail.id')
-                            ->where('tr_contract_invoice.contr_id',$contract->id)->groupBy('tr_contract_invoice.invtp_code','tr_contract_invoice.contr_id')->get();          
+                $totalInv = TrContractInvoice::select('tr_contract_invoice.contr_id','tr_contract_invoice.invtp_id')->join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
+                            ->where('tr_contract_invoice.contr_id',$contract->id)->groupBy('tr_contract_invoice.invtp_id','tr_contract_invoice.contr_id')->get();          
                 $totalInvoice+= count($totalInv);
                 foreach ($totalInv as $key => $ctrInv) {
                     // echo "Contract #".$ctrInv->contr_id."<br>";
                     $countInvoice+=1;
-                    $details = TrContractInvoice::select('tr_contract_invoice.*','ms_cost_detail.*','ms_cost_item.is_service_charge','ms_unit.unit_sqrt','ms_cost_detail.id as costd_id','tr_contract.tenan_id','tr_contract.contr_code','tr_contract.contr_enddate','tr_contract.contr_terminate_date','ms_invoice_type.invtp_prefix','ms_invoice_type.invtp_code')
-                            ->join('ms_cost_detail','tr_contract_invoice.costd_is','=','ms_cost_detail.id')
+                    // AMBIL CONTRACT INVOICE PER INVOICE TYPE
+                    $details = TrContractInvoice::select('tr_contract_invoice.*','ms_cost_detail.*','ms_cost_item.is_service_charge','ms_cost_item.is_sinking_fund','ms_cost_item.is_insurance','ms_unit.unit_sqrt','ms_cost_detail.id as costd_id','tr_contract.tenan_id','tr_contract.contr_code','tr_contract.contr_enddate','tr_contract.contr_terminate_date','ms_invoice_type.invtp_prefix','ms_invoice_type.id')
+                            ->join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
                             ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                             ->join('tr_contract',DB::raw('tr_contract_invoice.contr_id::integer'),'=','tr_contract.id')
                             ->join('ms_unit','ms_unit.id','=','tr_contract.unit_id')
-                            ->join('ms_invoice_type','tr_contract_invoice.invtp_code','=','ms_invoice_type.invtp_code')
-                            ->where('tr_contract_invoice.contr_id',$ctrInv->contr_id)->where('tr_contract_invoice.invtp_code',$ctrInv->invtp_code)->get();
+                            ->join('ms_invoice_type','tr_contract_invoice.invtp_id','=','ms_invoice_type.id')
+                            ->where('tr_contract_invoice.contr_id',$ctrInv->contr_id)->where('tr_contract_invoice.invtp_id',$ctrInv->invtp_id)->get();
                     
                     $invDetail = [];
                     $insertFlag = true;
                     // echo "<br>Invoice #".$countInvoice."<br>";
-                    // Looping per Invoice yg sdh di grouping
+                    // Looping per Invoice yg sdh di grouping (CONTRACT INVOICE PER INV TYPE)
                     foreach ($details as $key2 => $value) {
                         // echo "Invoice ".$key." , detail ".$key2."<br><br>";
-                        // KALAU is meter true, hitung cost meteran 
-                        if(!empty($value->costd_ismeter)){
-                            $totalPay = 0;
-                            // get harga meteran selama periode bulan ini
-                            $lastPeriodMeterofMonth = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();
-                            if($lastPeriodMeterofMonth){
-                                $meter = TrMeter::select('tr_meter.id as tr_meter_id','tr_meter.*','tr_period_meter.*','ms_cost_detail.costd_name','ms_cost_detail.id as costd_is')
-                                    ->join('tr_period_meter','tr_meter.prdmet_id','=','tr_period_meter.id')
-                                    ->join('ms_cost_detail','tr_meter.costd_is','=','ms_cost_detail.id')
-                                    ->where('tr_meter.contr_id', $contract->id)->where('tr_meter.costd_is',$value->costd_id)
-                                    ->where('tr_period_meter.id',$lastPeriodMeterofMonth->id)->first();
-                                // echo "<br>Last Prd ".$lastPeriodMeterofMonth->id."<br>";
-                                // echo "<br>Meter<br>".$meter."<br>";
-                                if(empty($meter)){ 
-                                    echo "Contract Code <strong>".$value->contr_code."</strong> Cost Item <strong>".$value->costd_name."</strong>, Meter ID is not inputed yet<br>";
-                                    $insertFlag = false;
+                        // LAST INV DATE
+                        if(!empty($value->continv_next_inv)) $last_inv_date = $value->continv_next_inv;
+                        else $last_inv_date = $tempTimeStart;
+                        // GENERATE KALAU PERIODE LAST INV UDA LEWAT
+                        if($tempTimeStart >= $last_inv_date){
+                            // KALAU is meter true, hitung cost meteran 
+                            if(!empty($value->costd_ismeter)){
+                                // echo 'meter<br>';
+                                $totalPay = 0;
+                                // get harga meteran selama periode bulan ini
+                                $lastPeriodMeterofMonth = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();
+                                if($lastPeriodMeterofMonth){
+                                    $meter = TrMeter::select('tr_meter.id as tr_meter_id','tr_meter.*','tr_period_meter.*','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.id as costd_id')
+                                        ->join('tr_period_meter','tr_meter.prdmet_id','=','tr_period_meter.id')
+                                        ->join('ms_cost_detail','tr_meter.costd_id','=','ms_cost_detail.id')
+                                        ->where('tr_meter.contr_id', $contract->id)->where('tr_meter.costd_id',$value->costd_id)
+                                        ->where('tr_period_meter.id',$lastPeriodMeterofMonth->id)->first();
+                                    // echo "<br>Last Prd ".$lastPeriodMeterofMonth->id."<br>";
+                                    // echo "<br>Meter<br>".$meter."<br>";
+                                    if(empty($meter)){ 
+                                        echo "<br><b>Contract #".$contract->contr_no."</b><br>Contract Code <strong>".$value->contr_code."</strong> Cost Item <strong>".$value->costd_name."</strong>, Meter ID is not inputed yet<br>";
+                                        $insertFlag = false;
+                                    }else{
+                                        // note masi minus rumus
+                                        $note = $meter->costd_name." Consumption : ".$meter->meter_used." ".$meter->costd_unit." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));   
+                                        // rumus masih standar, rate * meter used + burden + admin
+                                        // $amount = ($meter->meter_used * $meter->meter_cost) + $meter->meter_burden + $meter->meter_admin;
+                                        $amount = $meter->meter_cost;
+                                        $invDetail[] = [
+                                            'invdt_amount' => $amount,
+                                            'invdt_note' => $note,
+                                            'continv_start_inv' => $tempTimeStart,
+                                            'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months")),
+                                            'costd_id' => $meter->costd_id,
+                                            'meter_id' => $meter->tr_meter_id
+                                        ];
+                                        $totalPay+=$amount;
+                                    }
                                 }else{
-                                    // note masi minus rumus
-                                    $note = $meter->costd_name." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));   
-                                    // rumus masih standar, rate * meter used + burden + admin
-                                    // $amount = ($meter->meter_used * $meter->meter_cost) + $meter->meter_burden + $meter->meter_admin;
-                                    $amount = $meter->meter_cost;
-                                    $invDetail[] = [
-                                        'invdt_amount' => $amount,
-                                        'invdt_note' => $note,
-                                        'continv_start_inv' => $tempTimeStart,
-                                        'continv_next_inv' => date('Y-m-d',strtotime("+1 months", $tempTimeStart)),
-                                        'costd_is' => $meter->costd_is,
-                                        'meter_id' => $meter->tr_meter_id
-                                    ];
-                                    $totalPay+=$amount;
-                                }
-                            }else{
-                                echo "<br>Meter Input for ".date('F Y',strtotime($tempTimeStart)).' was not inputed yet. Go to <a href="'.url('period_meter').'">Meter Input</a> and create Period then Input Meter of this particular month<br>';
-                            }  
+                                    echo "<br><b>Contract #".$contract->contr_no."</b><br> Meter Input for ".date('F Y',strtotime($tempTimeStart)).' was not inputed yet. Go to <a href="'.url('period_meter').'">Meter Input</a> and create Period then Input Meter of this particular month<br>';
+                                    $insertFlag = false;
+                                }  
 
-                        }else{
-                            // YG NOT USING METER (AGK TRICKY), MUSTI CEK STATUS KONTRAK, KALO END GA SAMPE AKHIR BULAN MUSTI PRO RATE
-                            // echo "<br>not using meter<br>";
-                            $totalPay = 0;
-                            // CEK INV PERIOD DULU, UDA LWT NEXT INVOICE NYA BARU CREATE NEW INVOICE
-                            if($tempTimeStart >= $value->continv_next_inv){
+                            }
+                            else{
+                                echo 'non meter<br>';
+                                // YG NOT USING METER, GENERATE FULLRATE AJA
+                                $totalPay = 0;
                                 // SERVICE CHARGE
                                 if($value->is_service_charge){
                                     // pake rumus service charge
-                                    $note = $value->costd_name." (".(int)$value->unit_sqrt." m2) Per ".date('F',strtotime($tempTimeStart))." ".$year;
+                                    $note = $value->costd_name." (".(int)$value->unit_sqrt." sqrt) Per ".date('F',strtotime($tempTimeStart))." ".$year;
                                     // cek akhir period dari kontrak dia
                                     $totalDayCertainMonth = date('t',strtotime($tempTimeEnd));
                                     if(!empty($value->contr_terminate_date) && ($tempTimeEnd > $value->contr_terminate_date)){
@@ -271,16 +281,27 @@ class InvoiceController extends Controller
                                     'invdt_amount' => $amount,
                                     'invdt_note' => $note,
                                     'continv_start_inv' => $tempTimeStart,
-                                    'continv_next_inv' => date('Y-m-d',strtotime("+".$value->continv_period." months", $tempTimeStart)),
-                                    'costd_is' => $value->costd_id
+                                    'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months")),
+                                    'costd_id' => $value->costd_id
                                 ];
                                 $totalPay+=$amount;
+                                // ends
                             }
-                            
+                            // end cek meter not meter
                         }
+                        // end cek periode dan rangkai detail
 
                     }
-                    // $insertFlag = false;
+                    
+                    // HABIS JABARIN DETAIL, INSERT INVOICE 
+                    // TAMBAHIN STAMP DUTY
+                    if($totalPay <= $companyData->comp_materai1_amount) $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
+                    else $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
+                    
+                    echo var_dump($invDetail)."<br><br>"; 
+
+                    $insertFlag = false;
+                    // INSERT DB
                     if($insertFlag){
                         DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail){
                             // insert invoice
@@ -296,7 +317,7 @@ class InvoiceController extends Controller
                             $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
 
                             $now = date('Y-m-d');
-                            $duedate = date('Y-m-d', strtotime('+1 month'));
+                            $duedate = date('Y-m-d', strtotime('+'.$value->continv_period.' month'));
                             $inv = [
                                 'tenan_id' => $value->tenan_id,
                                 'inv_number' => $value->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
@@ -318,12 +339,13 @@ class InvoiceController extends Controller
                             }
                         });
                         $invoiceGenerated++;
-                    }  
+                    }
+                    //end insert db 
                 }
                                         
                         
             }
-        }
+        } die();
 
         return '<h3>'.$invoiceGenerated.' of '.$totalInvoice.' Invoices Generated, Please Check Invoice List <a href="'.url('invoice').'">Here</a></h3>';
     }

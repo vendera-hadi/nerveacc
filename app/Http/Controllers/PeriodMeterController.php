@@ -98,6 +98,10 @@ class PeriodMeterController extends Controller
             $count = TrPeriodMeter::count();
             $ms = $count+1;
             $input['prdmet_id'] = 'PRD-'.date('Ymd').'-'.$ms;
+            $prdstart = explode('/',$request->prdmet_start_date);
+            $prdend = explode('/',$request->prdmet_end_date);
+            $input['prdmet_start_date'] = implode('-', [$prdstart[2],$prdstart[0],$prdstart[1]]);
+            $input['prdmet_end_date'] = implode('-', [$prdend[2],$prdend[0],$prdend[1]]);
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
             $input['status'] = FALSE;
@@ -150,8 +154,8 @@ class PeriodMeterController extends Controller
                         $last_idmeter = $lts->id;
                         
                         $ct_meter = CutoffHistory::select('unit_id','costd_id','meter_end')
-                            ->where('close_date', '>=', $request->input('prdmet_start_date'))
-                            ->where('close_date', '<=', $request->input('prdmet_end_date'))
+                            ->where('close_date', '>=', $input['prdmet_start_date'])
+                            ->where('close_date', '<=', $input['prdmet_end_date'])
                             ->where('unit_id',$unit_kontrak[$i]->unit_id)
                             ->where('costd_id',$unit_kontrak[$i]->costd_id)
                             ->get();

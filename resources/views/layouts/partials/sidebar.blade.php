@@ -132,7 +132,7 @@
               <ul class="treeview-menu">
                 <li><a href="{{route('invoice.generate')}}"><i class="fa fa-circle-o"></i> Generate Invoice</a></li>
                 <li><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>
+                <li><a href="{{route('aging.index')}}"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>
                 <!-- <li><a href="#"><i class="fa fa-circle-o"></i> Outstanding</a></li> -->
                 <!-- <li>
                   <a href="#"><i class="fa fa-circle"></i> Form
