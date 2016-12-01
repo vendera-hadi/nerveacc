@@ -87,6 +87,14 @@ $('#formEditMeter').submit(function(e){
     if(flagContinue){
         $.post('{{route('contract.closectr')}}', data, function(result){
             console.log(result);
+            if(result.error){
+                $.messager.alert('Warning',result.message);
+            }
+            if(result.success){
+                $.messager.alert('Success',result.message);
+                $('#closeCtrModal').modal("hide");
+                $('#dg').datagrid('reload');
+            }
         }, 'json');
     }
 });

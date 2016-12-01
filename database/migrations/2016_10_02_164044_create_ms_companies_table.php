@@ -26,6 +26,7 @@ class CreateMsCompaniesTable extends Migration
             $table->decimal('comp_materai1_amount', 10, 2)->default(0);
             $table->decimal('comp_materai2', 4, 0);
             $table->decimal('comp_materai2_amount', 10, 2)->default(0);
+            $table->decimal('comp_sqrt', 6, 2);
             $table->integer('cashbk_id');
             $table->string('comp_image',255)->nullable();
         });
