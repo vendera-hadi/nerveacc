@@ -76,6 +76,8 @@ class ContractController extends Controller
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+            else $fetch->orderBy('created_at','desc');
+            
             $fetch = $fetch->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
@@ -734,6 +736,7 @@ class ContractController extends Controller
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+
             $fetch = $fetch->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
@@ -1069,7 +1072,7 @@ class ContractController extends Controller
             }
             // end foreach group
 
-            DB::transaction(function () use($insertInvNonMeter, $cutoffStatus, $groups) {
+            DB::transaction(function () use($insertInvNonMeter, $insertInvDetail, $insertOwnerInvNonMeter, $insertOwnerInvDetail, $groups) {
                 foreach($groups as $keygrp => $grp){
                     $invoice = TrInvoice::create($insertInvNonMeter[$keygrp]);
                     foreach ($insertInvDetail[$keygrp] as $key => $invDt) {
@@ -1200,7 +1203,7 @@ class ContractController extends Controller
         // end meter
 
         // CLOSE CONTRACT
-        TrContract::where('contr_id',$contr_id)->update('contr_status','closed');
+        TrContract::where('id',$contr_id)->update(['contr_status'=>'closed']);
         return response()->json(['success'=>true, 'message'=>'Invoice Generated for this Closed Contract '.$contractData->contr_no.', Please Cek Invoice List Menu']);
     }
     // end
