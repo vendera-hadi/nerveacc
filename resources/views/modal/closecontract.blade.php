@@ -90,6 +90,11 @@ $('#formEditMeter').submit(function(e){
             if(result.error){
                 $.messager.alert('Warning',result.message);
             }
+            if(result.success){
+                $.messager.alert('Success',result.message);
+                $('#closeCtrModal').modal("hide");
+                $('#dg').datagrid('reload');
+            }
         }, 'json');
     }
 });
