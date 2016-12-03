@@ -181,7 +181,7 @@ class InvoiceController extends Controller
                     // echo "Contract #".$ctrInv->contr_id."<br>";
                     $countInvoice+=1;
                     // AMBIL CONTRACT INVOICE PER INVOICE TYPE
-                    $details = TrContractInvoice::select('tr_contract_invoice.*','ms_cost_detail.*','ms_cost_item.is_service_charge','ms_cost_item.is_sinking_fund','ms_cost_item.is_insurance','ms_unit.unit_sqrt','ms_cost_detail.id as costd_id','tr_contract.tenan_id','tr_contract.contr_code','tr_contract.contr_enddate','tr_contract.contr_terminate_date','ms_invoice_type.invtp_prefix','ms_invoice_type.id')
+                    $details = TrContractInvoice::select('tr_contract_invoice.*','ms_cost_detail.*','ms_cost_item.is_service_charge','ms_cost_item.is_sinking_fund','ms_cost_item.is_insurance','ms_unit.unit_sqrt','ms_cost_detail.id as costd_id','tr_contract.tenan_id','tr_contract.unit_id','tr_contract.contr_code','tr_contract.contr_enddate','tr_contract.contr_terminate_date','ms_invoice_type.invtp_prefix','ms_invoice_type.id as invtp_id')
                             ->join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
                             ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                             ->join('tr_contract',DB::raw('tr_contract_invoice.contr_id::integer'),'=','tr_contract.id')
@@ -240,51 +240,52 @@ class InvoiceController extends Controller
 
                             }
                             else{
-                                echo 'non meter<br>';
+                                // echo 'non meter<br>';
                                 // YG NOT USING METER, GENERATE FULLRATE AJA
                                 $totalPay = 0;
-                                // SERVICE CHARGE
-                                if($value->is_service_charge){
-                                    // pake rumus service charge
-                                    $note = $value->costd_name." (".(int)$value->unit_sqrt." sqrt) Per ".date('F',strtotime($tempTimeStart))." ".$year;
-                                    // cek akhir period dari kontrak dia
-                                    $totalDayCertainMonth = date('t',strtotime($tempTimeEnd));
-                                    if(!empty($value->contr_terminate_date) && ($tempTimeEnd > $value->contr_terminate_date)){
-                                        $dayUsed = date('d',strtotime($value->contr_terminate_date));
-                                        // LOGIKA PRO RATE
-                                        $amount = ($dayUsed / $totalDayCertainMonth * $value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;
-                                        // echo "<br>PRO RATE BY TERMINATE DATE<br>";
-                                    }else if($tempTimeEnd > $value->contr_enddate){
-                                        $dayUsed = date('d',strtotime($value->contr_enddate));
-                                        // LOGIKA PRO RATE
-                                        $amount = ($dayUsed / $totalDayCertainMonth * $value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;
-                                        // echo "<br>PRO RATE END CONTRACT<br>";
-                                    }else{
-                                        // HITUNG FULL
-                                        // echo "<br>FULL RATE<br>";
-                                        $amount = ($value->costd_rate * $value->unit_sqrt) + $value->costd_burden + $value->costd_admin;    
-                                    }
-                                }else if($value->is_sinking_fund){
-                                    $note = $value->costd_name." Per ".date('F',strtotime($tempTimeStart))." ".$year;   
-                                    // rumus cost + burden + admin
-                                    $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
-                                }else if($value->is_insurance){
-                                    $note = $value->costd_name." Per ".date('F',strtotime($tempTimeStart))." ".$year;   
-                                    // rumus cost + burden + admin
-                                    $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
+                                if(!empty($value->contr_terminate_date) && ($tempTimeEnd > $value->contr_terminate_date)){
+                                    // JIKA CONTRACT TERMINATE DATE BERAKHIR BULAN INI
+                                    echo "<br><b>Contract #".$contract->contr_no."</b><br> terminated at ".date('d/m/Y',strtotime($value->contr_terminate_date)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here";
+                                    $insertFlag = false;
+                                }else if($tempTimeEnd > $value->contr_enddate){
+                                    // JIKA CONTRACT SUDAH BERAKHIR
+                                    echo "<br><b>Contract #".$contract->contr_no."</b><br> expired at ".date('d/m/Y',strtotime($value->contr_enddate)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here";
+                                    $insertFlag = false;
                                 }else{
-                                    $note = $value->costd_name." Per ".date('F',strtotime($tempTimeStart))." ".$year;   
-                                    // rumus cost + burden + admin
-                                    $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
+                                    // JENIS COST ITEM
+                                    if($value->is_service_charge){
+                                        // SERVICE CHARGE
+                                        $note = $value->costd_name." (Rp.".number_format($value->costd_rate,2)." x ".(int)$value->unit_sqrt." sqrt x ".$value->continv_period." bulan) Periode ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
+                                        $amount = ((int)$value->unit_sqrt * $value->costd_rate) + $value->costd_burden + $value->costd_admin;
+                                    }else if($value->is_sinking_fund){
+                                        // SINKING FUND (DUMMY)
+                                        $note = $value->costd_name." Periode ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"));   
+                                        $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
+                                    }else if($value->is_insurance){
+                                        // INSURANCE
+                                        // find unit utk ngambil luas unit
+                                        $currUnit = MsUnit::find($value->unit_id);
+                                        $npp_building = $companyData->comp_npp_insurance;
+                                        // npp unit  = lust unit per luas total unit
+                                        $npp_unit =  $currUnit->unit_sqrt / $companyData->comp_sqrt;
+                                        $note = $value->costd_name." (Rp. ".number_format($value->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"));   
+                                        // rumus cost + burden + admin
+                                        $smount = $value->costd_rate / $npp_building * $npp_unit;
+                                    }else{
+                                        // ELSE
+                                        $note = $value->costd_name." Periode ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"));   
+                                        // rumus cost + burden + admin
+                                        $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
+                                    }
+                                    $invDetail[] = [
+                                        'invdt_amount' => $amount,
+                                        'invdt_note' => $note,
+                                        'continv_start_inv' => $tempTimeStart,
+                                        'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months")),
+                                        'costd_id' => $value->costd_id
+                                    ];
+                                    $totalPay+=$amount;
                                 }
-                                $invDetail[] = [
-                                    'invdt_amount' => $amount,
-                                    'invdt_note' => $note,
-                                    'continv_start_inv' => $tempTimeStart,
-                                    'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months")),
-                                    'costd_id' => $value->costd_id
-                                ];
-                                $totalPay+=$amount;
                                 // ends
                             }
                             // end cek meter not meter
@@ -298,9 +299,9 @@ class InvoiceController extends Controller
                     if($totalPay <= $companyData->comp_materai1_amount) $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
                     else $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
                     
-                    echo var_dump($invDetail)."<br><br>"; 
+                    // echo var_dump($invDetail)."<br><br>"; 
 
-                    $insertFlag = false;
+                    // $insertFlag = false;
                     // INSERT DB
                     if($insertFlag){
                         DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail){
@@ -321,14 +322,19 @@ class InvoiceController extends Controller
                             $inv = [
                                 'tenan_id' => $value->tenan_id,
                                 'inv_number' => $value->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
+                                'inv_faktur_no' => $value->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
+                                'inv_faktur_date' => $now,
                                 'inv_date' => $now,
                                 'inv_duedate' => $duedate,
                                 'inv_amount' => $totalPay,
                                 'inv_ppn' => 0.1,
-                                'inv_ppn_amount' => $totalPay * 0.1,
+                                'inv_outstanding' => 0,
+                                'inv_ppn_amount' => $totalPay * 1.1,
                                 'inv_post' => 0,
-                                'invtp_code' => $value->invtp_code,
-                                'contr_id' => $contract->id
+                                'invtp_id' => $value->invtp_id,
+                                'contr_id' => $contract->id,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id()
                             ];
                             $insertInvoice = TrInvoice::create($inv);
 
@@ -345,7 +351,7 @@ class InvoiceController extends Controller
                                         
                         
             }
-        } die();
+        }
 
         return '<h3>'.$invoiceGenerated.' of '.$totalInvoice.' Invoices Generated, Please Check Invoice List <a href="'.url('invoice').'">Here</a></h3>';
     }
