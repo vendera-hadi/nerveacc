@@ -15,6 +15,8 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/default/easyui.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
+    <!-- datepicker -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -31,10 +33,34 @@
           		<!-- content -->
                 <form id="search">
                 <div class="row" style="margin-bottom:20px">
-                    <div class="col-sm-4">
+                    <div class="col-sm-3">
                         <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Contract or Tenan Name">
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-2">
+                        <select class="form-control" name="inv_type">
+                            <option value="">-- tipe invoice --</option>
+                            @foreach($inv_type as $itype)
+                            <option value="{{$itype->id}}" @if(Request::get('inv_type') == $itype->id){{'selected="selected"'}}@endif>{{$itype->invtp_name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="input-group date">
+                          <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </div>
+                          <input type="text" id="startDate" name="date_from" placeholder="From" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="input-group date">
+                          <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </div>
+                          <input type="text" id="startDate" name="date_to" placeholder="To" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
                         <button class="btn btn-info">Cari</button>
                     </div>
                 </div>
@@ -52,11 +78,11 @@
                             <th field="unit" width="100" sortable="true">Unit</th>  
                             <th field="inv_date" width="50" sortable="true">Tgl Invoice</th>
                             <th field="inv_duedate" width="50" sortable="true">Jatuh Tempo</th>
-                            <th field="inv_amount" width="50" sortable="true">Amount</th>
-                            <th field="inv_ppn_amount" width="50" sortable="true">+ 10% PPN Amount</th> 
+                            <th field="inv_amount" width="80" sortable="true">Amount</th>
+                            <th field="inv_outstanding" width="80" sortable="true">Outstanding Amount</th> 
                             <th field="invtp_name" width="100" sortable="true">Jenis Invoice</th>
-                            <th field="inv_post" width="50" sortable="true">Posting</th>       
-                            <th field="action_button" width="50" sortable="true">action</th>       
+                            <th field="inv_post" width="50" sortable="true">Posted</th>       
+                        <th field="action_button" width="50" sortable="true">action</th>
                         </tr>
                     </thead>
                 </table>
@@ -163,16 +189,40 @@ $(function(){
     });
     // $('#dg').datagrid('enableFilter');
 
-    var query;
+    var query, invtype, from, to;
     $('#search').submit(function(e){
         e.preventDefault();
         query = $(this).find('input[name=q]').val();
-        if(query!=''){
+        invtype = $(this).find('select[name=inv_type]').val();
+        datefrom = $(this).find('input[name=date_from]').val();
+        dateto = $(this).find('input[name=date_to]').val();
+
+        if((datefrom == "" && dateto !="") || (datefrom!="" && dateto=="")){
+            alert('Isi kedua tanggal From dan To untuk melakukan filter tanggal');
+        }else{
+
+            if(datefrom!="" && dateto!=""){
+                var dateFirst = datefrom.split('-');
+                var dateSecond = dateto.split('-');
+                var from = new Date(dateFirst[2], dateFirst[1], dateFirst[0]); //Year, Month, Date
+                var to = new Date(dateSecond[2], dateSecond[1], dateSecond[0]);
+
+                if(to<=from){
+                    alert('Tanggal To harus lebih lama dari Tanggal From');
+                    return false;
+                }
+            }
+
+        // if(query!=''){
             // refresh page
             $('#dg').datagrid('load', {
                 q: query,
+                invtype: invtype,
+                datefrom: datefrom,
+                dateto: dateto
             });
             $('#dg').datagrid('reload');
+        // }
         }
     });
 
@@ -207,4 +257,6 @@ $(function(){
 });        
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
+<!-- datepicker -->
+<script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 @endsection

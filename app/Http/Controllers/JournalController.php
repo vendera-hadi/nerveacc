@@ -14,7 +14,7 @@ class JournalController extends Controller
 {
     public function index(){
     	$coaYear = date('Y');
-    	$data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->orderBy('coa_type')->get();
+    	$data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
     	$data['departments'] = MsDepartment::where('dept_isactive',1)->get();
         $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
         return view('journal_list', $data);
@@ -217,7 +217,7 @@ class JournalController extends Controller
                     ->join('ms_journal_type',\DB::raw('tr_ledger.jour_type_id::integer'),'=','ms_journal_type.id')
                     ->where('tr_ledger.coa_year',$coayear)->where('tr_ledger.ledg_refno',$refno)
                     ->get();
-            $data['accounts'] = MsMasterCoa::where('coa_year',$coayear)->orderBy('coa_type')->get();
+            $data['accounts'] = MsMasterCoa::where('coa_year',$coayear)->where('coa_isparent',0)->orderBy('coa_type')->get();
             $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
             $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
             return view('editjournal', $data);

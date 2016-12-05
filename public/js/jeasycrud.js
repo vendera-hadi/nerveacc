@@ -29,9 +29,11 @@ function saveUser(){
                     msg: result.errorMsg
                 });
             } else {
+                $.messager.alert('Success','Data saved'); 
                 $('#dlg').dialog('close');      // close the dialog
                 $('#dg').datagrid('reload');    // reload the user data
             }
+
         },
         error: function (request, status, error) {
             alert(request.responseText);

@@ -46,7 +46,7 @@
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
               <li><a href="#tab_2" data-toggle="tab">Add Journal Entry</a></li>
-              <li><a href="#tab_3">Edit Journal</a></li>
+              <li class="hidden"><a href="#tab_3">Edit Journal</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
@@ -167,13 +167,9 @@
                         <div class="col-sm-6">
                             <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
                               <option value="">Choose Account</option>
-                              <?php $tempGroup = ''; ?>
+                              
                               @foreach($accounts as $key => $coa)
-                                @if($coa->coa_type != $tempGroup && $key > 0){!!'</optgroup>'!!}@endif
-                                @if($coa->coa_type != $tempGroup){!!'<optgroup label="'.$coa->coa_type.'">'!!}@endif
                                   <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                                
-                                <?php $tempGroup = $coa->coa_type; ?>
                               @endforeach
                             </select>
                         </div>

@@ -935,6 +935,7 @@ class ContractController extends Controller
                             if(!empty($cutoffStatus)){
                                 $tempProrateCostOwner = ($daysLeft / $totalDayinPeriod * $nonmeter_rate[$key] * $currUnit->unit_sqrt) + $nonmeter_burden[$key] + $nonmeter_admin[$key];
                                 $tempProrateCostOwner = floor($tempProrateCostOwner);
+                                $totalAmountOwner+= $tempProrateCostOwner;
                                 $insertOwnerInvDetail[$keygrp][] = ['invdt_amount' => $tempProrateCostOwner, 'invdt_note' => $currCostDetail->costd_name." (".$daysLeft."/".$totalDayinPeriod." days x Rp. ".number_format($nonmeter_rate[$key],2)." x ".number_format($currUnit->unit_sqrt,0)." sqrt) Periode ".date('d-m-Y')." s/d ".date('d-m-Y',strtotime($endPeriodInv))." (Cutoff Tenan)",
                                                 'costd_id'=>$meter_costdids[$key]];
                             }
@@ -1002,6 +1003,7 @@ class ContractController extends Controller
                             if(!empty($cutoffStatus)){
                                 $tempProrateCostOwner = ($daysLeft / $totalDayinPeriod * $nonmeter_rate[$key])  + $nonmeter_burden[$key] + $nonmeter_admin[$key];
                                 $tempProrateCostOwner = floor($tempProrateCostOwner);
+                                $totalAmountOwner+= $tempProrateCostOwner;
                                 $insertOwnerInvDetail[$keygrp][] = ['invdt_amount' => $tempProrateCostOwner, 'invdt_note' => $currCostDetail->costd_name." Periode ".date('d-m-Y')." s/d ".date('d-m-Y',strtotime($endPeriodInv))." (Cutoff Tenan)",
                                                 'costd_id'=>$meter_costdids[$key]];
                             }
@@ -1010,12 +1012,22 @@ class ContractController extends Controller
 
                     }
                 }
-                if($totalAmount <= $companyData->comp_materai1_amount) $insertInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
-                else $insertInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
+                if($totalAmount <= $companyData->comp_materai1_amount){ 
+                    $insertInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
+                    $totalStamp = $companyData->comp_materai1;
+                }else{ 
+                    $insertInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
+                    $totalStamp = $companyData->comp_materai2;
+                }
                 // tambahin jg stampduty di owner
                 if(count($insertOwnerInvDetail) > 0){
-                    if($totalAmount <= $companyData->comp_materai1_amount) $insertOwnerInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
-                    else $insertOwnerInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
+                    if($totalAmountOwner <= $companyData->comp_materai1_amount){ 
+                        $insertOwnerInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
+                        $totalStampOwner = $companyData->comp_materai1;
+                    }else{ 
+                        $insertOwnerInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
+                        $totalStampOwner = $companyData->comp_materai2;
+                    }
                 }
 
                 
@@ -1026,10 +1038,12 @@ class ContractController extends Controller
                 // generate invoice non meter
                 if(count($insertInvDetail[$keygrp]) > 1){
                     // kalo count dr detail2 nya ada selain stamp card baru isi inv baru
+                    $totalPay = $totalAmount + $totalStamp;
                     $insertInvNonMeter[$keygrp] = [
                                     'tenan_id'=>$tenan_id, 'inv_number'=>$invNo, 'inv_date'=>date('Y-m-d'), 
-                                    'inv_duedate'=>date('Y-m-d', strtotime('+'.$currTrInv->continv_period.' month')), 'inv_amount'=>$totalAmount,
-                                    'inv_ppn'=>0.1, 'inv_ppn_amount'=> 1.1*$totalAmount, 'inv_outstanding'=>0, 'inv_faktur_no' => $invNo,
+                                    'inv_duedate'=>date('Y-m-d', strtotime('+'.$currTrInv->continv_period.' month')), 
+                                    'inv_amount'=>$totalPay,
+                                    'inv_ppn'=>0.1, 'inv_ppn_amount'=> $totalPay, 'inv_outstanding'=>$totalPay, 'inv_faktur_no' => $invNo,
                                     'inv_faktur_date'=>date('Y-m-d'), 'invtp_id' => $keygrp, 'contr_id' => $contr_id, 'created_by' => Auth::id(), 'updated_by' => Auth::id()
                                 ];
 
@@ -1059,10 +1073,12 @@ class ContractController extends Controller
                         $invNo = "CL-".str_replace(" ", "", $invoiceType->invtp_prefix)."-".substr($year, -2).$month."-".$newPrefixTxt;
 
                         // INVOICE nya OWNER
+                        $totalPayOwner = $totalAmountOwner + $totalStampOwner;
                         $insertOwnerInvNonMeter[$keygrp] = [
                                 'tenan_id'=>$contractOwner->tenan_id, 'inv_number'=>$invNo, 'inv_date'=>date('Y-m-d'), 
-                                'inv_duedate'=>date('Y-m-d', strtotime('+'.$currTrInv->continv_period.' month')), 'inv_amount'=>$totalAmount,
-                                'inv_ppn'=>0.1, 'inv_ppn_amount'=> 1.1*$totalAmount, 'inv_outstanding'=>0, 'inv_faktur_no' => $invNo,
+                                'inv_duedate'=>date('Y-m-d', strtotime('+'.$currTrInv->continv_period.' month')), 
+                                'inv_amount'=>$totalPayOwner,
+                                'inv_ppn'=>0.1, 'inv_ppn_amount'=> $totalPayOwner, 'inv_outstanding'=>$totalPayOwner, 'inv_faktur_no' => $invNo,
                                 'inv_faktur_date'=>date('Y-m-d'), 'invtp_id' => $keygrp, 'contr_id' => $contr_id, 'created_by' => Auth::id(), 'updated_by' => Auth::id()
                             ];
                         // var_dump($insertInvDetail);

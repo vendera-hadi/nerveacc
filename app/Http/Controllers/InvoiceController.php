@@ -16,19 +16,25 @@ use App\Models\TrContractInvoice;
 use App\Models\TrPeriodMeter;
 use App\Models\TrMeter;
 use App\Models\MsCompany;
+use App\Models\MsCostItem;
 use DB;
 use PDF;
 
 class InvoiceController extends Controller
 {
     public function index(){
-        return view('invoice');
+        $data['inv_type'] = MsInvoiceType::all();
+        return view('invoice',$data);
     }
 
     public function get(Request $request){
-        // try{
+        try{
             // params
             $keyword = @$request->q;
+            $invtype = @$request->invtype;
+            $datefrom = @$request->datefrom;
+            $dateto = @$request->dateto;  
+
             $page = $request->page;
             $perPage = $request->rows; 
             $page-=1;
@@ -41,7 +47,7 @@ class InvoiceController extends Controller
 
             // olah data
             $count = TrInvoice::count();
-            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
+            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                     ->join('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
@@ -78,6 +84,13 @@ class InvoiceController extends Controller
             if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
                                         $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'like','%'.$keyword.'%');
                                     });
+            // jika ada inv type
+            if(!empty($invtype)) $fetch = $fetch->where('tr_invoice.invtp_id',$invtype);
+            // jika ada date from
+            if(!empty($datefrom)) $fetch = $fetch->where('tr_invoice.inv_faktur_date','>=',$datefrom);
+            // jika ada date to
+            if(!empty($dateto)) $fetch = $fetch->where('tr_invoice.inv_faktur_date','<=',$dateto);
+
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
             
@@ -95,6 +108,7 @@ class InvoiceController extends Controller
                 $temp['inv_ppn'] = $value->inv_ppn * 100;
                 $temp['inv_ppn'] = $temp['inv_ppn']."%";
                 $temp['inv_ppn_amount'] = "Rp. ".$value->inv_ppn_amount;
+                $temp['inv_outstanding'] = !empty((int)$value->inv_outstanding) ? "Rp. ".$value->inv_outstanding : "Lunas";
                 $temp['invtp_name'] = $value->invtp_name;
                 $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
@@ -104,9 +118,9 @@ class InvoiceController extends Controller
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
-        // }catch(\Exception $e){
-        //     return response()->json(['errorMsg' => $e->getMessage()]);
-        // } 
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
     }
 
     public function getdetail(Request $request){
@@ -114,13 +128,19 @@ class InvoiceController extends Controller
             $inv_id = $request->id;
             $nilai = TrInvoiceDetail::select('costd_id')->where('inv_id',$inv_id)->get();
             $cost_id = $nilai[0]->costd_is;
-            $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
+            $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name','ms_cost_detail.costd_unit')
                 ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
                 ->leftJoin('ms_cost_detail','tr_invoice_detail.costd_id',"=",'ms_cost_detail.id')
                 ->leftJoin('tr_meter','tr_meter.id',"=",'tr_invoice_detail.meter_id')
                 ->leftJoin('tr_period_meter','tr_period_meter.id',"=",'tr_meter.prdmet_id')
                 ->where('tr_invoice_detail.inv_id',$inv_id)
                 ->get();
+            foreach ($result as $key => $value) {
+                $result[$key]->invdt_amount = "Rp. ".$value->invdt_amount;
+                $result[$key]->meter_start = (int)$value->meter_start;
+                $result[$key]->meter_end = (int)$value->meter_end;
+                $result[$key]->meter_used = !empty($value->meter_used) ? (int)$value->meter_used." ".$value->costd_unit : (int)$value->meter_used;
+            }
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -141,6 +161,9 @@ class InvoiceController extends Controller
         $tempTimeStart = implode('-', [$year,$month,'01']);
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
         $companyData = MsCompany::first();
+        $stampData = MsCostItem::where('cost_code','STAMP')->first();
+        // if(!empty($stampData)) $stampCoa = $stampData->cost_coa_code;
+        // else $stampCoa = 21400;
 
         $maxTime = date('Y-m-d',strtotime("first day of previous month"));
         // invoice dpt di generate paling lama bulan sekarang, generate utk bulan kmaren
@@ -221,7 +244,7 @@ class InvoiceController extends Controller
                                         $insertFlag = false;
                                     }else{
                                         // note masi minus rumus
-                                        $note = $meter->costd_name." Consumption : ".$meter->meter_used." ".$meter->costd_unit." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));   
+                                        $note = $meter->costd_name." Consumption : ".(int)$meter->meter_used." ".$meter->costd_unit." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));   
                                         // rumus masih standar, rate * meter used + burden + admin
                                         // $amount = ($meter->meter_used * $meter->meter_cost) + $meter->meter_burden + $meter->meter_admin;
                                         $amount = $meter->meter_cost;
@@ -298,15 +321,20 @@ class InvoiceController extends Controller
                     
                     // HABIS JABARIN DETAIL, INSERT INVOICE 
                     // TAMBAHIN STAMP DUTY
-                    if($totalPay <= $companyData->comp_materai1_amount) $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
-                    else $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
-                    
+                    if($totalPay <= $companyData->comp_materai1_amount){ 
+                        $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
+                        $totalStamp = $companyData->comp_materai1;
+                    }else{ 
+                        $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
+                        $totalStamp = $companyData->comp_materai2;
+                    }
+
                     // echo var_dump($invDetail)."<br><br>"; 
 
                     // $insertFlag = false;
                     // INSERT DB
                     if($insertFlag){
-                        DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail){
+                        DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail, $totalStamp){
                             // insert invoice
                             // get last prefix
                             $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$value->invtp_prefix.'-'.substr($year, -2).$month.'-%')->orderBy('id','desc')->first();
@@ -321,6 +349,8 @@ class InvoiceController extends Controller
 
                             $now = date('Y-m-d');
                             $duedate = date('Y-m-d', strtotime('+'.$value->continv_period.' month'));
+                            // $totalWithTaxStamp = ($totalPay * 1.1) + $totalStamp;
+                            $totalWithStamp = $totalPay + $totalStamp;
                             $inv = [
                                 'tenan_id' => $value->tenan_id,
                                 'inv_number' => $value->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
@@ -328,10 +358,10 @@ class InvoiceController extends Controller
                                 'inv_faktur_date' => $now,
                                 'inv_date' => $now,
                                 'inv_duedate' => $duedate,
-                                'inv_amount' => $totalPay,
+                                'inv_amount' => $totalWithStamp,
                                 'inv_ppn' => 0.1,
                                 'inv_outstanding' => 0,
-                                'inv_ppn_amount' => $totalPay * 1.1,
+                                'inv_ppn_amount' => $totalWithStamp, // sementara begini dulu, ikutin cara di foto invoice
                                 'inv_post' => 0,
                                 'invtp_id' => $value->invtp_id,
                                 'contr_id' => $contract->id,

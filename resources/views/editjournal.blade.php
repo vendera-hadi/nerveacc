@@ -58,11 +58,7 @@
                 <option value="">Choose Account</option>
                 <?php $tempGroup = ''; ?>
                 @foreach($accounts as $key => $coa)
-                  @if($coa->coa_type != $tempGroup && $key > 0){!!'</optgroup>'!!}@endif
-                  @if($coa->coa_type != $tempGroup){!!'<optgroup label="'.$coa->coa_type.'">'!!}@endif
                     <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                  
-                  <?php $tempGroup = $coa->coa_type; ?>
                 @endforeach
               </select>
           </div>
