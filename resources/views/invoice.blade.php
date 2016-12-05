@@ -56,6 +56,7 @@
                             <th field="inv_ppn_amount" width="50" sortable="true">+ 10% PPN Amount</th> 
                             <th field="invtp_name" width="100" sortable="true">Jenis Invoice</th>
                             <th field="inv_post" width="50" sortable="true">Posting</th>       
+                            <th field="action_button" width="50" sortable="true">action</th>       
                         </tr>
                     </thead>
                 </table>
@@ -155,6 +156,9 @@ $(function(){
                 }
             });
             $('#dg').datagrid('fixDetailRowHeight',index);
+        },
+        onLoadSuccess:function(target){
+            print_window();
         }
     });
     // $('#dg').datagrid('enableFilter');
@@ -171,6 +175,35 @@ $(function(){
             $('#dg').datagrid('reload');
         }
     });
+
+    var print_window = function(){
+        $('.print-window').off('click');
+        $('.print-window').click(function(){
+            var self = $(this); 
+            var url = self.attr('href');
+            var title = self.attr('title');
+            var w = self.attr('data-width');
+            var h = self.attr('data-height');
+            
+             // Fixes dual-screen position                         Most browsers      Firefox
+            var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+            var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+            var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+            var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+            var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+            var top = ((height / 2) - (h / 2)) + dualScreenTop;
+            var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+            // Puts focus on the newWindow
+            if (window.focus) {
+                newWindow.focus();
+            }
+
+            return false;
+        });
+    };
 });        
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>

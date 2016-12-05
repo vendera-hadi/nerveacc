@@ -17,6 +17,7 @@ use App\Models\TrPeriodMeter;
 use App\Models\TrMeter;
 use App\Models\MsCompany;
 use DB;
+use PDF;
 
 class InvoiceController extends Controller
 {
@@ -98,6 +99,7 @@ class InvoiceController extends Controller
                 $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['inv_post'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
+                $temp['action_button'] = '<a href="/invoice/print_faktur?id='.$value->id.'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="/invoice/print_faktur?id='.$value->id.'&type=pdf">PDF</a>';
                 // $temp['daysLeft']
                 $result['rows'][] = $temp;
             }
@@ -356,4 +358,39 @@ class InvoiceController extends Controller
         return '<h3>'.$invoiceGenerated.' of '.$totalInvoice.' Invoices Generated, Please Check Invoice List <a href="'.url('invoice').'">Here</a></h3>';
     }
 
+    public function print_faktur(Request $request){
+        try{
+
+            $inv_id = $request->id;
+            $type = $request->type;
+            $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
+                ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
+                ->leftJoin('ms_cost_detail','tr_invoice_detail.costd_id',"=",'ms_cost_detail.id')
+                ->leftJoin('tr_meter','tr_meter.id',"=",'tr_invoice_detail.meter_id')
+                ->leftJoin('tr_period_meter','tr_period_meter.id',"=",'tr_meter.prdmet_id')
+                ->where('tr_invoice_detail.inv_id',$inv_id)
+                ->get()->toArray();
+
+            $invoice_data = TrInvoice::find($inv_id)->with('MsTenant')->get()->first()->toArray();
+            
+            $company = MsCompany::with('MsCashbank')->first()->toArray();
+
+            $set_data = array(
+                'invoice_data' => $invoice_data,
+                'result' => $result,
+                'company' => $company,
+                'type' => $type
+            );
+            
+            if($type == 'pdf'){
+                $pdf = PDF::loadView('print_faktur', $set_data);
+
+                return $pdf->download('FAKTUR-'.$invoice_data['inv_number'].'.pdf');
+            }else{
+                return view('print_faktur', $set_data);
+            }
+        }catch(\Exception $e){
+            return view('print_faktur', array('errorMsg' => $e->getMessage()));
+        } 
+    }
 }

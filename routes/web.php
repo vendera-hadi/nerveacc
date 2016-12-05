@@ -295,6 +295,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('invoice/getdetail','InvoiceController@getdetail')->name('invoice.getdetail');
 	Route::get('generateinvoice','InvoiceController@generateInvoice');
 	Route::post('generateinvoice','InvoiceController@postGenerateInvoice')->name('invoice.generate');
+	Route::get('invoice/print_faktur', 'InvoiceController@print_faktur');
 
 	// aging piutang
 	Route::get('aging','AgingController@index')->name('aging.index');
@@ -302,10 +303,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('aging/getdetail','AgingController@getdetail')->name('aging.getdetail');
 	Route::get('aging/tes','AgingController@tes')->name('aging.tes');
 	Route::get('aging/tes2','AgingController@tes2')->name('aging.tes2');
-
-	// Faktur
-	Route::get('faktur','FakturController@index')->name('faktur.index');
-	Route::post('faktur/get', 'FakturController@get')->name('faktur.get');
+	
 });
 
 Route::get('logout','Auth\AuthController@logout');
