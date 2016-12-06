@@ -53,7 +53,7 @@
                     <li><a href="{{route('contract.renewal')}}"><i class="fa fa-circle-o"></i> Contract Renewal</a></li>
                     <li><a href="{{route('contract.termination')}}"><i class="fa fa-circle-o"></i> Contract Termination</a></li>
                     <li><a href="{{route('contract.unclosed')}}"><i class="fa fa-circle-o"></i> Unclosed Contract <span class="pull-right-container">
-              <span class="label label-primary pull-right">1</span>
+              <span class="label label-primary pull-right">{{$notif_unclosed}}</span>
             </span></a></li>
                   </ul>
                 </li>
