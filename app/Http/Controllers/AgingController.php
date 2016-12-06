@@ -15,6 +15,7 @@ use App\Models\TrContract;
 use App\Models\TrContractInvoice;
 use App\Models\TrMeter;
 use DB;
+use Excel;
 
 class AgingController extends Controller
 {
@@ -36,9 +37,35 @@ class AgingController extends Controller
             if(!empty($filters)) $filters = json_decode($filters);
 
             // olah data
-            $count = TrContract::count();
-            $fetch = TrContract::select('tr_contract.id','tr_contract.contr_no','tr_contract.contr_startdate','tr_contract.contr_enddate','tr_contract.contr_status','ms_tenant.tenan_code')
-            ->leftJoin('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id');
+            $count = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date',
+                    DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS gabung"),
+                    DB::raw("SUM(inv_outstanding) AS total"),
+                    DB::raw("(CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END) AS current"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag30"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag60"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag90"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag190"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS agl180"))
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
+                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->where('tr_invoice.inv_outstanding','>',0)
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date','tr_invoice.inv_outstanding')
+                ->count();
+            $fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date',
+                    DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS gabung"),
+                    DB::raw("SUM(inv_outstanding) AS total"),
+                    DB::raw("(CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END) AS current"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag30"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag60"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag90"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag180"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS agl180"))
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
+                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->where('tr_invoice.inv_outstanding','>',0)
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date','tr_invoice.inv_outstanding');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -56,14 +83,6 @@ class AgingController extends Controller
                         default:
                             break;
                     }
-                    // special condition
-                    if($filter->field == 'inv_post'){
-                        if(strtolower($filter->value) == "yes") $filter->value = "true";
-                        else $filter->value = "false";
-                    }
-                    // end special condition
-                    if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
-                    else $fetch = $fetch->where($filter->field, $op, $filter->value);
                 }
             }
             $count = $fetch->count();
@@ -72,12 +91,15 @@ class AgingController extends Controller
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
                 $temp = [];
-                $temp['id'] = $value->id;
-                $temp['contr_no'] = $value->contr_no;
-                $temp['contr_startdate'] = $value->contr_startdate;
-                $temp['contr_enddate'] = $value->contr_enddate;
-                $temp['contr_status'] = $value->contr_status;
-                $temp['tenan_code'] = $value->tenan_code;
+                $temp['id'] = $value->tenan_id;
+                $temp['gabung'] = $value->gabung;
+                $temp['total'] = number_format($value->total,2);
+                $temp['current'] = number_format($value->current,2);
+                $temp['ag30'] = number_format($value->ag30,2);
+                $temp['ag60'] = number_format($value->ag60,2);
+                $temp['ag90'] = number_format($value->ag90,2);
+                $temp['ag180'] = number_format($value->ag180,2);
+                $temp['agl180'] = number_format($value->agl180,2);
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
@@ -89,10 +111,10 @@ class AgingController extends Controller
     public function getdetail(Request $request){
         try{
             $id = $request->id;
-            $result = TrInvoice::select('tr_invoice.*','ms_tenant.tenan_code','ms_invoice_type.invtp_name',DB::raw("current_date::date - inv_duedate::date AS ag"),DB::raw("current_date::date - inv_duedate::date AS ag1"),DB::raw("current_date::date - inv_duedate::date AS ag2"),DB::raw("current_date::date - inv_duedate::date AS ag3"),DB::raw("current_date::date - inv_duedate::date AS ag4"))
-                ->leftJoin('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
-                ->leftJoin('ms_invoice_type','ms_invoice_type.invtp_code',"=",'tr_invoice.invtp_code')
-                ->where('tr_invoice.contr_id',$id)
+            $result = TrInvoice::select('tr_invoice.*','ms_invoice_type.invtp_name')
+                ->leftJoin('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
+                ->where('tr_invoice.tenan_id',$id)
+                ->where('inv_outstanding','>',0)
                 ->get();
             return response()->json($result);
         }catch(\Exception $e){
@@ -100,21 +122,30 @@ class AgingController extends Controller
         } 
     }
 
-    public function tes(Request $request){
-        $result = TrContract::select('tr_contract.id','tr_contract.contr_no','tr_contract.contr_startdate','tr_contract.contr_enddate','tr_contract.contr_status','ms_tenant.tenan_code')
-            ->leftJoin('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
-            ->get();
-        echo $result;
-    }
-
-    public function tes2(Request $request){
-        $id=52;
-        $result = TrInvoice::select('tr_invoice.*','ms_tenant.tenan_code','ms_invoice_type.invtp_name',DB::raw("current_date::date - inv_duedate::date AS interval"))
-            ->leftJoin('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
-            ->leftJoin('ms_invoice_type','ms_invoice_type.invtp_code',"=",'tr_invoice.invtp_code')
-            ->where('tr_invoice.contr_id',$id)
-            ->get();
-        echo $result;
+    public function downloadAgingExcel()
+    {
+        $data = TrInvoice::select(
+                    DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS Tenan"),    
+                    DB::raw("SUM(inv_outstanding) AS total"),
+                    DB::raw("(CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END) AS Current"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag30"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag60"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag90"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag190"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS agl180"))
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
+                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->where('tr_invoice.inv_outstanding','>',0)
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date','tr_invoice.inv_outstanding')
+                ->get()->toArray();
+        $tp = 'xls';
+        return Excel::create('report_aging', function($excel) use ($data) {
+            $excel->sheet('mySheet', function($sheet) use ($data)
+            {
+                $sheet->fromArray($data);
+            });
+        })->download($tp);
     }
 
 }
