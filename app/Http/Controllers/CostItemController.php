@@ -105,8 +105,12 @@ class CostItemController extends Controller
     public function delete(Request $request){
         try{
             $id = $request->id;
-            MsCostItem::destroy($id);
-            return response()->json(['success'=>true]);
+            if($id == 4 || $id ==5 || $id ==6){
+                return response()->json(['errorMsg'=>'Sorry This Item Cannot be Deleted']);
+            }else{
+                MsCostItem::destroy($id);
+                return response()->json(['success'=>true]);
+            }     
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 

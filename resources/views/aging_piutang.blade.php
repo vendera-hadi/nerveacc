@@ -31,16 +31,19 @@
           		<!-- content -->
 
                 <!-- template tabel -->
-          		<table id="dg" title="Aging Invoice" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Aging Invoice" class="easyui-datagrid" style="width:100%;min-height:500px;" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="contr_no" width="100" sortable="true">No. Contract</th>
-                            <th field="contr_startdate" width="100" sortable="true">Start Date</th>
-                            <th field="contr_enddate" width="100" sortable="true">End Date</th>  
-                            <th field="contr_status" width="50" sortable="true">Contract Status</th>
-                            <th field="tenan_code" width="50" sortable="true">No Tenan</th>       
+                            <th field="gabung" width="200" sortable="true">Nama Tenan</th>
+                            <th field="total" width="100" sortable="true">Total</th>
+                            <th field="current" width="100" sortable="true">Current</th>  
+                            <th field="ag30" width="100" sortable="true">1 - 30 Hari</th>
+                            <th field="ag60" width="100" sortable="true">31 - 60 Hari</th> 
+                            <th field="ag90" width="100" sortable="true">61 - 90 Hari</th>
+                            <th field="ag180" width="100" sortable="true">91 - 180 Hari</th>
+                            <th field="agl180" width="100" sortable="true">> 180 Hari</th>         
                         </tr>
                     </thead>
                 </table>
@@ -48,43 +51,9 @@
                 
                 <!-- icon2 atas table -->
                 <div id="toolbar">
-                    
+                    <a href="{{ url('aging/downloadAgingExcel') }}" class="easyui-linkbutton" plain="false">Download Report</a>
                 </div>
                 <!-- end icon -->
-            
-                <!-- hidden form buat create edit -->
-                <div id="dlg" class="easyui-dialog" style="width:60%"
-                        closed="true" buttons="#dlg-buttons">
-                    <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_name" class="easyui-textbox" label="Cost Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_rate" class="easyui-textbox" label="Rate:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_burden" class="easyui-textbox" label="Biaya Abodemen:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_admin" class="easyui-textbox" label="Biaya Admin:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Cost Item:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Active Meter:" style="width:300px;">
-                                <option value="true" >yes</option>
-                                <option value="false">no</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div id="dlg-buttons">
-                    <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
-                </div>
-                <!-- end form -->
 
           		<!-- content -->
         	</div>
@@ -120,21 +89,16 @@ $(function(){
                 url: get_url2+"?id="+row.id,
                 singleSelect:true,
                 rownumbers:true,
-                loadMsg:'',
+                loadMsg:'Please Wait',
                 height:'auto',
                 columns:[[
                     {field:'inv_number',title:'Inv Number',width:100},
+                    {field:'invtp_name',title:'Invoice Type',width:150},
                     {field:'inv_date',title:'Inv Date',width:100},
                     {field:'inv_duedate',title:'Inv Due Date',width:100},
-                    {field:'inv_amount',title:'Amount',width:100},
-                    {field:'tenan_code',title:'No. Tenan',width:100},
-                    {field:'invtp_name',title:'Invoice Type',width:150},
-                    {field:'inv_post',title:'Posting',width:50,align:'center',formatter:formatPost},
-                    {field:'ag',title:'(1-30) Hari',align:'center',width:100,formatter:check30},
-                    {field:'ag1',title:'(31-60) Hari',align:'center',width:100,formatter:check60},
-                    {field:'ag2',title:'(61-90) Hari',align:'center',width:100,formatter:check90},
-                    {field:'ag3',title:'(91-180) Hari',align:'center',width:100,formatter:check180},
-                    {field:'ag4',title:'> 180 Hari',align:'center',width:150,formatter:check0}
+                    {field:'inv_amount',title:'Amount',width:100,formatter:addCommas},
+                    {field:'inv_outstanding',title:'Sisa',width:100,formatter:addCommas},
+                    {field:'inv_post',title:'Posting',width:50,align:'center',formatter:formatPost}
                 ]],
                 onResize:function(){
                     $('#dg').datagrid('fixDetailRowHeight',index);
@@ -156,41 +120,18 @@ function formatPost(val,row){
         return 'No';
     }
 }
-function check30(val,row){
-    if (val >0 && val <=30){
-        return '<span style="color:red;">V</span>';
-    } else {
-        return '';
+function addCommas(nStr,row)
+{
+    nStr += '';
+    x = nStr.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
     }
-}
-function check60(val,row){
-    if (val >30 && val <=60){
-        return '<span style="color:red;">V</span>';
-    } else {
-        return '';
-    }
-}
-function check90(val,row){
-    if (val >60 && val <=90){
-        return '<span style="color:red;">V</span>';
-    } else {
-        return '';
-    }
-}
-function check180(val,row){
-    if (val >90 && val <=180){
-        return '<span style="color:red;">V</span>';
-    } else {
-        return '';
-    }
-}
-function check0(val,row){
-    if (val >180){
-        return '<span style="color:red;">V</span>';
-    } else {
-        return '';
-    }
-}      
+    return x1 + x2;
+}    
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection

@@ -94,30 +94,82 @@ class PeriodMeterController extends Controller
 
     public function insert(Request $request){
         try{
-            $input = $request->all();
-            $count = TrPeriodMeter::count();
-            $ms = $count+1;
-            $input['prdmet_id'] = 'PRD-'.date('Ymd').'-'.$ms;
-            $prdstart = explode('/',$request->prdmet_start_date);
-            $prdend = explode('/',$request->prdmet_end_date);
-            $input['prdmet_start_date'] = implode('-', [$prdstart[2],$prdstart[0],$prdstart[1]]);
-            $input['prdmet_end_date'] = implode('-', [$prdend[2],$prdend[0],$prdend[1]]);
-            $input['created_by'] = Auth::id();
-            $input['updated_by'] = Auth::id();
-            $input['status'] = FALSE;
-            if($count > 0){
-                $today_month = date("m", strtotime($request->input('prd_billing_date'))); 
-                $today_year = date("Y", strtotime($request->input('prd_billing_date'))); 
-                $cek_last = TrPeriodMeter::where('tr_period_meter.status', TRUE)
-                    ->where(DB::raw("EXTRACT(MONTH FROM prd_billing_date)"), $today_month)
-                    ->where(DB::raw("EXTRACT(YEAR FROM prd_billing_date)"), $today_year)
-                    ->count();
-                if($cek_last == 0){
-                    $prd_last = TrPeriodMeter::select('id')
-                        ->where('tr_period_meter.status', TRUE)
-                        ->orderBy('prd_billing_date', 'desc')
-                        ->take(1)
+            $check_unit = MsUnit::count();
+            $check_unit_contract = TrContract::join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')->where('tr_contract.contr_status','confirmed')->count();
+            if($check_unit_contract >= $check_unit){
+                $input = $request->all();
+                $count = TrPeriodMeter::count();
+                $ms = $count+1;
+                $input['prdmet_id'] = 'PRD-'.date('Ymd').'-'.$ms;
+                $prdstart = explode('/',$request->prdmet_start_date);
+                $prdend = explode('/',$request->prdmet_end_date);
+                $input['prdmet_start_date'] = implode('-', [$prdstart[2],$prdstart[0],$prdstart[1]]);
+                $input['prdmet_end_date'] = implode('-', [$prdend[2],$prdend[0],$prdend[1]]);
+                $input['created_by'] = Auth::id();
+                $input['updated_by'] = Auth::id();
+                $input['status'] = FALSE;
+                if($count > 0){
+                    $today_month = date("m", strtotime($request->input('prd_billing_date'))); 
+                    $today_year = date("Y", strtotime($request->input('prd_billing_date'))); 
+                    $cek_last = TrPeriodMeter::where('tr_period_meter.status', TRUE)
+                        ->where(DB::raw("EXTRACT(MONTH FROM prd_billing_date)"), $today_month)
+                        ->where(DB::raw("EXTRACT(YEAR FROM prd_billing_date)"), $today_year)
+                        ->count();
+                    if($cek_last == 0){
+                        $prd_last = TrPeriodMeter::select('id')
+                            ->where('tr_period_meter.status', TRUE)
+                            ->orderBy('prd_billing_date', 'desc')
+                            ->take(1)
+                            ->get();
+                        $last_id =  TrPeriodMeter::create($input);
+                        $insertedId = $last_id->id;
+                        $unit_kontrak = MsUnit::select('ms_unit.id AS unit_id','ms_unit.unit_code','tr_contract.id AS contr_id','tr_contract_invoice.costd_id','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','costd_admin')
+                        ->leftJoin('tr_contract','tr_contract.unit_id',"=",'ms_unit.id')
+                        ->leftJoin('tr_contract_invoice','tr_contract_invoice.contr_id',"=",'tr_contract.id')
+                        ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_contract_invoice.costd_id')
+                        ->where('tr_contract_invoice.invtp_id', 1)
+                        ->where('ms_cost_detail.costd_ismeter', TRUE)
                         ->get();
+                
+                        for($i=0; $i<count($unit_kontrak); $i++){
+                            $meter = TrMeter::select('meter_end','costd_id','unit_id')
+                                ->where('unit_id',$unit_kontrak[$i]->unit_id)
+                                ->where('costd_id',$unit_kontrak[$i]->costd_id)
+                                ->where('prdmet_id',$prd_last[0]->id)
+                                ->get();
+                            $m_end = 0;
+                            if(count($meter) > 0){
+                                $m_end = $meter[0]->meter_end;
+                            }
+                            $inputs = [ 
+                                        'meter_start'=> $m_end,
+                                        'meter_end'=> 0,
+                                        'meter_used'=> 0,
+                                        'meter_cost'=> 0,
+                                        'meter_burden'=> $unit_kontrak[$i]->costd_burden,
+                                        'meter_admin'=> $unit_kontrak[$i]->costd_admin,
+                                        'costd_id'=>  $unit_kontrak[$i]->costd_id,
+                                        'contr_id'=> $unit_kontrak[$i]->contr_id,
+                                        'prdmet_id'=> $insertedId,
+                                        'unit_id'=>$unit_kontrak[$i]->unit_id
+                                    ];
+                            $lts = TrMeter::create($inputs);
+                            $last_idmeter = $lts->id;
+                            
+                            $ct_meter = CutoffHistory::select('unit_id','costd_id','meter_end')
+                                ->where('close_date', '>=', $input['prdmet_start_date'])
+                                ->where('close_date', '<=', $input['prdmet_end_date'])
+                                ->where('unit_id',$unit_kontrak[$i]->unit_id)
+                                ->where('costd_id',$unit_kontrak[$i]->costd_id)
+                                ->get();
+                            if(count($ct_meter)>0){
+                                TrMeter::where('id', $last_idmeter)->update(['meter_start' => $ct_meter[0]->meter_end]);
+                            }
+                        }   
+                    }else{
+                        return ['status' => 1, 'message' => 'Periode Meter Sudah Pernah Dibuat dan Sudah Di Approve'];
+                    }
+                }else{
                     $last_id =  TrPeriodMeter::create($input);
                     $insertedId = $last_id->id;
                     $unit_kontrak = MsUnit::select('ms_unit.id AS unit_id','ms_unit.unit_code','tr_contract.id AS contr_id','tr_contract_invoice.costd_id','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','costd_admin')
@@ -127,22 +179,12 @@ class PeriodMeterController extends Controller
                     ->where('tr_contract_invoice.invtp_id', 1)
                     ->where('ms_cost_detail.costd_ismeter', TRUE)
                     ->get();
-            
                     for($i=0; $i<count($unit_kontrak); $i++){
-                        $meter = TrMeter::select('meter_end','costd_id','unit_id')
-                            ->where('unit_id',$unit_kontrak[$i]->unit_id)
-                            ->where('costd_id',$unit_kontrak[$i]->costd_id)
-                            ->where('prdmet_id',$prd_last[0]->id)
-                            ->get();
-                        $m_end = 0;
-                        if(count($meter) > 0){
-                            $m_end = $meter[0]->meter_end;
-                        }
                         $inputs = [ 
-                                    'meter_start'=> $m_end,
-                                    'meter_end'=> 0,
-                                    'meter_used'=> 0,
-                                    'meter_cost'=> 0,
+                                    'meter_start'=> '0',
+                                    'meter_end'=> '0',
+                                    'meter_used'=> '0',
+                                    'meter_cost'=> '0',
                                     'meter_burden'=> $unit_kontrak[$i]->costd_burden,
                                     'meter_admin'=> $unit_kontrak[$i]->costd_admin,
                                     'costd_id'=>  $unit_kontrak[$i]->costd_id,
@@ -150,47 +192,11 @@ class PeriodMeterController extends Controller
                                     'prdmet_id'=> $insertedId,
                                     'unit_id'=>$unit_kontrak[$i]->unit_id
                                 ];
-                        $lts = TrMeter::create($inputs);
-                        $last_idmeter = $lts->id;
-                        
-                        $ct_meter = CutoffHistory::select('unit_id','costd_id','meter_end')
-                            ->where('close_date', '>=', $input['prdmet_start_date'])
-                            ->where('close_date', '<=', $input['prdmet_end_date'])
-                            ->where('unit_id',$unit_kontrak[$i]->unit_id)
-                            ->where('costd_id',$unit_kontrak[$i]->costd_id)
-                            ->get();
-                        if(count($ct_meter)>0){
-                            TrMeter::where('id', $last_idmeter)->update(['meter_start' => $ct_meter[0]->meter_end]);
-                        }
-                    }   
-                }else{
-                    echo 'Periode Meter Sudah Pernah Dibuat dan Sudah Di Approve';
+                        TrMeter::create($inputs);
+                    }
                 }
             }else{
-                $last_id =  TrPeriodMeter::create($input);
-                $insertedId = $last_id->id;
-                $unit_kontrak = MsUnit::select('ms_unit.id AS unit_id','ms_unit.unit_code','tr_contract.id AS contr_id','tr_contract_invoice.costd_id','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','costd_admin')
-                ->leftJoin('tr_contract','tr_contract.unit_id',"=",'ms_unit.id')
-                ->leftJoin('tr_contract_invoice','tr_contract_invoice.contr_id',"=",'tr_contract.id')
-                ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_contract_invoice.costd_id')
-                ->where('tr_contract_invoice.invtp_id', 1)
-                ->where('ms_cost_detail.costd_ismeter', TRUE)
-                ->get();
-                for($i=0; $i<count($unit_kontrak); $i++){
-                    $inputs = [ 
-                                'meter_start'=> '0',
-                                'meter_end'=> '0',
-                                'meter_used'=> '0',
-                                'meter_cost'=> '0',
-                                'meter_burden'=> $unit_kontrak[$i]->costd_burden,
-                                'meter_admin'=> $unit_kontrak[$i]->costd_admin,
-                                'costd_id'=>  $unit_kontrak[$i]->costd_id,
-                                'contr_id'=> $unit_kontrak[$i]->contr_id,
-                                'prdmet_id'=> $insertedId,
-                                'unit_id'=>$unit_kontrak[$i]->unit_id
-                            ];
-                    TrMeter::create($inputs);
-                }
+                return ['status' => 1, 'message' => 'Maaf ada Unit yang tidak ada kontraknya'];
             }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -242,13 +248,8 @@ class PeriodMeterController extends Controller
         ->get();
         echo $unit_kontrak;
         */
-        $ct_meter = CutoffHistory::select('unit_id','costd_id','meter_end')
-                        ->where('close_date', '>=', $request->input('meter_start'))
-                        ->where('close_date', '<=', $request->input('meter_end'))
-                        ->where('unit_id',$unit_kontrak[$i]->unit_id)
-                        ->where('costd_id',$unit_kontrak[$i]->costd_id)
-                        ->get();
-        echo $ct_meter;
+        $check_unit = TrInvoice::select('tr_invoice.tenan_id','tr_tenan.inv_outstanding')->where('tr_invoice.inv_outstanding','>',0);
+        echo $check_unit;
     }
 
     public function editModal(Request $request){
@@ -344,7 +345,7 @@ class PeriodMeterController extends Controller
                     ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
                     ->where('prdmet_id',$type)
                     ->get()->toArray();
-        $tp = 'csv';
+        $tp = 'xls';
         return Excel::create('meter_template', function($excel) use ($data) {
             $excel->sheet('mySheet', function($sheet) use ($data)
             {
@@ -398,7 +399,7 @@ class PeriodMeterController extends Controller
                     DB::table('tr_meter')
                     ->where('prdmet_id', $prd)
                     ->where('costd_id', $array_meter[$value->costd_name])
-                    ->where('unit_id', $array_unit[$value->unit_id])
+                    ->where('unit_id', $array_unit[$value->unit_code])
                     ->update(['meter_end' => $value->meter_end]);
                 }
                 return back();
