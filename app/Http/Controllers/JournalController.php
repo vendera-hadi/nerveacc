@@ -8,6 +8,7 @@ use App\Models\MsMasterCoa;
 use App\Models\MsDepartment;
 use App\Models\MsJournalType;
 use App\Models\TrLedger;
+use App\Models\MsJournalType;
 use DB;
 
 class JournalController extends Controller
@@ -47,8 +48,9 @@ class JournalController extends Controller
         $journalType = MsJournalType::find($request->jour_type_id);
         $journalPrefix = $journalType->jour_type_prefix;
         
-        // cari last prefix
-        $lastJournal = TrLedger::latest()->first();
+        // cari last prefix, order by journal type
+
+        $lastJournal = TrLedger::where('jour_type_id',$request->jour_type_id)->latest()->first();
         if($lastJournal){
             $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
             $lastJournalNumber = (int) end($lastJournalNumber);

@@ -18,7 +18,7 @@ class CreateTrInvoiceJournalsTable extends Migration
             $table->integer('inv_id');
             $table->string('invjour_voucher',15);
             $table->date('invjour_date');
-            $table->string('invjour_note',50);
+            $table->string('invjour_note',50)->nullable();
             $table->char('coa_code',10);
             $table->decimal('invjour_debit',12,2);
             $table->decimal('invjour_credit',12,2);

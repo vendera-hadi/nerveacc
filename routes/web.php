@@ -296,6 +296,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('generateinvoice','InvoiceController@generateInvoice');
 	Route::post('generateinvoice','InvoiceController@postGenerateInvoice')->name('invoice.generate');
 	Route::get('invoice/print_faktur', 'InvoiceController@print_faktur');
+	Route::post('invoice/posting','InvoiceController@posting')->name('invoice.posting');
 
 	// aging piutang
 	Route::get('aging','AgingController@index')->name('aging.index');

@@ -89,8 +89,9 @@
                 <!-- end table -->
                 
                 <!-- icon2 atas table -->
-                <div id="toolbar">
-                    
+                <div id="toolbar" class="datagrid-toolbar">
+                    <!-- <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Create Invoice</span></a>                     -->
+                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
                 </div>
                 <!-- end icon -->
             
@@ -143,6 +144,30 @@
 var entity = "List Invoice"; // nama si tabel, ditampilin di dialog
 var get_url = "{{route('invoice.get')}}";
 var get_url2 = "{{route('invoice.getdetail')}}";
+
+function postingInv(){
+    var row = $('#dg').datagrid('getSelected');
+    // console.log(row);
+    if(row.inv_post == 'no'){
+        $.messager.confirm('Confirm','Are you sure you want to post this Invoice ?',function(r){
+            if (r){
+                // posting invoice
+                $.post('{{route('invoice.posting')}}',{id:row.id},function(result){
+                    console.log(result);
+                    if(result.error){
+                        $.messager.alert('Warning',result.message);
+                    }
+                    if(result.success){
+                        $.messager.alert('Success',result.message);
+                        $('#dg').datagrid('reload');
+                    }
+                },'json');
+            }
+        });
+    }else{
+        $.messager.alert('Warning', 'You can\'t post invoice that already posted');
+    }
+}
 
 $(function(){
     $('#dg').datagrid({
@@ -254,6 +279,7 @@ $(function(){
             return false;
         });
     };
+
 });        
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>

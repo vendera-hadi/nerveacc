@@ -17,6 +17,10 @@ use App\Models\TrPeriodMeter;
 use App\Models\TrMeter;
 use App\Models\MsCompany;
 use App\Models\MsCostItem;
+use App\Models\MsMasterCoa;
+use App\Models\MsJournalType;
+use App\Models\TrLedger;
+use App\Models\TrInvoiceJournal;
 use DB;
 use PDF;
 
@@ -112,8 +116,8 @@ class InvoiceController extends Controller
                 $temp['invtp_name'] = $value->invtp_name;
                 $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
-                $temp['inv_post'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
-                $temp['action_button'] = '<a href="/invoice/print_faktur?id='.$value->id.'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="/invoice/print_faktur?id='.$value->id.'&type=pdf">PDF</a>';
+                $temp['inv_post'] = !empty($value->inv_post) ? 'yes' : 'no';
+                $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a>';
                 // $temp['daysLeft']
                 $result['rows'][] = $temp;
             }
@@ -423,4 +427,118 @@ class InvoiceController extends Controller
             return view('print_faktur', array('errorMsg' => $e->getMessage()));
         } 
     }
+
+    public function posting(Request $request){
+        $id = $request->id;
+        $coayear = date('Y');
+        $month = date('m');
+        $journal = [];
+        $invJournal = [];
+        
+        // get coa code dari invoice type
+        $invoiceHd = TrInvoice::with('InvoiceType')->find($id);
+        if(!isset($invoiceHd->InvoiceType->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$invoiceHd->InvoiceType->invtp_name.' need to be set with COA code']);
+        // create journal DEBET utk piutang
+        $coaDebet = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$invoiceHd->InvoiceType->invtp_coa_ar)->first();
+        if(empty($coaDebet)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$invoiceHd->InvoiceType->invtp_coa_ar.' is not found on this year list. Please ReInsert this COA Code']);
+        
+        // cari last prefix, order by journal type
+        $jourType = MsJournalType::where('jour_type_prefix','AR')->first();
+        if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "AR" first before posting an invoice']);
+        $lastJournal = TrLedger::where('jour_type_id',$jourType->id)->latest()->first();
+        if($lastJournal){
+            $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
+            $lastJournalNumber = (int) end($lastJournalNumber);
+            $nextJournalNumber = $lastJournalNumber + 1;
+        }else{
+            $nextJournalNumber = 1;
+        }
+        $nextJournalNumber = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+        $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumber;
+
+        $journal[] = [
+                        'ledg_id' => "JRNL".str_replace(".", "", str_replace(" ", "",microtime())),
+                        'ledge_fisyear' => $coayear,
+                        'ledg_number' => $journalNumber,
+                        'ledg_date' => date('Y-m-d'),
+                        'ledg_refno' => $invoiceHd->inv_faktur_no,
+                        'ledg_debit' => $invoiceHd->inv_amount,
+                        'ledg_credit' => 0,
+                        'ledg_description' => $coaDebet->coa_name,
+                        'coa_year' => $coaDebet->coa_year,
+                        'coa_code' => $coaDebet->coa_code,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                        'jour_type_id' => $jourType->id,
+                        'dept_id' => 3 //hardcode utk finance
+                    ];
+
+        $invJournal[] = [
+                        'inv_id' => $id,
+                        'invjour_voucher' => $journalNumber,
+                        'invjour_date' => date('Y-m-d'),
+                        'invjour_note' => 'Posting Invoice '.$invoiceHd->inv_faktur_no,
+                        'coa_code' => $coaDebet->coa_code,
+                        'invjour_debit' => $invoiceHd->inv_amount,
+                        'invjour_credit' => 0
+                    ];
+        // End DEBET
+
+        // Create CREDIT
+        // jabarin invoice detail
+        $invDetails = TrInvoiceDetail::where('inv_id',$id)->get();
+        foreach ($invDetails as $detail) {
+            // coa credit diambil dari cost item
+            if($detail->costd_id != 0){ 
+                $costItem = MsCostDetail::join('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')->where('ms_cost_detail.id',$detail->costd_id)->first();
+            }else{ 
+                $costItem = MsCostItem::where('cost_code','STAMP')->first();
+            }
+            $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$costItem->cost_coa_code)->first();
+            
+            $journal[] = [
+                        'ledg_id' => "JRNL".str_replace(".", "", str_replace(" ", "",microtime())),
+                        'ledge_fisyear' => $coayear,
+                        'ledg_number' => $journalNumber,
+                        'ledg_date' => date('Y-m-d'),
+                        'ledg_refno' => $invoiceHd->inv_faktur_no,
+                        'ledg_debit' => 0,
+                        'ledg_credit' => $detail->invdt_amount,
+                        'ledg_description' => $coaCredit->coa_name,
+                        'coa_year' => $coaCredit->coa_year,
+                        'coa_code' => $coaCredit->coa_code,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                        'jour_type_id' => $jourType->id,
+                        'dept_id' => 3 //hardcode utk finance
+                    ];
+
+            $invJournal[] = [
+                        'inv_id' => $id,
+                        'invjour_voucher' => $journalNumber,
+                        'invjour_date' => date('Y-m-d'),
+                        'invjour_note' => 'Posting Invoice '.$invoiceHd->inv_faktur_no,
+                        'coa_code' => $coaCredit->coa_code,
+                        'invjour_debit' => 0,
+                        'invjour_credit' => $detail->invdt_amount
+                    ];
+        }
+        
+        // INSERT DATABASE
+        try{
+            DB::transaction(function () use($id, $invJournal, $journal){
+                // insert journal
+                TrLedger::insert($journal);
+                // insert invoice journal
+                TrInvoiceJournal::insert($invJournal);
+                // update posting to yes
+                TrInvoice::where('id', $id)->update(['inv_post'=>1]);
+            });
+        }catch(\Exception $e){
+            return response()->json(['error'=>1, 'message'=> 'Error occured when posting invoice']);
+        }
+
+        return response()->json(['success'=>1, 'message'=>'Invoice posted Successfully']);
+    }
+
 }

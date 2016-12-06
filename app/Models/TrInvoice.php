@@ -15,4 +15,7 @@ class TrInvoice extends Model
    public function TrInvoiceDetail(){
    		return $this->hasMany('App\Models\TrInvoiceDetail','tenan_id');
    }
+   public function InvoiceType(){
+   		return $this->belongsTo('App\Models\MsInvoiceType','invtp_id');
+   }
 }
