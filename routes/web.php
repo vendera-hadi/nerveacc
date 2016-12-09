@@ -213,6 +213,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('cost_item/delete', 'CostItemController@delete')->name('cost_item.delete');
 	Route::post('cost_item/getDetail', 'CostItemController@getDetail')->name('cost_item.getDetail');
 	Route::post('cost_item/cost_detail','CostItemController@cost_detail')->name('cost_item.cost_detail');
+	Route::post('cost_item/getOptionsCoa', 'CostItemController@getOptionsCoa')->name('cost_item.getOptionsCoa');
 
 	//cost detail
 	Route::get('cost_detail','CostDetailController@index');

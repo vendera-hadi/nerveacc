@@ -35,11 +35,10 @@
                     <!-- kolom -->
                     <thead>
                         <tr>
-                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="id" width="120" sortable="true">ID</th>
-                            <th field="cashbk_code" width="120" sortable="true">Kode Cash Bank</th>
+                            <th field="cashbk_name" width="120" sortable="true">Kode Cash Bank</th>
                             <th field="cashbk_accn_no" width="120" sortable="true">Cash Bank Account No</th>
-                            <th field="cashbk_isbank" width="120" sortable="true">Active</th>
+                            <th field="coa_code" width="120" sortable="true">Coa Code</th>
+                            <th field="cashbk_isbank" width="120" sortable="true">Is Bank</th>
                             <th field="curr_name" width="120" sortable="true">Currency</th>
                         </tr>
                     </thead>
@@ -60,10 +59,13 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="cashbk_code" class="easyui-textbox" label="Cash Bank Code:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
+                            <input name="cashbk_name" class="easyui-textbox" label="Cash Bank Name:" style="width:100%" data-options="required:true,validType:'length[0,50]'">
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="cashbk_accn_no" class="easyui-textbox" label="Account Number:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input id="cc" class="easyui-combobox" required="true" name="coa_code" style="width:100%" label="Coa Code:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="cashbk_isbank" label="Active:" style="width:300px;">

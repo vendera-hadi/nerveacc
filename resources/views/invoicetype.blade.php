@@ -36,10 +36,9 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="invtp_code" width="50" sortable="true">Invoice Type Code</th>
                             <th field="invtp_name" width="50" sortable="true">Invoice Type Name</th>
                             <th field="invtp_prefix" width="50" sortable="true">Invoice Type Prefix</th>
-                            <th field="created_by" width="50" >Created By</th>
+                            <th field="invtp_coa_ar" width="50" sortable="true">Invoice Coa</th>
                         </tr>
                     </thead>
                 </table>
@@ -59,10 +58,10 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Information</div>
                         <div style="margin-bottom:10px">
-                            <input name="invtp_code" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,3]'" label="Code:" style="width:100%">
+                            <input name="invtp_name" class="easyui-textbox" required="true" label="Invoice Type Name:" style="width:100%">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="invtp_name" class="easyui-textbox" required="true" label="Invoice Type Name:" style="width:100%">
+                            <input id="cc" class="easyui-combobox" required="true" name="invtp_coa_ar" style="width:100%" label="Coa Cost:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="invtp_prefix" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,3]'" label="Prefix:" style="width:100%">

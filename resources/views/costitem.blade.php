@@ -38,6 +38,7 @@
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="cost_code" width="50" sortable="true">Cost Code</th>
                             <th field="cost_name" width="50" sortable="true">Cost Name</th>
+                            <th field="cost_coa_code" width="50" sortable="true">Cost Coa Code</th>
                             <th field="cost_isactive" width="50" sortable="true">Cost Active</th>
                         </tr>
                     </thead>
@@ -62,6 +63,9 @@
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="cost_name" class="easyui-textbox" label="Cost Name:" style="width:100%" data-options="required:true,validType:'length[0,150]'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input id="cc" class="easyui-combobox" required="true" name="cost_coa_code" style="width:100%" label="Coa Cost:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="cost_isactive" label="Active:" style="width:300px;">

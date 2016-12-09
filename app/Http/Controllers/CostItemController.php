@@ -9,6 +9,7 @@ use Auth;
 use App\Models\MsCostItem;
 use App\Models\MsCostDetail;
 use App\Models\User;
+use App\Models\MsMasterCoa;
 
 class CostItemController extends Controller
 {
@@ -69,6 +70,7 @@ class CostItemController extends Controller
                 $temp['cost_id'] = $value->cost_id;
                 $temp['cost_code'] = $value->cost_code;
                 $temp['cost_name'] = $value->cost_name;
+                $temp['cost_coa_code'] = $value->cost_coa_code;
                 $temp['cost_isactive'] = !empty($value->cost_isactive) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }
@@ -130,6 +132,21 @@ class CostItemController extends Controller
         try{
             $id = $request->id;
             $result = MsCostDetail::select('*')->where('cost_id',$id)->get();
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function getOptionsCoa(){
+        try{
+            $all = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',FALSE)->get();
+            $result = [];
+            if(count($all) > 0){
+                foreach ($all as $value) {
+                    $result[] = ['id'=>$value->coa_code, 'text'=>trim($value->coa_code).' - '.trim($value->coa_name)];
+                }
+            }
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
