@@ -12,4 +12,11 @@ class TrInvoicePaymhdr extends Model
    public function Cashbank(){
    		return $this->belongsTo('App\Models\MsCashBank','cashbk_id');
    }
+
+   public function TrInvoicePaymdtl(){
+   		return $this->hasMany('App\Models\TrInvoicePaymdtl','invpayh_id');
+   }
+   
+   public function TrContract(){
+         return $this->belongsTo('App\Models\TrContract','contr_id');
 }
