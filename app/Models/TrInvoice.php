@@ -18,4 +18,7 @@ class TrInvoice extends Model
    public function InvoiceType(){
    		return $this->belongsTo('App\Models\MsInvoiceType','invtp_id');
    }
+   public function TrContract(){
+         return $this->belongsTo('App\Models\TrContract','contr_id');
+   }
 }
