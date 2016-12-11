@@ -27,6 +27,10 @@ use PDF;
 class InvoiceController extends Controller
 {
     public function index(){
+        $data['cost_items'] = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name')
+                                ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
+                                ->where('ms_cost_detail.costd_ismeter',0)->where('is_service_charge',0)
+                                ->where('is_sinking_fund',0)->where('is_insurance',0)->get();
         $data['inv_type'] = MsInvoiceType::all();
         return view('invoice',$data);
     }
@@ -158,10 +162,13 @@ class InvoiceController extends Controller
     public function postGenerateInvoice(Request $request){
         $month = $request->input('month');
         // bulan dikurang 1 karna generate invoice utk bulan kemarin
+        $year = $request->input('year');
+        if($month == 1) $year = $year-1;
+
         if($month == 1) $month = 12;
         else $month = $month - 1;
         $month = str_pad($month, 2, 0, STR_PAD_LEFT);
-        $year = $request->input('year');
+   
         $tempTimeStart = implode('-', [$year,$month,'01']);
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
         $companyData = MsCompany::first();
@@ -210,7 +217,7 @@ class InvoiceController extends Controller
                     // echo "Contract #".$ctrInv->contr_id."<br>";
                     $countInvoice+=1;
                     // AMBIL CONTRACT INVOICE PER INVOICE TYPE
-                    $details = TrContractInvoice::select('tr_contract_invoice.*','ms_cost_detail.*','ms_cost_item.is_service_charge','ms_cost_item.is_sinking_fund','ms_cost_item.is_insurance','ms_unit.unit_sqrt','ms_cost_detail.id as costd_id','tr_contract.tenan_id','tr_contract.unit_id','tr_contract.contr_code','tr_contract.contr_enddate','tr_contract.contr_terminate_date','ms_invoice_type.invtp_prefix','ms_invoice_type.id as invtp_id')
+                    $details = TrContractInvoice::select('tr_contract_invoice.*','tr_contract_invoice.id as tcinv_id','ms_cost_detail.*','ms_cost_item.is_service_charge','ms_cost_item.is_sinking_fund','ms_cost_item.is_insurance','ms_unit.unit_sqrt','ms_cost_detail.id as costd_id','tr_contract.tenan_id','tr_contract.unit_id','tr_contract.contr_code','tr_contract.contr_enddate','tr_contract.contr_terminate_date','ms_invoice_type.invtp_prefix','ms_invoice_type.id as invtp_id')
                             ->join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
                             ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                             ->join('tr_contract',DB::raw('tr_contract_invoice.contr_id::integer'),'=','tr_contract.id')
@@ -255,10 +262,12 @@ class InvoiceController extends Controller
                                         $invDetail[] = [
                                             'invdt_amount' => $amount,
                                             'invdt_note' => $note,
-                                            'continv_start_inv' => $tempTimeStart,
-                                            'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months")),
                                             'costd_id' => $meter->costd_id,
                                             'meter_id' => $meter->tr_meter_id
+                                        ];
+                                        $updateCtrInv[$tcinv_id] = [
+                                            'continv_start_inv' => $tempTimeStart,
+                                            'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months"))
                                         ];
                                         $totalPay+=$amount;
                                     }
@@ -309,9 +318,11 @@ class InvoiceController extends Controller
                                     $invDetail[] = [
                                         'invdt_amount' => $amount,
                                         'invdt_note' => $note,
-                                        'continv_start_inv' => $tempTimeStart,
-                                        'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months")),
                                         'costd_id' => $value->costd_id
+                                    ];
+                                    $updateCtrInv[$value->tcinv_id] = [
+                                        'continv_start_inv' => $tempTimeStart,
+                                        'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months"))
                                     ];
                                     $totalPay+=$amount;
                                 }
@@ -338,7 +349,7 @@ class InvoiceController extends Controller
                     // $insertFlag = false;
                     // INSERT DB
                     if($insertFlag){
-                        DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail, $totalStamp){
+                        DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail, $totalStamp, $updateCtrInv){
                             // insert invoice
                             // get last prefix
                             $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$value->invtp_prefix.'-'.substr($year, -2).$month.'-%')->orderBy('id','desc')->first();
@@ -378,6 +389,11 @@ class InvoiceController extends Controller
                             foreach($invDetail as $indt){
                                 $indt['inv_id'] = $insertInvoice->id;
                                 TrInvoiceDetail::create($indt);
+                            }
+
+                            // update periode di tr contract inv
+                            foreach ($updateCtrInv as $key => $contractInvoice) {
+                                TrContractInvoice::where('id',$key)->update($contractInvoice);
                             }
                         });
                         $invoiceGenerated++;
@@ -539,6 +555,71 @@ class InvoiceController extends Controller
         }
 
         return response()->json(['success'=>1, 'message'=>'Invoice posted Successfully']);
+    }
+
+    public function insert(Request $request){
+        $inv_date = explode('-',$request->inv_date);
+        $invtp = MsInvoiceType::find($request->invtp_id);
+        $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$invtp->invtp_prefix.'-'.substr($inv_date[0], -2).$inv_date[1].'-%')->orderBy('id','desc')->first();
+        if($lastInvoiceofMonth){
+            $lastPrefix = explode('-', $lastInvoiceofMonth->inv_number);
+            $lastPrefix = (int) $lastPrefix[2];               
+        }else{
+            $lastPrefix = 0;
+        }
+        $newPrefix = $lastPrefix + 1;
+        $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
+        $contract = TrContract::find($request->contr_id);
+
+        $invHeader = [
+            'tenan_id' => $contract->tenan_id,
+            'inv_number' => $invtp->invtp_prefix."-".substr($inv_date[0], -2).$inv_date[1]."-".$newPrefix,
+            'inv_faktur_no' => $invtp->invtp_prefix."-".substr($inv_date[0], -2).$inv_date[1]."-".$newPrefix,
+            'inv_faktur_date' => $request->inv_date,
+            'inv_date' => $request->inv_date,
+            'inv_duedate' => $request->inv_duedate,
+            'inv_amount' => $request->amount,
+            'inv_ppn' => 0.1,
+            'inv_outstanding' => $request->amount,
+            'inv_ppn_amount' => $request->amount, // sementara begini dulu, ikutin cara di foto invoice
+            'inv_post' => 0,
+            'invtp_id' => $request->invtp_id,
+            'contr_id' => $request->contr_id,
+            'created_by' => Auth::id(),
+            'updated_by' => Auth::id()
+        ];
+
+        $costd_ids = $request->costd_id;
+        $costd_amounts = $request->costd_amount;
+        $costd_names = $request->costd_name;
+        foreach ($costd_ids as $key => $costd_id) {
+            $invDtl[] = [
+                'invdt_amount' => $costd_amounts[$key],
+                'invdt_note' => $costd_names[$key],
+                'costd_id' => $costd_id
+            ];
+            $updateCtrInv[] = [
+                'continv_start_inv' => $request->inv_date,
+                'continv_next_inv' => date('Y-m-d',strtotime($request->inv_date." +1 months"))
+            ];
+        }
+
+        try{
+            DB::transaction(function () use($invHeader, $invDtl, $request, $updateCtrInv){
+                $insertInvoice = TrInvoice::create($invHeader);
+
+                // insert detail
+                foreach($invDtl as $key => $indt){
+                    $indt['inv_id'] = $insertInvoice->id;
+                    TrInvoiceDetail::create($indt);
+
+                    TrContractInvoice::where('invtp_id',$request->invtp_id)->where('contr_id',$request->contr_id)->where('costd_id',$indt['costd_id'])->update($updateCtrInv[$key]);
+                }
+            });
+        }catch(\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Error Occured']);
+        }
+        return response()->json(['success' => 1, 'message' => 'Insert Invoice Success']);
     }
 
 }

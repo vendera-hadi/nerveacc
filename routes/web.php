@@ -195,6 +195,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('contract/inputed','ContractController@inputed')->name('contract.inputed');
 	Route::post('contract/terminate','ContractController@terminate')->name('contract.terminate');
 	Route::post('contract/renew','ContractController@renew')->name('contract.renew');
+	Route::post('contract/popup','ContractController@getPopupOptions')->name('contract.popup');
 
 	Route::get('contract/unclosed','ContractController@unclosed')->name('contract.unclosed');
 	Route::post('contract/getUnclosed', 'ContractController@unclosedList')->name('contract.getunclosed');
@@ -298,6 +299,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('generateinvoice','InvoiceController@postGenerateInvoice')->name('invoice.generate');
 	Route::get('invoice/print_faktur', 'InvoiceController@print_faktur');
 	Route::post('invoice/posting','InvoiceController@posting')->name('invoice.posting');
+	Route::post('invoice/insert','InvoiceController@insert')->name('invoice.insert');
 
 	// aging piutang
 	Route::get('aging','AgingController@index')->name('aging.index');

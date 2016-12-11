@@ -90,7 +90,7 @@
                 
                 <!-- icon2 atas table -->
                 <div id="toolbar" class="datagrid-toolbar">
-                    <!-- <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Create Invoice</span></a>                     -->
+                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Create Invoice</span></a>                    
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
                 </div>
                 <!-- end icon -->
@@ -129,6 +129,149 @@
                 </div>
                 <!-- end form -->
 
+                <!-- Modal extra -->
+                <div id="addInvModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog" style="width:900px">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Add Invoice</h4>
+                      </div>
+                      <div class="modal-body" id="addInvModalContent">
+                            <!-- isi form -->
+                            <form method="POST" id="formAddInv">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Invoice Number (No. Faktur)</label>
+                                            <input type="text" class="form-control" name="inv_number" placeholder="No. Faktur" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Invoice Date</label>
+                                            <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input type="text" class="form-control datepicker" name="inv_date" placeholder="Invoice Date" data-date-format="yyyy-mm-dd" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Invoice Type</label>
+                                            <select name="invtp_id" class="form-control" required>
+                                            @foreach($inv_type as $invtp)
+                                                <option value="{{$invtp->id}}">{{$invtp->invtp_name}}</option>
+                                            @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Invoice Due Date</label>
+                                            <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input type="text" class="form-control datepicker" name="inv_duedate" placeholder="Invoice Due Date" data-date-format="yyyy-mm-dd" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Contract</label>
+                                            <div class="input-group">
+                                                <input type="hidden" name="contr_id" id="txtContrId" required>
+                                                <input type="text" class="form-control" id="txtContr" disabled>
+                                                <span class="input-group-btn">
+                                                    <button class="btn btn-info" type="button" id="chooseContractButton">Choose Contract</button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label>Add Cost Item</label>
+                                            <select id="selectCostItemEdit" class="form-control">
+                                                <?php $tempGroup = ''; ?>
+                                                @foreach($cost_items as $key => $citm)
+                                                  @if($citm->cost_name != $tempGroup && $key > 0){!!'</optgroup>'!!}@endif
+                                                  @if($citm->cost_name != $tempGroup){!!'<optgroup label="'.$citm->cost_name.' ('.$citm->cost_code.')">'!!}@endif
+                                                  <option value="{{$citm->id}}">{{$citm->costd_name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <button type="button" id="clickCostItemEdit">Add Cost Item</button>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:40px">
+                                    <div class="col-sm-12">
+                                        <table id="tableCost" width="100%" class="table table-bordered" >
+                                            <tr class="text-center">
+                                              <td>Cost Item</td>
+                                              <td>Name</td>
+                                              <td>Unit</td>
+                                              <td>Cost Rate</td>
+                                              <td>Cost Burden</td>
+                                              <td>Cost Admin</td>
+                                              <td></td>
+                                            </tr>
+                                            
+                                          </table>
+                                            <table width="50%">
+                                                <input type="hidden" name="amount">
+                                                <tr>
+                                                    <td><b>Total</b></td>
+                                                    <td id="totalInv">0</td>
+                                                </tr>
+                                            </table>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3 col-sm-offset-9">
+                                        <button class="btn btn-info pull-right">Submit</button>
+                                    </div>
+                                </div>
+                                
+                            </form>
+                            <!-- end form -->
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- End Modal -->
+
+                <!-- Modal select contract -->
+                <div id="contractModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      
+                      <div class="modal-body" id="contractModalContent">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <!-- End Modal -->
+
           		<!-- content -->
         	</div>
 		</div>
@@ -140,10 +283,16 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-detailview.js') }}"></script>
+<!-- datepicker -->
+<script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 <script type="text/javascript">
 var entity = "List Invoice"; // nama si tabel, ditampilin di dialog
 var get_url = "{{route('invoice.get')}}";
 var get_url2 = "{{route('invoice.getdetail')}}";
+
+$('.datepicker').datepicker({
+            autoclose: true
+        });
 
 function postingInv(){
     var row = $('#dg').datagrid('getSelected');
@@ -167,6 +316,11 @@ function postingInv(){
     }else{
         $.messager.alert('Warning', 'You can\'t post invoice that already posted');
     }
+}
+
+function addInv(){
+    var row = $('#dg').datagrid('getSelected');
+    $('#addInvModal').modal("show");
 }
 
 $(function(){
@@ -250,6 +404,103 @@ $(function(){
         // }
         }
     });
+
+    var currenturl; 
+    $('#chooseContractButton').click(function(){
+        $('#contractModal').modal("show");
+        currenturl = '{{route('contract.popup')}}';
+        $.post(currenturl, null, function(data){
+            $('#contractModalContent').html(data);
+        });
+    });
+
+    // paging
+    $(document).delegate('.pagination li a','click',function(e){
+        e.preventDefault();
+        currenturl = $(this).attr('href');
+        $.post(currenturl, null, function(data){
+            $('#contractModalContent').html(data);
+        });
+    });
+
+    $(document).delegate('#searchContract','submit',function(e){
+        e.preventDefault();
+        var data = $('#searchContract').serialize();
+        currenturl = '{{route('contract.popup')}}';
+        $.post(currenturl, data, function(data){
+            $('#contractModalContent').html(data);
+        });
+    });
+
+     $(document).delegate('#chooseContract','click',function(e){
+        e.preventDefault();
+        var contractid = $('input[name="contract"]:checked').val();
+        var contractname = $('input[name="contract"]:checked').data('name');
+        $('input[name=contr_id]').val(contractid);
+        $('#txtContr').val(contractname);
+        $('#contractModalContent').text('');
+        $('#contractModal').modal("hide");
+    });
+
+    $('#clickCostItemEdit').click(function(){
+          var flag = false;
+          var subtotal = 0;
+          costItem = $('#selectCostItemEdit').val();
+          $('.costdid').each(function(){
+              console.log($(this).val());
+              if($(this).val() == costItem){ 
+                $.messager.alert('Warning', "Cost Item already exist in the list below");
+                flag = true;
+              }
+          });
+          if(!flag){
+            costItemName = $('#selectCostItemEdit option:selected').parent().attr('label');
+            $.post('{{route('cost_item.getDetail')}}', {id: costItem}, function(result){
+                subtotal = parseFloat(result.costd_rate) + parseFloat(result.costd_burden) + parseFloat(result.costd_admin);
+                $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_id[]" class="costdid" value="'+result.id+'" data-total="'+subtotal+'"><input type="hidden" name="costd_amount[]" value="'+subtotal+'"><input type="hidden" name="costd_name[]" value="'+result.costitem.cost_name+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>Rp. '+result.costd_rate+'</td><td>Rp. '+result.costd_burden+'</td><td>Rp. '+result.costd_admin+'</td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+                updateTotal();
+            });
+          }
+            // $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><strong>Name :</strong> <input type="text" name="costd_name[]" class="form-control costd_name"  required><strong>Unit :</strong> <input type="text" name="costd_unit[]" class="form-control costd_unit" required><strong>Cost Rate :</strong> <input type="text" name="costd_rate[]" class="form-control costd_rate" required><strong>Cost Burden :</strong> <input type="text" name="costd_burden[]" class="form-control costd_burden" required><strong>Cost Admin :</strong> <input type="text" name="costd_admin[]" class="form-control costd_admin" required><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select><strong>Use Meter :</strong> <select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+    });
+
+    $('#formAddInv').submit(function(e){
+        e.preventDefault();
+        if($('#txtContrId').val() == ""){ 
+            $.messager.alert('Warning','Contract is required');
+            return false;
+        }
+        if($('.costdid').length < 1){ 
+            $.messager.alert('Warning','Cost item is required');
+            return false;
+        }
+        $.post('{{route('invoice.insert')}}', $(this).serialize(), function(result){
+            console.log(result);
+            if(result.error) $.messager.alert('Warning',result.message);
+            if(result.success){
+                $.messager.alert('Success',result.message);
+                $('#addInvModal').modal("hide");
+                $('#dg').datagrid('reload');
+            }
+        },'json');
+    });
+
+    function updateTotal(){
+        var total = 0;
+        $('.costdid').each(function(){
+            total = total + $(this).data('total');
+        });
+        // console.log(total);
+        $('input[name=amount]').val(total);
+        total = total.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+        $('#totalInv').html("Rp. "+total);
+    }
+
+    $(document).delegate('.removeCost','click',function(){
+            if(confirm('Are you sure want to remove this cost item?')){
+                $(this).parent().parent().remove();
+            }
+        });
 
     var print_window = function(){
         $('.print-window').off('click');

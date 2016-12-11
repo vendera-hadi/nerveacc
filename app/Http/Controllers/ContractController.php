@@ -498,8 +498,8 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name')
-                    ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
-                    ->whereNull('tr_contract.contr_terminate_date');
+                    ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id');
+            if(strtolower($pageName) != 'renewal') $fetch = $fetch->whereNull('tr_contract.contr_terminate_date');
             // filter page
             if(strtolower($pageName) == 'confirmation'){
                 $fetch = $fetch->where('tr_contract.contr_status','inputed');
@@ -626,8 +626,8 @@ class ContractController extends Controller
                 TrContractInvLog::create([
                         'continv_amount' => $value->continv_amount,
                         'contr_id' => $id,
-                        'invtp_code' => $value->invtp_code,
-                        'costd_is' => $value->costd_is
+                        'invtp_id' => $value->invtp_id,
+                        'costd_id' => $value->costd_id
                     ]);
             }
         }
@@ -1223,5 +1223,21 @@ class ContractController extends Controller
         return response()->json(['success'=>true, 'message'=>'Invoice Generated for this Closed Contract '.$contractData->contr_no.', Please Cek Invoice List Menu']);
     }
     // end
+
+    public function getPopupOptions(Request $request){
+        $keyword = $request->input('keyword');
+        $fetch = TrContract::select('tr_contract.id','tr_contract.contr_code','tr_contract.contr_no','ms_unit.unit_name','ms_tenant.tenan_name')
+                            ->join('ms_tenant','tr_contract.tenan_id','=','ms_tenant.id')
+                            ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                            ->where('contr_status','confirmed')->where(function($query){
+                                $query->whereNull('contr_terminate_date')->orWhere('contr_terminate_date','<',date('Y-m-d'));
+                            });
+        if($keyword) $fetch = $fetch->where(function($query) use($keyword){
+                                            $query->where('contr_no','like','%'.$keyword.'%')->orWhere('contr_code','like','%'.$keyword.'%')
+                                                ->orWhere('unit_name','like','%'.$keyword.'%')->orWhere('tenan_name','like','%'.$keyword.'%');
+                                        });
+        $fetch = $fetch->paginate(10);
+        return view('modal.popupcontract', ['contracts'=>$fetch, 'keyword'=>$keyword, 'edit'=> null]);
+    }
 
 }

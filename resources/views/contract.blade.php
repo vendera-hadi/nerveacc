@@ -541,12 +541,21 @@
         var invoiceTypes = '{!!$invoice_types!!}';
         var choices = [];
         $('#clickCostItem').click(function(){
+            var flag = false;
             $('#tableCost').show();
             costDetail = $('#selectCostItem').val();
             costDetailName = $('#selectCostItem option:selected').text();
-            $.post('{{route('cost_item.getDetail')}}', {id: costDetail}, function(result){
-                $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><select name="period[]" class="form-control"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="4">4 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+            $('.costdid').each(function(){
+                if($(this).val() == costDetail){ 
+                  $.messager.alert('Warning', "Cost Item already exist in the list below");
+                  flag = true;
+                }
             });
+            if(!flag){
+              $.post('{{route('cost_item.getDetail')}}', {id: costDetail}, function(result){
+                  $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" class="costdid" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><select name="period[]" class="form-control"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="4">4 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+              });
+            }
         });
 
         // $('#clickManualCostItem').click(function(){
