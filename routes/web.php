@@ -308,6 +308,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('aging/downloadAgingExcel', 'AgingController@downloadAgingExcel');
 	
 	Route::post('payment/posting','PaymentController@posting');
+	// report
+	Route::get('report/arview','ReportController@arview')->name('report.arview');
+	Route::get('report/arbyinvoice','ReportController@arbyInvoice')->name('report.arbyinv');
+	Route::get('report/arbyinvoicecancel','ReportController@arbyInvoiceCancel')->name('report.arbyinvcancel');
 });
 
 Route::get('logout','Auth\AuthController@logout');
