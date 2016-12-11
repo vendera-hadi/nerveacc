@@ -55,7 +55,7 @@ class InvoiceController extends Controller
 
             // olah data
             $count = TrInvoice::count();
-            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
+            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_iscancel','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                     ->join('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
@@ -122,6 +122,7 @@ class InvoiceController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['inv_post'] = !empty($value->inv_post) ? 'yes' : 'no';
                 $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a>';
+                $temp['inv_iscancel'] = $value->inv_iscancel;
                 // $temp['daysLeft']
                 $result['rows'][] = $temp;
             }
@@ -620,6 +621,16 @@ class InvoiceController extends Controller
             return response()->json(['error' => 1, 'message' => 'Error Occured']);
         }
         return response()->json(['success' => 1, 'message' => 'Insert Invoice Success']);
+    }
+
+    public function cancel(Request $request){
+        try{
+            $id = $request->id;
+            TrInvoice::where('id',$id)->update(['inv_iscancel'=>1]);
+            return response()->json(['success' => 1, 'message' => 'Cancel Invoice Success']);
+        }catch(\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Error Occured']);
+        } 
     }
 
 }

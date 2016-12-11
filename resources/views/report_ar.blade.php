@@ -37,6 +37,7 @@
                                 <select id="type" name="type" class="form-control">
                                     <option value="arbyinvoice">Invoice</option>
                                     <option value="arbyinvoicecancel">Invoice Cancel</option>
+                                    <option value="araging">Aging Invoices</option>
                                 </select>
                             </div>
                             <div class="col-sm-3">

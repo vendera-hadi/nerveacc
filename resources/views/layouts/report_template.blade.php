@@ -36,7 +36,7 @@
         </tr>
       </table>
 
-      @include('report_ar_invoice')
+      @include($template)
 
       </section>
 

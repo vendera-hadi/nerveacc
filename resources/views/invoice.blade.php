@@ -67,7 +67,7 @@
                 </form>
 
                 <!-- template tabel -->
-          		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;height:380px" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
@@ -92,6 +92,7 @@
                 <div id="toolbar" class="datagrid-toolbar">
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Create Invoice</span></a>                    
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="cancelInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-ban"></i>&nbsp;Cancel Invoice</span></a>           
                 </div>
                 <!-- end icon -->
             
@@ -323,6 +324,27 @@ function addInv(){
     $('#addInvModal').modal("show");
 }
 
+function cancelInv(){
+    var row = $('#dg').datagrid('getSelected');
+    if(row.inv_post == 'no'){
+        $.messager.confirm('Confirm','Are you sure you want to post this Invoice ?',function(r){
+            if (r){
+                $.post('{{route('invoice.cancel')}}',{id:row.id},function(result){
+                    if(result.error){
+                        $.messager.alert('Warning',result.message);
+                    }
+                    if(result.success){
+                        $.messager.alert('Success',result.message);
+                        $('#dg').datagrid('reload');
+                    }
+                },'json');
+            }
+        });
+    }else{
+        $.messager.alert('Warning', 'You can\'t post invoice that already posted');
+    }
+}
+
 $(function(){
     $('#dg').datagrid({
         view: detailview,
@@ -364,6 +386,12 @@ $(function(){
         },
         onLoadSuccess:function(target){
             print_window();
+        },
+        rowStyler:function(index,row){
+            // penanda dicancel
+            if(row.inv_iscancel){
+                return 'background-color:gray';
+            }
         }
     });
     // $('#dg').datagrid('enableFilter');

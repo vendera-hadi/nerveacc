@@ -7,6 +7,7 @@ use App\Models\TrInvoice;
 use App\Models\TrInvoiceDetail;
 use App\Models\MsCompany;
 use PDF;
+use DB;
 
 class ReportController extends Controller
 {
@@ -20,6 +21,7 @@ class ReportController extends Controller
     	$pdf = @$request->pdf;
     	$data['title'] = "AR Invoices";
     	$data['logo'] = MsCompany::first()->comp_image;
+    	$data['template'] = 'report_ar_invoice';
     	$fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
@@ -76,6 +78,7 @@ class ReportController extends Controller
     	$pdf = @$request->pdf;
     	$data['title'] = "AR Cancelled Invoices";
     	$data['logo'] = MsCompany::first()->comp_image;
+    	$data['template'] = 'report_ar_invoice';
     	$fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
@@ -120,7 +123,40 @@ class ReportController extends Controller
         }
     	if($pdf){
     		$pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
-        	return $pdf->download('AR_Invoice_'.$from.'_to_'.$to.'.pdf');
+        	return $pdf->download('AR_Invoice_Cancel_'.$from.'_to_'.$to.'.pdf');
+    	}else{
+    		return view('layouts.report_template', $data);
+    	}
+    }
+
+    public function arAging(Request $request){
+    	$from = @$request->from;
+    	$to = @$request->to;
+    	$pdf = @$request->pdf;
+    	$data['title'] = "Aging Invoices";
+    	$data['logo'] = MsCompany::first()->comp_image;
+    	$data['template'] = 'report_ar_aging';
+    	$fetch = TrInvoice::select('tr_invoice.tenan_id','tr_invoice.inv_duedate','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date',
+                    DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS gabung"),
+                    DB::raw("SUM(inv_outstanding) AS total"),
+                    DB::raw("(CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END) AS current"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag30"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag60"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag90"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag180"),
+                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS agl180"))
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
+                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->where('tr_invoice.inv_outstanding','>',0)
+                ->groupBy('tr_invoice.tenan_id','tr_invoice.inv_duedate','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date','tr_invoice.inv_outstanding');
+    	if($from) $fetch = $fetch->where('inv_date','>=',$from);
+        if($to) $fetch = $fetch->where('inv_date','<=',$to);
+        $fetch = $fetch->get();
+    	$data['invoices'] = $fetch;
+    	if($pdf){
+    		$pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
+        	return $pdf->download('AR_Aging_'.$from.'_to_'.$to.'.pdf');
     	}else{
     		return view('layouts.report_template', $data);
     	}

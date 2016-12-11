@@ -300,6 +300,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('invoice/print_faktur', 'InvoiceController@print_faktur');
 	Route::post('invoice/posting','InvoiceController@posting')->name('invoice.posting');
 	Route::post('invoice/insert','InvoiceController@insert')->name('invoice.insert');
+	Route::post('invoice/cancel','InvoiceController@cancel')->name('invoice.cancel');
 
 	// aging piutang
 	Route::get('aging','AgingController@index')->name('aging.index');
@@ -312,6 +313,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/arview','ReportController@arview')->name('report.arview');
 	Route::get('report/arbyinvoice','ReportController@arbyInvoice')->name('report.arbyinv');
 	Route::get('report/arbyinvoicecancel','ReportController@arbyInvoiceCancel')->name('report.arbyinvcancel');
+	Route::get('report/araging','ReportController@arAging')->name('report.aging');
+	// payment
 	Route::get('payment','PaymentController@index')->name('payment.index');
 	Route::post('payment/get','PaymentController@get')->name('payment.get');
 	Route::post('payment/detail', 'PaymentController@getdetail')->name('payment.getdetail');
