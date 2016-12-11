@@ -36,17 +36,17 @@
                   <tr><td style="text-align:right"><strong>Invoice Type</strong></td><td>:</td>
                     <td><select name="inv_type[]" class="form-control">
                 @foreach($invoice_types as $invtype)
-                <option value="{{$invtype->invtp_code}}" @if($cdt->invtp_code == $invtype->invtp_code){{'selected="selected"'}}@endif>{{$invtype->invtp_name}}</option>
+                <option value="{{$invtype->id}}" @if($cdt->invtp_id == $invtype->id){!!'selected="selected"'!!}@endif>{{$invtype->invtp_name}}</option>
                 @endforeach
                 </select></td></tr>
                   <tr><td style="text-align:right"><strong>Billing Period</strong></td><td>:</td>
                     <td><select name="period[]" class="form-control">
-                      <option value="1" @if($cdt->continv_period == 1){{'selected="selected"'}}@endif>1 Month</option>
-                      <option value="2" @if($cdt->continv_period == 2){{'selected="selected"'}}@endif>2 Months</option>
-                      <option value="3" @if($cdt->continv_period == 3){{'selected="selected"'}}@endif>3 Months</option>
-                      <option value="4" @if($cdt->continv_period == 4){{'selected="selected"'}}@endif>4 Months</option>
-                      <option value="6" @if($cdt->continv_period == 5){{'selected="selected"'}}@endif>6 Months</option>
-                      <option value="12" @if($cdt->continv_period == 6){{'selected="selected"'}}@endif>12 Months</option>
+                      <option value="1" @if($cdt->continv_period == 1){!!'selected="selected"'!!}@endif>1 Month</option>
+                      <option value="2" @if($cdt->continv_period == 2){!!'selected="selected"'!!}@endif>2 Months</option>
+                      <option value="3" @if($cdt->continv_period == 3){!!'selected="selected"'!!}@endif>3 Months</option>
+                      <option value="4" @if($cdt->continv_period == 4){!!'selected="selected"'!!}@endif>4 Months</option>
+                      <option value="6" @if($cdt->continv_period == 5){!!'selected="selected"'!!}@endif>6 Months</option>
+                      <option value="12" @if($cdt->continv_period == 6){!!'selected="selected"'!!}@endif>12 Months</option>
                     </select>
                     </select></td>
               </table>

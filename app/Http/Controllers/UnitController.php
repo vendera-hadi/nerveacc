@@ -141,7 +141,8 @@ class UnitController extends Controller
     public function insert(Request $request){
         try{
             $input = $request->all();
-            $input['unit_id'] = md5(date('Y-m-d H:i:s'));
+            // $input['unit_id'] = md5(date('Y-m-d H:i:s'));
+            $input['unit_isavailable'] = 1;
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
             return MsUnit::create($input);        
@@ -192,7 +193,8 @@ class UnitController extends Controller
         $tenan_id = @$request->tenan;
         // $isowner = $request->input('isowner', 0);
         // get unit yg available plus bs select unit dia sendiri
-        if($keyword) $fetch = MsUnit::select('ms_unit.*','ms_virtual_account.viracc_no','ms_unit_owner.tenan_id')->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
+        if($keyword) $fetch = MsUnit::select('ms_unit.*','ms_virtual_account.viracc_no','ms_unit_owner.tenan_id')
+                                    ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
                                     ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.tenan_id')
                                     ->where(function($query) use($keyword){
                                         $query->where(DB::raw('LOWER(unit_code)'),'like','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'like','%'.$keyword.'%');

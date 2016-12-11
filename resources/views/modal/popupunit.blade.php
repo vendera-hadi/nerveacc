@@ -21,7 +21,7 @@
 	</tr>
 	@foreach($units as $unit)
 	<tr>
-		<td><center><input type="radio" name="@if($edit){{'unitedit'}}@else{{'unit'}}@endif" data-name="{{$unit->unit_code." ".$unit->unit_name}}" data-vaccount="{{$unit->viracc_no}}" value="{{$unit->id}}"></center></td>
+		<td><center><input type="radio" name="@if($edit){{'unitedit'}}@else{{'unit'}}@endif" data-name="{{$unit->unit_code." ".$unit->unit_name}}" data-vaccount="{{$unit->viracc_no}}" data-vaccount-id ="{{$unit->unit_virtual_accn}}" value="{{$unit->id}}"></center></td>
 		<td>{{$unit->unit_code}}</td>
 		<td>{{$unit->unit_name}}</td>
 		<td>{{(int)$unit->unit_sqrt." m2"}}</td>

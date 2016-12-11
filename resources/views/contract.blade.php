@@ -662,7 +662,9 @@
             $('#txtUnitId').val(unitid);
             $('#txtUnit').val(unitname);
             var unitvaccount = $('input[name="unit"]:checked').data('vaccount');
-            $('#txtVAId,#txtVA').val(unitvaccount);
+            var unitvaccountid = $('input[name="unit"]:checked').data('vaccount-id');
+            $('#txtVA').val(unitvaccount);
+            $('#txtVAId').val(unitvaccountid);
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
@@ -721,7 +723,9 @@
             $('#txtUnitEditId').val(unitid);
             $('#txtUnitEdit').val(unitname);
             var unitvaccount = $('input[name="unitedit"]:checked').data('vaccount');
-            $('#txtVAEditId,#txtVAEdit').val(unitvaccount);
+            var unitvaccountid = $('input[name="unit"]:checked').data('vaccount-id');
+            $('#txtVA').val(unitvaccount);
+            $('#txtVAId').val(unitvaccountid);
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });

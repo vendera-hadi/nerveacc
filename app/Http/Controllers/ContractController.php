@@ -33,7 +33,7 @@ class ContractController extends Controller
         $data['marketing_agents'] = MsMarketingAgent::all(); 
         $data['invoice_types'] = '';
         foreach ($invoice_types as $key => $val) {
-            $data['invoice_types'] = $data['invoice_types'].'<option value="'.$val->invtp_code.'">'.$val->invtp_name.'</option>';
+            $data['invoice_types'] = $data['invoice_types'].'<option value="'.$val->id.'">'.$val->invtp_name.'</option>';
         }
         return view('contract', $data);
     }
@@ -144,17 +144,17 @@ class ContractController extends Controller
     public function citmDetail(Request $request){
         try{
             $contractId = $request->id;
-            $costdetail = TrContractInvoice::select('ms_cost_detail.id','ms_cost_detail.cost_id','ms_invoice_type.invtp_code','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code','tr_contract_invoice.continv_period')
-                ->join('ms_invoice_type',\DB::raw('tr_contract_invoice.invtp_code'),"=",\DB::raw('ms_invoice_type.invtp_code'))
-                ->join('ms_cost_detail',\DB::raw('tr_contract_invoice.costd_is::integer'),"=",\DB::raw('ms_cost_detail.id::integer'))
-                ->join('ms_cost_item',\DB::raw('ms_cost_detail.cost_id::integer'),"=",\DB::raw('ms_cost_item.id::integer'))
+            $costdetail = TrContractInvoice::select('ms_cost_detail.id','ms_cost_detail.cost_id','ms_cost_detail.costd_unit','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code','tr_contract_invoice.continv_period','tr_contract_invoice.invtp_id')
+                ->join('ms_invoice_type','tr_contract_invoice.invtp_id',"=",'ms_invoice_type.id')
+                ->join('ms_cost_detail','tr_contract_invoice.costd_id',"=",'ms_cost_detail.id')
+                ->join('ms_cost_item','ms_cost_detail.cost_id',"=",'ms_cost_item.id')
                 ->where('contr_id',$contractId)
                 ->get();
 
             $invoice_types = MsInvoiceType::all();
             $inv_types_options = '';
             foreach ($invoice_types as $key => $val) {
-                $inv_types_options = $inv_types_options.'<option value="'.$val->invtp_code.'">'.$val->invtp_name.'</option>';
+                $inv_types_options = $inv_types_options.'<option value="'.$val->id.'">'.$val->invtp_name.'</option>';
             }
             $cost_items = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
             return view('modal.editcontract', ['id'=>$contractId, 'costdetail' => $costdetail, 'invoice_types'=>$invoice_types, 'cost_items' => $cost_items, 'inv_types_options' => $inv_types_options
@@ -234,7 +234,7 @@ class ContractController extends Controller
             'contr_note' => $request->input('contr_note'),
             'contr_status' => 'inputed',
             'tenan_id' => $request->input('tenan_id'),
-            'mark_id' => $request->input('mark_id'),
+            'mark_id' => !empty($request->input('mark_id')) ? $request->input('mark_id') : 0,
             'viracc_id' => $request->input('viracc_id'),
             'const_id' => $request->input('const_id',0),
             'unit_id' => $request->input('unit_id')
@@ -263,8 +263,8 @@ class ContractController extends Controller
                     foreach ($costd_ids as $key => $value) {
                         $inputContractInv = [
                             'contr_id' => $contract->id,
-                            'invtp_code' => $inv_type[$key],
-                            'costd_is' => $costd_ids[$key],
+                            'invtp_id' => $inv_type[$key],
+                            'costd_id' => $costd_ids[$key],
                             'continv_amount' => $total,
                             'continv_period' => $periods[$key]
                         ];
@@ -394,8 +394,8 @@ class ContractController extends Controller
                     foreach ($costd_ids as $key => $value) {
                         $inputContractInv = [
                             'contr_id' => $contractID,
-                            'invtp_code' => $inv_type[$key],
-                            'costd_is' => $costd_ids[$key],
+                            'invtp_id' => $inv_type[$key],
+                            'costd_id' => $costd_ids[$key],
                             'continv_amount' => $total,
                             'continv_period' => $periods[$key]
                         ];

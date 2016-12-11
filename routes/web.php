@@ -305,6 +305,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('aging/getdetail','AgingController@getdetail')->name('aging.getdetail');
 	Route::get('aging/downloadAgingExcel', 'AgingController@downloadAgingExcel');
 	
+	Route::post('payment/posting','PaymentController@posting');
 });
 
 Route::get('logout','Auth\AuthController@logout');
