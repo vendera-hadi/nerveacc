@@ -53,13 +53,13 @@
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
                   <!-- template tabel -->
-                <table id="dg" title="Contract" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <table id="dg" title="Payment" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_no" width="120" sortable="true">Contract Code</th>
+                            <th field="contr_no" width="120" sortable="true">Payment Code</th>
                             <th field="invpayh_checkno" width="120" sortable="true">Payment Code</th>
                             <th field="invpayh_date" width="120" sortable="true">Tanggal Bayar</th>
                             <th field="invpayh_amount" width="120" sortable="true">Total Pembayaran</th>
@@ -175,7 +175,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Contract Information</h4>
+                        <h4 class="modal-title">Payment Information</h4>
                       </div>
                       <div class="modal-body" id="detailModalContent">
                       </div>
@@ -215,7 +215,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Edit Contract</h4>
+                        <h4 class="modal-title">Edit Payment</h4>
                       </div>
                       <div class="modal-body">
                         
@@ -267,7 +267,7 @@
         if(startdate == ''){
             $.messager.alert('Warning','Payment date must be choose');
         }else if($('#contrId').val() == ""){
-          $.messager.alert('Warning','Contract must be choose');
+          $.messager.alert('Warning','Payment must be choose');
         }else if($('#cashbkId').val() == ""){
           $.messager.alert('Warning','Bank must be choose');
         }else if($('#paymtpCode').val() == ""){

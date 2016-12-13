@@ -19,4 +19,5 @@ class TrInvoicePaymhdr extends Model
    
    public function TrContract(){
          return $this->belongsTo('App\Models\TrContract','contr_id');
+   }
 }
