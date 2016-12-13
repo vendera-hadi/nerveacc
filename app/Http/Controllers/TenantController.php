@@ -144,7 +144,7 @@ class TenantController extends Controller
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
 
-            if(isset($input['unit_id'])){
+            if(!empty($input['unit_id'])){
                 // cek unit
                 $cekunit = MsUnitOwner::where('unit_id',$input['unit_id'])->first();
                 if($cekunit){
@@ -153,7 +153,7 @@ class TenantController extends Controller
             }
             $tenant = MsTenant::create($input);
 
-            if(isset($input['unit_id'])){
+            if(!empty($input['unit_id'])){
                 // insert ke unit owner
                 MsUnitOwner::create(['unit_id'=>$input['unit_id'], 'tenan_id'=>$tenant->id, 'unitow_start_date'=>@$input['unitow_start_date']]);
             }
@@ -214,6 +214,7 @@ class TenantController extends Controller
             if($cekKontrak) return response()->json(['errorMsg' => 'There are any contract running for this tenant, You can remove this after contract is not available for this tenant']);
 
             MsTenant::destroy($id);
+            MsUnitOwner::where('tenan_id',$id)->delete();
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -270,9 +271,9 @@ class TenantController extends Controller
             $date = $request->date;
             
             $cekUnit = MsUnitOwner::where('unit_id',$unitid)->where('tenan_id',$tenanid)->first();
-            if($cekunit) return response()->json(['errorMsg' => 'Unit is already owned']);
+            if($cekUnit) return response()->json(['errorMsg' => 'Unit is already owned']);
             $cekUnit = MsUnitOwner::where('unit_id',$unitid)->first();
-            if($cekunit) return response()->json(['errorMsg' => 'Unit is already owned by others']);
+            if($cekUnit) return response()->json(['errorMsg' => 'Unit is already owned by others']);
 
             MsUnitOwner::create(['unit_id'=>$unitid,'tenan_id'=>$tenanid, 'unitow_start_date'=>$date]);
             return response()->json(['success'=>true]);

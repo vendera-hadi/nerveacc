@@ -451,7 +451,7 @@
         if(unitid == ''){ $.messager.alert('Warning','Unit must be choosed first'); }
         else if(date == ''){ $.messager.alert('Warning','Date must be choosed first'); }
         else{
-            $.post('{{route('tenant.addunit')}}',{unitid:unitid, tenanid:tenanid, date:date},function(data){
+            $.post('{{route('tenant.addunit')}}',{unitid:unitid, tenanid:tenanid, date:date},function(result){
                     if (result.success){
                         $.messager.alert('Success','Insert Success');
                         $('#startDate').val('');
