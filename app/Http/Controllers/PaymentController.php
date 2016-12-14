@@ -261,12 +261,35 @@ class PaymentController extends Controller
 
                     foreach ($detail_payment as $key => $value) {
                         $action_detail = new TrInvoicePaymdtl;
-                        
-                        $action_detail->invpayd_amount = $value['invpayd_amount'];
-                        $action_detail->inv_id = $value['inv_id'];
-                        $action_detail->invpayh_id = $payment_id;
 
-                        $action_detail->save();
+                        $invoice = TrInvoice::find($value['inv_id']);
+
+                        $invoice_data = $invoice->get()->first();
+                        
+                        if(!empty($invoice_data)){
+                            $invoice_data = $invoice_data->toArray();
+                            
+                            $inv_amount = $invoice_data['inv_amount'];
+
+                            $invoice_has_paid = TrInvoicePaymdtl::where('inv_id', '=', $value['inv_id'])->first()->sum('invpayd_amount');
+
+                            $total_has_paid = $invoice_has_paid + $value['invpayd_amount'];
+                            $outstand = $inv_amount - $total_has_paid;
+
+                            if($outstand <= 0){
+                                $outstand = 0;
+                            }
+
+                            $action_detail->invpayd_amount = $value['invpayd_amount'];
+                            $action_detail->inv_id = $value['inv_id'];
+                            $action_detail->invpayh_id = $payment_id;
+
+                            $action_detail->save();
+                            
+                            $invoice->inv_outstanding = $outstand;
+
+                            $invoice->save();
+                        }
                     }
                 }else{
                     return ['status' => 0, 'message' => 'Failed to submit payment'];
