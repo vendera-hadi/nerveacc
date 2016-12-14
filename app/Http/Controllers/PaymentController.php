@@ -16,6 +16,7 @@ use App\Models\MsMasterCoa;
 use App\Models\MsJournalType;
 use Auth;
 use DB;
+use Validator;
 
 class PaymentController extends Controller
 {
@@ -198,108 +199,79 @@ class PaymentController extends Controller
         $messages = [
             'contr_id' => 'Contract id must be choose',
             'cashbk_id' => 'cash bank must be choose',
+            'paymtp_code' => 'payment type must be choose',
+            'invpayh_date' => 'payment date must be fill',
+            'invpayh_checkno' => 'payment code must be fill'
         ];
 
         $validator = Validator::make($request->all(), [
             'contr_id' => 'required:tr_invoice_paymhdr',
-            'contr_no' => 'required:tr_invoice_paymhdr',
+            'cashbk_id' => 'required:tr_invoice_paymhdr',
+            'paymtp_code' => 'required:tr_invoice_paymhdr',
+            'invpayh_date' => 'required:tr_invoice_paymhdr',
+            'invpayh_checkno' => 'required:tr_invoice_paymhdr',
         ], $messages);
 
         if ($validator->fails()) {
             $errors = $validator->errors()->first();
             return ['status' => 0, 'message' => $errors];
         }
+        
+        $data_payment = $request->input('data_payment');
+        
+        $detail_payment = array();
 
-        $input = [
-            'invpayh_date' => $request->input('contr_code'),
-            'invpayh_checkno' => $request->input('contr_no'),
-            'invpayh_giro' => $request->input('contr_startdate'),
-            'invpayh_note' => $request->input('contr_enddate'),
-            'invpayh_amount' => $request->input('contr_bast_date'),
-            'invpayh_post' => $request->input('contr_bast_by'),
-            'paymtp_code' => $request->input('contr_note'),
-            'cashbk_id' => 'inputed',
-            'contr_id' => $request->input('tenan_id'),
-        ];
-        $costd_ids = $request->input('costd_is'); 
-        $inv_type = $request->input('inv_type');
-        $cost_name = $request->input('cost_name');
-        $cost_code = $request->input('cost_code');
+        $cek_pay = false;
+        $total = 0;
+        if(!empty($data_payment['invpayd_amount'])){
+            foreach ($data_payment['invpayd_amount'] as $key => $value) {
+                if(!empty($value)){
+                    $cek_pay = true;
 
-        $cost_id = $request->input('cost_id');
-        $costd_name = $request->input('costd_name');
-        $costd_unit = $request->input('costd_unit');
-        $costd_rate = $request->input('costd_rate');
-        $costd_burden = $request->input('costd_burden');
-        $costd_admin = $request->input('costd_admin');
-        $inv_type_custom = $request->input('inv_type_custom');
-        $periods = $request->input('period');
-        $is_meter = $request->input('is_meter');
+                    $total += (int) $value;
+                    $detail_payment[] = array(
+                        'invpayd_amount' => $value,
+                        'inv_id' => $key
+                    );
+                }
+            }
+        }
+
         try{
-            DB::transaction(function () use($input, $request, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $costd_ids, $inv_type_custom, $cost_name, $cost_code, $periods) {
-                $contract = TrContract::create($input);
-                
-                // insert
-                if(count($costd_ids) > 0){
-                    $total = 0;
-                    foreach ($costd_ids as $key => $value) {
-                        $inputContractInv = [
-                            'contr_id' => $contract->id,
-                            'invtp_code' => $inv_type[$key],
-                            'costd_is' => $costd_ids[$key],
-                            'continv_amount' => $total,
-                            'continv_period' => $periods[$key]
-                        ];
-                        TrContractInvoice::create($inputContractInv);
+            if($total <= 0){
+                return ['status' => 0, 'message' => 'You have not entered payment'];
+            }else{
+                $action = new TrInvoicePaymhdr;
+
+                $action->invpayh_date = $request->input('invpayh_date');
+                $action->invpayh_checkno = $request->input('invpayh_checkno');
+                $action->invpayh_giro = $request->input('invpayh_giro');
+                $action->invpayh_note = $request->input('invpayh_note');
+                $action->invpayh_post = !empty($request->input('invpayh_post')) ? true : false;
+                $action->paymtp_code = $request->input('paymtp_code');
+                $action->cashbk_id = $request->input('cashbk_id');
+                $action->contr_id = $request->input('contr_id');
+                $action->invpayh_settlamt = 1;
+                $action->invpayh_adjustamt = 1;
+                $action->invpayh_amount = $total;
+                $action->updated_by = $action->created_by = Auth::id();
+
+                if($action->save()){
+                    $payment_id = $action->id;
+
+                    foreach ($detail_payment as $key => $value) {
+                        $action_detail = new TrInvoicePaymdtl;
+                        
+                        $action_detail->invpayd_amount = $value['invpayd_amount'];
+                        $action_detail->inv_id = $value['inv_id'];
+                        $action_detail->invpayh_id = $payment_id;
+
+                        $action_detail->save();
                     }
+                }else{
+                    return ['status' => 0, 'message' => 'Failed to submit payment'];
                 }
-
-                 // unit jadi unavailable
-                 MsUnit::where('id',$request->input('unit_id'))->update(['unit_isavailable'=>0]); 
-
-                // insert custom
-                if(count($cost_name) > 0){
-                    foreach ($cost_name as $key => $value) {
-                        // cost item
-                        $input = [
-                                    'cost_id' => 'COST'.str_replace(".", "", str_replace(" ", "",microtime())),
-                                    'cost_code' => $cost_code[$key],
-                                    'cost_name' => $cost_name[$key],
-                                    'created_by' => \Auth::id(),
-                                    'updated_by' => \Auth::id()
-                                ];
-                        $cost = MsCostItem::create($input);
-
-                        // cost detail
-                        $costd_is = 'COSTD'.str_replace(".", "", str_replace(" ", "",microtime())); 
-                        $input = [
-                            'costd_is' => $costd_is,
-                            'cost_id' => $cost->id,
-                            'costd_name' => $costd_name[$key],
-                            'costd_unit' => $costd_unit[$key],
-                            'costd_rate' => $costd_rate[$key],
-                            'costd_burden' => $costd_burden[$key],
-                            'costd_admin' => $costd_admin[$key],
-                            'costd_ismeter' => $is_meter[$key] 
-                        ];
-                        $costdt = MsCostDetail::create($input);
-
-                        // contract invoice
-                        $total = 0;
-                        // $total = $costd_rate[$key] + $costd_burden[$key] + $costd_admin[$key];
-                        $inputContractInv = [
-                            'contr_id' => $contract->id,
-                            'invtp_code' => $inv_type_custom[$key],
-                            'costd_is' => $costdt->id,
-                            'continv_amount' => $total,
-                            'continv_period' => $periods[$key]
-                        ];
-                        TrContractInvoice::create($inputContractInv);
-                    }
-
-                }
-
-            });
+            }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }

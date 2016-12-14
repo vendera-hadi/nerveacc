@@ -91,6 +91,11 @@
                             ?>
                           </select>
                       </div>
+
+                      <div class="form-group">
+                          <label>Payment Code</label>
+                          <input type="text" name="invpayh_checkno" class="form-control">
+                      </div>
                       
                       <div class="row">
                         <div class="col-sm-6">
@@ -143,7 +148,7 @@
                                   <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
                                   </div>
-                                  <input type="text" id="invpayhGiro" name="invpayh_giro" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                  <input type="text" id="invpayhGiro" name="invpayh_giro" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
                                 </div>
                             </div>
                          </div>
@@ -155,6 +160,12 @@
                       </div>
 
                       <div class="ajax-detail"></div>
+
+                      <div class="checkbox">
+                        <label>
+                          <input type="checkbox" name="invpayh_post"> Posting Payment
+                        </label>
+                      </div>
                       
                       <button type="submit" class="btn btn-primary">submit</button>
                   </form>

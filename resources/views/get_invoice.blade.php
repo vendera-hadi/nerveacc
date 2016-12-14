@@ -34,7 +34,7 @@
                 <td>
                     <div class="input-group">
                         <div class="input-group-addon">Rp</div>
-                        <input type="text" name="invpayd_amount.<?php echo $inv_id;?>" class="form-control" value="<?php echo $value['inv_outstanding'];?>">
+                        <input type="text" name="data_payment[invpayd_amount][<?php echo $inv_id;?>]" class="form-control" value="<?php echo $value['inv_outstanding'];?>">
                     </div>
                 </td>
             </tr>
