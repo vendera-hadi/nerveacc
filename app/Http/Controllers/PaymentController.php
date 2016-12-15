@@ -488,12 +488,12 @@ class PaymentController extends Controller
 
         $cek_pay = false;
         $total = 0;
-        if(!empty($data_payment['invpayd_amount'])){
-            foreach ($data_payment['invpayd_amount'] as $key => $value) {
+        if(!empty($data_payment)){
+            foreach ($data_payment as $key => $value) {
                 if(!empty($value)){
                     $cek_pay = true;
 
-                    $total += (int) $value;
+                    $total += (int) $value['invpayd_amount'];
                     $detail_payment[] = array(
                         'id' => $key,
                         'invpayd_amount' => $value['invpayd_amount'],

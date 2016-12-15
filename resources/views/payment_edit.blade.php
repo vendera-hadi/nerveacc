@@ -61,6 +61,7 @@
                   <!-- template tabel -->
                 <form method="POST" id="formPayment">
                       <input type="hidden" name="invoice_paymhdr_id" value="<?php echo $invoice['id']?>">
+                      <input type="hidden" name="contr_id" value="<?php echo $invoice['contr_id']?>">
                       <div class="form-group">
                           <label>Tenan Name : </label>
                           <?php
@@ -170,7 +171,7 @@
                                       <td>
                                           <div class="input-group">
                                               <div class="input-group-addon">Rp</div>
-                                              <input type="text" name="data_payment[<?php echo $value['id'];?>][invpayd_amount]" class="form-control" value="<?php echo $tr_invoice['inv_outstanding'];?>">
+                                              <input type="text" name="data_payment[<?php echo $value['id'];?>][invpayd_amount]" class="form-control" value="<?php echo $value['invpayd_amount'];?>">
                                               <input type="hidden" name="data_payment[<?php echo $value['id'];?>][inv_id]" value="<?php echo $inv_id;?>">
                                           </div>
                                       </td>
@@ -232,7 +233,7 @@
           $.messager.alert('Warning','Payment type must be choose');
         }
 
-        var allFormData = $['#formPayment'].serialize();
+        var allFormData = $('#formPayment').serialize();
         
         $.post('{{route('payment.do_edit')}}',allFormData, function(result){
             alert(result.message);
