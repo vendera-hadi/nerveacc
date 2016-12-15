@@ -320,6 +320,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('payment/detail', 'PaymentController@getdetail')->name('payment.getdetail');
 	Route::get('payment/get_invoice','PaymentController@get_invoice')->name('payment.get_invoice');
 	Route::post('payment/insert','PaymentController@insert')->name('payment.insert');
+	Route::get('payment/edit','PaymentController@payment_edit')->name('payment.payment_edit');
+	Route::post('payment/do_edit','PaymentController@do_edit')->name('payment.do_edit');
 });
 
 Route::get('logout','Auth\AuthController@logout');
