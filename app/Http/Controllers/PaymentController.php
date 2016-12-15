@@ -78,7 +78,8 @@ class PaymentController extends Controller
                     ->join('tr_contract',       'tr_contract.id',"=",'tr_invoice_paymhdr.contr_id')
                     ->join('ms_unit',           'tr_contract.unit_id',"=",'ms_unit.id')
                     ->join('ms_floor',          'ms_unit.floor_id',"=",'ms_floor.id')
-                    ->join('ms_tenant',         'ms_tenant.id',"=",'tr_contract.tenan_id');
+                    ->join('ms_tenant',         'ms_tenant.id',"=",'tr_contract.tenan_id')
+                    ->where('status_void', '=', false);
 
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -132,7 +133,8 @@ class PaymentController extends Controller
                 $action_button = '<a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>';
                 
                 if($invpayh_post == 'no'){
-                    $action_button .= ' | <a href="payment/edit?id='.$value->id.'" title="Edit"><i class="fa fa-pencil-square-o"></i></a>';
+                    $action_button .= ' | <a href="payment/posting_payment?id='.$value->id.'" title="Posting Payment" class="posting-confirm"><i class="fa fa-arrow-circle-o-up"></i></a>';
+                    $action_button .= ' | <a href="payment/void?id='.$value->id.'" title="Void" class="void-confirm"><i class="fa fa-ban"></i></a>';
                 }
 
                 $temp['action_button'] = $action_button;
@@ -260,6 +262,7 @@ class PaymentController extends Controller
                 $action->invpayh_adjustamt = 1;
                 $action->invpayh_amount = $total;
                 $action->updated_by = $action->created_by = Auth::id();
+                $action->status_void = false;
 
                 if($action->save()){
                     $payment_id = $action->id;
@@ -416,158 +419,93 @@ class PaymentController extends Controller
         return response()->json(['success'=>1, 'message'=>'Invoice Payment posted Successfully']);
     }
 
-    public function payment_edit(Request $request){
-        $id = @$request->id;
+    public function void(Request $request){
+        $id = $request->id;
 
-        $invoice = TrInvoicePaymhdr::where('id', $id)->with(array(
-            'TrInvoicePaymdtl' => function($query){
-                $query->with('TrInvoice');
-            }, 
-            'TrContract' => function($query){
-                $query->with(array(
-                    'MsTenant', 
-                    'MsUnit' => function($query_uniy){
-                        $query_uniy->with('MsFloor');
-                    }
-                ));
-            }
-        ))->get()->first()->toArray();
+        $invoice = TrInvoicePaymhdr::
+            where('id', $id)
+            ->where('invpayh_post', '=', false)
+            ->with('TrInvoicePaymdtl', 'TrContract')->get()->first();
         
-        $curr_contract_data = array(
-            'id' => $invoice['tr_contract']['id'],
-            'tenan_name' => sprintf('%s | %s', $invoice['tr_contract']['ms_tenant']['tenan_name'], $invoice['tr_contract']['contr_code'])
-        );
+        if(!empty($invoice)){
+            $action = TrInvoicePaymhdr::find($id);
+            
+            $action->status_void = true;
 
-        $cashbank_data = MsCashBank::all()->toArray();
-        $payment_type_data = MsPaymentType::all()->toArray();
-        
-        if(!empty($contract_data)){
-            $temp = array();
-            foreach ($contract_data as $key => $value) {
-                $temp[] = array(
-                    'id' => $value['id'],
-                    'tenan_name' => sprintf('%s | %s', $value['tenan_name'], $value['contr_code'])
-                );
-            }
+            if($action->save()){
+                $invoice = $invoice->toArray();
 
-            $contract_data = $temp;
-        }
+                if(!empty($invoice['tr_invoice_paymdtl'])){
+                    foreach ($invoice['tr_invoice_paymdtl'] as $key => $value) {
+                        $invoice_id = $value['inv_id'];
 
-        return view('payment_edit', array(
-            'invoice' => $invoice,
-            'cashbank_data' => $cashbank_data,
-            'payment_type_data' => $payment_type_data
-        ));
-    }
+                        $invoice_has_paid = TrInvoicePaymdtl::select('tr_invoice_paymhdr.*', 'tr_invoice_paymdtl.*')
+                            ->join('tr_invoice_paymhdr','tr_invoice_paymdtl.invpayh_id','=','tr_invoice_paymhdr.id')
+                            ->where('status_void', '=', false)
+                            ->where('inv_id', '=', $invoice_id)
+                            ->first();
 
-    public function do_edit(Request $request){
-        $messages = [
-            'contr_id' => 'Contract id must be choose',
-            'cashbk_id' => 'cash bank must be choose',
-            'paymtp_code' => 'payment type must be choose',
-            'invpayh_date' => 'payment date must be fill',
-            'invpayh_checkno' => 'payment code must be fill'
-        ];
-
-        $validator = Validator::make($request->all(), [
-            'contr_id' => 'required:tr_invoice_paymhdr',
-            'cashbk_id' => 'required:tr_invoice_paymhdr',
-            'paymtp_code' => 'required:tr_invoice_paymhdr',
-            'invpayh_date' => 'required:tr_invoice_paymhdr',
-            'invpayh_checkno' => 'required:tr_invoice_paymhdr',
-        ], $messages);
-
-        if ($validator->fails()) {
-            $errors = $validator->errors()->first();
-            return ['status' => 0, 'message' => $errors];
-        }
-        
-        $data_payment = $request->input('data_payment');
-        
-        $detail_payment = array();
-
-        $cek_pay = false;
-        $total = 0;
-        if(!empty($data_payment)){
-            foreach ($data_payment as $key => $value) {
-                if(!empty($value)){
-                    $cek_pay = true;
-
-                    $total += (int) $value['invpayd_amount'];
-                    $detail_payment[] = array(
-                        'id' => $key,
-                        'invpayd_amount' => $value['invpayd_amount'],
-                        'inv_id' => $value['inv_id']
-                    );
-                }
-            }
-        }
-        
-        try{
-            if($total <= 0){
-                return ['status' => 0, 'message' => 'You have not entered payment'];
-            }else{
-                $action = TrInvoicePaymhdr::find($request->input('invoice_paymhdr_id'));
-
-                $action->invpayh_date = $request->input('invpayh_date');
-                $action->invpayh_checkno = $request->input('invpayh_checkno');
-                $action->invpayh_giro = $request->input('invpayh_giro');
-                $action->invpayh_note = $request->input('invpayh_note');
-                $action->invpayh_post = !empty($request->input('invpayh_post')) ? true : false;
-                $action->paymtp_code = $request->input('paymtp_code');
-                $action->cashbk_id = $request->input('cashbk_id');
-                $action->contr_id = $request->input('contr_id');
-                $action->invpayh_settlamt = 1;
-                $action->invpayh_adjustamt = 1;
-                $action->invpayh_amount = $total;
-                $action->updated_by = $action->created_by = Auth::id();
-
-                if($action->save()){
-                    $payment_id = $action->id;
-
-                    foreach ($detail_payment as $key => $value) {
-                        $action_detail = TrInvoicePaymdtl::find($value['id']);
-
-                        $invoice = TrInvoice::find($value['inv_id']);
-
-                        $invoice_data = $invoice->get()->first();
+                        if(!empty($invoice_has_paid)){
+                            $invoice_has_paid = $invoice_has_paid->sum('invpayd_amount');
+                        }else{
+                            $invoice_has_paid = 0;
+                        }
                         
+                        $invoice_target = TrInvoice::find($invoice_id);
+
+                        $invoice_data = $invoice_target->get()->first();
+
                         if(!empty($invoice_data)){
                             $invoice_data = $invoice_data->toArray();
 
                             $inv_amount = $invoice_data['inv_amount'];
 
-                            $data_detail = TrInvoicePaymdtl::where('id', '=', $value['id'])->get()->first();
-                            $before_pay = $data_detail['invpayd_amount'];
-                            $invoice_has_paid = TrInvoicePaymdtl::where('inv_id', '=', $value['inv_id'])->first()->sum('invpayd_amount');
-
-                            $total_after_decrease = $invoice_has_paid - $before_pay;
-
-                            $total_has_paid = $total_after_decrease + $value['invpayd_amount'];
-                            $outstand = $inv_amount - $total_has_paid;
+                            $outstand = $inv_amount - $invoice_has_paid;
 
                             if($outstand <= 0){
                                 $outstand = 0;
                             }
 
-                            $action_detail->invpayd_amount = $value['invpayd_amount'];
-                            $action_detail->inv_id = $value['inv_id'];
-                            $action_detail->invpayh_id = $payment_id;
+                            $invoice_target->inv_outstanding = $outstand;
 
-                            $action_detail->save();
-                            
-                            $invoice->inv_outstanding = $outstand;
-
-                            $invoice->save();
+                            $invoice_target->save();
                         }
                     }
-                }else{
-                    return ['status' => 0, 'message' => 'Failed to submit payment'];
                 }
+
+                $request->session()->flash('success', 'Success void payment');
+            }else{
+                $request->session()->flash('error', 'Cannot void payment, try again later');
             }
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
+        }else{
+            $request->session()->flash('error', 'Data not found');
         }
-        return ['status' => 1, 'message' => 'Edit Success'];
+
+        return redirect('payment/');
+    }
+
+    public function posting_payment(Request $request){
+        $id = $request->id;
+
+        $invoice = TrInvoicePaymhdr::
+            where('id', $id)
+            ->where('invpayh_post', '=', false)
+            ->get()->first();
+        
+        if(!empty($invoice)){
+            $action = TrInvoicePaymhdr::find($id);
+            
+            $action->invpayh_post = true;
+
+            if($action->save()){
+                $request->session()->flash('success', 'Success posting payment');
+            }else{
+                $request->session()->flash('error', 'Cannot posting payment, try again later');
+            }
+        }else{
+            $request->session()->flash('error', 'Data not found');
+        }
+
+        return redirect('payment/');
     }
 }

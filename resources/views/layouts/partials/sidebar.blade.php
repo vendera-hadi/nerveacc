@@ -271,7 +271,8 @@
                 </span>
               </a>
               <ul class="treeview-menu">
-                <li><a href="#"><i class="fa fa-circle-o"></i> Cash Bank List</a></li>
+                <li><a href="{{route('payment.index')}}"><i class="fa fa-circle-o"></i> Payment Invoice</a></li>
+                <li><a href="{{route('cash_bank.index')}}"><i class="fa fa-circle-o"></i> Cash Bank List</a></li>
                 <!-- <li><a href="#"><i class="fa fa-circle-o"></i> Advance Entry</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Unidentified Entry</a></li>
                 <li><a href="#"><i class="fa fa-circle-o"></i> Virtual Account Entry</a></li>

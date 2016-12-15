@@ -159,7 +159,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unitcomplaint/delete', 'UnitComplaintController@delete')->name('unitcomplaint.delete');
 
 	// cash bank
-	Route::get('cash_bank','CashBankController@index');
+	Route::get('cash_bank','CashBankController@index')->name('cash_bank.index');
 	Route::post('cash_bank/get', 'CashBankController@get')->name('cash_bank.get');
 	Route::post('cash_bank/options', 'CashBankController@getOptions')->name('cash_bank.options');
 	Route::post('cash_bank/insert', 'CashBankController@insert')->name('cash_bank.insert');
@@ -320,8 +320,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('payment/detail', 'PaymentController@getdetail')->name('payment.getdetail');
 	Route::get('payment/get_invoice','PaymentController@get_invoice')->name('payment.get_invoice');
 	Route::post('payment/insert','PaymentController@insert')->name('payment.insert');
-	Route::get('payment/edit','PaymentController@payment_edit')->name('payment.payment_edit');
-	Route::post('payment/do_edit','PaymentController@do_edit')->name('payment.do_edit');
+	Route::get('payment/void','PaymentController@void')->name('payment.void');
+	Route::get('payment/posting_payment','PaymentController@posting_payment')->name('payment.posting_payment');
 });
 
 Route::get('logout','Auth\AuthController@logout');

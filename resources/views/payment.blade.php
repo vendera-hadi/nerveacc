@@ -59,12 +59,12 @@
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_no" width="120" sortable="true">Payment Code</th>
+                            <th field="contr_no" width="120" sortable="true">Contract Code</th>
                             <th field="invpayh_checkno" width="120" sortable="true">Payment Code</th>
-                            <th field="invpayh_date" width="120" sortable="true">Tanggal Bayar</th>
-                            <th field="invpayh_amount" width="120" sortable="true">Total Pembayaran</th>
+                            <th field="invpayh_date" width="120" sortable="true">Payment Date</th>
+                            <th field="invpayh_amount" width="120" sortable="true">Payment Total</th>
                             
-                            <th field="invpayh_post" width="120" sortable="true">Status</th>
+                            <th field="invpayh_post" width="120" sortable="true">Posting Status</th>
                             <th field="action_button">Action</th>
                         </tr>
                     </thead>
@@ -328,6 +328,22 @@
         $.post('{{route('payment.getdetail')}}',{id:id}, function(data){
             $('#detailModalContent').html(data);
         });
+    });
+
+    $(document).delegate('.void-confirm','click',function(){
+      if(confirm("are you sure you want void this payment?")){
+        return true;
+      }else{
+        return false;
+      }
+    });
+
+    $(document).delegate('.posting-confirm','click',function(){
+      if(confirm("are you sure you want posting this payment?")){
+        return true;
+      }else{
+        return false;
+      }
     });
 </script>
 @endsection
