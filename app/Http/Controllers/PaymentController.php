@@ -233,6 +233,15 @@ class PaymentController extends Controller
                         'invpayd_amount' => $value,
                         'inv_id' => $key
                     );
+
+                    $tempAmount = 0;
+                    $invoice = TrInvoice::find($key);
+                    if(isset($invoice->inv_outstanding)){
+                        $tempAmount = $invoice->inv_outstanding - $value;
+                        // update
+                        $invoice->inv_outstanding = $tempAmount;
+                        $invoice->save();
+                    }
                 }
             }
         }
