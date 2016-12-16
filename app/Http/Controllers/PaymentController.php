@@ -155,10 +155,8 @@ class PaymentController extends Controller
         ->join('tr_contract', 'tr_contract.id',"=",'tr_invoice.contr_id')
         ->join('ms_unit', 'tr_contract.unit_id',"=",'ms_unit.id')
         ->join('ms_floor', 'ms_unit.floor_id',"=",'ms_floor.id')
-        ->where(array(
-            array('tr_invoice.contr_id', '=',$contract_id),
-            array('tr_invoice.inv_outstanding', '>', 0)
-        ))
+        ->where('tr_invoice.contr_id', '=',$contract_id)
+        ->where('tr_invoice.inv_outstanding', '>', 0)
         ->get();
 
         if(!empty($invoice_data)){
@@ -261,7 +259,7 @@ class PaymentController extends Controller
 
                 $action->invpayh_date = $request->input('invpayh_date');
                 $action->invpayh_checkno = $request->input('invpayh_checkno');
-                $action->invpayh_giro = $request->input('invpayh_giro');
+                $action->invpayh_giro = !empty($request->input('invpayh_giro')) ? $request->input('invpayh_giro') : null ;
                 $action->invpayh_note = $request->input('invpayh_note');
                 $action->invpayh_post = !empty($request->input('invpayh_post')) ? true : false;
                 $action->paymtp_code = $request->input('paymtp_code');
@@ -288,8 +286,18 @@ class PaymentController extends Controller
                             
                             $inv_amount = $invoice_data['inv_amount'];
 
-                            $invoice_has_paid = TrInvoicePaymdtl::where('inv_id', '=', $value['inv_id'])->first()->sum('invpayd_amount');
+                            $invoice_has_paid = TrInvoicePaymdtl::select('tr_invoice_paymhdr.*', 'tr_invoice_paymdtl.*')
+                                ->join('tr_invoice_paymhdr','tr_invoice_paymdtl.invpayh_id','=','tr_invoice_paymhdr.id')
+                                ->where('status_void', '=', false)
+                                ->where('inv_id', '=', $value['inv_id'])
+                                ->get()->first();
 
+                            if(!empty($invoice_has_paid)){
+                                $invoice_has_paid = $invoice_has_paid->sum('invpayd_amount');
+                            }else{
+                                $invoice_has_paid = 0;
+                            }
+                            
                             $total_has_paid = $invoice_has_paid + $value['invpayd_amount'];
                             $outstand = $inv_amount - $total_has_paid;
 
