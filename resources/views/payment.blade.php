@@ -160,12 +160,6 @@
                       </div>
 
                       <div class="ajax-detail"></div>
-
-                      <div class="checkbox">
-                        <label>
-                          <input type="checkbox" name="invpayh_post"> Posting Payment
-                        </label>
-                      </div>
                       
                       <button type="submit" class="btn btn-primary">submit</button>
                   </form>
@@ -332,7 +326,24 @@
 
     $(document).delegate('.void-confirm','click',function(){
       if(confirm("are you sure you want void this payment?")){
-        return true;
+        var url = $(this).attr('href');
+        
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(result) {
+              alert(result.message);
+              if(result.status == 1) location.reload();
+
+              return false;
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert('failed during proccess.');
+                return false;
+            }
+        });
+
+        return false;
       }else{
         return false;
       }
@@ -340,7 +351,16 @@
 
     $(document).delegate('.posting-confirm','click',function(){
       if(confirm("are you sure you want posting this payment?")){
-        return true;
+        var id = $(this).attr('data-id');
+
+        $.post('{{route('payment.posting')}}',{id:id}, function(data){
+            alert(data.message);
+            if(data.success == 1){
+              location.reload();
+            } else{
+              return false;
+            }
+        });
       }else{
         return false;
       }

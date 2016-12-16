@@ -27,7 +27,7 @@ class PaymentController extends Controller
         ->join('tr_contract','tr_invoice.contr_id','=','tr_contract.id')
         ->orderBy('ms_tenant.tenan_name', 'ASC')
         ->groupBy('tr_invoice.contr_id', 'ms_tenant.tenan_name', 'tr_contract.contr_code', 'tr_contract.id')
-        // ->where('tr_invoice.inv_outstanding', '>', 0)
+        ->where('tr_invoice.inv_outstanding', '>', 0)
         ->get()
         ->toArray();
 
@@ -133,7 +133,7 @@ class PaymentController extends Controller
                 $action_button = '<a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>';
                 
                 if($invpayh_post == 'no'){
-                    $action_button .= ' | <a href="payment/posting_payment?id='.$value->id.'" title="Posting Payment" class="posting-confirm"><i class="fa fa-arrow-circle-o-up"></i></a>';
+                    $action_button .= ' | <a href="#" data-id="'.$value->id.'" title="Posting Payment" class="posting-confirm"><i class="fa fa-arrow-circle-o-up"></i></a>';
                     $action_button .= ' | <a href="payment/void?id='.$value->id.'" title="Void" class="void-confirm"><i class="fa fa-ban"></i></a>';
                 }
 
@@ -157,7 +157,7 @@ class PaymentController extends Controller
         ->join('ms_floor', 'ms_unit.floor_id',"=",'ms_floor.id')
         ->where(array(
             array('tr_invoice.contr_id', '=',$contract_id),
-            // array('tr_invoice.inv_outstanding', '>', 0)
+            array('tr_invoice.inv_outstanding', '>', 0)
         ))
         ->get();
 
@@ -436,6 +436,11 @@ class PaymentController extends Controller
             ->where('invpayh_post', '=', false)
             ->with('TrInvoicePaymdtl', 'TrContract')->get()->first();
         
+        $result = array(
+            'status'=>0, 
+            'message'=> 'Data not found'
+        );
+
         if(!empty($invoice)){
             $action = TrInvoicePaymhdr::find($id);
             
@@ -482,39 +487,18 @@ class PaymentController extends Controller
                     }
                 }
 
-                $request->session()->flash('success', 'Success void payment');
+                $result = array(
+                    'status'=>1, 
+                    'message'=> 'Success void payment'
+                );
             }else{
-                $request->session()->flash('error', 'Cannot void payment, try again later');
+                $result = array(
+                    'status'=>0, 
+                    'message'=> 'Cannot void payment, try again later'
+                );
             }
-        }else{
-            $request->session()->flash('error', 'Data not found');
         }
 
-        return redirect('payment/');
-    }
-
-    public function posting_payment(Request $request){
-        $id = $request->id;
-
-        $invoice = TrInvoicePaymhdr::
-            where('id', $id)
-            ->where('invpayh_post', '=', false)
-            ->get()->first();
-        
-        if(!empty($invoice)){
-            $action = TrInvoicePaymhdr::find($id);
-            
-            $action->invpayh_post = true;
-
-            if($action->save()){
-                $request->session()->flash('success', 'Success posting payment');
-            }else{
-                $request->session()->flash('error', 'Cannot posting payment, try again later');
-            }
-        }else{
-            $request->session()->flash('error', 'Data not found');
-        }
-
-        return redirect('payment/');
+        return response()->json($result);
     }
 }

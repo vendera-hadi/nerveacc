@@ -308,7 +308,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('aging/getdetail','AgingController@getdetail')->name('aging.getdetail');
 	Route::get('aging/downloadAgingExcel', 'AgingController@downloadAgingExcel');
 	
-	Route::post('payment/posting','PaymentController@posting');
+	Route::post('payment/posting','PaymentController@posting')->name('payment.posting');
 	// report
 	Route::get('report/arview','ReportController@arview')->name('report.arview');
 	Route::get('report/arbyinvoice','ReportController@arbyInvoice')->name('report.arbyinv');
@@ -321,7 +321,6 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('payment/get_invoice','PaymentController@get_invoice')->name('payment.get_invoice');
 	Route::post('payment/insert','PaymentController@insert')->name('payment.insert');
 	Route::get('payment/void','PaymentController@void')->name('payment.void');
-	Route::get('payment/posting_payment','PaymentController@posting_payment')->name('payment.posting_payment');
 });
 
 Route::get('logout','Auth\AuthController@logout');
