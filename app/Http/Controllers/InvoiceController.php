@@ -230,11 +230,15 @@ class InvoiceController extends Controller
                     $insertFlag = true;
                     // echo "<br>Invoice #".$countInvoice."<br>";
                     // Looping per Invoice yg sdh di grouping (CONTRACT INVOICE PER INV TYPE)
+                    //$totalPay = 0;
                     foreach ($details as $key2 => $value) {
-                        // echo "Invoice ".$key." , detail ".$key2."<br><br>";
+                        //echo "Invoice ".$key." , detail ".$key2."<br><br>";
                         // LAST INV DATE
+                        //echo $value->continv_next_inv;
                         if(!empty($value->continv_next_inv)) $last_inv_date = $value->continv_next_inv;
                         else $last_inv_date = $tempTimeStart;
+
+                        //echo $tempTimeStart." dan ".$last_inv_date;
                         // GENERATE KALAU PERIODE LAST INV UDA LEWAT
                         if($tempTimeStart >= $last_inv_date){
                             // KALAU is meter true, hitung cost meteran 
@@ -266,7 +270,7 @@ class InvoiceController extends Controller
                                             'costd_id' => $meter->costd_id,
                                             'meter_id' => $meter->tr_meter_id
                                         ];
-                                        $updateCtrInv[$tcinv_id] = [
+                                        $updateCtrInv[$value->tcinv_id] = [
                                             'continv_start_inv' => $tempTimeStart,
                                             'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months"))
                                         ];
@@ -330,26 +334,28 @@ class InvoiceController extends Controller
                                 // ends
                             }
                             // end cek meter not meter
+                        }else{
+                            $insertFlag = false;
                         }
                         // end cek periode dan rangkai detail
 
                     }
-                    
-                    // HABIS JABARIN DETAIL, INSERT INVOICE 
-                    // TAMBAHIN STAMP DUTY
-                    if($totalPay <= $companyData->comp_materai1_amount){ 
-                        $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
-                        $totalStamp = $companyData->comp_materai1;
-                    }else{ 
-                        $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
-                        $totalStamp = $companyData->comp_materai2;
-                    }
 
-                    // echo var_dump($invDetail)."<br><br>"; 
+                    //echo var_dump($invDetail)."<br><br>"; 
 
-                    // $insertFlag = false;
+                    //$insertFlag = false;
                     // INSERT DB
                     if($insertFlag){
+                        // HABIS JABARIN DETAIL, INSERT INVOICE 
+                        // TAMBAHIN STAMP DUTY
+                        if($totalPay <= $companyData->comp_materai1_amount){ 
+                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
+                            $totalStamp = $companyData->comp_materai1;
+                        }else{ 
+                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
+                            $totalStamp = $companyData->comp_materai2;
+                        }
+
                         DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail, $totalStamp, $updateCtrInv){
                             // insert invoice
                             // get last prefix
@@ -376,7 +382,7 @@ class InvoiceController extends Controller
                                 'inv_duedate' => $duedate,
                                 'inv_amount' => $totalWithStamp,
                                 'inv_ppn' => 0.1,
-                                'inv_outstanding' => 0,
+                                'inv_outstanding' => $totalWithStamp,
                                 'inv_ppn_amount' => $totalWithStamp, // sementara begini dulu, ikutin cara di foto invoice
                                 'inv_post' => 0,
                                 'invtp_id' => $value->invtp_id,
