@@ -112,11 +112,11 @@ class InvoiceController extends Controller
                 $temp['inv_number'] = $value->inv_number;
                 $temp['inv_date'] = date('d/m/Y',strtotime($value->inv_date));
                 $temp['inv_duedate'] = date('d/m/Y',strtotime($value->inv_duedate));
-                $temp['inv_amount'] = "Rp. ".$value->inv_amount;
+                $temp['inv_amount'] = "Rp. ".number_format($value->inv_amount);
                 $temp['inv_ppn'] = $value->inv_ppn * 100;
                 $temp['inv_ppn'] = $temp['inv_ppn']."%";
                 $temp['inv_ppn_amount'] = "Rp. ".$value->inv_ppn_amount;
-                $temp['inv_outstanding'] = !empty((int)$value->inv_outstanding) ? "Rp. ".$value->inv_outstanding : "Lunas";
+                $temp['inv_outstanding'] = !empty((int)number_format($value->inv_outstanding)) ? "Rp. ".number_format($value->inv_outstanding) : "Lunas";
                 $temp['invtp_name'] = $value->invtp_name;
                 $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
@@ -162,6 +162,7 @@ class InvoiceController extends Controller
 
     public function postGenerateInvoice(Request $request){
         $month = $request->input('month');
+        $month2 = $request->input('month');
         // bulan dikurang 1 karna generate invoice utk bulan kemarin
         $year = $request->input('year');
         if($month == 1) $year = $year-1;
@@ -190,10 +191,11 @@ class InvoiceController extends Controller
         
         // dari semua yg available check invoice yg sudah exist di BULAN YG DIFILTER 
         // $invoiceExists = TrInvoice::select('tr_contract.id')->join('tr_contract','tr_invoice.contr_id','=','tr_contract.id')->whereNull('tr_contract.contr_terminate_date')->where('tr_contract.contr_startdate','>=',$tempTimeStart)->where('tr_contract.contr_enddate','<=',$tempTimeEnd)->toSql();
-        $invoiceExists = DB::select('select "tr_contract"."id" from "tr_invoice" inner join "tr_contract" on "tr_invoice"."contr_id" = "tr_contract"."id" where "tr_contract"."contr_iscancel" = false and "tr_contract"."contr_status" != \'closed\' and \''.$tempTimeStart.'\' >= "tr_contract"."contr_startdate" and \''.$tempTimeStart.'\' <= "tr_contract"."contr_enddate" and EXTRACT(MONTH FROM "tr_invoice"."inv_date") = '.$month.' group by "tr_contract"."id" ');
+        //edited rahmat, gw ganti monthnya jadi bulan berjalan soalnya aneh kok dia ngecek malah bulan yg lalu harusnya ngecek bulan berjalan
+        $invoiceExists = DB::select('select "tr_contract"."id" from "tr_invoice" inner join "tr_contract" on "tr_invoice"."contr_id" = "tr_contract"."id" where "tr_contract"."contr_iscancel" = false and "tr_contract"."contr_status" != \'closed\' and \''.$tempTimeStart.'\' >= "tr_contract"."contr_startdate" and \''.$tempTimeStart.'\' <= "tr_contract"."contr_enddate" and EXTRACT(MONTH FROM "tr_invoice"."inv_date") = '.$month2.' group by "tr_contract"."id" ');
         // echo 'total available : '.$totalavContract.' , total exist : '.$invoiceExists->count(); die();
         if(count($invoiceExists) >= $totalavContract){
-            return '<h4><strong>All of Invoices this month is already exist in Invoice List</strong></h4>';
+            return '<h4><strong>All of Invoices this month is already exist in Invoice List</strong></h4> ';
         }
 
         // contract pengecualian

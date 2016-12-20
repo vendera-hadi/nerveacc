@@ -6,9 +6,11 @@
 
 @section('content')
 <body class="hold-transition login-page">
-    <div class="login-box">
+    <div class="login-box shadow">
         <div class="login-logo">
-            <a href="{{ url('/home') }}"><b>JLM</b>Accounting</a>
+            <img src="{{ asset('/img/logo.png') }}" style="max-height: 150px;">
+            <br>
+            <a href="{{ url('/home') }}"><b>Accounting</b> Apps</a>
         </div><!-- /.login-logo -->
 
     @if (count($errors) > 0)

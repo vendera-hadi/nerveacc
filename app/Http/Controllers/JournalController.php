@@ -8,7 +8,6 @@ use App\Models\MsMasterCoa;
 use App\Models\MsDepartment;
 use App\Models\MsJournalType;
 use App\Models\TrLedger;
-use App\Models\MsJournalType;
 use DB;
 
 class JournalController extends Controller

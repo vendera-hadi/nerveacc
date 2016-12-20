@@ -1,0 +1,20 @@
+div.loading{ text-align: center;}
+.fs11{ font-size: 11px !important;}
+.mid{ text-align: center;}
+.midt{ text-align: left; min-width:200px;}
+.right{ text-align: right;}
+.midk{ text-align: center; min-width:100px;}
+
+.login-page {
+    background: url('../img/cover.jpg') no-repeat fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+.login-logo{background: #FFF;margin-bottom: 0px;padding: 10px 0 10px 10px;}
+.login-box-body{
+	background: #FFF;
+	padding-top: 0px;
+}
+.shadow{box-shadow: 0 2px 4px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12)!important;}

@@ -90,6 +90,7 @@
               <ul class="treeview-menu">
                 <li><a href="{{url('period_meter')}}"><i class="fa fa-circle-o"></i> Meter Input</a></li>
                 <li><a href="{{ url('complaint') }}"><i class="fa fa-circle-o"></i> Complain Entry</a></li>
+                <li><a href="{{route('report.hmeter')}}"><i class="fa fa-circle-o"></i> History Reports</a></li>
               </ul>
             </li>
 
