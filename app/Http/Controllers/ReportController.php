@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\TrInvoice;
 use App\Models\TrInvoiceDetail;
 use App\Models\MsCompany;
+use App\Models\TrContract;
 use PDF;
 use DB;
 
@@ -136,20 +137,20 @@ class ReportController extends Controller
     	$data['title'] = "Aging Invoices";
     	$data['logo'] = MsCompany::first()->comp_image;
     	$data['template'] = 'report_ar_aging';
-    	$fetch = TrInvoice::select('tr_invoice.tenan_id','tr_invoice.inv_duedate','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date',
+    	$fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
                     DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS gabung"),
                     DB::raw("SUM(inv_outstanding) AS total"),
-                    DB::raw("(CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END) AS current"),
-                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag30"),
-                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag60"),
-                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag90"),
-                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS ag180"),
-                    DB::raw("(CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END) AS agl180"))
+                    DB::raw("SUM((CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END)) AS current"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag190"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->where('tr_invoice.inv_outstanding','>',0)
-                ->groupBy('tr_invoice.tenan_id','tr_invoice.inv_duedate','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.inv_date','tr_invoice.inv_outstanding');
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name');
     	if($from) $fetch = $fetch->where('inv_date','>=',$from);
         if($to) $fetch = $fetch->where('inv_date','<=',$to);
         $fetch = $fetch->get();
@@ -160,5 +161,57 @@ class ReportController extends Controller
     	}else{
     		return view('layouts.report_template', $data);
     	}
+    }
+
+    public function outContr(Request $request){
+        $from = @$request->from;
+        $to = @$request->to;
+        $pdf = @$request->pdf;
+        $data['title'] = "Outstanding By Contract";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['template'] = 'report_out_contr';
+        $fetch = TrInvoice::select('tr_contract.contr_code','ms_unit.unit_name','ms_tenant.tenan_name',
+                    DB::raw("SUM(inv_outstanding) AS outstanding"))
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
+                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->where('tr_invoice.inv_outstanding','>',0)
+                ->groupBy('ms_unit.unit_name','ms_tenant.tenan_name','tr_contract.contr_code');
+        if($from) $fetch = $fetch->where('inv_date','>=',$from);
+        if($to) $fetch = $fetch->where('inv_date','<=',$to);
+        $fetch = $fetch->get();
+        $data['invoices'] = $fetch;
+        if($pdf){
+            $pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('Outstanding_By_Contract_'.$from.'_to_'.$to.'.pdf');
+        }else{
+            return view('layouts.report_template', $data);
+        }
+    }
+
+    public function outInv(Request $request){
+        $from = @$request->from;
+        $to = @$request->to;
+        $pdf = @$request->pdf;
+        $data['title'] = "Outstanding By Invoices";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['template'] = 'report_out_inv';
+        $fetch = TrInvoice::select('tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','ms_unit.unit_name','ms_tenant.tenan_name','tr_invoice.inv_outstanding')
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
+                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->where('tr_invoice.inv_outstanding','>',0)
+                ->groupBy('tr_invoice.inv_number','ms_unit.unit_name','ms_tenant.tenan_name','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_outstanding')
+                ->orderBy('tr_invoice.inv_date','ms_unit.unit_name');
+        if($from) $fetch = $fetch->where('inv_date','>=',$from);
+        if($to) $fetch = $fetch->where('inv_date','<=',$to);
+        $fetch = $fetch->get();
+        $data['invoices'] = $fetch;
+        if($pdf){
+            $pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('Outstanding_By_Invoice_'.$from.'_to_'.$to.'.pdf');
+        }else{
+            return view('layouts.report_template', $data);
+        }
     }
 }

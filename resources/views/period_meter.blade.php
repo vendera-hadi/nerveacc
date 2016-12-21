@@ -116,6 +116,7 @@ Period Meter
             var dg = $('#dg').datagrid({
                 url: get_url,
                 pagination: true,
+                pageSize:50,
                 remoteFilter: true, //utk jalanin search filter
                 rownumbers: true,
                 singleSelect: true,

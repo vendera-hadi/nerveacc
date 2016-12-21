@@ -314,6 +314,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/arbyinvoice','ReportController@arbyInvoice')->name('report.arbyinv');
 	Route::get('report/arbyinvoicecancel','ReportController@arbyInvoiceCancel')->name('report.arbyinvcancel');
 	Route::get('report/araging','ReportController@arAging')->name('report.aging');
+	Route::get('report/outinv','ReportController@outInv')->name('report.outinv');
+	Route::get('report/outcontr','ReportController@outContr')->name('report.outcontr');
+	Route::get('report/hmeter','ReportController@HistoryMeter')->name('report.hmeter');
 	// payment
 	Route::get('payment','PaymentController@index')->name('payment.index');
 	Route::post('payment/get','PaymentController@get')->name('payment.get');

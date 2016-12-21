@@ -75,14 +75,14 @@
                             <th field="inv_number" width="100" sortable="true">No.Invoice</th>
                             <th field="contr_no" width="100" sortable="true">No Kontrak</th>
                             <th field="tenan_name" width="100" sortable="true">Nama Tenan</th>
-                            <th field="unit" width="100" sortable="true">Unit</th>  
-                            <th field="inv_date" width="50" sortable="true">Tgl Invoice</th>
-                            <th field="inv_duedate" width="50" sortable="true">Jatuh Tempo</th>
-                            <th field="inv_amount" width="80" sortable="true">Amount</th>
-                            <th field="inv_outstanding" width="80" sortable="true">Outstanding Amount</th> 
-                            <th field="invtp_name" width="100" sortable="true">Jenis Invoice</th>
+                            <th field="unit" width="150" sortable="true">Unit</th>  
+                            <th field="inv_date" width="100" sortable="true">Tgl Invoice</th>
+                            <th field="inv_duedate" width="100" sortable="true">Jatuh Tempo</th>
+                            <th field="inv_amount" width="100" sortable="true" align="right">Amount</th>
+                            <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th> 
+                            <th field="invtp_name" width="150" sortable="true">Jenis Invoice</th>
                             <th field="inv_post" width="50" sortable="true">Posted</th>       
-                        <th field="action_button" width="50" sortable="true">action</th>
+                        <th field="action_button" width="80" sortable="true">action</th>
                         </tr>
                     </thead>
                 </table>
@@ -350,6 +350,7 @@ $(function(){
         view: detailview,
         url: get_url,
         pagination: true,
+        pageSize:50,
         remoteFilter: true,
         rownumbers: true,
         singleSelect: true,
