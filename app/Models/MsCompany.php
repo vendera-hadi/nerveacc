@@ -11,6 +11,6 @@ class MsCompany extends Model
    public $timestamps  = false;
 
    public function MsCashbank(){
-   		return $this->hasOne('App\Models\MsCashbank','id','cashbk_id');
+   		return $this->hasOne('App\Models\MsCashBank','id','cashbk_id');
    }
 }
