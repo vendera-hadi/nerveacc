@@ -159,7 +159,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unitcomplaint/delete', 'UnitComplaintController@delete')->name('unitcomplaint.delete');
 
 	// cash bank
-	Route::get('cash_bank','CashBankController@index');
+	Route::get('cash_bank','CashBankController@index')->name('cash_bank.index');
 	Route::post('cash_bank/get', 'CashBankController@get')->name('cash_bank.get');
 	Route::post('cash_bank/options', 'CashBankController@getOptions')->name('cash_bank.options');
 	Route::post('cash_bank/insert', 'CashBankController@insert')->name('cash_bank.insert');
@@ -308,7 +308,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('aging/getdetail','AgingController@getdetail')->name('aging.getdetail');
 	Route::get('aging/downloadAgingExcel', 'AgingController@downloadAgingExcel');
 	
-	Route::post('payment/posting','PaymentController@posting');
+	Route::post('payment/posting','PaymentController@posting')->name('payment.posting');
 	// report
 	Route::get('report/arview','ReportController@arview')->name('report.arview');
 	Route::get('report/arbyinvoice','ReportController@arbyInvoice')->name('report.arbyinv');
@@ -323,6 +323,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('payment/detail', 'PaymentController@getdetail')->name('payment.getdetail');
 	Route::get('payment/get_invoice','PaymentController@get_invoice')->name('payment.get_invoice');
 	Route::post('payment/insert','PaymentController@insert')->name('payment.insert');
+	Route::get('payment/void','PaymentController@void')->name('payment.void');
 });
 
 Route::get('logout','Auth\AuthController@logout');

@@ -59,12 +59,12 @@
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_no" width="120" sortable="true">Payment Code</th>
+                            <th field="contr_no" width="120" sortable="true">Contract Code</th>
                             <th field="invpayh_checkno" width="120" sortable="true">Payment Code</th>
-                            <th field="invpayh_date" width="120" sortable="true">Tanggal Bayar</th>
-                            <th field="invpayh_amount" width="120" sortable="true">Total Pembayaran</th>
+                            <th field="invpayh_date" width="120" sortable="true">Payment Date</th>
+                            <th field="invpayh_amount" width="120" sortable="true">Payment Total</th>
                             
-                            <th field="invpayh_post" width="120" sortable="true">Status</th>
+                            <th field="invpayh_post" width="120" sortable="true">Posting Status</th>
                             <th field="action_button">Action</th>
                         </tr>
                     </thead>
@@ -160,12 +160,6 @@
                       </div>
 
                       <div class="ajax-detail"></div>
-
-                      <div class="checkbox">
-                        <label>
-                          <input type="checkbox" name="invpayh_post"> Posting Payment
-                        </label>
-                      </div>
                       
                       <button type="submit" class="btn btn-primary">submit</button>
                   </form>
@@ -328,6 +322,48 @@
         $.post('{{route('payment.getdetail')}}',{id:id}, function(data){
             $('#detailModalContent').html(data);
         });
+    });
+
+    $(document).delegate('.void-confirm','click',function(){
+      if(confirm("are you sure you want void this payment?")){
+        var url = $(this).attr('href');
+        
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(result) {
+              alert(result.message);
+              if(result.status == 1) location.reload();
+
+              return false;
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert('failed during proccess.');
+                return false;
+            }
+        });
+
+        return false;
+      }else{
+        return false;
+      }
+    });
+
+    $(document).delegate('.posting-confirm','click',function(){
+      if(confirm("are you sure you want posting this payment?")){
+        var id = $(this).attr('data-id');
+
+        $.post('{{route('payment.posting')}}',{id:id}, function(data){
+            alert(data.message);
+            if(data.success == 1){
+              location.reload();
+            } else{
+              return false;
+            }
+        });
+      }else{
+        return false;
+      }
     });
 </script>
 @endsection
