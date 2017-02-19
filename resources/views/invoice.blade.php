@@ -499,7 +499,7 @@ $(function(){
             $.messager.alert('Warning','Contract is required');
             return false;
         }
-        if($('.costdid').length < 1){ 
+        if($('.costdid').length == 0){ 
             $.messager.alert('Warning','Cost item is required');
             return false;
         }
