@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Contract
+    Billing Information
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Contract
+   Billing Information
 @endsection
 
 <!-- tambahan script atas -->
@@ -34,7 +34,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Contract</li>
+        <li class="active">Billing Info</li>
     </ol>
 @stop
 
@@ -47,21 +47,21 @@
           <div class="nav-tabs-custom">
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
-              <li><a href="#tab_2" data-toggle="tab">Add Contract</a></li>
-              <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Contract</a></li>
+              <li><a href="#tab_2" data-toggle="tab">Add Billing Info</a></li>
+              <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Billing Info</a></li>
               <li class="hidden"><a href="#tab_4" data-toggle="tab">Edit Cost Item</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
                   <!-- template tabel -->
-                <table id="dg" title="Contract" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <table id="dg" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_code" width="120" sortable="true">Contract Code</th>
-                            <th field="contr_no" width="120" sortable="true">Contract No</th>
+                            <th field="contr_code" width="120" sortable="true">Billing Info Code</th>
+                            <th field="contr_no" width="120" sortable="true">Billing Info No</th>
                             <th field="contr_startdate" width="120" sortable="true">Start Date</th>
                             <th field="contr_enddate" width="120" sortable="true">End Date</th>
                             
@@ -81,15 +81,15 @@
                         <form method="POST" id="formContract">
                             
                             <div class="form-group">
-                                <label>Contract Code</label>
+                                <label>Billing Info Code</label>
                                 <input type="text" name="contr_code" required="required" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label>Contract No</label>
+                                <label>Billing Info No</label>
                                 <input type="text" name="contr_no" required="required" class="form-control">
                             </div>
                             <div class="form-group">
-                                <label>Contract Start Date</label>
+                                <label>Billing Info Start Date</label>
                                 <div class="input-group date">
                                   <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
@@ -98,7 +98,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Contract End Date</label>
+                                <label>Billing Info End Date</label>
                                 <div class="input-group date">
                                   <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
@@ -221,7 +221,7 @@
 
               <!-- /.tab-pane -->
               <div class="tab-pane" id="tab_3">
-                    <h3><center>Edit Contract</center></h3>
+                    <h3><center>Edit Billing Info</center></h3>
                     <div class ="row" style="margin: 100px 0;" id="editLoading">
                         <div class="col-sm-12 text-center" >
                           <img src="{{asset('img/facebook.gif')}}">
@@ -232,15 +232,15 @@
                     <form method="POST" id="formEditContract" style="display:none">
                         <input type="hidden" name="id">
                         <div class="form-group">
-                            <label>Contract Code</label>
+                            <label>Billing Info Code</label>
                             <input type="text" name="contr_code" required="required" class="form-control" >
                         </div>
                         <div class="form-group">
-                            <label>Contract No</label>
+                            <label>Billing Info No</label>
                             <input type="text" name="contr_no" required="required" class="form-control" >
                         </div>
                         <div class="form-group">
-                            <label>Contract Start Date</label>
+                            <label>Billing Info Start Date</label>
                             <div class="input-group date">
                               <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
@@ -249,7 +249,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Contract End Date</label>
+                            <label>Billing Info End Date</label>
                             <div class="input-group date">
                               <div class="input-group-addon">
                                 <i class="fa fa-calendar"></i>
@@ -356,7 +356,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Contract Information</h4>
+                        <h4 class="modal-title">Billing Information</h4>
                       </div>
                       <div class="modal-body" id="detailModalContent">
                       </div>
@@ -396,7 +396,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Edit Contract</h4>
+                        <h4 class="modal-title">Edit Billing Info</h4>
                       </div>
                       <div class="modal-body">
                         

@@ -124,14 +124,14 @@ class TenantController extends Controller
         try{
         // var_dump($request->all());
             $messages = [
-                'tenan_code.unique' => 'Tenant Code is taken',
+                // 'tenan_code.unique' => 'Tenant Code is taken',
                 'tent_id.required' => 'Choose Tenant Type First',
                 'tenan_idno.numeric' => 'KTP No must be in numeric format',
                 'tenan_phone.numeric' => 'Phone must be in numeric format',
                 'tenan_fax.numeric' => 'Fax must be in numeric format'
             ];
             $validator = Validator::make($request->all(), [
-                'tenan_code' => 'required|unique:ms_tenant',
+                // 'tenan_code' => 'required|unique:ms_tenant',
                 'tenan_idno' => 'numeric',
                 'tenan_phone' => 'numeric',
                 'tenan_fax' => 'numeric',
@@ -143,6 +143,8 @@ class TenantController extends Controller
                 return response()->json(['errorMsg' => $errors]);
             }
             $input = $request->all();
+            // update otomatis tenancode
+            $input['tenan_code'] = "TN".date('ymdHis');
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
 

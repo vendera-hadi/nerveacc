@@ -39,7 +39,7 @@
                                     <option value="arbyinvoicecancel">Invoice Cancel</option>
                                     <option value="araging">Aging Invoices</option>
                                     <option value="outinv">Outstanding By Invoice</option>
-                                    <option value="outcontr">Outstanding By Contract</option>
+                                    <option value="outcontr">Outstanding By Billing Info</option>
                                 </select>
                             </div>
                             <div class="col-sm-3">

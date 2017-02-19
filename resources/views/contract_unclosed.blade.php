@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Unclosed Contracts
+    Unclosed Billing Info
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Unclosed Contracts
+   Unclosed Billing Info
 @endsection
 
 <!-- tambahan script atas -->
@@ -34,7 +34,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Unclosed Contracts</li>
+        <li class="active">Unclosed Billing Info</li>
     </ol>
 @stop
 
@@ -43,14 +43,14 @@
         <div class="row">
             <div class="col-md-11">
                 <!-- template tabel -->
-                <table id="dg" title="Contract" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <table id="dg" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_code" width="120" sortable="true">Contract Code</th>
-                            <th field="contr_no" width="120" sortable="true">Contract No</th>
+                            <th field="contr_code" width="120" sortable="true">Billing Info Code</th>
+                            <th field="contr_no" width="120" sortable="true">Billing Info No</th>
                             <th field="contr_enddate" width="120" sortable="true">End Date</th>
                             <th field="contr_status" width="120" sortable="true">Status</th>
                             <th field="contr_terminate_date" width="120" sortable="true">Terminated Date</th>
@@ -68,7 +68,7 @@
                     <div class="modal-content">
                       <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Contract Information</h4>
+                        <h4 class="modal-title">Billing Info Information</h4>
                       </div>
                       <div class="modal-body" id="detailModalContent">
                       </div>
@@ -115,7 +115,7 @@
 <!-- datepicker -->
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Unclosed Contracts"; // nama si tabel, ditampilin di dialog
+        var entity = "Unclosed Billing Info"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('contract.getunclosed')}}";
 
         $(function(){

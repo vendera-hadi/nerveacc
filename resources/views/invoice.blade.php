@@ -34,7 +34,7 @@
                 <form id="search">
                 <div class="row" style="margin-bottom:20px">
                     <div class="col-sm-3">
-                        <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Contract or Tenan Name">
+                        <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Billing Info or Tenan Name">
                     </div>
                     <div class="col-sm-2">
                         <select class="form-control" name="inv_type">
@@ -184,12 +184,12 @@
                                     </div>
                                     <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label>Contract</label>
+                                            <label>Billing Info</label>
                                             <div class="input-group">
                                                 <input type="hidden" name="contr_id" id="txtContrId" required>
                                                 <input type="text" class="form-control" id="txtContr" disabled>
                                                 <span class="input-group-btn">
-                                                    <button class="btn btn-info" type="button" id="chooseContractButton">Choose Contract</button>
+                                                    <button class="btn btn-info" type="button" id="chooseContractButton">Choose Billing Info</button>
                                                 </span>
                                             </div>
                                         </div>
@@ -496,7 +496,7 @@ $(function(){
     $('#formAddInv').submit(function(e){
         e.preventDefault();
         if($('#txtContrId').val() == ""){ 
-            $.messager.alert('Warning','Contract is required');
+            $.messager.alert('Warning','Billing Info is required');
             return false;
         }
         if($('.costdid').length == 0){ 

@@ -9,7 +9,7 @@
 	    	<table width="100%">
 			<tr><td width="40%"><strong>Tenant Name</strong></td><td>:</td><td>{{$invoice['ms_tenant']['tenan_name']}}</td></tr>
 			<tr><td width="40%"><strong>Payment Code</strong></td><td>:</td><td>{{$invoice['invpayh_checkno']}}</td></tr>
-			<tr><td><strong>Contract Code</strong></td><td>:</td><td>{{$invoice['tr_contract']['contr_no']}}</td></tr>
+			<tr><td><strong>Billing Info Code</strong></td><td>:</td><td>{{$invoice['tr_contract']['contr_no']}}</td></tr>
 			<tr><td><strong>Payment Date</strong></td><td>:</td><td>{{date('d/m/Y', strtotime($invoice['invpayh_date']))}}</td></tr>
 			<tr><td><strong>Payment Total</strong></td><td>:</td><td>{{'Rp. '.number_format($invoice['invpayh_amount'])}}</td></tr>
 			</table>
