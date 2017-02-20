@@ -32,7 +32,7 @@
                         @if($notif_unclosed > 0)
                         <li>
                             <a href="{{route('contract.unclosed')}}">
-                              <i class="fa fa-users text-aqua"></i> There @if($notif_unclosed!=1){{'are'}}@else{{'is'}}@endif {{$notif_unclosed}} Unclosed Contract 
+                              <i class="fa fa-users text-aqua"></i> There @if($notif_unclosed!=1){{'are'}}@else{{'is'}}@endif {{$notif_unclosed}} Unclosed Billing Info 
                             </a>
                         </li>
                         @endif

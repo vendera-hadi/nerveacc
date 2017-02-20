@@ -59,7 +59,7 @@
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_no" width="120" sortable="true">Contract Code</th>
+                            <th field="contr_no" width="120" sortable="true">Billing Info Code</th>
                             <th field="invpayh_checkno" width="120" sortable="true">Payment Code</th>
                             <th field="invpayh_date" width="120" sortable="true">Payment Date</th>
                             <th field="invpayh_amount" width="120" sortable="true">Payment Total</th>

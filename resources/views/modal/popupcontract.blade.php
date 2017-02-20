@@ -1,9 +1,9 @@
-<center><h3>Choose Contract</h3></center><br>
+<center><h3>Choose Billing Info</h3></center><br>
 
 <form action="post" id="@if($edit){{'searchContractEdit'}}@else{{'searchContract'}}@endif">
 <div class="col-xs-6 col-xs-offset-6">
 	<div class="input-group">
-      <input type="text" name="keyword" class="form-control" placeholder="Search Contract" value="@if(!empty($keyword)){{$keyword}}@endif">
+      <input type="text" name="keyword" class="form-control" placeholder="Search Billing Info" value="@if(!empty($keyword)){{$keyword}}@endif">
       <span class="input-group-btn">
         <button class="btn btn-info" type="submit">Search</button>
       </span>
@@ -15,8 +15,8 @@
 <table class="table table-bordered">
 	<tr>
 		<th></th>
-		<th>Contract No</th>
-		<th>Contract Code</th>
+		<th>Billing Info No</th>
+		<th>Billing Info Code</th>
 		<th>Unit Name</th>
 		<th>Tenan Name</th>
 	</tr>

@@ -1,7 +1,7 @@
 <table class="table table-bordered" width="100%"> 
     <thead>
       <tr>
-        <th>Contract Number</th>
+        <th>Billing Info Number</th>
         <th>Tenant Name</th>
         <th>Unit Code</th>
         <th>Total Outstanding</th>    

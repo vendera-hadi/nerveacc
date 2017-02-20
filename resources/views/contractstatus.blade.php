@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Contract Status
+    Billing Info Status
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Master Contract Status
+   Master Billing Info Status
 @endsection
 
 <!-- tambahan script atas -->
@@ -20,7 +20,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Master Contract Status</li>
+        <li class="active">Master Billing Info Status</li>
     </ol>
 @stop
 
@@ -31,14 +31,14 @@
                 <!-- content -->
 
                 <!-- template tabel -->
-                <table id="dg" title="Contract Status" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <table id="dg" title="Billing Info Status" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="const_code" width="50" sortable="true">Contract Status Code</th>
-                            <th field="const_name" width="50" sortable="true">Contract Status Name</th>
-                            <th field="const_order" width="50" sortable="true">Contract Status Order</th>
+                            <th field="const_code" width="50" sortable="true">Billing Info Status Code</th>
+                            <th field="const_name" width="50" sortable="true">Billing Info Status Name</th>
+                            <th field="const_order" width="50" sortable="true">Billing Info Status Order</th>
                             <th field="created_by" width="50" >Created By</th>
                         </tr>
                     </thead>
@@ -86,7 +86,7 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Contract Status"; // nama si tabel, ditampilin di dialog
+        var entity = "Billing Info Status"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('contractstatus.get')}}";
         var insert_url = "{{route('contractstatus.insert')}}";
         var update_url = "{{route('contractstatus.update')}}";
