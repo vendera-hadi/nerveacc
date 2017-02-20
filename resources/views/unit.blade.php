@@ -38,8 +38,9 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="unit_code" width="120" sortable="true">ID</th>
-                            <th field="unit_name" width="120" sortable="true">Unit Name</th>
+                            <th field="unit_code" width="120" sortable="true">Unit Code</th>
+                            <th field="tenan_name" width="120" sortable="true">Owner</th>
+                            <!-- <th field="unit_name" width="120" sortable="true">Unit Name</th> -->
                             <th field="unit_sqrt" width="120" sortable="true">Luas</th>
                             <th field="unit_virtual_accn" width="120" sortable="true">Virtual Account</th>
                             <th field="untype_name" width="120" sortable="true">Unit Type</th>
@@ -54,7 +55,8 @@
                 <!-- icon2 atas table -->
                 <div id="toolbar">
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="createNew()">New</a>
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Edit</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUnit()">Edit</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="detail()">View Detail</a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
                 </div>
                 <!-- end icon -->
@@ -254,6 +256,180 @@
     </div>
 
     <!-- End Modal -->
+
+    <!-- Modal extra -->
+    <div id="editUnitModal" class="modal fade" role="dialog">
+      <div class="modal-dialog" style="width:900px">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Edit Unit</h4>
+          </div>
+          <div class="modal-body" id="editUnitModalContent" style="padding: 20px 40px">
+                <!-- isi form -->
+                <form method="POST" id="formEditUnit">
+                    <div class="row">
+                        <div class="col-sm-12 text-center" style="margin-bottom: 20px;">
+                            <h4><strong>Unit Details</strong></h4>
+                            <input type="hidden" name="id" class="unit_id">
+                        </div>
+                        <!-- UNIT -->
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Unit Code</label>
+                                <input type="text" class="form-control unit_code" name="unit_code" placeholder="Unit Code" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Unit Square</label>
+                                <input type="text" class="form-control unit_sqrt" name="unit_sqrt" placeholder="Unit Area (m2)" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Virtual Account</label>
+                                <input type="text" class="form-control virtual_account" name="virtual_account" placeholder="Virtual Account">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Floor</label>
+                                <select name="floor_id" class="form-control floor_id" required>
+                                @foreach($floors as $floor)
+                                    <option value="{{$floor->id}}">{{$floor->floor_name}}</option>
+                                @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Unit Type</label>
+                                <select name="untype_id" class="form-control untype_id" required>
+                                @foreach($unittypes as $unittype)
+                                    <option value="{{$unittype->id}}">{{$unittype->untype_name}}</option>
+                                @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <!-- END UNIT -->
+                        <div class="col-sm-12 text-center" style="margin-bottom: 20px;">
+                            <h4><strong>Owner Details</strong></h4>
+                        </div>
+                        <!-- OWNER -->
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Name</label>
+                                <input type="text" class="form-control tenan_name" name="tenan_name" placeholder="Owner Name" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>KTP</label>
+                                <input type="text" class="form-control tenan_idno" name="tenan_idno" placeholder="Owner KTP" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="text" class="form-control tenan_phone" name="tenan_phone" placeholder="Owner Phone Number" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>FAX</label>
+                                <input type="text" class="form-control tenan_fax" name="tenan_fax" placeholder="Owner Fax Number">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="text" class="form-control tenan_email" name="tenan_email" placeholder="Owner Email Address" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Address</label>
+                                <input type="text" class="form-control tenan_address" name="tenan_address" placeholder="Owner Address">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>NPWP</label>
+                                <input type="text" class="form-control tenan_npwp" name="tenan_npwp" placeholder="Owner NPWP Number">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Tax Name (Nama NPWP)</label>
+                                <input type="text" class="form-control tenan_taxname" name="tenan_taxname" placeholder="Owner NPWP Name">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Tax Address (Alamat NPWP)</label>
+                                <input type="text" class="form-control tenan_tax_address" name="tenan_tax_address" placeholder="Owner NPWP Address">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>PPN</label>
+                                &nbsp;&nbsp;<input type="checkbox" name="tenan_isppn" class="tenan_isppn" value="1" >
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>PKP</label>
+                                &nbsp;&nbsp;<input type="checkbox" name="tenan_ispkp" class="tenan_ispkp" value="1" > 
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Own Unit Since</label>
+                                <div class="input-group date">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control datepicker unitow_start_date" name="unitow_start_date" placeholder="Own Unit Since" data-date-format="yyyy-mm-dd" required>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END OWNER -->
+                        <div class="col-sm-12">
+                            <button class="btn btn-info pull-right">Submit</button>
+                            <button type="button" class="btn btn-danger pull-right" style="margin-right: 10px" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+                <!-- end form -->
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- End Modal -->
+
+    <!-- Modal extra -->
+    <div id="detailModal" class="modal fade" role="dialog">
+      <div class="modal-dialog" style="width:900px">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Detail Unit</h4>
+          </div>
+          <div class="modal-body" id="detailUnitModalContent" style="padding: 20px 40px">  
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- End Modal -->
 @endsection
 
 @section('footer-scripts')
@@ -290,14 +466,68 @@
             $('#addUnitModal').modal("show");
         }
 
+        function detail(){
+            var row = $('#dg').datagrid('getSelected');   
+            $.post('{{route('unit.modaldetail')}}', {id:row.id}, function(result){
+                if(result.errorMsg) $.messager.alert('Warning',result.message);
+                else{
+                    $('#detailUnitModalContent').html(result);     
+                    $('#detailModal').modal("show");
+                }
+            });
+        }
+
+        function editUnit(){
+            var row = $('#dg').datagrid('getSelected');
+            $.post('{{route('unit.ajaxdetail')}}', {id:row.id}, function(result){
+                if(result.errorMsg) $.messager.alert('Warning',result.message);
+                else{
+                    $('.unit_id').val(row.id);
+                    $('.unit_code').val(result.unit_code);
+                    $('.unit_sqrt').val(result.unit_sqrt);
+                    $('.virtual_account').val(result.virtual_account);
+                    $('.floor_id').val(result.floor_id);
+                    $('.untype_id').val(result.untype_id);
+                    if(result.tenant){
+                        $('.tenan_name').val(result.tenant.tenan_name);
+                        $('.tenan_idno').val(result.tenant.tenan_idno);
+                        $('.tenan_phone').val(result.tenant.tenan_phone);
+                        $('.tenan_fax').val(result.tenant.tenan_fax);
+                        $('.tenan_email').val(result.tenant.tenan_email);
+                        $('.tenan_address').val(result.tenant.tenan_address);
+                        $('.tenan_npwp').val(result.tenant.tenan_npwp);
+                        $('.tenan_taxname').val(result.tenant.tenan_taxname);
+                        $('.tenan_tax_address').val(result.tenant.tenan_tax_address);
+                        if(result.tenant.tenan_ispkp) $('.tenan_ispkp').prop('checked', true);
+                        if(result.tenant.tenan_isppn) $('.tenan_isppn').prop('checked', true);
+                        $('.unitow_start_date').val(result.unitow_start_date);
+                    }
+                    $('#editUnitModal').modal("show");
+                }
+            },'json');
+        }
+
         $('#formAddUnit').submit(function(e){
             e.preventDefault();
             $.post('{{route('unit.insert')}}', $(this).serialize(), function(result){
-                console.log(result);
-                if(result.error) $.messager.alert('Warning',result.message);
+                // console.log(result);
+                if(result.errorMsg) $.messager.alert('Warning',result.message);
                 if(result.success){
                     $.messager.alert('Success',result.message);
                     $('#addUnitModal').modal("hide");
+                    $('#dg').datagrid('reload');
+                }
+            },'json');
+        });
+
+        $('#formEditUnit').submit(function(e){
+            e.preventDefault();
+            $.post('{{route('unit.update')}}', $(this).serialize(), function(result){
+                // console.log(result);
+                if(result.errorMsg) $.messager.alert('Warning',result.message);
+                if(result.success){
+                    $.messager.alert('Success',result.message);
+                    $('#editUnitModal').modal("hide");
                     $('#dg').datagrid('reload');
                 }
             },'json');

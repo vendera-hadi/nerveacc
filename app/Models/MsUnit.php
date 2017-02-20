@@ -12,4 +12,8 @@ class MsUnit extends Model
    public function MsFloor(){
    		return $this->belongsTo('App\Models\MsFloor','floor_id');
    }
+
+   public function UnitType(){
+   		return $this->belongsTo('App\Models\MsUnitType', 'untype_id');
+   }
 }

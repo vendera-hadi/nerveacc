@@ -129,6 +129,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('unit/update', 'UnitController@update')->name('unit.update');
 	Route::post('unit/delete', 'UnitController@delete')->name('unit.delete');
 	Route::post('unit/option2', 'UnitController@getOptions_account')->name('unit.option2');
+	Route::post('unit/ajaxdetail','UnitController@newAjaxUnitDetail')->name('unit.ajaxdetail');
+	Route::post('unit/modaldetail', 'UnitController@getdetail')->name('unit.modaldetail');
+
 	// master unit type
 	Route::get('unittype','UnitTypeController@index');
 	Route::post('unittype/get', 'UnitTypeController@get')->name('unittype.get');

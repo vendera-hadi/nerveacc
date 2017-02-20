@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use Auth;
 // load model
+use App\Models\TrContract;
 use App\Models\MsUnit;
 use App\Models\MsUnitType;
 use App\Models\MsUnitOwner;
@@ -38,7 +39,8 @@ class UnitController extends Controller
 
             // olah data
             $count = MsUnit::count();
-            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))->join('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'));
+            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name','ms_tenant.tenan_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))->join('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'))
+                    ->leftJoin('ms_unit_owner', 'ms_unit.id','=','ms_unit_owner.unit_id')->leftJoin('ms_tenant', 'ms_tenant.id', '=', 'ms_unit_owner.tenan_id');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -76,13 +78,14 @@ class UnitController extends Controller
                 $temp['unit_id'] = $value->unit_id;
                 $temp['unit_code'] = $value->unit_code;
                 $temp['unit_name'] = $value->unit_name;
-                $temp['unit_sqrt'] = $value->unit_sqrt;
-                $temp['unit_virtual_accn'] = $value->unit_virtual_accn;
+                $temp['unit_sqrt'] = $value->unit_sqrt." m2";
+                $temp['unit_virtual_accn'] = $value->virtual_account;
                 $temp['unit_isactive'] = $value->unit_isactive;
                 $temp['untype_name'] = $value->untype_name;
                 $temp['floor_name'] = $value->floor_name;
                 $temp['floor_id'] = $value->floor_id;
                 $temp['untype_id'] = $value->untype_id;
+                $temp['tenan_name'] = $value->tenan_name;
                 $temp['unit_isactive'] = !empty($value->unit_isactive) ? 'yes' : 'no';
                 try{
                     $temp['created_by'] = User::findOrFail($value->created_by)->name;
@@ -204,6 +207,69 @@ class UnitController extends Controller
         try{
             $id = $request->id;
             $input = $request->all();
+            // unit 
+            $updateUnit = [
+                    'unit_code' => @$request->unit_code,
+                    'unit_name' => @$request->unit_code,
+                    'unit_sqrt' => @$request->unit_sqrt,
+                    'virtual_account' => @$request->virtual_account,
+                    'floor_id' => @$request->floor_id,
+                    'untype_id' => @$request->untype_id,
+                    'updated_by' => Auth::id()
+                ];
+            MsUnit::find($id)->update($updateUnit);
+
+            $unitowner = MsUnitOwner::where('unit_id',$id)->first();
+            if($unitowner){
+                $unitowner->unitow_start_date = $request->unitow_start_date;
+                $unitowner->save();
+
+                $updateTenant = [
+                        'tenan_name' => @$request->tenan_name,
+                        'tenan_email' => @$request->tenan_email,
+                        'tenan_idno' => @$request->tenan_idno,
+                        'tenan_phone' => @$request->tenan_phone,
+                        'tenan_fax' => @$request->tenan_fax,
+                        'tenan_address' => @$request->tenan_address,
+                        'tenan_npwp' => @$request->tenan_npwp,
+                        'tenan_taxname' => @$request->tenan_taxname,
+                        'tenan_tax_address' => @$request->tenan_tax_address,
+                        'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
+                        'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
+                        'updated_by' => Auth::id()
+                    ];
+                MsTenant::find($unitowner->tenan_id)->update($updateTenant);
+            }else{
+                // create new
+                $tenant = MsTenant::create([
+                        'tenan_code' => "TN".date('ymdhis'),
+                        'tenan_name' => @$request->tenan_name,
+                        'tenan_email' => @$request->tenan_email,
+                        'tenan_idno' => @$request->tenan_idno,
+                        'tenan_phone' => @$request->tenan_phone,
+                        'tenan_fax' => @$request->tenan_fax,
+                        'tenan_address' => @$request->tenan_address,
+                        'tenan_npwp' => @$request->tenan_npwp,
+                        'tenan_taxname' => @$request->tenan_taxname,
+                        'tenan_tax_address' => @$request->tenan_tax_address,
+                        'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
+                        'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
+                        'tent_id' => 1,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id()
+                    ]);
+                MsUnitOwner::create(['unit_id'=>$unit->id, 'tenan_id'=>$tenant->id, 'unitow_start_date' => @$request->unitow_start_date]);
+            }
+            return response()->json(['success'=>true, 'message'=>'Update Unit Success']);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function update2(Request $request){
+        try{
+            $id = $request->id;
+            $input = $request->all();
             $input['updated_by'] = Auth::id();
             MsUnit::find($id)->update($input);
             return MsUnit::find($id);
@@ -272,4 +338,41 @@ class UnitController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
+
+    public function newAjaxUnitDetail(Request $request){
+        try{
+            $unit = MsUnit::find($request->id)->toArray();
+            $unitowner = MsUnitOwner::where('unit_id',$request->id)->first();
+            if($unitowner){
+                $unit['unitow_start_date'] = $unitowner->unitow_start_date;
+                // jika unit owner ada, ambil data tenan
+                $tenant = MsTenant::find($unitowner->tenan_id)->toArray();
+                $unit['tenant'] = $tenant;
+            }
+            return response()->json($unit);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function getdetail(Request $request){
+        // try{
+            $id = $request->id;
+            $unit = MsUnit::with('MsFloor','UnitType')->find($id); 
+            $unitowner = MsUnitOwner::where('unit_id',$id)->first();
+            if($unitowner){
+                $tenant = MsTenant::find($unitowner->tenan_id);
+            }else{
+                $tenant = null;
+            }
+            $renter = TrContract::where('unit_id',$id);
+            if($unitowner) $renter = $renter->where('tenan_id','!=',$tenant->id);
+            $renter = $renter->with('MsTenant')->get();
+
+            return view('modal.detailunit', ['unit' => $unit, 'unitowner' => $unitowner, 'tenant' => $tenant, 'renter' => $renter]);
+        // }catch(\Exception $e){
+        //     return response()->json(['errorMsg' => $e->getMessage()]);
+        // }
+    }
+
 }
