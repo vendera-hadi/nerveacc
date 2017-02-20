@@ -8,6 +8,8 @@ use Auth;
 // load model
 use App\Models\MsUnit;
 use App\Models\MsUnitType;
+use App\Models\MsUnitOwner;
+use App\Models\MsTenant;
 use App\Models\User;
 use App\Models\MsFloor;
 use App\Models\MsVirtualAccount;
@@ -16,7 +18,9 @@ use DB;
 class UnitController extends Controller
 {
     public function index(){
-        return view('unit');
+        $data['floors'] = MsFloor::all();
+        $data['unittypes'] = MsUnitType::all();
+        return view('unit', $data);
     }
 
     public function get(Request $request){
@@ -139,6 +143,51 @@ class UnitController extends Controller
     }
 
     public function insert(Request $request){
+        try{
+            $input = $request->all();
+            DB::transaction(function () use($request){
+                // unit 
+                $unit = MsUnit::create([
+                        'unit_code' => @$request->unit_code,
+                        'unit_name' => @$request->unit_code,
+                        'unit_sqrt' => @$request->unit_sqrt,
+                        'unit_virtual_accn' => 0,
+                        'virtual_account' => @$request->virtual_account,
+                        'floor_id' => @$request->floor_id,
+                        'untype_id' => @$request->untype_id,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                        'unit_isavailable' => 1,
+                        'unit_isactive' => 1
+                    ]);
+
+                $tenant = MsTenant::create([
+                        'tenan_code' => "TN".date('ymdhis'),
+                        'tenan_name' => @$request->tenan_name,
+                        'tenan_email' => @$request->tenan_email,
+                        'tenan_idno' => @$request->tenan_idno,
+                        'tenan_phone' => @$request->tenan_phone,
+                        'tenan_fax' => @$request->tenan_fax,
+                        'tenan_address' => @$request->tenan_address,
+                        'tenan_npwp' => @$request->tenan_npwp,
+                        'tenan_taxname' => @$request->tenan_taxname,
+                        'tenan_tax_address' => @$request->tenan_tax_address,
+                        'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
+                        'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
+                        'tent_id' => 1,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id()
+                    ]);
+
+                MsUnitOwner::create(['unit_id'=>$unit->id, 'tenan_id'=>$tenant->id, 'unitow_start_date' => @$request->unitow_start_date]);
+            });
+            return response()->json(['success'=>true, 'message'=>'Input Unit Success']);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function insert2(Request $request){
         try{
             $input = $request->all();
             // $input['unit_id'] = md5(date('Y-m-d H:i:s'));
