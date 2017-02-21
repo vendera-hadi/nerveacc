@@ -16,6 +16,12 @@
 			<tr>
 				<td><strong>Unit Type</strong></td><td width="15">:</td><td>{{$unit->UnitType->untype_name}}</td>
 			</tr>
+			<tr>
+				<td><strong>No Meteran Air</strong></td><td width="15">:</td><td>{{$unit->meter_airs}}</td>
+			</tr>
+			<tr>
+				<td><strong>No Meteran Listrik</strong></td><td width="15">:</td><td>{{$unit->meter_listrik}}</td>
+			</tr>
 			
 		</table>
 	</div>

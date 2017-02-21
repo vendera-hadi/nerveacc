@@ -141,6 +141,18 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
+                                <label>No. Meter Air</label>
+                                <input type="text" class="form-control" name="meter_air" placeholder="No. Meter Air">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>No. Meter Listrik</label>
+                                <input type="text" class="form-control" name="meter_listrik" placeholder="No. Meter Listrik">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
                                 <label>Floor</label>
                                 <select name="floor_id" class="form-control" required>
                                 @foreach($floors as $floor)
@@ -292,6 +304,18 @@
                             <div class="form-group">
                                 <label>Virtual Account</label>
                                 <input type="text" class="form-control virtual_account" name="virtual_account" placeholder="Virtual Account">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>No. Meter Air</label>
+                                <input type="text" class="form-control meter_air" name="meter_air" placeholder="No. Meter Air">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>No. Meter Listrik</label>
+                                <input type="text" class="form-control meter_listrik" name="meter_listrik" placeholder="No. Meter Listrik">
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -488,6 +512,8 @@
                     $('.virtual_account').val(result.virtual_account);
                     $('.floor_id').val(result.floor_id);
                     $('.untype_id').val(result.untype_id);
+                    $('.meter_listrik').val(result.meter_listrik);
+                    $('.meter_air').val(result.meter_air);
                     if(result.tenant){
                         $('.tenan_name').val(result.tenant.tenan_name);
                         $('.tenan_idno').val(result.tenant.tenan_idno);

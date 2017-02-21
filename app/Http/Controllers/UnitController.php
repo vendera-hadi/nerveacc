@@ -156,6 +156,8 @@ class UnitController extends Controller
                         'unit_sqrt' => @$request->unit_sqrt,
                         'unit_virtual_accn' => 0,
                         'virtual_account' => @$request->virtual_account,
+                        'meter_air' => @$request->meter_air,
+                        'meter_listrik' => @$request->meter_listrik,
                         'floor_id' => @$request->floor_id,
                         'untype_id' => @$request->untype_id,
                         'created_by' => Auth::id(),
@@ -213,6 +215,8 @@ class UnitController extends Controller
                     'unit_name' => @$request->unit_code,
                     'unit_sqrt' => @$request->unit_sqrt,
                     'virtual_account' => @$request->virtual_account,
+                    'meter_air' => @$request->meter_air,
+                    'meter_listrik' => @$request->meter_listrik,
                     'floor_id' => @$request->floor_id,
                     'untype_id' => @$request->untype_id,
                     'updated_by' => Auth::id()
