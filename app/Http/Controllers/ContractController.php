@@ -111,10 +111,10 @@ class ContractController extends Controller
 
     public function getdetail(Request $request){
         $contractId = $request->id;
-        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_virtual_account.viracc_no','ms_virtual_account.viracc_name','ms_virtual_account.viracc_isactive','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
+        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.virtual_account','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
         ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
         ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
-        ->join('ms_virtual_account','ms_virtual_account.id',"=",'tr_contract.viracc_id')
+        // ->join('ms_virtual_account','ms_virtual_account.id',"=",'tr_contract.viracc_id')
         ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')->first();
         $costdetail = TrContractInvoice::select('ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter')
                 ->join('ms_invoice_type','tr_contract_invoice.invtp_id',"=",'ms_invoice_type.id')
@@ -127,11 +127,11 @@ class ContractController extends Controller
     public function ctrDetail(Request $request){
         try{
             $contractId = $request->id;
-            $fetch = TrContract::select('tr_contract.*','ms_virtual_account.viracc_no','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.unit_code','ms_unit.unit_virtual_accn','ms_unit.unit_name','ms_unit.unit_isactive')
+            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.unit_code','ms_unit.virtual_account','ms_unit.unit_name','ms_unit.unit_isactive')
             ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
             ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
             ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
-            ->join('ms_virtual_account','ms_virtual_account.id',"=",'ms_unit.unit_virtual_accn')
+            // ->join('ms_virtual_account','ms_virtual_account.id',"=",'ms_unit.unit_virtual_accn')
             // ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
             ->where('tr_contract.id', $contractId)->first();
             $result = ['success'=>1, 'data'=>$fetch];
@@ -235,7 +235,7 @@ class ContractController extends Controller
             'contr_status' => 'inputed',
             'tenan_id' => $request->input('tenan_id'),
             'mark_id' => !empty($request->input('mark_id')) ? $request->input('mark_id') : 0,
-            'viracc_id' => $request->input('viracc_id'),
+            'viracc_id' => 0,
             'const_id' => $request->input('const_id',0),
             'unit_id' => $request->input('unit_id')
         ];
@@ -352,7 +352,7 @@ class ContractController extends Controller
         if($request->input('tenan_id')) $update['tenan_id'] = $request->input('tenan_id');
         if($request->input('mark_id')) $update['mark_id'] = $request->input('mark_id');
         // if($request->input('const_id')) $update['const_id'] = $request->input('const_id');
-        if($request->input('viracc_id')) $update['viracc_id'] = $request->input('viracc_id');
+        // if($request->input('viracc_id')) $update['viracc_id'] = $request->input('viracc_id');
         if(!empty($request->input('unit_id')) && $request->input('current_unit_id') != $request->input('unit_id')){ 
             $update['unit_id'] = $request->input('unit_id');
             // unit lama jadi available

@@ -165,7 +165,7 @@
                                 <div class="col-xs-6">
                                     <div class="form-group">
                                         <label>Virtual Account</label>
-                                        <input type="hidden" name="viracc_id" id="txtVAId" required>
+                                        <!-- <input type="hidden" name="viracc_id" id="txtVAId" required> -->
                                         <input type="text" class="form-control" id="txtVA" disabled>
                                     </div>
                                 </div>
@@ -510,8 +510,8 @@
                 $.messager.alert('Warning','Start Date must be lower than End Date');
             }else if($('#txtUnitId').val() == ""){
               $.messager.alert('Warning','Unit is required');
-            }else if($('#txtVAId').val() == ""){
-              $.messager.alert('Warning','Virtual Account is required');
+            // }else if($('#txtVAId').val() == ""){
+            //   $.messager.alert('Warning','Virtual Account is required');
             }else{
               $('#contractStep1').hide();
               $('#contractStep2').show();
@@ -673,7 +673,7 @@
             var unitvaccount = $('input[name="unit"]:checked').data('vaccount');
             var unitvaccountid = $('input[name="unit"]:checked').data('vaccount-id');
             $('#txtVA').val(unitvaccount);
-            $('#txtVAId').val(unitvaccountid);
+            // $('#txtVAId').val(unitvaccountid);
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
@@ -734,7 +734,7 @@
             var unitvaccount = $('input[name="unitedit"]:checked').data('vaccount');
             var unitvaccountid = $('input[name="unit"]:checked').data('vaccount-id');
             $('#txtVA').val(unitvaccount);
-            $('#txtVAId').val(unitvaccountid);
+            // $('#txtVAId').val(unitvaccountid);
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
@@ -776,7 +776,7 @@
                     form.find('#txtTenanEdit').val(data.tenan_code+" "+data.tenan_name);
                     if(data.mark_id != null) form.find('input[name=mark_id]').val(data.mark_id);
                     form.find('#txtUnitEdit').val(data.unit_code+" "+data.unit_name);
-                    form.find('#txtVAEdit').val(data.viracc_no);
+                    form.find('#txtVAEdit').val(data.virtual_account);
                     form.find('#txtCrUnitId').val(data.unit_id);
                 }
                 console.log(result);
