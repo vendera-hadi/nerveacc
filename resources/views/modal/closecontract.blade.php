@@ -1,5 +1,5 @@
 <center>
-  <p>Contract No : <strong>{{$contractNo}}</strong></p>
+  <p>Billing Info No : <strong>{{$contractNo}}</strong></p>
   <p>Unit : <strong>{{$unitCode}}</strong></p>
 </center>
 

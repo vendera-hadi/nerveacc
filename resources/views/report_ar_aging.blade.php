@@ -8,8 +8,7 @@
         <th>1 - 30 Hari</th>
         <th>31 - 60 Hari</th> 
         <th>61 - 90 Hari</th>
-        <th>91 - 180 Hari</th>
-        <th>180 Hari</th>     
+        <th>> 90 Hari</th>     
       </tr>
     </thead>
         <tbody>
@@ -22,7 +21,6 @@
                 <td>{{"Rp. ".number_format($invoice->ag30,2)}}</td>
                 <td>{{"Rp. ".number_format($invoice->ag60,2)}}</td>
                 <td>{{"Rp. ".number_format($invoice->ag90,2)}}</td>
-                <td>{{"Rp. ".number_format($invoice->ag180,2)}}</td>
                 <td>{{"Rp. ".number_format($invoice->agl180,2)}}</td>
             </tr>
             @endforeach

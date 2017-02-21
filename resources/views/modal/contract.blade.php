@@ -7,10 +7,10 @@
               <div class="tab-pane active" id="modaltab_1">
                 	<!-- information -->
                 	<table width="100%">
-					<tr><td width="40%"><strong>Contract Code</strong></td><td>:</td><td>{{$fetch['contr_code']}}</td></tr>
-					<tr><td><strong>Contract Number</strong></td><td>:</td><td>{{$fetch['contr_no']}}</td></tr>
-					<tr><td><strong>Contract Start Date</strong></td><td>:</td><td>{{!empty($fetch['contr_startdate']) ? date('d-m-Y', strtotime($fetch['contr_startdate'])) : '-'}}</td></tr>
-					<tr><td><strong>Contract End Date</strong></td><td>:</td><td>{{!empty($fetch['contr_enddate']) ? date('d-m-Y', strtotime($fetch['contr_enddate'])) : '-'}}</td></tr>
+					<tr><td width="40%"><strong>Billing Info Code</strong></td><td>:</td><td>{{$fetch['contr_code']}}</td></tr>
+					<tr><td><strong>Billing Info Number</strong></td><td>:</td><td>{{$fetch['contr_no']}}</td></tr>
+					<tr><td><strong>Billing Info Start Date</strong></td><td>:</td><td>{{!empty($fetch['contr_startdate']) ? date('d-m-Y', strtotime($fetch['contr_startdate'])) : '-'}}</td></tr>
+					<tr><td><strong>Billing Info End Date</strong></td><td>:</td><td>{{!empty($fetch['contr_enddate']) ? date('d-m-Y', strtotime($fetch['contr_enddate'])) : '-'}}</td></tr>
 					<tr><td><strong>Bukti Acara Serah Terima Date</strong></td><td>:</td><td>{{!empty($fetch['contr_bast_date']) ? date('d-m-Y', strtotime($fetch['contr_bast_date'])) : '-'}}</td></tr>
 					<tr><td><strong>Bukti Acara Serah Terima By</strong></td><td>:</td><td>{{$fetch['contr_bast_by']}}</td></tr>
 					@if(!empty($fetch['contr_note']))<tr><td><strong>Rollback Note</strong></td><td>:</td><td>{{$fetch['contr_note']}}</td></tr>@endif
@@ -20,10 +20,8 @@
 					<tr><td><strong>Agent Code</strong></td><td>:</td><td>{{$fetch['mark_code']}}</td></tr>
 					<tr><td><strong>Agent Name</strong></td><td>:</td><td>{{$fetch['mark_name']}}</td></tr>
 					
-					<tr><td><strong>Virtual Account No</strong></td><td>:</td><td>{{$fetch['viracc_no']}}</td></tr>
-					<tr><td><strong>Virtual Account Name</strong></td><td>:</td><td>{{$fetch['viracc_name']}}</td></tr>
-					<tr><td><strong>VA Active Status</strong></td><td>:</td><td>{{!empty($fetch['viracc_isactive']) ? 'active' : 'not active' }}</td></tr>
-					<tr><td><strong>Contract Status</strong></td><td>:</td><td>{{$fetch['contr_status']}}</td></tr>
+					<tr><td><strong>Virtual Account</strong></td><td>:</td><td>{{$fetch['virtual_account']}}</td></tr>
+					<tr><td><strong>Billing Info Status</strong></td><td>:</td><td>{{$fetch['contr_status']}}</td></tr>
 					<tr><td><strong>Unit Code</strong></td><td>:</td><td>{{$fetch['unit_code']}}</td></tr>
 					<tr><td><strong>Unit Name</strong></td><td>:</td><td>{{$fetch['unit_name']}}</td></tr>
 					<tr><td><strong>Unit Active Status</strong></td><td>:</td><td>{{!empty($fetch['unit_isactive']) ? 'active' : 'not active'}}</td></tr>

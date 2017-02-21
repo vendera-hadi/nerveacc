@@ -77,9 +77,9 @@
                         closed="true" buttons="#dlg-buttons">
                     <form id="fm" method="post" style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
-                        <div style="margin-bottom:10px">
+                        <!-- <div style="margin-bottom:10px">
                             <input name="tenan_code" class="easyui-textbox" label="Code:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
-                        </div>
+                        </div> -->
                         <div style="margin-bottom:10px">
                             <input name="tenan_name" class="easyui-textbox" label="Name:" style="width:100%" data-options="required:true,validType:'length[0,80]'">
                         </div>

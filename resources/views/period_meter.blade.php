@@ -46,7 +46,7 @@ Period Meter
                   <div class="tab-pane active" id="tab_1">
 
                 <!-- template tabel -->
-                <table id="dg" title="Contract Status" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <table id="dg" title="Billing Info Status" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>

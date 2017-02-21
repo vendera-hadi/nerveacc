@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Contract {{$pageType}}
+    Billing Info {{$pageType}}
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Contract {{$pageType}}
+   Billing Info {{$pageType}}
 @endsection
 
 <!-- tambahan script atas -->
@@ -34,7 +34,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Contract {{$pageType}}</li>
+        <li class="active">Billing Info {{$pageType}}</li>
     </ol>
 @stop
 
@@ -43,14 +43,14 @@
         <div class="row">
             <div class="col-md-11">
                 <!-- template tabel -->
-                <table id="dg" title="Contract" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <table id="dg" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_code" width="120" sortable="true">Contract Code</th>
-                            <th field="contr_no" width="120" sortable="true">Contract No</th>
+                            <th field="contr_code" width="120" sortable="true">Billing Info Code</th>
+                            <th field="contr_no" width="120" sortable="true">Billing Info No</th>
                             <th field="contr_startdate" width="120" sortable="true">Start Date</th>
                             <th field="contr_enddate" width="120" sortable="true">End Date</th>
                             
@@ -124,15 +124,15 @@
                         <form method="post" id="renewForm">
                             <input type="hidden" name="id" id="renewId">
                             <div class="form-group">
-                                <label>Contract Code</label>
+                                <label>Billing Info Code</label>
                                 <input type="text" name="contr_code" required="required" class="form-control" >
                             </div>
                             <div class="form-group">
-                                <label>Contract No</label>
+                                <label>Billing Info No</label>
                                 <input type="text" name="contr_no" required="required" class="form-control" >
                             </div>
                             <div class="form-group">
-                                <label>Contract Start Date</label>
+                                <label>Billing Info Start Date</label>
                                 <div class="input-group date">
                                   <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
@@ -141,7 +141,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Contract End Date</label>
+                                <label>Billing Info End Date</label>
                                 <div class="input-group date">
                                   <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
@@ -177,7 +177,7 @@
 <!-- datepicker -->
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Contract {{$pageType}}"; // nama si tabel, ditampilin di dialog
+        var entity = "Billing Info {{$pageType}}"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('contract.getother',['page'=>$pageType])}}";
 
         $(function(){

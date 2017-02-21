@@ -44,8 +44,7 @@ class AgingController extends Controller
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag190"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
@@ -59,8 +58,7 @@ class AgingController extends Controller
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag190"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
@@ -98,7 +96,7 @@ class AgingController extends Controller
                 $temp['ag30'] = "Rp. ".number_format($value->ag30);
                 $temp['ag60'] = "Rp. ".number_format($value->ag60);
                 $temp['ag90'] = "Rp. ".number_format($value->ag90);
-                $temp['ag180'] = "Rp. ".number_format($value->ag180);
+                // $temp['ag180'] = "Rp. ".number_format($value->ag180);
                 $temp['agl180'] = "Rp. ".number_format($value->agl180);
                 $result['rows'][] = $temp;
             }
@@ -131,8 +129,7 @@ class AgingController extends Controller
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 AND (current_date::date - inv_date::date)<=180 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag190"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 180 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
