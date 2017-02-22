@@ -24,7 +24,8 @@ class MsCompanySeeder extends Seeder
             'comp_materai2' => 6000,
             'comp_materai2_amount' => 0,
             'cashbk_id' => 1,
-            'comp_image' => ''
+            'comp_image' => 'company.png',
+            'comp_sign_position' => 'Property Manager'
         ]);
     }
 }
