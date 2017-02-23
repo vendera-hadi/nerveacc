@@ -20,7 +20,6 @@
 		<th>Size</th>
 	</tr>
 	@foreach($units as $unit)
-	<tr>
 		<td><center><input type="radio" name="@if($edit){{'unitedit'}}@else{{'unit'}}@endif" data-name="{{$unit->unit_code}}" data-vaccount="{{$unit->virtual_account}}" value="{{$unit->id}}"></center></td>
 		<td>{{$unit->unit_code}}</td>
 		<td>{{$unit->unit_name}}</td>

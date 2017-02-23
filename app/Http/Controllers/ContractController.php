@@ -113,10 +113,10 @@ class ContractController extends Controller
 
     public function getdetail(Request $request){
         $contractId = $request->id;
-        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_virtual_account.viracc_no','ms_virtual_account.viracc_name','ms_virtual_account.viracc_isactive','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
+        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.virtual_account','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
         ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
         ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
-        ->join('ms_virtual_account','ms_virtual_account.id',"=",'tr_contract.viracc_id')
+        // ->join('ms_virtual_account','ms_virtual_account.id',"=",'tr_contract.viracc_id')
         ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')->first();
         $costdetail = TrContractInvoice::select('ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter')
                 ->join('ms_invoice_type','tr_contract_invoice.invtp_id',"=",'ms_invoice_type.id')

@@ -29,6 +29,7 @@ class CreateMsCompaniesTable extends Migration
             $table->decimal('comp_sqrt', 6, 2);
             $table->integer('cashbk_id');
             $table->string('comp_image',255)->nullable();
+            $table->string('comp_sign_position',255)->nullable();
         });
     }
 

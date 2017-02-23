@@ -157,7 +157,7 @@
                                 <div class="col-xs-6">
                                     <div class="form-group">
                                         <label>Virtual Account</label>
-                                        <input type="hidden" name="viracc_id" id="txtVAId" required>
+                                        <!-- <input type="hidden" name="viracc_id" id="txtVAId" required> -->
                                         <input type="text" class="form-control" id="txtVA" disabled>
                                     </div>
                                 </div>
@@ -658,7 +658,7 @@
             var unitvaccount = $('input[name="unit"]:checked').data('vaccount');
             var unitvaccountid = $('input[name="unit"]:checked').data('vaccount-id');
             $('#txtVA').val(unitvaccount);
-            $('#txtVAId').val(unitvaccountid);
+            // $('#txtVAId').val(unitvaccountid);
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
@@ -719,7 +719,7 @@
             var unitvaccount = $('input[name="unitedit"]:checked').data('vaccount');
             var unitvaccountid = $('input[name="unit"]:checked').data('vaccount-id');
             $('#txtVA').val(unitvaccount);
-            $('#txtVAId').val(unitvaccountid);
+            // $('#txtVAId').val(unitvaccountid);
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });

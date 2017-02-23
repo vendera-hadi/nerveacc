@@ -20,9 +20,7 @@
 					<tr><td><strong>Agent Code</strong></td><td>:</td><td>{{$fetch['mark_code']}}</td></tr>
 					<tr><td><strong>Agent Name</strong></td><td>:</td><td>{{$fetch['mark_name']}}</td></tr>
 					
-					<tr><td><strong>Virtual Account No</strong></td><td>:</td><td>{{$fetch['viracc_no']}}</td></tr>
-					<tr><td><strong>Virtual Account Name</strong></td><td>:</td><td>{{$fetch['viracc_name']}}</td></tr>
-					<tr><td><strong>VA Active Status</strong></td><td>:</td><td>{{!empty($fetch['viracc_isactive']) ? 'active' : 'not active' }}</td></tr>
+					<tr><td><strong>Virtual Account</strong></td><td>:</td><td>{{$fetch['virtual_account']}}</td></tr>
 					<tr><td><strong>Billing Info Status</strong></td><td>:</td><td>{{$fetch['contr_status']}}</td></tr>
 					<tr><td><strong>Unit Code</strong></td><td>:</td><td>{{$fetch['unit_code']}}</td></tr>
 					<tr><td><strong>Unit Name</strong></td><td>:</td><td>{{$fetch['unit_name']}}</td></tr>

@@ -17,6 +17,7 @@ use App\Models\MsCostDetail;
 use App\Models\CutoffHistory;
 use DB;
 use Excel;
+use Session;
 class PeriodMeterController extends Controller
 {
     public function index(){
@@ -339,7 +340,7 @@ class PeriodMeterController extends Controller
 
     public function downloadExcel($type)
     {
-        $data = TrMeter::select('tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','tr_meter.meter_start','tr_meter.meter_end')
+        $data = TrMeter::select('tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','tr_meter.meter_start','tr_meter.meter_end','ms_cost_detail.costd_rate','tr_meter.meter_burden','tr_meter.meter_admin')
                     ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
                     ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
                     ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
@@ -396,12 +397,15 @@ class PeriodMeterController extends Controller
 
             if(!empty($data) && $data->count()){
                 foreach ($data as $key => $value) {
+                    $meter_used = ($value->meter_end - $value->meter_start);
+                    $meter_cost = (($meter_used * $value->costd_rate)+$value->meter_burden+$value->meter_admin);
                     DB::table('tr_meter')
                     ->where('prdmet_id', $prd)
                     ->where('costd_id', $array_meter[$value->costd_name])
                     ->where('unit_id', $array_unit[$value->unit_code])
-                    ->update(['meter_end' => $value->meter_end]);
+                    ->update(['meter_end' => $value->meter_end,'meter_used' => $meter_used,'meter_cost' => $meter_cost]);
                 }
+                Session::flash('msg', 'Upload Success.');
                 return back();
             }
         }

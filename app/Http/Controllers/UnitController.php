@@ -156,6 +156,8 @@ class UnitController extends Controller
                         'unit_sqrt' => @$request->unit_sqrt,
                         'unit_virtual_accn' => 0,
                         'virtual_account' => @$request->virtual_account,
+                        'meter_air' => @$request->meter_air,
+                        'meter_listrik' => @$request->meter_listrik,
                         'floor_id' => @$request->floor_id,
                         'untype_id' => @$request->untype_id,
                         'created_by' => Auth::id(),
@@ -213,6 +215,8 @@ class UnitController extends Controller
                     'unit_name' => @$request->unit_code,
                     'unit_sqrt' => @$request->unit_sqrt,
                     'virtual_account' => @$request->virtual_account,
+                    'meter_air' => @$request->meter_air,
+                    'meter_listrik' => @$request->meter_listrik,
                     'floor_id' => @$request->floor_id,
                     'untype_id' => @$request->untype_id,
                     'updated_by' => Auth::id()
@@ -308,15 +312,15 @@ class UnitController extends Controller
         $tenan_id = @$request->tenan;
         // $isowner = $request->input('isowner', 0);
         // get unit yg available plus bs select unit dia sendiri
-        if($keyword) $fetch = MsUnit::select('ms_unit.*','ms_virtual_account.viracc_no','ms_unit_owner.tenan_id')
-                                    ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
+        if($keyword) $fetch = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
+                                    // ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
                                     ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.tenan_id')
                                     ->where(function($query) use($keyword){
                                         $query->where(DB::raw('LOWER(unit_code)'),'like','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'like','%'.$keyword.'%');
                                     });
-        else $fetch = MsUnit::select('ms_unit.*','ms_virtual_account.viracc_no','ms_unit_owner.tenan_id')
-                        ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.tenan_id')
-                        ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id');
+        else $fetch = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
+                        ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.tenan_id');
+                        // ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id');
 
         if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
         if(!empty($tenan_id)) $fetch = $fetch->orWhere('ms_unit_owner.tenan_id','=',$tenan_id);
