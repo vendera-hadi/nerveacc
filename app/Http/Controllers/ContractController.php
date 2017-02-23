@@ -53,8 +53,9 @@ class ContractController extends Controller
 
             // olah data
             $count = TrContract::count();
-            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name')
-            		->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'));
+            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name', 'ms_unit.unit_code')
+            		->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
+                    ->join('ms_unit', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('tr_contract.unit_id::integer'));
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -76,13 +77,14 @@ class ContractController extends Controller
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
-            else $fetch->orderBy('created_at','desc');
+            else $fetch->orderBy('ms_unit.unit_code');
             
             $fetch = $fetch->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
+                $temp['unit_code'] = $value->unit_code;
                 $temp['contr_code'] = $value->contr_code;
                 $temp['contr_no'] = $value->contr_no;
                 $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
@@ -127,11 +129,11 @@ class ContractController extends Controller
     public function ctrDetail(Request $request){
         try{
             $contractId = $request->id;
-            $fetch = TrContract::select('tr_contract.*','ms_virtual_account.viracc_no','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.unit_code','ms_unit.unit_virtual_accn','ms_unit.unit_name','ms_unit.unit_isactive')
+            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.unit_code','ms_unit.virtual_account','ms_unit.unit_name','ms_unit.unit_isactive')
             ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
             ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
             ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
-            ->join('ms_virtual_account','ms_virtual_account.id',"=",'ms_unit.unit_virtual_accn')
+            // ->join('ms_virtual_account','ms_virtual_account.id',"=",'ms_unit.unit_virtual_accn')
             // ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
             ->where('tr_contract.id', $contractId)->first();
             $result = ['success'=>1, 'data'=>$fetch];
@@ -210,23 +212,24 @@ class ContractController extends Controller
     }
 
     public function insert(Request $request){
-        $messages = [
-            'contr_code.unique' => 'Contract Code must be unique',
-            'contr_no.unique' => 'Contract No must be unique',
-        ];
+        // $messages = [
+        //     'contr_code.unique' => 'Contract Code must be unique',
+        //     'contr_no.unique' => 'Contract No must be unique',
+        // ];
 
-        $validator = Validator::make($request->all(), [
-            'contr_code' => 'required|unique:tr_contract',
-            'contr_no' => 'required|unique:tr_contract',
-        ], $messages);
+        // $validator = Validator::make($request->all(), [
+        //     'contr_code' => 'required|unique:tr_contract',
+        //     'contr_no' => 'required|unique:tr_contract',
+        // ], $messages);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors()->first();
-            return ['status' => 0, 'message' => $errors];
-        }
+        // if ($validator->fails()) {
+        //     $errors = $validator->errors()->first();
+        //     return ['status' => 0, 'message' => $errors];
+        // }
+        $randomString = strtoupper(str_random(5));
         $input = [
-            'contr_code' => $request->input('contr_code'),
-            'contr_no' => $request->input('contr_no'),
+            'contr_code' => 'B'.date('ym').$request->input('tenan_id').$randomString,
+            'contr_no' => 'B'.date('ym').$request->input('tenan_id').$randomString,
             'contr_startdate' => $request->input('contr_startdate'),
             'contr_enddate' => $request->input('contr_enddate'),
             'contr_bast_date' => $request->input('contr_bast_date'),
@@ -235,7 +238,7 @@ class ContractController extends Controller
             'contr_status' => 'inputed',
             'tenan_id' => $request->input('tenan_id'),
             'mark_id' => !empty($request->input('mark_id')) ? $request->input('mark_id') : 0,
-            'viracc_id' => $request->input('viracc_id'),
+            'viracc_id' => 0,
             'const_id' => $request->input('const_id',0),
             'unit_id' => $request->input('unit_id')
         ];
@@ -325,24 +328,22 @@ class ContractController extends Controller
     }
 
     public function update(Request $request){
-        $messages = [
-            'contr_code.unique' => 'Contract Code must be unique',
-            'contr_no.unique' => 'Contract No must be unique',
-        ];
+        // $messages = [
+        //     'contr_code.unique' => 'Contract Code must be unique',
+        //     'contr_no.unique' => 'Contract No must be unique',
+        // ];
 
-        $validator = Validator::make($request->all(), [
-            'contr_code' => 'required|unique:tr_contract,contr_code,'.$request->input('id'),
-            'contr_no' => 'required|unique:tr_contract,contr_no,'.$request->input('id'),
-        ], $messages);
+        // $validator = Validator::make($request->all(), [
+        //     'contr_code' => 'required|unique:tr_contract,contr_code,'.$request->input('id'),
+        //     'contr_no' => 'required|unique:tr_contract,contr_no,'.$request->input('id'),
+        // ], $messages);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors()->first();
-            return ['status' => 0, 'message' => $errors];
-        }
+        // if ($validator->fails()) {
+        //     $errors = $validator->errors()->first();
+        //     return ['status' => 0, 'message' => $errors];
+        // }
 
         $update = [
-            'contr_code' => $request->input('contr_code'),
-            'contr_no' => $request->input('contr_no'),
             'contr_startdate' => $request->input('contr_startdate'),
             'contr_enddate' => $request->input('contr_enddate'),
             'contr_bast_date' => $request->input('contr_bast_date'),
@@ -352,7 +353,7 @@ class ContractController extends Controller
         if($request->input('tenan_id')) $update['tenan_id'] = $request->input('tenan_id');
         if($request->input('mark_id')) $update['mark_id'] = $request->input('mark_id');
         // if($request->input('const_id')) $update['const_id'] = $request->input('const_id');
-        if($request->input('viracc_id')) $update['viracc_id'] = $request->input('viracc_id');
+        // if($request->input('viracc_id')) $update['viracc_id'] = $request->input('viracc_id');
         if(!empty($request->input('unit_id')) && $request->input('current_unit_id') != $request->input('unit_id')){ 
             $update['unit_id'] = $request->input('unit_id');
             // unit lama jadi available
@@ -497,8 +498,9 @@ class ContractController extends Controller
 
             // olah data
             $count = TrContract::count();
-            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name')
-                    ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id');
+            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name','ms_unit.unit_code')
+                    ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
+                    ->join('ms_unit','ms_unit.id','=','tr_contract.unit_id');
             if(strtolower($pageName) != 'renewal') $fetch = $fetch->whereNull('tr_contract.contr_terminate_date');
             // filter page
             if(strtolower($pageName) == 'confirmation'){
@@ -533,6 +535,7 @@ class ContractController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
+                $temp['unit_code'] = $value->unit_code;
                 $temp['contr_code'] = $value->contr_code;
                 $temp['contr_no'] = $value->contr_no;
                 $temp['contr_startdate'] = $value->contr_startdate;
@@ -635,20 +638,20 @@ class ContractController extends Controller
     }
 
     public function renew(Request $request){
-        $messages = [
-            'contr_code.unique' => 'Contract Code must be unique',
-            'contr_no.unique' => 'Contract No must be unique',
-        ];
+        // $messages = [
+        //     'contr_code.unique' => 'Contract Code must be unique',
+        //     'contr_no.unique' => 'Contract No must be unique',
+        // ];
 
-        $validator = Validator::make($request->all(), [
-            'contr_code' => 'required|unique:tr_contract,contr_code,'.$request->input('id'),
-            'contr_no' => 'required|unique:tr_contract,contr_no,'.$request->input('id'),
-        ], $messages);
+        // $validator = Validator::make($request->all(), [
+        //     'contr_code' => 'required|unique:tr_contract,contr_code,'.$request->input('id'),
+        //     'contr_no' => 'required|unique:tr_contract,contr_no,'.$request->input('id'),
+        // ], $messages);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors()->first();
-            return ['errorMsg' => $errors];
-        }
+        // if ($validator->fails()) {
+        //     $errors = $validator->errors()->first();
+        //     return ['errorMsg' => $errors];
+        // }
 
         // new contract date must be after old one
         $id = $request->id;
@@ -664,8 +667,9 @@ class ContractController extends Controller
                 // $newdata->contr_id = 'CTR'.str_replace(".", "", str_replace(" ", "",microtime()));
                 $newdata->contr_startdate = $startdate;
                 $newdata->contr_enddate = $enddate;
-                $newdata->contr_code = $request->contr_code;
-                $newdata->contr_no = $request->contr_no;
+                $randomString = strtoupper(str_random(5));
+                $newdata->contr_code = 'B'.date('ym').$newdata->tenan_id.$randomString;
+                $newdata->contr_no = 'B'.date('ym').$newdata->tenan_id.$randomString;
                 $newdata->save();
                 $newContractId = $newdata->id;
 

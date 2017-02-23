@@ -59,9 +59,9 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_code" width="120" sortable="true">Billing Info Code</th>
-                            <th field="contr_no" width="120" sortable="true">Billing Info No</th>
+                            <th field="unit_code" width="120" sortable="true">Unit</th>
+                            <th field="tenan_name" width="120" sortable="true">Nama Tenant</th>
+                            
                             <th field="contr_startdate" width="120" sortable="true">Start Date</th>
                             <th field="contr_enddate" width="120" sortable="true">End Date</th>
                             
@@ -80,14 +80,6 @@
                         <div id="contractStep1">
                         <form method="POST" id="formContract">
                             
-                            <div class="form-group">
-                                <label>Billing Info Code</label>
-                                <input type="text" name="contr_code" required="required" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <label>Billing Info No</label>
-                                <input type="text" name="contr_no" required="required" class="form-control">
-                            </div>
                             <div class="form-group">
                                 <label>Billing Info Start Date</label>
                                 <div class="input-group date">
@@ -231,14 +223,7 @@
                    <!-- form -->
                     <form method="POST" id="formEditContract" style="display:none">
                         <input type="hidden" name="id">
-                        <div class="form-group">
-                            <label>Billing Info Code</label>
-                            <input type="text" name="contr_code" required="required" class="form-control" >
-                        </div>
-                        <div class="form-group">
-                            <label>Billing Info No</label>
-                            <input type="text" name="contr_no" required="required" class="form-control" >
-                        </div>
+                        
                         <div class="form-group">
                             <label>Billing Info Start Date</label>
                             <div class="input-group date">
@@ -510,8 +495,8 @@
                 $.messager.alert('Warning','Start Date must be lower than End Date');
             }else if($('#txtUnitId').val() == ""){
               $.messager.alert('Warning','Unit is required');
-            }else if($('#txtVAId').val() == ""){
-              $.messager.alert('Warning','Virtual Account is required');
+              // }else if($('#txtVAId').val() == ""){
+              //   $.messager.alert('Warning','Virtual Account is required');
             }else{
               $('#contractStep1').hide();
               $('#contractStep2').show();
@@ -765,18 +750,19 @@
                     var data = result.data;
                     var form = $('#formEditContract');
                     form.find('input[name=id]').val(data.id);
-                    form.find('input[name=contr_code]').val(data.contr_code);
-                    form.find('input[name=contr_no]').val(data.contr_no);
+                    // form.find('input[name=contr_code]').val(data.contr_code);
+                    // form.find('input[name=contr_no]').val(data.contr_no);
                     form.find('input[name=contr_startdate]').val(data.contr_startdate);
                     form.find('input[name=contr_enddate]').val(data.contr_enddate);
                     form.find('input[name=contr_bast_date]').val(data.contr_enddate);
                     form.find('input[name=contr_bast_by]').val(data.contr_bast_by);
                     form.find('textarea[name=contr_note]').val(data.contr_note);
                     form.find('input[name=tenan_id]').val(data.tenan_id);
-                    form.find('#txtTenanEdit').val(data.tenan_code+" "+data.tenan_name);
+                    form.find('#txtTenanEdit').val(data.tenan_name);
                     if(data.mark_id != null) form.find('input[name=mark_id]').val(data.mark_id);
-                    form.find('#txtUnitEdit').val(data.unit_code+" "+data.unit_name);
-                    form.find('#txtVAEdit').val(data.viracc_no);
+                    form.find('#txtUnitEdit').val(data.unit_code);
+                    form.find('#txtVAEdit').val(data.virtual_account);
+                    console.log(data.virtual_account, 'VA');
                     form.find('#txtCrUnitId').val(data.unit_id);
                 }
                 console.log(result);

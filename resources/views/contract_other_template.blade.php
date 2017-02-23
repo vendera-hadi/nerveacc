@@ -48,9 +48,8 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            <th field="unit_code" width="120" sortable="true">Unit</th>
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_code" width="120" sortable="true">Billing Info Code</th>
-                            <th field="contr_no" width="120" sortable="true">Billing Info No</th>
                             <th field="contr_startdate" width="120" sortable="true">Start Date</th>
                             <th field="contr_enddate" width="120" sortable="true">End Date</th>
                             
@@ -123,14 +122,7 @@
                         <h3>Input New Data :</h3>
                         <form method="post" id="renewForm">
                             <input type="hidden" name="id" id="renewId">
-                            <div class="form-group">
-                                <label>Billing Info Code</label>
-                                <input type="text" name="contr_code" required="required" class="form-control" >
-                            </div>
-                            <div class="form-group">
-                                <label>Billing Info No</label>
-                                <input type="text" name="contr_no" required="required" class="form-control" >
-                            </div>
+                            
                             <div class="form-group">
                                 <label>Billing Info Start Date</label>
                                 <div class="input-group date">
@@ -227,8 +219,8 @@
             // }
         }).delegate('.renewStatus','click',function(){
             $('#renewId').val($(this).data('id'));
-            $('#renewForm').find('input[name="contr_code"]').val($(this).data('code'));
-            $('#renewForm').find('input[name="contr_no"]').val($(this).data('no'));
+            // $('#renewForm').find('input[name="contr_code"]').val($(this).data('code'));
+            // $('#renewForm').find('input[name="contr_no"]').val($(this).data('no'));
             $('#renewForm').find('input[name="contr_startdate"]').val($(this).data('start'));
             $('#renewForm').find('input[name="contr_enddate"]').val($(this).data('end'));
             $('#renewModal').modal('show');

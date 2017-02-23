@@ -22,7 +22,7 @@
 	</tr>
 	@foreach($tenants as $tenant)
 	<tr>
-		<td><center><input type="radio" name="@if($edit){{'tenantedit'}}@else{{'tenant'}}@endif" data-name="{{$tenant->tenan_code." ".$tenant->tenan_name}}"  value="{{$tenant->id}}"></center></td>
+		<td><center><input type="radio" name="@if($edit){{'tenantedit'}}@else{{'tenant'}}@endif" data-name="{{$tenant->tenan_name}}"  value="{{$tenant->id}}"></center></td>
 		<td>{{$tenant->tenan_code}}</td>
 		<td>{{$tenant->tenan_name}}</td>
 		<td>{{$tenant->tenan_phone}}</td>
