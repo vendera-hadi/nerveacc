@@ -219,7 +219,7 @@ class InvoiceController extends Controller
                     // echo "Contract #".$ctrInv->contr_id."<br>";
                     $countInvoice+=1;
                     // AMBIL CONTRACT INVOICE PER INVOICE TYPE
-                    $details = TrContractInvoice::select('tr_contract_invoice.*','tr_contract_invoice.id as tcinv_id','ms_cost_detail.*','ms_cost_item.is_service_charge','ms_cost_item.is_sinking_fund','ms_cost_item.is_insurance','ms_unit.unit_sqrt','ms_cost_detail.id as costd_id','tr_contract.tenan_id','tr_contract.unit_id','tr_contract.contr_code','tr_contract.contr_enddate','tr_contract.contr_terminate_date','ms_invoice_type.invtp_prefix','ms_invoice_type.id as invtp_id')
+                    $details = TrContractInvoice::select('tr_contract_invoice.*','tr_contract_invoice.id as tcinv_id','ms_cost_detail.*','ms_cost_item.is_service_charge','ms_cost_item.is_sinking_fund','ms_cost_item.is_insurance','ms_unit.unit_sqrt','ms_cost_detail.id as costd_id','tr_contract.tenan_id','tr_contract.unit_id','tr_contract.contr_code','tr_contract.contr_enddate','tr_contract.contr_terminate_date','ms_invoice_type.invtp_prefix','ms_invoice_type.id as invtp_id','ms_cost_item.id as cost_item_id')
                             ->join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
                             ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                             ->join('tr_contract',DB::raw('tr_contract_invoice.contr_id::integer'),'=','tr_contract.id')
@@ -249,7 +249,7 @@ class InvoiceController extends Controller
                                 // get harga meteran selama periode bulan ini
                                 $lastPeriodMeterofMonth = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();
                                 if($lastPeriodMeterofMonth){
-                                    $meter = TrMeter::select('tr_meter.id as tr_meter_id','tr_meter.*','tr_period_meter.*','ms_cost_detail.costd_name','ms_cost_detail.costd_unit','ms_cost_detail.id as costd_id')
+                                    $meter = TrMeter::select('tr_meter.id as tr_meter_id','tr_meter.*','tr_period_meter.*','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_unit','ms_cost_detail.id as costd_id')
                                         ->join('tr_period_meter','tr_meter.prdmet_id','=','tr_period_meter.id')
                                         ->join('ms_cost_detail','tr_meter.costd_id','=','ms_cost_detail.id')
                                         ->where('tr_meter.contr_id', $contract->id)->where('tr_meter.costd_id',$value->costd_id)
@@ -260,11 +260,23 @@ class InvoiceController extends Controller
                                         echo "<br><b>Contract #".$contract->contr_no."</b><br>Contract Code <strong>".$value->contr_code."</strong> Cost Item <strong>".$value->costd_name."</strong>, Meter ID is not inputed yet<br>";
                                         $insertFlag = false;
                                     }else{
-                                        // note masi minus rumus
-                                        $note = $meter->costd_name." Consumption : ".(int)$meter->meter_used." ".$meter->costd_unit." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));   
+                                        $amount = $meter->meter_cost;
+                                        // note masi minus rumus     
+                                        // KALAU ELECTRICITY
+                                        if($value->cost_item_id == 1){
+                                            $amount = $amount + (0.03 * $amount);
+                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Rate : ".number_format($meter->costd_rate,0)." Meter Akhir : ".number_format($meter->meter_end,0)." Meter Awal : ".number_format($meter->meter_start,0)." Konsumsi : ".number_format($meter->meter_used,0)."<br>BPJU 3%";
+                                        }else if($value->cost_item_id == 2){
+                                            // KALAU AIR
+                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Akhir : ".number_format($meter->meter_end,0)." Meter Awal : ".number_format($meter->meter_start,0)." Konsumsi : ".number_format($meter->meter_used,0)."<br>Biaya Pemakaian : ".number_format($meter->meter_used,0)." x ".number_format($meter->costd_rate,0)."<br>Biaya Beban Tetap Air : ".number_format($meter->meter_burden,0)."<br>Biaya Pemeliharaan Meter : ".number_format($meter->meter_admin,0); 
+                                        }else{
+                                            $note = $meter->costd_name."<br>Konsumsi : ".number_format($meter->meter_used,0)." ".$meter->costd_unit." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));
+                                        }
+
+
                                         // rumus masih standar, rate * meter used + burden + admin
                                         // $amount = ($meter->meter_used * $meter->meter_cost) + $meter->meter_burden + $meter->meter_admin;
-                                        $amount = $meter->meter_cost;
+                                        // $amount = $meter->meter_cost;
                                         $invDetail[] = [
                                             'invdt_amount' => $amount,
                                             'invdt_note' => $note,
