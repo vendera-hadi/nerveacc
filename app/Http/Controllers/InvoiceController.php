@@ -19,6 +19,7 @@ use App\Models\MsCompany;
 use App\Models\MsCostItem;
 use App\Models\MsMasterCoa;
 use App\Models\MsJournalType;
+use App\Models\MsConfig;
 use App\Models\TrLedger;
 use App\Models\TrInvoiceJournal;
 use DB;
@@ -161,6 +162,7 @@ class InvoiceController extends Controller
     }
 
     public function postGenerateInvoice(Request $request){
+        $include_outstanding = @MsConfig::where('name','inv_outstanding_active')->first()->value;
         $month = $request->input('month');
         // bulan dikurang 1 karna generate invoice utk bulan kemarin
         $year = $request->input('year');
@@ -360,6 +362,14 @@ class InvoiceController extends Controller
                     // INSERT DB
                     if($insertFlag){
                         // HABIS JABARIN DETAIL, INSERT INVOICE 
+                        
+                        // INCLUDE OUTSTANDING JK ADA
+                        if(!empty($include_outstanding)){
+                            $totalOutstanding = TrInvoice::where('contr_id',$contract->id)->sum('inv_outstanding'); 
+                            $invDetail[] = ['invdt_amount' => $totalOutstanding, 'invdt_note'=> 'Tagihan Belum Terbayar', 'costd_id' => 0];
+                        }
+                        // KARNA DENDA ITU KAN UTK PAYMENT TELAT, GENERATOR DIGENERATE SEBELUM WKT BAYAR JD BLUM TENTU ADA DISINI
+
                         // TAMBAHIN STAMP DUTY
                         if($totalPay <= $companyData->comp_materai1_amount){ 
                             $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
