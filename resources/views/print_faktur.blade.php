@@ -5,12 +5,7 @@
     $company_phone = $company['comp_phone'];
     $company_fax = $company['comp_fax'];
     $company_sign = $company['comp_sign_inv_name'];
-    $company_position = $company['comp_sign_position'];
-    $no_invoice = $invoice_data['inv_number'];
-    $invoice_date = date('d/m/Y', strtotime($invoice_data['inv_date']));
-    $invoice_due_date = date('d/m/Y', strtotime($invoice_data['inv_duedate']));
-    $tenan_name = $invoice_data['ms_tenant']['tenan_taxname'];
-    $tenan_address = $invoice_data['ms_tenant']['tenan_tax_address'];
+    $company_position = @$company['comp_sign_position'];
     $bank_name = $company['ms_cashbank']['cashbk_name'];
 ?>
 <!DOCTYPE html>
@@ -74,6 +69,14 @@ table tr td{font-size:9pt;}
 </style>
 </head>
 <body>
+    @foreach($invoice_data as $inv)
+    <?php
+    $no_invoice = $inv['inv_number'];
+    $invoice_date = date('d/m/Y', strtotime($inv['inv_date']));
+    $invoice_due_date = date('d/m/Y', strtotime($inv['inv_duedate']));
+    $tenan_name = $inv['ms_tenant']['tenan_taxname'];
+    $tenan_address = $inv['ms_tenant']['tenan_tax_address'];
+    ?>
     <div class="page">
         <div class="subpage">
             <div style="float:left;"><img src="{{asset('/upload/'.$company_logo)}}" style="width:110px;"/></div>
@@ -136,10 +139,10 @@ table tr td{font-size:9pt;}
                     <td width="15%" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br>Amount</td>
                 </tr>
                 <?php
-                    if(!empty($result)){
+                    if(!empty($inv['details'])){
                         $total = 0;
                         $no = 1;
-                        foreach ($result as $key => $value) {
+                        foreach ($inv['details'] as $key => $value) {
                             $total += $value['invdt_amount'];
                 ?>
                 <tr>
@@ -230,7 +233,7 @@ table tr td{font-size:9pt;}
             </table>
         </div>
     </div>
-
+    @endforeach
 </body>
 <!--
 <?php if($type != 'pdf'){ ?>

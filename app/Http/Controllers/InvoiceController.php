@@ -122,6 +122,7 @@ class InvoiceController extends Controller
                 $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['inv_post'] = !empty($value->inv_post) ? 'yes' : 'no';
+                $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'">';
                 $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a>';
                 $temp['inv_iscancel'] = $value->inv_iscancel;
                 // $temp['daysLeft']
@@ -442,16 +443,20 @@ class InvoiceController extends Controller
         try{
 
             $inv_id = $request->id;
+            if(!is_array($inv_id)) $inv_id = [$inv_id];
             $type = $request->type;
-            $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
+
+            $invoice_data = TrInvoice::whereIn('id',$inv_id)->with('MsTenant')->get()->toArray();
+            foreach ($invoice_data as $key => $inv) {
+                $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
                 ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
                 ->leftJoin('ms_cost_detail','tr_invoice_detail.costd_id',"=",'ms_cost_detail.id')
                 ->leftJoin('tr_meter','tr_meter.id',"=",'tr_invoice_detail.meter_id')
                 ->leftJoin('tr_period_meter','tr_period_meter.id',"=",'tr_meter.prdmet_id')
-                ->where('tr_invoice_detail.inv_id',$inv_id)
+                ->where('tr_invoice_detail.inv_id',$inv['id'])
                 ->get()->toArray();
-
-            $invoice_data = TrInvoice::find($inv_id)->with('MsTenant')->get()->first()->toArray();
+                $invoice_data[$key]['details'] = $result;
+            }
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
 

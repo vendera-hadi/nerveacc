@@ -16,10 +16,6 @@ Route::group(['middleware' => 'auth'], function () {
 	    return redirect('contract/unclosed'); 
 	});
 
-	Route::get('test', function () {
-	    echo App\Models\TrInvoice::where('contr_id',16)->sum('inv_outstanding'); 
-	});
-
 	// currency
 	Route::get('currency','CurrencyController@index');
 	Route::post('currency/get', 'CurrencyController@get')->name('currency.get');

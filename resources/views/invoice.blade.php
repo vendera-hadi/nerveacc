@@ -72,6 +72,7 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            <th field="checkbox" width="25" sortable="true"></th>
                             <th field="inv_number" width="100" sortable="true">No.Invoice</th>
                             <th field="contr_no" width="100" sortable="true">No Kontrak</th>
                             <th field="tenan_name" width="100" sortable="true">Nama Tenan</th>
@@ -90,9 +91,11 @@
                 
                 <!-- icon2 atas table -->
                 <div id="toolbar" class="datagrid-toolbar">
+                    <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Create Invoice</span></a>                    
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="cancelInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-ban"></i>&nbsp;Cancel Invoice</span></a>           
+                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="printInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-print"></i>&nbsp;Print</span></a>
                 </div>
                 <!-- end icon -->
             
@@ -345,6 +348,50 @@ function cancelInv(){
     }
 }
 
+function openWindow(url, title, w, h){
+    // Fixes dual-screen position                         Most browsers      Firefox
+    var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+    var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+    var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+    var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+    var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+    var top = ((height / 2) - (h / 2)) + dualScreenTop;
+    var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+    // Puts focus on the newWindow
+    if (window.focus) {
+        newWindow.focus();
+    }
+}
+
+function printInv(){
+    var ids = [];
+    var url = '{{url('invoice/print_faktur')}}?';
+    var title = 'Print Invoices';
+    $('input[name=check]:checked').each(function() {
+       ids.push($(this).val());
+    });
+    if(ids.length > 0){
+        ids = {id: ids};
+        url += $.param(ids);
+        openWindow(url, title, 640, 660);
+    }
+}
+
+$('input[name=checkall]').change(function() {
+        if($(this).is(':checked')){ 
+            $('input[name=check]').each(function(){
+                $(this).prop('checked',true);
+            });
+        }else{
+            $('input[name=check]').each(function(){
+                $(this).prop('checked',false);
+            });
+        }
+     });
+
 $(function(){
     $('#dg').datagrid({
         view: detailview,
@@ -540,21 +587,7 @@ $(function(){
             var w = self.attr('data-width');
             var h = self.attr('data-height');
             
-             // Fixes dual-screen position                         Most browsers      Firefox
-            var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
-            var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
-
-            var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-            var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
-
-            var left = ((width / 2) - (w / 2)) + dualScreenLeft;
-            var top = ((height / 2) - (h / 2)) + dualScreenTop;
-            var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
-
-            // Puts focus on the newWindow
-            if (window.focus) {
-                newWindow.focus();
-            }
+            openWindow(url, title, w, h);
 
             return false;
         });
