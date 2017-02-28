@@ -262,6 +262,8 @@ class PeriodMeterController extends Controller
                     ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
                     ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
                     ->where('prdmet_id',$id)
+                    ->orderBy('ms_unit.unit_code','asc')
+                    ->orderBy('ms_cost_detail.costd_name','asc')
                     ->get();
 
             return view('modal.editmeter', ['meter' => $fetch,'st'=>$currentPrd, 'prd'=>$id]);
@@ -340,16 +342,20 @@ class PeriodMeterController extends Controller
 
     public function downloadExcel($type)
     {
-        $data = TrMeter::select('tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','tr_meter.meter_start','tr_meter.meter_end','ms_cost_detail.costd_rate','tr_meter.meter_burden','tr_meter.meter_admin')
+        $data = TrMeter::select('ms_unit.unit_code AS UNIT','ms_cost_detail.costd_name AS COST','tr_meter.meter_start AS START','tr_meter.meter_end AS END','ms_cost_detail.costd_rate AS RATE','tr_meter.meter_burden AS ABODEMEN','tr_meter.meter_admin AS ADMIN','tr_meter.meter_cost AS BIAYA')
                     ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
                     ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
                     ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
                     ->where('prdmet_id',$type)
+                    ->orderBy('ms_unit.unit_code','asc')
+                    ->orderBy('ms_cost_detail.costd_name','asc')
                     ->get()->toArray();
         $tp = 'xls';
         return Excel::create('meter_template', function($excel) use ($data) {
-            $excel->sheet('mySheet', function($sheet) use ($data)
+            $excel->sheet('Unit Meter', function($sheet) use ($data)
             {
+                $total = count($data)+1;
+                $sheet->setBorder('A1:H'.$total, 'thin');
                 $sheet->fromArray($data);
             });
         })->download($tp);
@@ -395,15 +401,19 @@ class PeriodMeterController extends Controller
                 $array_unit[$row->unit_code]= $row->id;
             }
 
+            //print_r($data);
+            //die();
+
             if(!empty($data) && $data->count()){
                 foreach ($data as $key => $value) {
-                    $meter_used = ($value->meter_end - $value->meter_start);
-                    $meter_cost = (($meter_used * $value->costd_rate)+$value->meter_burden+$value->meter_admin);
+                    $meter_used = ($value->end - $value->start);
+                    //$meter_cost = (($meter_used * $value->rate)+$value->meter_burden+$value->admin);
+                    $meter_cost =  $value->biaya;
                     DB::table('tr_meter')
                     ->where('prdmet_id', $prd)
-                    ->where('costd_id', $array_meter[$value->costd_name])
-                    ->where('unit_id', $array_unit[$value->unit_code])
-                    ->update(['meter_end' => $value->meter_end,'meter_used' => $meter_used,'meter_cost' => $meter_cost]);
+                    ->where('costd_id', $array_meter[$value->cost])
+                    ->where('unit_id', $array_unit[$value->unit])
+                    ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost]);
                 }
                 Session::flash('msg', 'Upload Success.');
                 return back();

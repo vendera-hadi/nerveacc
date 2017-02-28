@@ -38,5 +38,6 @@ class DatabaseSeeder extends Seeder
         $this->call(MsCashBankSeeder::class);
         $this->call(TrInvoicePaymhdrSeeder::class);
         $this->call(TrInvoicePaymdtlSeeder::class);
+        $this->call(MsConfigSeeder::class);
     }
 }

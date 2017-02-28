@@ -78,13 +78,13 @@ Period Meter
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Information</div>
                         <div style="margin-bottom:10px">
-                            <input id="dd" type="text" class="easyui-datebox" required="required" name="prdmet_start_date" label="Start Date :" style="width:100%">
+                            <input type="text" class="easyui-datebox" required="required" name="prdmet_start_date" label="Start Date :" style="width:100%" data-options="formatter:myformatter,parser:myparser">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="dd" type="text" class="easyui-datebox" required="required" name="prdmet_end_date" label="End Date :" style="width:100%">
+                            <input type="text" class="easyui-datebox" required="required" name="prdmet_end_date" label="End Date :" style="width:100%" data-options="formatter:myformatter,parser:myparser">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="dd" type="text" class="easyui-datebox" required="required" name="prd_billing_date" label="Periode Billing :" style="width:100%">
+                            <input type="text" class="easyui-datebox" required="required" name="prd_billing_date" label="Periode Billing :" style="width:100%" data-options="formatter:myformatter,parser:myparser">
                         </div>
                     </form>
                 </div>
@@ -112,6 +112,7 @@ Period Meter
 <script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
+<script src="{{asset('js/jeasycrud.js')}}"></script>
 <script type="text/javascript">
         var entity = "Period Meter"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('period_meter.get')}}";
@@ -131,26 +132,7 @@ Period Meter
             });
             dg.datagrid('enableFilter');
         });
-</script>
-<script src="{{asset('js/jeasycrud.js')}}"></script>
-<script type="text/javascript">
-/*
-function detail(){
-    var row = $('#dg').datagrid('getSelected');
-    if (row){
-        id = row.id;
-        $.post('{{route('period_meter.detail')}}',{id:id},function(result){
-            if
-                (result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-            else
-                $('#editModal').find('.modal-body').html('');
-                $('#editModal').find('.modal-body').html(result);
-                $('#editModal').modal('show'); 
-            
-        });
-    }
-}
-*/
+
 function detail(){
     var row = $('#dg').datagrid('getSelected');
     if (row){
@@ -184,6 +166,25 @@ function approve(){
                 },'json');
             }
         });
+    }
+}
+
+function myformatter(date){
+    var y = date.getFullYear();
+    var m = date.getMonth()+1;
+    var d = date.getDate();
+    return y+'-'+(m<10?('0'+m):m)+'-'+(d<10?('0'+d):d);
+}
+function myparser(s){
+    if (!s) return new Date();
+    var ss = (s.split('-'));
+    var y = parseInt(ss[0],10);
+    var m = parseInt(ss[1],10);
+    var d = parseInt(ss[2],10);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d)){
+        return new Date(y,m-1,d);
+    } else {
+        return new Date();
     }
 }
 
