@@ -46,15 +46,39 @@
           <!-- Tabs -->
           <div class="nav-tabs-custom">
             <ul class="nav nav-tabs">
-              <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
+              <li class="active"><a href="#tab_1" data-toggle="tab">Owner Lists</a></li>
+              <li><a href="#tab_5" class="tenan_tab" data-toggle="tab">Tenant Lists</a></li>
               <li><a href="#tab_2" data-toggle="tab">Add Billing Info</a></li>
               <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Billing Info</a></li>
-              <li class="hidden"><a href="#tab_4" data-toggle="tab">Edit Cost Item</a></li>
+              <li class="hidden"><a href="#tab_4" data-toggle="tab">Edit Component Billing</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
                   <!-- template tabel -->
                 <table id="dg" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                    <!-- kolom -->
+                    <thead>
+                        <tr>
+                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            <th field="unit_code" width="120" sortable="true">Unit</th>
+                            <th field="tenan_name" width="120" sortable="true">Nama Tenant</th>
+                            
+                            <th field="contr_startdate" width="120" sortable="true">Start Date</th>
+                            <th field="contr_enddate" width="120" sortable="true">End Date</th>
+                            
+                            <th field="contr_status" width="120" sortable="true">Status</th>
+                            <th field="contr_terminate_date" width="120" sortable="true">Terminated Date</th>
+                            <th field="action">Action</th>
+                        </tr>
+                    </thead>
+                </table>
+                <!-- end table -->
+                
+                
+              </div>
+              <div class="tab-pane" id="tab_5">
+                  <!-- template tabel -->
+                <table id="dg2" class="hidden" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
@@ -128,19 +152,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xs-6">    
-                                    <div class="form-group">
-                                        <label>Marketing Agent (optional)</label>
-                                        <select class="form-control choose-marketing" name="mark_id" style="width:100%">
-                                          <option value="">-</option>
-                                          @foreach($marketing_agents as $ma)
-                                          <option value="{{$ma->id}}">{{$ma->mark_code." ".$ma->mark_name}}</option>
-                                          @endforeach
-                                        </select>
-                                    </div>
-                                  </div>
-                            </div>
-                            <div class="row">
+                                
+                            
                                 <div class="col-xs-6">
                                     <div class="form-group">
                                         <label>Unit</label>
@@ -154,13 +167,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="col-xs-6">
-                                    <div class="form-group">
-                                        <label>Virtual Account</label>
-                                        <!-- <input type="hidden" name="viracc_id" id="txtVAId" required> -->
-                                        <input type="text" class="form-control" id="txtVA" disabled>
-                                    </div>
-                                </div>
+                                
                             </div>
                             
 
@@ -172,9 +179,9 @@
                         <div id="contractStep2" style="display:none">
                           
                         <!-- Form step 2 -->
-                                <h4>Cost Detail</h4>
+                                <h4>Component Billing Detail</h4>
                   <div class="form-group">
-                      <label>Choose Cost Items</label>
+                      <label>Choose Component Billing</label>
                       <select id="selectCostItem" class="form-control" name="costdt[]">
                           <?php $tempGroup = ''; ?>
                           @foreach($cost_items as $key => $citm)
@@ -184,13 +191,13 @@
                           @endforeach
                       </select>
                   </div>
-                  <button id="clickCostItem">Add Cost Item</button>
+                  <button id="clickCostItem">Add Component Billing</button>
 
                   <br><br>
                   <form method="POST" id="formContract2">
                   <table id="tableCost" width="100%" class="table table-bordered" style="display: none">
                     <tr class="text-center">
-                      <td>Cost Item</td>
+                      <td>Component Billing</td>
                       <td>Name</td>
                       <td>Unit</td>
                       <td>Cost Rate</td>
@@ -273,22 +280,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xs-6">
-                                    <div class="form-group">
-                                        <label>Marketing Agent (optional)</label>
-                                        <select class="form-control choose-marketing" name="mark_id" style="width:100%">
-                                        <option value="">-</option>
-                                        @foreach($marketing_agents as $ma)
-                                        <option value="{{$ma->id}}">{{$ma->mark_code." ".$ma->mark_name}}</option>
-                                        @endforeach
-                                        </select>
-                                    </div>
-                                </div>
-                        </div>
-                        
-                        
-
-                        <div class="row">
+                                
                             <div class="col-xs-6">
                                 <div class="form-group">
                                     <label>Unit</label>
@@ -303,14 +295,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-xs-6">
-                                <div class="form-group">
-                                    <label>Virtual Account</label>
-                                    <input type="hidden" name="viracc_id" id="txtVAEditId" required>
-                                    <input type="text" class="form-control" id="txtVAEdit" disabled>
-                                    
-                                </div>
-                            </div>
+                            
                         </div>
                         <button type="submit" class="btn btn-default">Submit</button>
                     </form>
@@ -447,9 +432,7 @@
               minimumInputLength: 1
         });
 
-        $(".choose-marketing").select2();
-
-        
+        // $(".choose-marketing").select2();
 
         $(".choose-vaccount").select2({
               ajax: {
@@ -506,7 +489,7 @@
         $('#formContract2').submit(function(e){
             e.preventDefault();
             if(!$('#formContract2').serialize()){
-                alert('Please fill the Cost Item first');
+                alert('Please fill the Component Billing first');
             }else{
                 var allFormData = $('#formContract,#formContract2').serialize();
                 console.log(allFormData);
@@ -532,7 +515,7 @@
             costDetailName = $('#selectCostItem option:selected').text();
             $('.costdid').each(function(){
                 if($(this).val() == costDetail){ 
-                  $.messager.alert('Warning', "Cost Item already exist in the list below");
+                  $.messager.alert('Warning', "Component Billing already exist in the list below");
                   flag = true;
                 }
             });
@@ -547,7 +530,7 @@
         //     $('#tableCost').show();
         //     unit = $('.choose-unit option:selected').text();
         //     unit = unit.substring(unit.indexOf('(') + 1, unit.indexOf(')'));
-        //     $('#tableCost').append('<tr class="text-center"><td><input type="text" name="cost_name[]" placeholder="New Cost Item Name" required><br><br><input type="text" name="cost_code[]" placeholder="New Cost Item Code" required></td><td><input type="text" name="costd_name[]" class="form-control costd_name" placeholder="Cost Detail Name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" placeholder="Unit" required></td><td><input type="text" name="costd_rate[]" placeholder="Rate" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" placeholder="Abonemen" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" placeholder="Biaya Admin" class="form-control costd_admin" required></td><td><select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><select name="inv_type_custom[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+        //     $('#tableCost').append('<tr class="text-center"><td><input type="text" name="cost_name[]" placeholder="New Component Billing Name" required><br><br><input type="text" name="cost_code[]" placeholder="New Component Billing Code" required></td><td><input type="text" name="costd_name[]" class="form-control costd_name" placeholder="Component Billing Detail Name" required></td><td><input type="text" name="costd_unit[]" class="form-control costd_unit" value="'+unit+'" placeholder="Unit" required></td><td><input type="text" name="costd_rate[]" placeholder="Rate" class="form-control costd_rate" required></td><td><input type="text" name="costd_burden[]" placeholder="Abonemen" class="form-control costd_burden" required></td><td><input type="text" name="costd_admin[]" placeholder="Biaya Admin" class="form-control costd_admin" required></td><td><select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><select name="inv_type_custom[]" class="form-control">'+invoiceTypes+'</select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
         // });
 
         // $(document).delegate(".costd_rate,.costd_burden,.costd_admin", "keypress", function(e) {
@@ -572,7 +555,7 @@
         });
 
         $(document).delegate('.removeCost','click',function(){
-            if(confirm('Are you sure want to remove this cost item?')){
+            if(confirm('Are you sure want to remove this Component Billing?')){
                 $(this).parent().parent().remove();
             }
         });
@@ -583,10 +566,11 @@
 
         var entity = "Contract"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('contract.get')}}";
+        var get_url2 = "{{route('contract.get2')}}";
 
         $(function(){
             var dg = $('#dg').datagrid({
-                url: get_url,
+                url: get_url2,
                 pagination: true,
                 remoteFilter: true, //utk jalanin search filter
                 rownumbers: true,
@@ -595,6 +579,27 @@
             });
             dg.datagrid('enableFilter');
         });
+
+        var tenantableflag = 0;        
+        $('.tenan_tab').click(function(){
+            if(tenantableflag == 0){
+              setTimeout(function(){
+                  var dg2 = $('#dg2').datagrid({
+                        url: get_url,
+                        pagination: true,
+                        remoteFilter: true, //utk jalanin search filter
+                        rownumbers: true,
+                        singleSelect: true,
+                        fitColumns: true
+                    });
+                  dg2.datagrid('enableFilter');
+              },500);
+              tenantableflag = 1;
+              console.log('test');  
+            }
+        });
+            
+        
 
         $(document).delegate('.getDetail','click',function(){
             $('#detailModalContent').html('<center><img src="{{ asset('img/loading.gif') }}"><p>Loading ...</p></center>');
@@ -667,6 +672,13 @@
             e.preventDefault();
             var tenanid = $('input[name="tenant"]:checked').val();
             var tenanname = $('input[name="tenant"]:checked').data('name');
+            var isowner = $('input[name="tenant"]:checked').data('owned');
+            if(isowner != null && isowner != ""){
+              $('input[name=contr_enddate]').val(''); 
+              $('input[name=contr_enddate]').attr('disabled','disabled');
+            }else{ 
+              $('input[name=contr_enddate]').removeAttr('disabled');
+            }
             $('#txtTenanId').val(tenanid);
             $('#txtTenan').val(tenanname);
             $('#unitModalContent').text('');
@@ -753,17 +765,23 @@
                     // form.find('input[name=contr_code]').val(data.contr_code);
                     // form.find('input[name=contr_no]').val(data.contr_no);
                     form.find('input[name=contr_startdate]').val(data.contr_startdate);
-                    form.find('input[name=contr_enddate]').val(data.contr_enddate);
+                    
                     form.find('input[name=contr_bast_date]').val(data.contr_enddate);
                     form.find('input[name=contr_bast_by]').val(data.contr_bast_by);
                     form.find('textarea[name=contr_note]').val(data.contr_note);
                     form.find('input[name=tenan_id]').val(data.tenan_id);
                     form.find('#txtTenanEdit').val(data.tenan_name);
-                    if(data.mark_id != null) form.find('input[name=mark_id]').val(data.mark_id);
+                    // if(data.mark_id != null) form.find('input[name=mark_id]').val(data.mark_id);
                     form.find('#txtUnitEdit').val(data.unit_code);
                     form.find('#txtVAEdit').val(data.virtual_account);
                     console.log(data.virtual_account, 'VA');
                     form.find('#txtCrUnitId').val(data.unit_id);
+                    if(data.owner == null){ 
+                      form.find('input[name=contr_enddate]').removeAttr('disabled');
+                      form.find('input[name=contr_enddate]').val(data.contr_enddate);
+                    }else{ 
+                      form.find('input[name=contr_enddate]').attr('disabled','disabled');
+                    }
                 }
                 console.log(result);
             });

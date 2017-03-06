@@ -20,7 +20,7 @@
 		<th>Size</th>
 	</tr>
 	@foreach($units as $unit)
-		<td><center><input type="radio" name="@if($edit){{'unitedit'}}@else{{'unit'}}@endif" data-name="{{$unit->unit_code}}" data-vaccount="{{$unit->virtual_account}}" value="{{$unit->id}}"></center></td>
+		<td><center><input type="radio" name="@if($edit){{'unitedit'}}@else{{'unit'}}@endif" data-name="{{$unit->unit_code}}" data-vaccount="{{$unit->virtual_account}}" data-owner="{{$unit->tenan_id}}" value="{{$unit->id}}"></center></td>
 		<td>{{$unit->unit_code}}</td>
 		<td>{{$unit->unit_name}}</td>
 		<td>{{(int)$unit->unit_sqrt." m2"}}</td>
