@@ -76,6 +76,8 @@ class ContractController extends Controller
                             break;
                     }
                 }
+                if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                else $fetch = $fetch->where($filter->field, $op, $filter->value);
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
@@ -151,6 +153,8 @@ class ContractController extends Controller
                             break;
                     }
                 }
+                if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                else $fetch = $fetch->where($filter->field, $op, $filter->value);
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
@@ -604,6 +608,8 @@ class ContractController extends Controller
                             break;
                     }
                 }
+                if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                else $fetch = $fetch->where($filter->field, $op, $filter->value);
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
@@ -814,6 +820,8 @@ class ContractController extends Controller
                             break;
                     }
                 }
+                if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                else $fetch = $fetch->where($filter->field, $op, $filter->value);
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
