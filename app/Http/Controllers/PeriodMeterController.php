@@ -21,25 +21,25 @@ use Session;
 class PeriodMeterController extends Controller
 {
     public function index(){
-		return view('period_meter');
+        return view('period_meter');
     }
 
     public function get(Request $request){
         try{
-        	// params
-        	$page = $request->page;
-        	$perPage = $request->rows; 
-        	$page-=1;
-        	$offset = $page * $perPage;
+            // params
+            $page = $request->page;
+            $perPage = $request->rows; 
+            $page-=1;
+            $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
             $sort = @$request->sort;
             $order = @$request->order;
             $filters = @$request->filterRules;
             if(!empty($filters)) $filters = json_decode($filters);
 
-        	// olah data
-        	$count = TrPeriodMeter::count();
-        	$fetch = TrPeriodMeter::query();
+            // olah data
+            $count = TrPeriodMeter::count();
+            $fetch = TrPeriodMeter::query();
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -70,23 +70,23 @@ class PeriodMeterController extends Controller
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
             $fetch = $fetch->skip($offset)->take($perPage)->get();
-        	$result = ['total' => $count, 'rows' => []];
-        	foreach ($fetch as $key => $value) {
-        		$temp = [];
-        		$temp['id'] = $value->id;
-        		$temp['prdmet_id'] = $value->prdmet_id;
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['prdmet_id'] = $value->prdmet_id;
                 $temp['prdmet_start_date'] = $value->prdmet_start_date;
-        		$temp['prdmet_end_date'] = $value->prdmet_end_date;
+                $temp['prdmet_end_date'] = $value->prdmet_end_date;
                 $temp['prd_billing_date'] = $value->prd_billing_date;
                 $temp['created_by'] = $value->created_by;
                 $temp['status'] = !empty($value->status) ? 'Posted' : 'Need Approval';
-        		try{
-        			$temp['created_by'] = User::findOrFail($value->created_by)->name;
-        		}catch(\Exception $e){
-        			$temp['created_by'] = '-';
-        		}
-        		$result['rows'][] = $temp;
-        	}
+                try{
+                    $temp['created_by'] = User::findOrFail($value->created_by)->name;
+                }catch(\Exception $e){
+                    $temp['created_by'] = '-';
+                }
+                $result['rows'][] = $temp;
+            }
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -102,10 +102,10 @@ class PeriodMeterController extends Controller
                 $count = TrPeriodMeter::count();
                 $ms = $count+1;
                 $input['prdmet_id'] = 'PRD-'.date('Ymd').'-'.$ms;
-                $prdstart = explode('/',$request->prdmet_start_date);
-                $prdend = explode('/',$request->prdmet_end_date);
-                $input['prdmet_start_date'] = implode('-', [$prdstart[2],$prdstart[0],$prdstart[1]]);
-                $input['prdmet_end_date'] = implode('-', [$prdend[2],$prdend[0],$prdend[1]]);
+                $prdstart = date("Y-m-d", strtotime($request->prdmet_start_date));
+                $prdend = date("Y-m-d", strtotime($request->prdmet_end_date));
+                $input['prdmet_start_date'] = $prdstart;
+                $input['prdmet_end_date'] = $prdend;
                 $input['created_by'] = Auth::id();
                 $input['updated_by'] = Auth::id();
                 $input['status'] = FALSE;
@@ -202,10 +202,15 @@ class PeriodMeterController extends Controller
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }    
-        return ['status' => 1, 'message' => 'Insert Success'];      	
+        return ['status' => 1, 'message' => 'Insert Success'];          
     }
 
     public function testing(){
+        $t1 = StrToTime ( '2006-04-14' );
+        $t2 = StrToTime ( '2006-04-12' );
+        $diff = $t1 - $t2;
+        $hours = $diff / ( 60 * 60 );
+        echo $hours;
         /*
         $unit_kontrak = MsUnit::select('ms_unit.id AS unit_id','ms_unit.unit_code','tr_contract.id AS contr_id','tr_contract_invoice.costd_id','ms_cost_detail.costd_rate','ms_cost_detail.costd_rate','costd_admin')
             ->leftJoin('tr_contract','tr_contract.unit_id',"=",'ms_unit.id')
@@ -248,25 +253,36 @@ class PeriodMeterController extends Controller
         ->where('ms_cost_detail.costd_ismeter', TRUE)
         ->get();
         echo $unit_kontrak;
-        */
+        
         $check_unit = TrInvoice::select('tr_invoice.tenan_id','tr_tenan.inv_outstanding')->where('tr_invoice.inv_outstanding','>',0);
         echo $check_unit;
+        */
     }
 
     public function editModal(Request $request){
         try{
             $id = $request->id;
             $currentPrd = TrPeriodMeter::find($id);
-            $fetch = TrMeter::select('tr_meter.*','ms_cost_detail.costd_rate','tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name')
+            $electric = TrMeter::select('tr_meter.*','ms_cost_detail.costd_rate','tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','ms_cost_detail.daya','ms_cost_detail.cost_id')
                     ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
                     ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
                     ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
                     ->where('prdmet_id',$id)
+                    ->where('ms_cost_detail.cost_id',1)
+                    ->orderBy('ms_unit.unit_code','asc')
+                    ->orderBy('ms_cost_detail.costd_name','asc')
+                    ->get();
+             $water = TrMeter::select('tr_meter.*','ms_cost_detail.costd_rate','tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.cost_id','ms_cost_detail.daya')
+                    ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
+                    ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
+                    ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
+                    ->where('prdmet_id',$id)
+                    ->where('ms_cost_detail.cost_id',2)
                     ->orderBy('ms_unit.unit_code','asc')
                     ->orderBy('ms_cost_detail.costd_name','asc')
                     ->get();
 
-            return view('modal.editmeter', ['meter' => $fetch,'st'=>$currentPrd, 'prd'=>$id]);
+            return view('modal.editmeter', ['listrik' => $electric,'air' => $water,'st'=>$currentPrd, 'prd'=>$id]);
         }catch(\Exception $e){
              return response()->json(['errorMsg' => $e->getMessage()]);
         }
@@ -279,13 +295,34 @@ class PeriodMeterController extends Controller
         $meter_rate = $request->input('meter_rate');
         $meter_burden = $request->input('meter_burden');
         $meter_admin = $request->input('meter_admin');
+        $cost_id = $request->input('cost_id');
+        $daya = $request->input('daya');
         try{
-            DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin){
+            DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin, $cost_id, $daya){
                 foreach ($id as $key => $value) {
+                    $meter_used = ($meter_end[$key] - $meter_start[$key]);
+                    if($cost_id[$key] == '1'){
+                        //CEK MIN 40 JAM PEMAKAIAN LISTRIK
+                        $min = 40 * ($daya[$key]/1000) * $meter_rate[$key];
+                        $elec_cost = $meter_used *  $meter_rate[$key];
+                        if($elec_cost > $min){
+                            $meter_cost = $elec_cost;
+                        }else{
+                            $meter_cost = $min;
+                        }
+                        $bpju = (0.03 * $meter_cost);
+                        $total = ($meter_cost + $bpju);
+                    }else{
+                        $bpju = 0;
+                        $meter_cost = $meter_used * $meter_rate[$key];
+                        $total = $meter_cost + $meter_burden[$key] + $meter_admin[$key] + $bpju;
+                    }
                     $input = [
                         'meter_end' => $meter_end[$key],
-                        'meter_used' => ($meter_end[$key] - $meter_start[$key]),
-                        'meter_cost' => ((($meter_end[$key] - $meter_start[$key]) * $meter_rate[$key]) + $meter_burden[$key] + $meter_admin[$key])
+                        'meter_used' => $meter_used,
+                        'meter_cost' => $meter_cost,
+                        'other_cost' => $bpju,
+                        'total' => $total
                     ];
                     TrMeter::find($id[$key])->update($input);
                 }
@@ -309,7 +346,7 @@ class PeriodMeterController extends Controller
 
     public function update(Request $request){
         try{
-        	$id = $request->id;
+            $id = $request->id;
             $status = TrPeriodMeter::select('status')->where('id',$id)->get();
             if($status[0]->status == FALSE){
                 $input = $request->all();
@@ -326,7 +363,7 @@ class PeriodMeterController extends Controller
 
     public function delete(Request $request){
         try{
-        	$id = $request->id;
+            $id = $request->id;
             $status = TrPeriodMeter::select('status')->where('id',$id)->get();
             if($status[0]->status == FALSE){
                 TrPeriodMeter::destroy($id);
@@ -340,22 +377,37 @@ class PeriodMeterController extends Controller
         } 
     }
 
-    public function downloadExcel($type)
+    public function downloadExcel($type,$cost)
     {
-        $data = TrMeter::select('ms_unit.unit_code AS UNIT','ms_cost_detail.costd_name AS COST','tr_meter.meter_start AS START','tr_meter.meter_end AS END','ms_cost_detail.costd_rate AS RATE','tr_meter.meter_burden AS ABODEMEN','tr_meter.meter_admin AS ADMIN','tr_meter.meter_cost AS BIAYA')
-                    ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
-                    ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
-                    ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
-                    ->where('prdmet_id',$type)
-                    ->orderBy('ms_unit.unit_code','asc')
-                    ->orderBy('ms_cost_detail.costd_name','asc')
-                    ->get()->toArray();
+        if($cost == 1){
+            $data = TrMeter::select('ms_unit.unit_code AS UNIT','ms_cost_detail.costd_name AS COST','ms_cost_detail.daya AS DAYA','tr_meter.meter_start AS START','tr_meter.meter_end AS END')
+                        ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
+                        ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
+                        ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
+                        ->where('tr_meter.prdmet_id',$type)
+                        ->where('ms_cost_detail.cost_id',$cost)
+                        ->orderBy('ms_unit.unit_code','asc')
+                        ->orderBy('ms_cost_detail.costd_name','asc')
+                        ->get()->toArray();
+            $border = 'A1:E';
+        }else{
+            $data = TrMeter::select('ms_unit.unit_code AS UNIT','ms_cost_detail.costd_name AS COST','tr_meter.meter_start AS START','tr_meter.meter_end AS END')
+                        ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
+                        ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
+                        ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
+                        ->where('tr_meter.prdmet_id',$type)
+                        ->where('ms_cost_detail.cost_id',$cost)
+                        ->orderBy('ms_unit.unit_code','asc')
+                        ->orderBy('ms_cost_detail.costd_name','asc')
+                        ->get()->toArray();
+            $border = 'A1:D';
+        }
         $tp = 'xls';
-        return Excel::create('meter_template', function($excel) use ($data) {
-            $excel->sheet('Unit Meter', function($sheet) use ($data)
+        return Excel::create('meter_template', function($excel) use ($data,$border) {
+            $excel->sheet('Unit Meter', function($sheet) use ($data,$border)
             {
                 $total = count($data)+1;
-                $sheet->setBorder('A1:H'.$total, 'thin');
+                $sheet->setBorder($border.$total, 'thin');
                 $sheet->fromArray($data);
             });
         })->download($tp);
@@ -389,10 +441,12 @@ class PeriodMeterController extends Controller
 
             })->get();
             $prd = $request->input('prd');
-            $meter = MsCostDetail::select('id','costd_name')->where('costd_ismeter',TRUE)->get();
+            $meter = MsCostDetail::select('id','cost_id','daya','costd_name','costd_rate','costd_burden','costd_admin')->where('costd_ismeter',TRUE)->get();
             $array_meter=[];
+            $array_rate =[];
             foreach ($meter as $row) {
                 $array_meter[$row->costd_name]= $row->id;
+                $array_rate[$row->daya]= $row->costd_rate.'~'.$row->costd_burden.'~'.$row->costd_admin;
             }
 
             $unit = MsUnit::select('id','unit_code')->get();
@@ -401,19 +455,33 @@ class PeriodMeterController extends Controller
                 $array_unit[$row->unit_code]= $row->id;
             }
 
-            //print_r($data);
-            //die();
-
             if(!empty($data) && $data->count()){
                 foreach ($data as $key => $value) {
                     $meter_used = ($value->end - $value->start);
-                    //$meter_cost = (($meter_used * $value->rate)+$value->meter_burden+$value->admin);
-                    $meter_cost =  $value->biaya;
+                    $formula = explode('~', $array_rate[$value->daya]);
+
+                    if (strpos($value->cost, 'ELECTRICITY') !== false) {
+                        //CEK MIN 40 JAM PEMAKAIAN LISTRIK
+                        $min = 40 * ($value->daya/1000) * $formula[0];
+                        $elec_cost = $meter_used * $formula[0];
+                        if($elec_cost > $min){
+                            $meter_cost = $elec_cost;
+                        }else{
+                            $meter_cost = $min;
+                        }
+                        $bpju = (0.03 * $meter_cost);
+                        $total = $meter_cost + $bpju;
+                    }else{
+                        $bpju = 0;
+                        $meter_cost = $meter_used * $formula[0];
+                        $total =  $meter_cost + $formula[1] + $formula[2];
+                    }
+                    
                     DB::table('tr_meter')
                     ->where('prdmet_id', $prd)
                     ->where('costd_id', $array_meter[$value->cost])
                     ->where('unit_id', $array_unit[$value->unit])
-                    ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost]);
+                    ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>$bpju,'total'=>$total]);
                 }
                 Session::flash('msg', 'Upload Success.');
                 return back();

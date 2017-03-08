@@ -281,7 +281,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('period_meter/editModal', 'PeriodMeterController@editModal')->name('period_meter.detail');
 	Route::post('period_meter/cdtupdate', 'PeriodMeterController@meterdetailUpdate')->name('period_meter.cdtupdate');
 	Route::post('period_meter/approve', 'PeriodMeterController@approve')->name('period_meter.approve');
-	Route::get('period_meter/downloadExcel/{type}', 'PeriodMeterController@downloadExcel');
+	Route::get('period_meter/downloadExcel/{type}/{cost}', 'PeriodMeterController@downloadExcel');
 	Route::post('period_meter/importExcel', 'PeriodMeterController@importExcel')->name('period_meter.importExcel');
 
 	// journal

@@ -131,7 +131,23 @@ class CostItemController extends Controller
     public function cost_detail(Request $request){
         try{
             $id = $request->id;
-            $result = MsCostDetail::select('*')->where('cost_id',$id)->get();
+            $count = MsCostDetail::count();
+            $fetch = MsCostDetail::select('*')->where('cost_id',$id)->get();
+            $count = $fetch->count();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['cost_id'] = $value->cost_id;
+                $temp['costd_name'] = $value->costd_name;
+                $temp['costd_unit'] = $value->costd_unit;
+                $temp['costd_rate'] = $value->costd_rate;
+                $temp['costd_burden'] = $value->costd_burden;
+                $temp['costd_admin'] = $value->costd_admin;
+                $temp['daya'] = $value->daya;
+                $temp['costd_ismeter'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
+                $result['rows'][] = $temp;
+            }
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);

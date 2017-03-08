@@ -25,6 +25,8 @@ class CreateTrMetersTable extends Migration
             $table->integer('contr_id');
             $table->integer('prdmet_id')->nullable();
             $table->integer('unit_id');
+            $table->decimal('other_cost', 10, 2)->nullable();
+            $table->decimal('total', 10, 2)->nullable();
         });
     }
 

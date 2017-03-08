@@ -105,7 +105,7 @@
                             <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Cost Item:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Active Meter:" style="width:300px;">
+                            <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Komponen Ber-Meter:" style="width:300px;">
                                 <option value="true" >yes</option>
                                 <option value="false">no</option>
                             </select>
