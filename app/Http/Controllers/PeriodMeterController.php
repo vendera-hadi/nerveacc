@@ -75,9 +75,9 @@ class PeriodMeterController extends Controller
                 $temp = [];
                 $temp['id'] = $value->id;
                 $temp['prdmet_id'] = $value->prdmet_id;
-                $temp['prdmet_start_date'] = $value->prdmet_start_date;
-                $temp['prdmet_end_date'] = $value->prdmet_end_date;
-                $temp['prd_billing_date'] = $value->prd_billing_date;
+                $temp['prdmet_start_date'] = date("d-m-Y", strtotime($value->prdmet_start_date));
+                $temp['prdmet_end_date'] = date("d-m-Y", strtotime($value->prdmet_end_date));
+                $temp['prd_billing_date'] = date("d-m-Y", strtotime($value->prd_billing_date));
                 $temp['created_by'] = $value->created_by;
                 $temp['status'] = !empty($value->status) ? 'Posted' : 'Need Approval';
                 try{

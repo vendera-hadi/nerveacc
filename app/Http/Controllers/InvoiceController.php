@@ -250,7 +250,8 @@ class InvoiceController extends Controller
                                 // echo 'meter<br>';
                                 $totalPay = 0;
                                 // get harga meteran selama periode bulan ini
-                                $lastPeriodMeterofMonth = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();
+                                $lastPeriodMeterofMonth = TrPeriodMeter::where(\DB::raw('Extract(month from prd_billing_date)'),'=',$month)->where('status',1)->orderBy('id','desc')->first();
+                                // echo $tempTimeStart." dan ".$tempTimeEnd; die();
                                 if($lastPeriodMeterofMonth){
                                     $meter = TrMeter::select('tr_meter.id as tr_meter_id','tr_meter.*','tr_period_meter.*','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_unit','ms_cost_detail.id as costd_id')
                                         ->join('tr_period_meter','tr_meter.prdmet_id','=','tr_period_meter.id')
