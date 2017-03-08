@@ -55,7 +55,84 @@ class ContractController extends Controller
             $count = TrContract::count();
             $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name', 'ms_unit.unit_code')
             		->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
-                    ->join('ms_unit', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('tr_contract.unit_id::integer'));
+                    ->join('ms_unit', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('tr_contract.unit_id::integer'))
+                    ->leftJoin('ms_unit_owner', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('ms_unit_owner.unit_id::integer'))
+                    ->whereNull('ms_unit_owner.unit_id');
+            if(!empty($filters) && count($filters) > 0){
+                foreach($filters as $filter){
+                    $op = "like";
+                    // tentuin operator
+                    switch ($filter->op) {
+                        case 'contains':
+                            $op = 'like';
+                            break;
+                        case 'less':
+                            $op = '<=';
+                            break;
+                        case 'greater':
+                            $op = '>=';
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+            else $fetch->orderBy('ms_unit.unit_code');
+            
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['unit_code'] = $value->unit_code;
+                $temp['contr_code'] = $value->contr_code;
+                $temp['contr_no'] = $value->contr_no;
+                $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
+                $temp['contr_enddate'] = date('d/m/Y',strtotime($value->contr_enddate));
+                $temp['tenan_name'] = $value->tenan_name;
+                if($value->contr_status == 'confirmed') $status = '<strong class="text-success">'.$value->contr_status.'</strong>';
+                else if($value->contr_status == 'cancelled' || $value->contr_status == 'closed') $status = '<strong class="text-danger">'.$value->contr_status.'</strong>';
+                else $status = '<strong>'.$value->contr_status.'</strong>';
+                $temp['contr_status'] = $status;
+                $temp['contr_terminate_date'] = !empty($value->contr_terminate_date) ? date('d/m/Y',strtotime($value->contr_terminate_date)) : '';
+                if($value->contr_status != 'confirmed') $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                                                                    &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>
+                                                                    &nbsp;<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                else if($value->contr_status == 'confirmed' && !empty($value->contr_terminate_date) ) $confirmed = '<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                else $confirmed = '';
+                
+                if($value->contr_status != 'cancelled') $temp['action'] = '<a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>&nbsp; '.$confirmed;
+                else $temp['action'] = '';
+                $result['rows'][] = $temp;
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function getOwner(Request $request){
+        try{
+            // params
+            $page = $request->page;
+            $perPage = $request->rows; 
+            $page-=1;
+            $offset = $page * $perPage;
+            // @ -> isset(var) ? var : null
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+
+            // olah data
+            $count = TrContract::count();
+            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name', 'ms_unit.unit_code')
+                    ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
+                    ->join('ms_unit', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('tr_contract.unit_id::integer'))
+                    ->leftJoin('ms_unit_owner', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('ms_unit_owner.unit_id::integer'))
+                    ->whereNotNull('ms_unit_owner.unit_id');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -129,10 +206,10 @@ class ContractController extends Controller
     public function ctrDetail(Request $request){
         try{
             $contractId = $request->id;
-            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.unit_code','ms_unit.virtual_account','ms_unit.unit_name','ms_unit.unit_isactive')
+            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_unit.unit_code','ms_unit.virtual_account','ms_unit.unit_name','ms_unit.unit_isactive','ms_unit_owner.tenan_id as owner')
             ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
-            ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
             ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+            ->leftJoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
             // ->join('ms_virtual_account','ms_virtual_account.id',"=",'ms_unit.unit_virtual_accn')
             // ->join('ms_contract_status',\DB::raw('ms_contract_status.id::integer'),"=",\DB::raw('tr_contract.const_id::integer'))
             ->where('tr_contract.id', $contractId)->first();
@@ -231,7 +308,7 @@ class ContractController extends Controller
             'contr_code' => 'B'.date('ym').$request->input('tenan_id').$randomString,
             'contr_no' => 'B'.date('ym').$request->input('tenan_id').$randomString,
             'contr_startdate' => $request->input('contr_startdate'),
-            'contr_enddate' => $request->input('contr_enddate'),
+            'contr_enddate' => $request->input('contr_enddate','2030-12-31'),
             'contr_bast_date' => $request->input('contr_bast_date'),
             'contr_bast_by' => $request->input('contr_bast_by'),
             'contr_note' => $request->input('contr_note'),
@@ -345,7 +422,7 @@ class ContractController extends Controller
 
         $update = [
             'contr_startdate' => $request->input('contr_startdate'),
-            'contr_enddate' => $request->input('contr_enddate'),
+            'contr_enddate' => $request->input('contr_enddate','2030-12-31'),
             'contr_bast_date' => $request->input('contr_bast_date'),
             'contr_bast_by' => $request->input('contr_bast_by'),
             'contr_note' => $request->input('contr_note')

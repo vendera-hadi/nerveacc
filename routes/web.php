@@ -181,6 +181,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// tr contract
 	Route::get('contract','ContractController@index')->name('contract.index');
 	Route::post('contract/get', 'ContractController@get')->name('contract.get');
+	Route::post('contract/get2', 'ContractController@getOwner')->name('contract.get2');
 	Route::post('contract/detail', 'ContractController@getdetail')->name('contract.getdetail');
 	Route::post('contract/ctrDetail', 'ContractController@ctrDetail')->name('contract.ctrdetail');
 	Route::post('contract/citmDetail', 'ContractController@citmDetail')->name('contract.citmdetail');

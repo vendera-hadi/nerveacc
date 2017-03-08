@@ -80,7 +80,7 @@
                             <th field="inv_date" width="100" sortable="true">Tgl Invoice</th>
                             <th field="inv_duedate" width="100" sortable="true">Jatuh Tempo</th>
                             <th field="inv_amount" width="100" sortable="true" align="right">Amount</th>
-                            <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th> 
+                            <!-- <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th>  -->
                             <th field="invtp_name" width="150" sortable="true">Jenis Invoice</th>
                             <th field="inv_post" width="50" sortable="true">Posted</th>       
                         <th field="action_button" width="80" sortable="true">action</th>
@@ -92,7 +92,7 @@
                 <!-- icon2 atas table -->
                 <div id="toolbar" class="datagrid-toolbar">
                     <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
-                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Create Invoice</span></a>                    
+                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Invoice Lain Lain</span></a>                    
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="cancelInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-ban"></i>&nbsp;Cancel Invoice</span></a>           
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="printInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-print"></i>&nbsp;Print</span></a>
@@ -105,7 +105,7 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="costd_name" class="easyui-textbox" label="Cost Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
+                            <input name="costd_name" class="easyui-textbox" label="Component Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="costd_rate" class="easyui-textbox" label="Rate:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
@@ -117,7 +117,7 @@
                             <input name="costd_admin" class="easyui-textbox" label="Biaya Admin:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Cost Item:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
+                            <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Component Billing:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Active Meter:" style="width:300px;">
@@ -202,7 +202,7 @@
                                 <div class="row">
                                     <div class="col-sm-4">
                                         <div class="form-group">
-                                            <label>Add Cost Item</label>
+                                            <label>Add Component Billing</label>
                                             <select id="selectCostItemEdit" class="form-control">
                                                 <?php $tempGroup = ''; ?>
                                                 @foreach($cost_items as $key => $citm)
@@ -212,7 +212,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <button type="button" id="clickCostItemEdit">Add Cost Item</button>
+                                        <button type="button" id="clickCostItemEdit">Add Component Billing</button>
                                     </div>
                                 </div>
 
@@ -220,7 +220,7 @@
                                     <div class="col-sm-12">
                                         <table id="tableCost" width="100%" class="table table-bordered" >
                                             <tr class="text-center">
-                                              <td>Cost Item</td>
+                                              <td>Component Billing</td>
                                               <td>Name</td>
                                               <td>Unit</td>
                                               <td>Cost Rate</td>
@@ -414,7 +414,7 @@ $(function(){
                 loadMsg:'',
                 height:'auto',
                 columns:[[
-                    {field:'costd_name',title:'Cost Item'},
+                    {field:'costd_name',title:'Component Billing'},
                     {field:'invdt_note',title:'Note'},
                     {field:'meter_start',title:'Start'},
                     {field:'meter_end',title:'End'},
@@ -525,7 +525,7 @@ $(function(){
           $('.costdid').each(function(){
               console.log($(this).val());
               if($(this).val() == costItem){ 
-                $.messager.alert('Warning', "Cost Item already exist in the list below");
+                $.messager.alert('Warning', "Component Billing already exist in the list below");
                 flag = true;
               }
           });
@@ -547,7 +547,7 @@ $(function(){
             return false;
         }
         if($('.costdid').length == 0){ 
-            $.messager.alert('Warning','Cost item is required');
+            $.messager.alert('Warning','Component Billing is required');
             return false;
         }
         $.post('{{route('invoice.insert')}}', $(this).serialize(), function(result){
@@ -573,7 +573,7 @@ $(function(){
     }
 
     $(document).delegate('.removeCost','click',function(){
-            if(confirm('Are you sure want to remove this cost item?')){
+            if(confirm('Are you sure want to remove this component Billing?')){
                 $(this).parent().parent().remove();
             }
         });

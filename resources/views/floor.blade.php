@@ -31,7 +31,7 @@
           		<!-- content -->
 
                 <!-- template tabel -->
-          		<table id="dg" title="Master Cost Item" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Master Cost Item" class="easyui-datagrid" style="width:100%;height:500px" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
@@ -91,7 +91,8 @@
                 remoteFilter: true, //utk jalanin search filter
                 rownumbers: true,
                 singleSelect: true,
-                fitColumns: true
+                fitColumns: true,
+                pageSize: 50
             });
             dg.datagrid('enableFilter');
         });

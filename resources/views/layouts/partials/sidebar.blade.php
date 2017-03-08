@@ -56,7 +56,7 @@
                     <li @if(Request::url() == route('contract.addendum')) class="active" @endif><a href="{{route('contract.addendum')}}"><i class="fa fa-circle-o"></i> Billing Info Addendum</a></li>
                     <li @if(Request::url() == route('contract.renewal')) class="active" @endif><a href="{{route('contract.renewal')}}"><i class="fa fa-circle-o"></i> Billing Info Renewal</a></li>
                     <li @if(Request::url() == route('contract.termination')) class="active" @endif><a href="{{route('contract.termination')}}"><i class="fa fa-circle-o"></i> Billing Info Termination</a></li>
-                    <li @if(Request::url() == route('contract.unclosed')) class="active" @endif><a href="{{route('contract.unclosed')}}"><i class="fa fa-circle-o"></i> Unclosed Billing Info <span class="pull-right-container">
+                    <li @if(Request::url() == route('contract.unclosed')) class="active" @endif><a href="{{route('contract.unclosed')}}"><i class="fa fa-circle-o"></i> Reminder Billing <span class="pull-right-container">
               <span class="label label-primary pull-right">{{$notif_unclosed}}</span>
             </span></a></li>
                   </ul>
@@ -74,11 +74,10 @@
 
                     </ul>
                 </li>
-                <li @if(Request::url() == url('cost_item')) class="active" @endif><a href="{{url('cost_item')}}"><i class="fa fa-circle-o"></i> Cost Items</a></li>
+                <li @if(Request::url() == url('cost_item')) class="active" @endif><a href="{{url('cost_item')}}"><i class="fa fa-circle-o"></i> Component Billing</a></li>
                 <li @if(Request::url() == url('tenant')) class="active" @endif><a href="{{ url('tenant') }}"><i class="fa fa-circle-o"></i> Tenant/Owner</a></li>
                 <li @if(Request::url() == url('typetenant')) class="active" @endif><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant/Owner Type</a></li>
-                <li @if(Request::url() == route('marketing.index')) class="active" @endif><a href="{{route('marketing.index')}}"><i class="fa fa-circle-o"></i> Marketing/Agent</a></li>
-                <li @if(Request::url() == url('vaccount')) class="active" @endif><a href="{{ url('vaccount') }}"><i class="fa fa-circle-o"></i> Virtual Account</a></li>
+                
               
               </ul>
             </li>

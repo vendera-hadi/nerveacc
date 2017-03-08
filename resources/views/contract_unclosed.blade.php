@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Unclosed Billing Info
+    Reminder Unclosed Billing
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Unclosed Billing Info
+   Reminder Unclosed Billing
 @endsection
 
 <!-- tambahan script atas -->
@@ -34,7 +34,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Unclosed Billing Info</li>
+        <li class="active">Reminder Unclosed Billing</li>
     </ol>
 @stop
 

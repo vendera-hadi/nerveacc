@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Cost Item
+    Component Billing
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Master Cost Item
+   Master Component Billing
 @endsection
 
 <!-- tambahan script atas -->
@@ -20,7 +20,7 @@
 @section('contentheader_breadcrumbs')
 	<ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Master Cost Item</li>
+        <li class="active">Master Component Billing</li>
     </ol>
 @stop
 
@@ -31,15 +31,15 @@
           		<!-- content -->
 
                 <!-- template tabel -->
-          		<table id="dg" title="Master Cost Item" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          		<table id="dg" title="Master Component Billing" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="cost_code" width="50" sortable="true">Cost Code</th>
-                            <th field="cost_name" width="50" sortable="true">Cost Name</th>
-                            <th field="cost_coa_code" width="50" sortable="true">Cost Coa Code</th>
-                            <th field="cost_isactive" width="50" sortable="true">Cost Active</th>
+                            <th field="cost_code" width="50" sortable="true">Component Code</th>
+                            <th field="cost_name" width="50" sortable="true">Component Name</th>
+                            <th field="cost_coa_code" width="50" sortable="true">Coa Code</th>
+                            <th field="cost_isactive" width="50" sortable="true">Active</th>
                         </tr>
                     </thead>
                 </table>
@@ -59,13 +59,13 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="cost_code" class="easyui-textbox" label="Cost Code:" style="width:100%" data-options="required:true,validType:'length[0,5]'">
+                            <input name="cost_code" class="easyui-textbox" label="Component Code:" style="width:100%" data-options="required:true,validType:'length[0,5]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="cost_name" class="easyui-textbox" label="Cost Name:" style="width:100%" data-options="required:true,validType:'length[0,150]'">
+                            <input name="cost_name" class="easyui-textbox" label="Component Name:" style="width:100%" data-options="required:true,validType:'length[0,150]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="cost_coa_code" style="width:100%" label="Coa Cost:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
+                            <input id="cc" class="easyui-combobox" required="true" name="cost_coa_code" style="width:100%" label="Coa Component:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="cost_isactive" label="Active:" style="width:300px;">
@@ -87,7 +87,7 @@
                     <form id="fm2" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="costd_name" class="easyui-textbox" label="Cost Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
+                            <input name="costd_name" class="easyui-textbox" label="Component Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="costd_rate" class="easyui-textbox" label="Rate:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
@@ -102,7 +102,7 @@
                             <input name="costd_unit" class="easyui-textbox" label="Satuan:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Cost Item:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
+                            <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Component Billing:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Komponen Ber-Meter:" style="width:300px;">
@@ -130,7 +130,7 @@
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-detailview.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Master Cost Item"; // nama si tabel, ditampilin di dialog
+        var entity = "Master Component Billing"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('cost_item.get')}}";
         var insert_url = "{{route('cost_item.insert')}}";
         var update_url = "{{route('cost_item.update')}}";
@@ -163,7 +163,7 @@
                         height:'auto',
                         toolbar:toolbar,
                         columns:[[
-                            {field:'costd_name',title:'Cost Name',width:100},
+                            {field:'costd_name',title:'Component Name',width:100},
                             {field:'costd_rate',title:'Cost Rate',width:100},
                             {field:'costd_burden',title:'Abodemen Cost',width:100},
                             {field:'costd_admin',title:'Admin Cost',width:100},
