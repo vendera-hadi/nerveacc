@@ -199,37 +199,18 @@ table tr td{font-size:9pt;}
             <br>
             <table width="100%" style="line-height: 18px;">
                 <tr>
-                    <td width="77%">Note:</td>
-                    <td width="23%" style="text-align: center;">Jakarta, <?php echo date('d F Y'); ?></td>
+                    <td width="77%" style="vertical-align:top">
+                        {!!$footer!!}<br><br>
+                        {!!$label!!}
+                    </td>
+                    <td width="23%" style="text-align: center;">
+                        Jakarta, <?php echo date('d F Y'); ?><br><br><br><br>
+                        <br><br>
+                        <b><u>{{$company_sign}}</u></b><br>
+                        {{$company_position}}
+                    </td>
                 </tr>
-                <tr>
-                    <td>Pembayaran melalui <?php echo $bank_name; ?></td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td><span style="display:inline-block; width:30px;"></span>No Rekening ...</td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td><span style="display:inline-block; width:30px;"></span>Atas Nama ...</td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>KETENTUAN :</td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>1. Pembayaran TRANSFER harap mencantumkan NO.INVOICE / NO.UNIT</td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td>2. Denda minimum dikenakan 1/1000 (per mil) dijumlahkan hari keterlambatan</td>
-                    <td style="text-align: center; text-decoration: underline;font-weight: bold;"><?php echo $company_sign; ?></td>
-                </tr>
-                <tr>
-                    <td>3. Pengelola akan memutuskan aliran listrik dan air apabila penghuni belum melunasi dalam jangka waktu 30 Hari.</td>
-                    <td style="text-align: center; vertical-align: top;"><?php echo $company_position; ?></td>
-                </tr>
+                
             </table>
         </div>
     </div>

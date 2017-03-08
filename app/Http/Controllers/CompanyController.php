@@ -8,6 +8,7 @@ use Auth;
 // load model
 use App\Models\MsCashBank;
 use App\Models\MsCompany;
+use App\Models\MsConfig;
 use Form;
 
 class CompanyController extends Controller
@@ -15,6 +16,22 @@ class CompanyController extends Controller
     public function index(){
         return view('company');
     }
+
+    public function config(){
+        $data['footer'] = @MsConfig::where('name','footer_invoice')->first()->value;
+        $data['label'] = @MsConfig::where('name','footer_label_inv')->first()->value;
+        return view('config',$data);
+    }
+
+    public function configUpdate(Request $request){
+        if(count($request->all()) > 0){
+            foreach ($request->all() as $key => $value) {
+                MsConfig::where('name',$key)->update(['value' => $value]);
+            }
+        }
+        $request->session()->flash('success', 'Update other configuration success');
+        return redirect()->back();
+    }    
 
     public function index2(){
         $data['company'] = MsCompany::first();

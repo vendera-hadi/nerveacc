@@ -288,8 +288,8 @@ class InvoiceController extends Controller
                                             'meter_id' => $meter->tr_meter_id
                                         ];
                                         $updateCtrInv[$value->tcinv_id] = [
-                                            'continv_start_inv' => $tempTimeStart,
-                                            'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months"))
+                                            'continv_start_inv' => $meter->prd_billing_date,
+                                            'continv_next_inv' => date('Y-m-d',strtotime($meter->prd_billing_date." +".$value->continv_period." months"))
                                         ];
                                         $totalPay+=$amount;
                                     }
@@ -315,12 +315,16 @@ class InvoiceController extends Controller
                                     // JENIS COST ITEM
                                     if($value->is_service_charge){
                                         // SERVICE CHARGE
-                                        $note = $value->costd_name." (Rp.".number_format($value->costd_rate,2)." x ".(int)$value->unit_sqrt." sqrt x ".$value->continv_period." bulan) Periode ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
-                                        $amount = ((int)$value->unit_sqrt * $value->costd_rate) + $value->costd_burden + $value->costd_admin;
+                                        $currUnit = MsUnit::find($value->unit_id);
+                                        $note = "IURAN PENGELOLAAN LINGKUNGAN (IPL) ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costd_rate);
+                                        $amount = ($value->unit_sqrt * $value->costd_rate) + $value->costd_burden + $value->costd_admin;
+                                        $amount = round($amount,2);
                                     }else if($value->is_sinking_fund){
                                         // SINKING FUND (DUMMY)
-                                        $note = $value->costd_name." Periode ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"));   
-                                        $amount = $value->costd_rate + $value->costd_burden + $value->costd_admin;
+                                        $currUnit = MsUnit::find($value->unit_id);
+                                        $note = $value->costd_name." (SF)  ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costd_rate);   
+                                        $amount = ($value->unit_sqrt * $value->costd_rate) + $value->costd_burden + $value->costd_admin;
+                                        $amount = round($amount,2);
                                     }else if($value->is_insurance){
                                         // INSURANCE
                                         // find unit utk ngambil luas unit
@@ -460,12 +464,16 @@ class InvoiceController extends Controller
             }
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
+            $footer = @MsConfig::where('name','footer_invoice')->first()->value;
+            $label = @MsConfig::where('name','footer_label_inv')->first()->value;
 
             $set_data = array(
                 'invoice_data' => $invoice_data,
                 'result' => $result,
                 'company' => $company,
-                'type' => $type
+                'type' => $type,
+                'footer' => $footer,
+                'label' => $label
             );
             
             if($type == 'pdf'){

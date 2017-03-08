@@ -177,6 +177,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('company/insert', 'CompanyController@insert')->name('company.insert');
 	Route::post('company/update', 'CompanyController@update')->name('company.update');
 	Route::post('company/delete', 'CompanyController@delete')->name('company.delete');
+	Route::get('config','CompanyController@config');
+	Route::post('config', 'CompanyController@configUpdate')->name('config.update');
 
 	// tr contract
 	Route::get('contract','ContractController@index')->name('contract.index');
