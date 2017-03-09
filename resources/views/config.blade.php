@@ -41,7 +41,7 @@
                                 
                                 <form action="{{route('config.update')}}" method="post" enctype="multipart/form-data">
                                   <div class="box-body">
-                                    <div class="col-sm-6">
+                                    <div class="col-sm-12">
 
                                         @if(Session::get('error'))
                                             <div class="alert alert-danger">
@@ -67,12 +67,12 @@
                                     
                                         <div class="form-group">
                                           <label>Footer Invoice Text</label>
-                                          <textarea class="textarea" name="footer_invoice" required>{{$footer}}</textarea>
+                                          <textarea class="textarea" name="footer_invoice" class="form-control" style="width: 100%;" required>{{$footer}}</textarea>
                                         </div>
 
                                         <div class="form-group">
                                           <label>Footer Invoice Label</label>
-                                          <textarea class="textarea" name="footer_label_inv" required>{{$label}}</textarea>
+                                          <textarea class="textarea" name="footer_label_inv" class='form-control' style="width: 100%;" required>{{$label}}</textarea>
                                         </div>
 
                                                                             

@@ -21,6 +21,7 @@ use App\Models\MsMasterCoa;
 use App\Models\MsJournalType;
 use App\Models\MsConfig;
 use App\Models\TrLedger;
+use App\Models\MsUnit;
 use App\Models\TrInvoiceJournal;
 use DB;
 use PDF;
@@ -56,7 +57,7 @@ class InvoiceController extends Controller
 
             // olah data
             $count = TrInvoice::count();
-            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_iscancel','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
+            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_iscancel','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name','ms_unit.unit_code')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                     ->join('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
@@ -109,7 +110,7 @@ class InvoiceController extends Controller
                 $temp = [];
                 $temp['id'] = $value->id;
                 $temp['contr_no'] = $value->contr_no;
-                $temp['unit'] = $value->unit_name." (".$value->floor_name.")";
+                $temp['unit'] = $value->unit_code;
                 $temp['inv_number'] = $value->inv_number;
                 $temp['inv_date'] = date('d/m/Y',strtotime($value->inv_date));
                 $temp['inv_duedate'] = date('d/m/Y',strtotime($value->inv_duedate));
@@ -123,7 +124,7 @@ class InvoiceController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['inv_post'] = !empty($value->inv_post) ? 'yes' : 'no';
                 $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'">';
-                $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a>';
+                $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Kuitansi</a>';
                 $temp['inv_iscancel'] = $value->inv_iscancel;
                 // $temp['daysLeft']
                 $result['rows'][] = $temp;
@@ -147,7 +148,7 @@ class InvoiceController extends Controller
                 ->where('tr_invoice_detail.inv_id',$inv_id)
                 ->get();
             foreach ($result as $key => $value) {
-                $result[$key]->invdt_amount = "Rp. ".$value->invdt_amount;
+                $result[$key]->invdt_amount = "Rp. ".number_format($value->invdt_amount);
                 $result[$key]->meter_start = (int)$value->meter_start;
                 $result[$key]->meter_end = (int)$value->meter_end;
                 $result[$key]->meter_used = !empty($value->meter_used) ? (int)$value->meter_used." ".$value->costd_unit : (int)$value->meter_used;
@@ -402,6 +403,9 @@ class InvoiceController extends Controller
                             $duedate = date('Y-m-d', strtotime('+'.$value->continv_period.' month'));
                             // $totalWithTaxStamp = ($totalPay * 1.1) + $totalStamp;
                             $totalWithStamp = $totalPay + $totalStamp;
+
+                            $footer = @MsConfig::where('name','footer_invoice')->first()->value;
+                            $label = @MsConfig::where('name','footer_label_inv')->first()->value;
                             $inv = [
                                 'tenan_id' => $value->tenan_id,
                                 'inv_number' => $value->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
@@ -417,7 +421,9 @@ class InvoiceController extends Controller
                                 'invtp_id' => $value->invtp_id,
                                 'contr_id' => $contract->id,
                                 'created_by' => Auth::id(),
-                                'updated_by' => Auth::id()
+                                'updated_by' => Auth::id(),
+                                'footer' => $footer,
+                                'label' => $label
                             ];
                             $insertInvoice = TrInvoice::create($inv);
 
@@ -464,28 +470,24 @@ class InvoiceController extends Controller
             }
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
-            $footer = @MsConfig::where('name','footer_invoice')->first()->value;
-            $label = @MsConfig::where('name','footer_label_inv')->first()->value;
 
             $set_data = array(
                 'invoice_data' => $invoice_data,
                 'result' => $result,
                 'company' => $company,
-                'type' => $type,
-                'footer' => $footer,
-                'label' => $label
+                'type' => $type
             );
             
             if($type == 'pdf'){
-                $pdf = PDF::loadView('print_faktur', $set_data);
+                $pdf = PDF::loadView('print_faktur', $set_data)->setPaper('a4');
 
-                return $pdf->download('FAKTUR-'.$invoice_data['inv_number'].'.pdf');
+                return $pdf->download('FAKTUR-ABC.pdf');
             }else{
                 return view('print_faktur', $set_data);
             }
-        }catch(\Exception $e){
-            return view('print_faktur', array('errorMsg' => $e->getMessage()));
-        } 
+         }catch(\Exception $e){
+             return $e->getMessage();
+         } 
     }
 
     public function posting(Request $request){
@@ -674,6 +676,34 @@ class InvoiceController extends Controller
         }catch(\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Error Occured']);
         } 
+    }
+
+    public function kuitansi(Request $request){
+            $inv_id = $request->id;
+            if(!is_array($inv_id)) $inv_id = [$inv_id];
+            $type = $request->type;
+
+            $invoice_data = TrInvoice::whereIn('id',$inv_id)->with('MsTenant')->get()->toArray();
+            foreach ($invoice_data as $key => $inv) {
+                $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
+                ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
+                ->leftJoin('ms_cost_detail','tr_invoice_detail.costd_id',"=",'ms_cost_detail.id')
+                ->leftJoin('tr_meter','tr_meter.id',"=",'tr_invoice_detail.meter_id')
+                ->leftJoin('tr_period_meter','tr_period_meter.id',"=",'tr_meter.prdmet_id')
+                ->where('tr_invoice_detail.inv_id',$inv['id'])
+                ->get()->toArray();
+                $invoice_data[$key]['details'] = $result;
+            }
+            
+            $company = MsCompany::with('MsCashbank')->first()->toArray();
+
+            $set_data = array(
+                'invoice_data' => $invoice_data,
+                'result' => $result,
+                'company' => $company,
+                'type' => $type
+            );
+            return view('print_kuitansi', $set_data);
     }
 
 }

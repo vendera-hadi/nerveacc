@@ -32,7 +32,7 @@
         <!-- Sidebar Menu -->
         <ul class="sidebar-menu">
             <?php
-              $masterUrls = [url('coa'), url('department'), url('invtype'), url('groupaccount'), url('company')];
+              $masterUrls = [url('coa'), url('department'), url('invtype'), url('groupaccount'), url('company'), url('config')];
               
             ?>
             <li class="treeview @if(in_array(Request::url(),$masterUrls)){{'active'}}@endif">
@@ -139,10 +139,10 @@
 
             
             <?php
-              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview')];
-              $cashbankUrls = [route('payment.index'), route('cash_bank.index')];
+              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index')];
+              
             ?>
-            <li class="treeview @if(in_array(Request::url(),$arUrls) || in_array(Request::url(),$cashbankUrls)){{'active'}}@endif">
+            <li class="treeview @if(in_array(Request::url(),$arUrls)){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-book"></i> <span>FINANCE</span>
                 <span class="pull-right-container">
@@ -150,8 +150,7 @@
                 </span>
               </a>
               <ul class="treeview-menu">
-                <li @if(Request::url() == route('invoice.index')) class="active" @endif><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
-                <li @if(Request::url() == route('aging.index')) class="active" @endif><a href="{{route('aging.index')}}"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>
+                
                 <li>
                     <a href="#"><i class="fa fa-circle"></i> Account Receivables
                         <span class="pull-right-container">
@@ -160,22 +159,17 @@
                     </a>
                     <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
                       <li @if(Request::url() == route('invoice.generate')) class="active" @endif><a href="{{route('invoice.generate')}}"><i class="fa fa-circle-o"></i> Generate Invoice</a></li>
+                      <li @if(Request::url() == route('invoice.index')) class="active" @endif><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
+                      <li @if(Request::url() == route('aging.index')) class="active" @endif><a href="{{route('aging.index')}}"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>
                       <li @if(Request::url() == route('report.arview')) class="active" @endif><a href="{{route('report.arview')}}"><i class="fa fa-circle-o"></i> AR Reports</a></li>
-                    </ul>
-                </li>
-                <li ><a href="#"><i class="fa fa-circle-o"></i> Account Payable</a></li>
-                <li>
-                    <a href="#"><i class="fa fa-circle"></i> Cash Bank
-                        <span class="pull-right-container">
-                          <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
-                    <ul class="treeview-menu @if(in_array(Request::url(),$cashbankUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$cashbankUrls)) style="display:block" @endif>
+                      <li @if(Request::url() == route('journal.index')) class="active" @endif><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
                       <li @if(Request::url() == route('payment.index')) class="active" @endif><a href="{{route('payment.index')}}"><i class="fa fa-circle-o"></i> Payment Invoice</a></li>
                       <li @if(Request::url() == route('cash_bank.index')) class="active" @endif><a href="{{route('cash_bank.index')}}"><i class="fa fa-circle-o"></i> Cash Bank List</a></li>
                     </ul>
                 </li>
-                <li @if(Request::url() == route('journal.index')) class="active" @endif><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
+                <li ><a href="#"><i class="fa fa-circle-o"></i> Account Payable</a></li>
+                
+                
               
                 <!-- report -->
                 <li>

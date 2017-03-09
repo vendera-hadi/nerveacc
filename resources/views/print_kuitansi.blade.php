@@ -85,58 +85,20 @@ table tr td{font-size:9pt;}
             <div style="font-size:10pt; text-align: center; width: 600px;"><?php echo 'Tlp: '.$company_phone.'/Fax: '.$company_fax; ?></div>
             <table style="width:100%;">
                 <tr>
-                    <td style="text-align:center;" colspan="2"><h4 style="font-size:12pt;">INVOICE</h4></td>
-                </tr>
-                <tr>
-                    <td width="60%">No. Unit : <?php ?></td>
-                    <td width="40%">
-                        <table width="100%">
-                            <tr>
-                                <td width="50%">Nomer / Number</td>
-                                <td>: <?php echo $no_invoice; ?></td>
-                            </tr>
-                        </table>
+                    <td style="text-align:center;" colspan="2">
+                    <h4 style="font-size:12pt;">RECEIPT NO. ....</h4>
+                    <p>INV. {{$inv['inv_number']}}</p>
+                    <p>Diterima dari : {{$tenan_name}}</p>
+                    <p>Banyaknya Uang : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
                     </td>
                 </tr>
-                <tr>
-                    <td width="60%"><b><?php echo $tenan_name; ?></b></td>
-                    <td width="40%">
-                        <table width="100%">
-                            <tr>
-                                <td width="50%">Tanggal / Date</td>
-                                <td>: <?php echo $invoice_date; ?></td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td rowspan="2" width="60%" style="vertical-align: top;"><?php echo $tenan_address; ?></td>
-                    <td width="40%">
-                        <table width="100%">
-                            <tr>
-                                <td width="50%">Jatuh Tempo</td>
-                                <td>: <?php echo $invoice_due_date; ?></td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr>
-                    <td width="40%">
-                        <table width="100%">
-                            <tr>
-                                <td width="50%">No. Virtual Account</td>
-                                <td>: </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
+                
             </table>
             <br>
             <table width="100%" style="border-collapse: collapse; border: solid 1px; line-height: 18px;">
                 <tr style="text-align: center;">
-                    <td width="5%" style="border-collapse: collapse; border: solid 1px; font-weight: bold;">NO</td>
                     <td width="80%" style="border-collapse: collapse; border: solid 1px;"><b>KETERANGAN</b><br>Description</td>
-                    <td width="15%" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br>Amount</td>
+                    <td width="20%" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br>Amount</td>
                 </tr>
                 <?php
                     if(!empty($inv['details'])){
@@ -146,7 +108,7 @@ table tr td{font-size:9pt;}
                             $total += $value['invdt_amount'];
                 ?>
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px; text-align: center; vertical-align: top;"><?php echo $no++; ?></td>
+                    
                     <td style="vertical-align: top;">
                         <?php echo $value['invdt_note'];?>
                     </td>
@@ -157,17 +119,17 @@ table tr td{font-size:9pt;}
                 <?php
                     }
                 ?>
-                <tr>
+                <!-- <tr>
                     <td style="border-collapse: collapse; border-right: solid 1px; text-align: center; vertical-align: top;">4</td>
                     <td>BIAYA ADMINISTRASI</td>
                     <td style="border-collapse: collapse; border-left: solid 1px;"></td>
-                </tr>
+                </tr> -->
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
+                    
                     <td>&nbsp;</td>
                     <td style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
-                <tr>
+                <!-- <tr>
                     <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
                     <td>Tagihan Bulan Ini</td>
                     <td style="border-collapse: collapse; border-left: solid 1px;"></td>
@@ -181,16 +143,16 @@ table tr td{font-size:9pt;}
                     <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
                     <td>Tagihan belum terbayar</td>
                     <td style="border-collapse: collapse; border-left: solid 1px;"></td>
-                </tr>
+                </tr> -->
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
+                    
                     <td>&nbsp;</td>
                     <td style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
+                    
                     <td><b>TOTAL</b></td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;"></td>
+                    <td style="border-collapse: collapse; border-left: solid 1px; text-align: right"><b>Rp. {{number_format($total,0)}}</b></td>
                 </tr>
                 <?php
                     }
@@ -200,15 +162,14 @@ table tr td{font-size:9pt;}
             <table width="100%" style="line-height: 18px;">
                 <tr>
                     <td width="77%" style="vertical-align:top">
-                        {!!$inv['footer']!!}<br><br>
-                        {!!$inv['label']!!}
+                        <p style="padding-right: 50px;">Pembayaran dengan cek/giro belum dianggap sah selama cek/giro itu belum diclearing oleh bank bersangkutan.</p>
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
                         Jakarta, <?php echo date('d F Y'); ?><br><br><br><br>
                         <br><br>
                         <b><u>{{$company_sign}}</u></b><br>
                         {{$company_position}}
-                    </td>
+                    </td> 
                 </tr>
                 
             </table>
@@ -219,7 +180,7 @@ table tr td{font-size:9pt;}
 
 <?php if($type != 'pdf'){ ?>
     <script type="text/javascript">
-        window.print();
+         window.print();
     </script>
 <?php } ?>
 

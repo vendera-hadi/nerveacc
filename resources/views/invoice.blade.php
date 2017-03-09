@@ -73,16 +73,16 @@
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="checkbox" width="25" sortable="true"></th>
-                            <th field="inv_number" width="100" sortable="true">No.Invoice</th>
-                            <th field="contr_no" width="100" sortable="true">No Kontrak</th>
+                            <th field="inv_number" width="70" sortable="true">No.Invoice</th>
+                            <!-- <th field="contr_no" width="100" sortable="true">No Kontrak</th> -->
                             <th field="tenan_name" width="100" sortable="true">Nama Tenan</th>
-                            <th field="unit" width="150" sortable="true">Unit</th>  
-                            <th field="inv_date" width="100" sortable="true">Tgl Invoice</th>
-                            <th field="inv_duedate" width="100" sortable="true">Jatuh Tempo</th>
-                            <th field="inv_amount" width="100" sortable="true" align="right">Amount</th>
+                            <th field="unit" width="45" sortable="true">Unit</th>  
+                            <th field="inv_date" width="80" sortable="true">Tgl Invoice</th>
+                            <th field="inv_duedate" width="80" sortable="true">Jatuh Tempo</th>
+                            <th field="inv_amount" width="70" sortable="true" align="right">Amount</th>
                             <!-- <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th>  -->
-                            <th field="invtp_name" width="150" sortable="true">Jenis Invoice</th>
-                            <th field="inv_post" width="50" sortable="true">Posted</th>       
+                            <th field="invtp_name" width="90" sortable="true">Jenis Invoice</th>
+                            <th field="inv_post" width="40" sortable="true">Posted</th>       
                         <th field="action_button" width="80" sortable="true">action</th>
                         </tr>
                     </thead>
