@@ -308,6 +308,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('invoice/posting','InvoiceController@posting')->name('invoice.posting');
 	Route::post('invoice/insert','InvoiceController@insert')->name('invoice.insert');
 	Route::post('invoice/cancel','InvoiceController@cancel')->name('invoice.cancel');
+	Route::post('invoice/ajax-get-footer','InvoiceController@ajaxGetFooter')->name('invoice.ajaxgetfooter');
+	Route::post('invoice/ajax-store-footer','InvoiceController@ajaxStoreFooter')->name('invoice.ajaxstorefooter');
 
 	// aging piutang
 	Route::get('aging','AgingController@index')->name('aging.index');

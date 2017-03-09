@@ -706,4 +706,28 @@ class InvoiceController extends Controller
             return view('print_kuitansi', $set_data);
     }
 
+    public function ajaxGetFooter(Request $request){
+        $inv_id = $request->id;
+        $invoice = TrInvoice::select('id','footer','label')->find($inv_id)->toArray();
+        if(!$invoice) return response()->json(['errMsg' => 'Invoice not found']);
+
+        return response()->json(['status' => 1, 'result' => $invoice]); 
+    }
+
+    public function ajaxStoreFooter(Request $request){
+        if(!empty(@$request->id)){
+            try{
+                $invoice = TrInvoice::find($request->id);
+                $invoice->footer = $request->footer_invoice;
+                $invoice->label = $request->footer_label_inv;
+                $invoice->save();
+                return response()->json(['success' => 1]);
+            }catch(\Exception $e){
+                return response()->json(['errMsg' => $e->getMessage()]);
+            }
+        }else{
+            return response()->json(['errMsg' => 'Invoice ID not found']);
+        }
+    }
+
 }

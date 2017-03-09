@@ -17,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
     <!-- datepicker -->
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -96,6 +97,7 @@
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="cancelInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-ban"></i>&nbsp;Cancel Invoice</span></a>           
                     <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="printInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-print"></i>&nbsp;Print</span></a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="editFooter()" group="" id=""><span class="l-btn-text"><i class="fa fa-font"></i>&nbsp;Edit Footer/Label</span></a>
                 </div>
                 <!-- end icon -->
             
@@ -258,6 +260,57 @@
 
                 <!-- End Modal -->
 
+                <div id="editFooterModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog" style="width:900px">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Edit Footer & Label Invoice</h4>
+                      </div>
+                      <div class="modal-body" id="editFooterModalContent">
+                            <!-- isi form -->
+                            <form method="POST" id="formEditFooter">
+                                <input type="hidden" name="id" value="">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                          <label>Footer Invoice Text</label>
+                                          <div id="footer_invoice">
+                                          <textarea class="textarea" name="footer_invoice" class="form-control" style="width: 100%;" required></textarea>
+                                          </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                          <label>Footer Invoice Label</label>
+                                          <div id="footer_label_inv">
+                                          <textarea class="textarea" name="footer_label_inv" class='form-control' style="width: 100%;" required></textarea>
+                                          </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-sm-3 col-sm-offset-9">
+                                        <button class="btn btn-info pull-right">Submit</button>
+                                    </div>
+                                </div>
+                                
+                            </form>
+                            <!-- end form -->
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- End Modal -->
+
                 <!-- Modal select contract -->
                 <div id="contractModal" class="modal fade" role="dialog">
                   <div class="modal-dialog">
@@ -289,11 +342,12 @@
 <script type="text/javascript" src="{{ asset('js/datagrid-detailview.js') }}"></script>
 <!-- datepicker -->
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
+<script type="text/javascript" src="{{asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js')}}"></script>
 <script type="text/javascript">
 var entity = "List Invoice"; // nama si tabel, ditampilin di dialog
 var get_url = "{{route('invoice.get')}}";
 var get_url2 = "{{route('invoice.getdetail')}}";
-
+// $(".textarea").wysihtml5();
 $('.datepicker').datepicker({
             autoclose: true
         });
@@ -346,6 +400,24 @@ function cancelInv(){
     }else{
         $.messager.alert('Warning', 'You can\'t post invoice that already posted');
     }
+}
+
+function editFooter(){
+    var row = $('#dg').datagrid('getSelected');
+    $('#footer_invoice').html('<textarea class="textarea" name="footer_invoice" class="form-control" style="width: 100%;" required></textarea>');
+    $('#footer_label_inv').html('<textarea class="textarea" name="footer_label_inv" class="form-control" style="width: 100%;" required></textarea>');
+    $.post('{{route('invoice.ajaxgetfooter')}}', {id: row.id}, function(data){
+        console.log(data);
+        if(data.errMsg){ 
+            $.messager.alert('Warning',data.errMsg);
+        }else{
+            $('#formEditFooter input[name=id]').val(row.id);
+            $('#formEditFooter textarea[name=footer_invoice]').val(data.result.footer);
+            $('#formEditFooter textarea[name=footer_label_inv]').val(data.result.label);
+            $(".textarea").wysihtml5();
+            $('#editFooterModal').modal("show");
+        }
+    }, 'json');
 }
 
 function openWindow(url, title, w, h){
@@ -538,6 +610,18 @@ $(function(){
             });
           }
             // $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><strong>Name :</strong> <input type="text" name="costd_name[]" class="form-control costd_name"  required><strong>Unit :</strong> <input type="text" name="costd_unit[]" class="form-control costd_unit" required><strong>Cost Rate :</strong> <input type="text" name="costd_rate[]" class="form-control costd_rate" required><strong>Cost Burden :</strong> <input type="text" name="costd_burden[]" class="form-control costd_burden" required><strong>Cost Admin :</strong> <input type="text" name="costd_admin[]" class="form-control costd_admin" required><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select><strong>Use Meter :</strong> <select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+    });
+
+    $('#formEditFooter').submit(function(e){
+        e.preventDefault();
+        $.post('{{route('invoice.ajaxstorefooter')}}',$(this).serialize(),function(data){
+            if(data.errMsg) $.messager.alert('Warning',data.errMsg);
+            if(data.success){
+                $.messager.alert('Success','Update success');
+                $('#editFooterModal').modal("hide");
+                $('#dg').datagrid('reload');
+            }
+        },'json');
     });
 
     $('#formAddInv').submit(function(e){
