@@ -173,7 +173,7 @@ class InvoiceController extends Controller
         if($month == 1) $month = 12;
         else $month = $month - 1;
         $month = str_pad($month, 2, 0, STR_PAD_LEFT);
-   
+        // BUAT DATE LIMITATION PERIOD METER
         $tempTimeStart = implode('-', [$year,$month,'01']);
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
         $companyData = MsCompany::first();
@@ -235,7 +235,7 @@ class InvoiceController extends Controller
                     $insertFlag = true;
                     // echo "<br>Invoice #".$countInvoice."<br>";
                     // Looping per Invoice yg sdh di grouping (CONTRACT INVOICE PER INV TYPE)
-                    //$totalPay = 0;
+                    $totalPay = 0;
                     foreach ($details as $key2 => $value) {
                         //echo "Invoice ".$key." , detail ".$key2."<br><br>";
                         // LAST INV DATE
@@ -249,7 +249,7 @@ class InvoiceController extends Controller
                             // KALAU is meter true, hitung cost meteran 
                             if(!empty($value->costd_ismeter)){
                                 // echo 'meter<br>';
-                                $totalPay = 0;
+                                // $totalPay = 0;
                                 // get harga meteran selama periode bulan ini
                                 $lastPeriodMeterofMonth = TrPeriodMeter::where(\DB::raw('Extract(month from prd_billing_date)'),'=',$month)->where('status',1)->orderBy('id','desc')->first();
                                 // echo $tempTimeStart." dan ".$tempTimeEnd; die();
@@ -270,11 +270,14 @@ class InvoiceController extends Controller
                                         // KALAU ELECTRICITY
                                         if($value->cost_item_id == 1){
                                             $amount = $amount + (0.03 * $amount);
+                                            // echo 'listrik '.$amount."<br>";
                                             $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Rate : ".number_format($meter->costd_rate,0)." Meter Akhir : ".number_format($meter->meter_end,0)." Meter Awal : ".number_format($meter->meter_start,0)." Konsumsi : ".number_format($meter->meter_used,0)."<br>BPJU 3%";
                                         }else if($value->cost_item_id == 2){
                                             // KALAU AIR
+                                            // echo 'air '.$amount."<br>";
                                             $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Akhir : ".number_format($meter->meter_end,0)." Meter Awal : ".number_format($meter->meter_start,0)." Konsumsi : ".number_format($meter->meter_used,0)."<br>Biaya Pemakaian : ".number_format($meter->meter_used,0)." x ".number_format($meter->costd_rate,0)."<br>Biaya Beban Tetap Air : ".number_format($meter->meter_burden,0)."<br>Biaya Pemeliharaan Meter : ".number_format($meter->meter_admin,0); 
                                         }else{
+                                            // echo 'other '.$amount."<br>";
                                             $note = $meter->costd_name."<br>Konsumsi : ".number_format($meter->meter_used,0)." ".$meter->costd_unit." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));
                                         }
 
@@ -293,6 +296,7 @@ class InvoiceController extends Controller
                                             'continv_next_inv' => date('Y-m-d',strtotime($meter->prd_billing_date." +".$value->continv_period." months"))
                                         ];
                                         $totalPay+=$amount;
+                                        // echo 'totalpay : '.$totalPay."<br>";
                                     }
                                 }else{
                                     echo "<br><b>Contract #".$contract->contr_no."</b><br> Meter Input for ".date('F Y',strtotime($tempTimeStart)).' was not inputed yet. Go to <a href="'.url('period_meter').'">Meter Input</a> and create Period then Input Meter of this particular month<br>';
@@ -303,7 +307,7 @@ class InvoiceController extends Controller
                             else{
                                 // echo 'non meter<br>';
                                 // YG NOT USING METER, GENERATE FULLRATE AJA
-                                $totalPay = 0;
+                                // $totalPay = 0;
                                 if(!empty($value->contr_terminate_date) && ($tempTimeEnd > $value->contr_terminate_date)){
                                     // JIKA CONTRACT TERMINATE DATE BERAKHIR BULAN INI
                                     echo "<br><b>Contract #".$contract->contr_no."</b><br> terminated at ".date('d/m/Y',strtotime($value->contr_terminate_date)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here";
@@ -351,7 +355,9 @@ class InvoiceController extends Controller
                                         'continv_start_inv' => $tempTimeStart,
                                         'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months"))
                                     ];
+                                    // echo 'non meter cost '.$amount."<br>";
                                     $totalPay+=$amount;
+                                    // echo 'totalpay : '.$totalPay."<br>";
                                 }
                                 // ends
                             }
@@ -365,7 +371,7 @@ class InvoiceController extends Controller
 
                     //echo var_dump($invDetail)."<br><br>"; 
 
-                    //$insertFlag = false;
+                    // $insertFlag = false;
                     // INSERT DB
                     if($insertFlag){
                         // HABIS JABARIN DETAIL, INSERT INVOICE 
