@@ -265,11 +265,10 @@ class InvoiceController extends Controller
                                         echo "<br><b>Contract #".$contract->contr_no."</b><br>Contract Code <strong>".$value->contr_code."</strong> Cost Item <strong>".$value->costd_name."</strong>, Meter ID is not inputed yet<br>";
                                         $insertFlag = false;
                                     }else{
-                                        $amount = $meter->meter_cost;
+                                        $amount = $meter->total;
                                         // note masi minus rumus     
                                         // KALAU ELECTRICITY
                                         if($value->cost_item_id == 1){
-                                            $amount = $amount + (0.03 * $amount);
                                             // echo 'listrik '.$amount."<br>";
                                             $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Rate : ".number_format($meter->costd_rate,0)." Meter Akhir : ".number_format($meter->meter_end,0)." Meter Awal : ".number_format($meter->meter_start,0)." Konsumsi : ".number_format($meter->meter_used,0)."<br>BPJU 3%";
                                         }else if($value->cost_item_id == 2){
