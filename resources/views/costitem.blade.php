@@ -105,6 +105,9 @@
                             <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Component Billing:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
                         </div>
                         <div style="margin-bottom:10px">
+                            <input name="daya" class="easyui-textbox" label="Daya:" style="width:100%" data-options="validType:'length[0,100]'">
+                        </div>
+                        <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Komponen Ber-Meter:" style="width:300px;">
                                 <option value="true" >yes</option>
                                 <option value="false">no</option>
@@ -169,6 +172,7 @@
                             {field:'costd_admin',title:'Admin Cost',width:100},
                             {field:'costd_unit',title:'Satuan',width:100},
                             {field:'costd_ismeter',title:'Meter Status',width:100},
+                            {field:'daya',title:'Daya',width:100},
                             {field: 'action', title: 'Action',
                                  formatter:function(value,row,index)
                                  {

@@ -36,7 +36,7 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="dept_code" width="50" sortable="true">Department Code</th>
+                            <!-- <th field="dept_code" width="50" sortable="true">Department Code</th> -->
                             <th field="dept_name" width="50" sortable="true">Department Name</th>
                             <th field="dept_isactive" width="50" sortable="true">Active</th>
                         </tr>
@@ -57,9 +57,6 @@
                         closed="true" buttons="#dlg-buttons">
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Information</div>
-                        <div style="margin-bottom:10px">
-                            <input name="dept_code" class="easyui-textbox" required="true" data-options="required:true,validType:'length[0,3]'" label="Department Code:" style="width:100%">
-                        </div>
                         <div style="margin-bottom:10px">
                             <input name="dept_name" class="easyui-textbox" required="true" label="Department Name:" style="width:100%">
                         </div>

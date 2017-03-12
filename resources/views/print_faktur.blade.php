@@ -170,17 +170,7 @@ table tr td{font-size:9pt;}
                 <tr>
                     <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
                     <td>Tagihan Bulan Ini</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;"></td>
-                </tr>
-                <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
-                    <td>Denda</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;"></td>
-                </tr>
-                <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
-                    <td>Tagihan belum terbayar</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;"></td>
+                    <td style="border-collapse: collapse; border-left: solid 1px; text-align: right;">Rp. {{number_format($total,0)}}</td>
                 </tr>
                 <tr>
                     <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
@@ -190,13 +180,17 @@ table tr td{font-size:9pt;}
                 <tr>
                     <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
                     <td><b>TOTAL</b></td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;"></td>
+                    <td style="border-collapse: collapse; border-left: solid 1px; text-align: right;"><b>Rp. {{number_format($total,0)}}</b></td>
                 </tr>
                 <?php
                     }
                 ?>
             </table>
             <br>
+            <div style="font-size: 9pt;">
+            Terbilang :<br>
+            {{$inv['terbilang']}}
+            </div>
             <table width="100%" style="line-height: 18px;">
                 <tr>
                     <td width="77%" style="vertical-align:top">

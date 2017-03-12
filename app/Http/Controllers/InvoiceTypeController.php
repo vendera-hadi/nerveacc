@@ -63,7 +63,7 @@ class InvoiceTypeController extends Controller
         		$temp['id'] = $value->id;
         		$temp['invtp_name'] = $value->invtp_name;
         		$temp['invtp_prefix'] = $value->invtp_prefix;
-                $temp['invtp_coa_ar'] = $value->invtp_coa_ar;
+                $temp['invtp_coa_ar'] = trim($value->invtp_coa_ar);
         		$result['rows'][] = $temp;
         	}
             return response()->json($result);

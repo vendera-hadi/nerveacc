@@ -7,7 +7,7 @@
 
 <!-- page title -->
 @section('contentheader_title')
-   Reminder Unclosed Billing
+   Reminder Billing
 @endsection
 
 <!-- tambahan script atas -->
@@ -34,7 +34,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Reminder Unclosed Billing</li>
+        <li class="active">Reminder Billing</li>
     </ol>
 @stop
 

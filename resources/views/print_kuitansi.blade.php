@@ -87,12 +87,20 @@ table tr td{font-size:9pt;}
                 <tr>
                     <td style="text-align:center;" colspan="2">
                     <h4 style="font-size:12pt;">RECEIPT NO. ....</h4>
-                    <p>INV. {{$inv['inv_number']}}</p>
-                    <p>Diterima dari : {{$tenan_name}}</p>
-                    <p>Banyaknya Uang : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
                     </td>
                 </tr>
-                
+                <tr>
+                    <td width="20%">INV.</td>
+                    <td>: {{$inv['inv_number']}}</td>
+                </tr>
+                <tr>
+                    <td>Diterima dari</td>
+                    <td>: {{$tenan_name}}</td>
+                </tr>
+                <tr>
+                    <td>Banyaknya Uang</td>
+                    <td>: {{$inv['terbilang']}}</td>
+                </tr>
             </table>
             <br>
             <table width="100%" style="border-collapse: collapse; border: solid 1px; line-height: 18px;">

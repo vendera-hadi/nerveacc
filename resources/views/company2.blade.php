@@ -93,8 +93,20 @@
 						                  <label>Building Insurance (IDR)</label>
 						                  <input type="text" value="{{(int)$company->comp_build_insurance}}" name="comp_build_insurance" class="form-control numeric" id="compBuildInsurance" placeholder="Company Insurance" required>
 						                </div>
-
 						                <div class="form-group">
+						                  <label>Cash Bank ID</label>
+						                  <select name="cashbk_id" class="form-control" id="cashBank" required>
+						                  	@foreach($cashbanks as $cb)
+						                  	<option value="{{$cb->id}}" @if($cb->id == $company->cashbk_id){{'selected="selected"'}}@endif>
+						                  		{{$cb->cashbk_name}}
+						                  	</option>
+						                  	@endforeach
+						                  </select>
+						                </div>
+
+					                </div>
+					                <div class="col-sm-6">
+										<div class="form-group">
 						                  <label>NPP Insurance (IDR)</label>
 						                  <input type="text" value="{{(int)$company->comp_npp_insurance}}" name="comp_npp_insurance" class="form-control numeric" id="compNPPInsurance" placeholder="Company NPP Insurance" required>
 						                </div>
@@ -121,21 +133,10 @@
 						                  <input type="text" value="{{(int)$company->comp_materai2_amount}}" name="comp_materai2_amount" class="form-control numeric" id="compMateraiAmount2" placeholder="Company Materai Amount 2" required>
 						                </div>
 
-						                <div class="form-group">
-						                  <label>Cash Bank ID</label>
-						                  <select name="cashbk_id" class="form-control" id="cashBank" required>
-						                  	@foreach($cashbanks as $cb)
-						                  	<option value="{{$cb->id}}" @if($cb->id == $company->cashbk_id){{'selected="selected"'}}@endif>
-						                  		{{$cb->cashbk_name}}
-						                  	</option>
-						                  	@endforeach
-						                  </select>
-						                </div>
-
 						                @if($company->comp_image)
 										<div class="form-group">
 						                  <label>Current Image</label>
-						                  <img src="{{asset($company->comp_image)}}" class="img-responsive">
+						                  <img src="{{asset('/upload/'.$company->comp_image)}}" class="img-responsive">
 						                </div>						                
 						                @endif
 
@@ -145,7 +146,7 @@
 						                  <p class="help-block">masukkan icon company anda</p>
 						                </div>
 					                
-					                </div>
+									</div>
 					              </div>
 					              <!-- /.box-body -->
 

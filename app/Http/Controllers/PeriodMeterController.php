@@ -106,6 +106,7 @@ class PeriodMeterController extends Controller
                 $prdend = date("Y-m-d", strtotime($request->prdmet_end_date));
                 $input['prdmet_start_date'] = $prdstart;
                 $input['prdmet_end_date'] = $prdend;
+                $input['prd_billing_date'] = date("Y-m-d", strtotime($request->prd_billing_date));
                 $input['created_by'] = Auth::id();
                 $input['updated_by'] = Auth::id();
                 $input['status'] = FALSE;

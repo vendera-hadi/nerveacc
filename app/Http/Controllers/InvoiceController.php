@@ -92,7 +92,7 @@ class InvoiceController extends Controller
             }
             // jika ada keyword
             if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
-                                        $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'like','%'.$keyword.'%');
+                                        $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("unit_code"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'like','%'.$keyword.'%');
                                     });
             // jika ada inv type
             if(!empty($invtype)) $fetch = $fetch->where('tr_invoice.invtp_id',$invtype);
@@ -124,7 +124,7 @@ class InvoiceController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['inv_post'] = !empty($value->inv_post) ? 'yes' : 'no';
                 $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'">';
-                $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Kuitansi</a>';
+                $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Receipt</a>';
                 $temp['inv_iscancel'] = $value->inv_iscancel;
                 // $temp['daysLeft']
                 $result['rows'][] = $temp;
@@ -473,6 +473,9 @@ class InvoiceController extends Controller
                 ->get()->toArray();
                 $invoice_data[$key]['details'] = $result;
             }
+            $total = $invoice_data[0]['inv_outstanding'];
+            $terbilang = $this->terbilang($total);
+            $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
 
@@ -486,7 +489,7 @@ class InvoiceController extends Controller
             if($type == 'pdf'){
                 $pdf = PDF::loadView('print_faktur', $set_data)->setPaper('a4');
 
-                return $pdf->download('FAKTUR-ABC.pdf');
+                return $pdf->download('FAKTUR-INV.pdf');
             }else{
                 return view('print_faktur', $set_data);
             }
@@ -699,6 +702,9 @@ class InvoiceController extends Controller
                 ->get()->toArray();
                 $invoice_data[$key]['details'] = $result;
             }
+            $total = $invoice_data[0]['inv_outstanding'];
+            $terbilang = $this->terbilang($total);
+            $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
 
@@ -732,6 +738,29 @@ class InvoiceController extends Controller
             }
         }else{
             return response()->json(['errMsg' => 'Invoice ID not found']);
+        }
+    }
+
+    public function terbilang ($angka) {
+        $angka = (float)$angka;
+        $bilangan = array('','Satu','Dua','Tiga','Empat','Lima','Enam','Tujuh','Delapan','Sembilan','Sepuluh','Sebelas');
+        if ($angka < 12) {
+            return $bilangan[$angka];
+        } else if ($angka < 20) {
+            return $bilangan[$angka - 10] . ' Belas';
+        } else if ($angka < 100) {
+            $hasil_bagi = (int)($angka / 10);
+            $hasil_mod = $angka % 10;
+            return trim(sprintf('%s Puluh %s', $bilangan[$hasil_bagi], $bilangan[$hasil_mod]));
+        } else if ($angka < 200) { return sprintf('Seratus %s', $this->terbilang($angka - 100));
+        } else if ($angka < 1000) { $hasil_bagi = (int)($angka / 100); $hasil_mod = $angka % 100; return trim(sprintf('%s Ratus %s', $bilangan[$hasil_bagi], $this->terbilang($hasil_mod)));
+        } else if ($angka < 2000) { return trim(sprintf('Seribu %s', $this->terbilang($angka - 1000)));
+        } else if ($angka < 1000000) { $hasil_bagi = (int)($angka / 1000); $hasil_mod = $angka % 1000; return sprintf('%s Ribu %s', $this->terbilang($hasil_bagi), $this->terbilang($hasil_mod));
+        } else if ($angka < 1000000000) { $hasil_bagi = (int)($angka / 1000000); $hasil_mod = $angka % 1000000; return trim(sprintf('%s Juta %s', $this->terbilang($hasil_bagi), $this->terbilang($hasil_mod)));
+        } else if ($angka < 1000000000000) { $hasil_bagi = (int)($angka / 1000000000); $hasil_mod = fmod($angka, 1000000000); return trim(sprintf('%s Milyar %s', $this->terbilang($hasil_bagi), $this->terbilang($hasil_mod)));
+        } else if ($angka < 1000000000000000) { $hasil_bagi = $angka / 1000000000000; $hasil_mod = fmod($angka, 1000000000000); return trim(sprintf('%s Triliun %s', $this->terbilang($hasil_bagi), $this->terbilang($hasil_mod)));
+        } else {
+            return 'Data Salah';
         }
     }
 

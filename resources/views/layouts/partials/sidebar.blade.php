@@ -120,26 +120,11 @@
               </ul>
             </li>
 
-            <?php
-              $engineeringUrls = [url('period_meter'), url('complaint'), route('report.hmeter')];
-            ?>
-            <li class="treeview @if(in_array(Request::url(),$engineeringUrls)){{'active'}}@endif">
-              <a href="#">
-                <i class="fa fa-fire-extinguisher"></i> <span>ENGINEERING</span>
-                <span class="pull-right-container">
-                  <i class="fa fa-angle-left pull-right"></i>
-                </span>
-              </a>
-              <ul class="treeview-menu ">
-                <li @if(Request::url() == url('period_meter')) class="active" @endif><a href="{{url('period_meter')}}"><i class="fa fa-circle-o"></i> Meter Input</a></li>
-                <li @if(Request::url() == url('complaint')) class="active" @endif><a href="{{ url('complaint') }}"><i class="fa fa-circle-o"></i> Complain Entry</a></li>
-                <!-- <li @if(Request::url() == route('report.hmeter')) class="active" @endif><a href="{{route('report.hmeter')}}"><i class="fa fa-circle-o"></i> History Reports</a></li> -->
-              </ul>
-            </li>
+            
 
             
             <?php
-              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index')];
+              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index'),url('period_meter')];
               
             ?>
             <li class="treeview @if(in_array(Request::url(),$arUrls)){{'active'}}@endif">
@@ -158,6 +143,7 @@
                         </span>
                     </a>
                     <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
+                      <li @if(Request::url() == url('period_meter')) class="active" @endif><a href="{{url('period_meter')}}"><i class="fa fa-circle-o"></i> Meter Input</a></li>
                       <li @if(Request::url() == route('invoice.generate')) class="active" @endif><a href="{{route('invoice.generate')}}"><i class="fa fa-circle-o"></i> Generate Invoice</a></li>
                       <li @if(Request::url() == route('invoice.index')) class="active" @endif><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
                       <li @if(Request::url() == route('aging.index')) class="active" @endif><a href="{{route('aging.index')}}"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>

@@ -44,7 +44,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('department/delete', 'DepartmentController@delete')->name('department.delete');
 	// invoice type
 	Route::get('invtype','InvoiceTypeController@index');
-	Route::get('invtype/get', 'InvoiceTypeController@get')->name('invtype.get');
+	Route::post('invtype/get', 'InvoiceTypeController@get')->name('invtype.get');
 	Route::post('invtype/insert', 'InvoiceTypeController@insert')->name('invtype.insert');
 	Route::post('invtype/update', 'InvoiceTypeController@update')->name('invtype.update');
 	Route::post('invtype/delete', 'InvoiceTypeController@delete')->name('invtype.delete');
