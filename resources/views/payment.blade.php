@@ -58,11 +58,11 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_no" width="120" sortable="true">Billing Info Code</th>
-                            <th field="invpayh_checkno" width="120" sortable="true">Payment Code</th>
+                            <th field="tenan_name" width="120" sortable="true">Nama Tenant</th>
+                            <th field="unit_code" width="120" sortable="true">No Unit</th>
+                            <th field="paymtp_name" width="120" sortable="true">Payment Type</th>
                             <th field="invpayh_date" width="120" sortable="true">Payment Date</th>
-                            <th field="invpayh_amount" width="120" sortable="true">Payment Total</th>
+                            <th field="invpayh_amount" width="120" sortable="true">Total</th>
                             
                             <th field="invpayh_post" width="120" sortable="true">Posting Status</th>
                             <th field="action_button">Action</th>
@@ -93,7 +93,7 @@
                       </div>
 
                       <div class="form-group">
-                          <label>Payment Code</label>
+                          <label>No Giro</label>
                           <input type="text" name="invpayh_checkno" class="form-control">
                       </div>
                       
@@ -143,7 +143,7 @@
                          </div>
                          <div class="col-sm-6">
                             <div class="form-group">
-                                <label>Giro Date</label>
+                                <label>Cheque/Giro Date</label>
                                 <div class="input-group date">
                                   <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>

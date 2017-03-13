@@ -79,31 +79,34 @@ table tr td{font-size:9pt;}
     ?>
     <div class="page">
         <div class="subpage">
-            <div style="float:left;"><img src="{{asset('/upload/'.$company_logo)}}" style="width:110px;"/></div>
-            <div style="font-size:10pt; font-weight: bold; text-align: center; width: 600px;"><?php echo $company_name; ?></div>
-            <div style="font-size:10pt; text-align: center; width: 600px;"><?php echo $company_address; ?></div>
-            <div style="font-size:10pt; text-align: center; width: 600px;"><?php echo 'Tlp: '.$company_phone.'/Fax: '.$company_fax; ?></div>
+            <div style="position:absolute;"><img src="{{asset($company_logo)}}" style="width:110px;"/></div>
+            <div style="font-size:10pt; text-align: center; width: 100%;">
+                    <b>{{ $company_name }}</b><br>
+                    {{ $company_address }}<br>
+                    {{'Tlp: '.$company_phone.'/Fax: '.$company_fax}}<br><br><br>
+            </div>
+
             <table style="width:100%;">
                 <tr>
                     <td style="text-align:center;" colspan="2"><h4 style="font-size:12pt;">INVOICE</h4></td>
                 </tr>
                 <tr>
-                    <td width="60%">No. Unit : <?php ?></td>
+                    <td width="60%">Nama Tenan / No Unit :</td>
                     <td width="40%">
                         <table width="100%">
                             <tr>
-                                <td width="50%">Nomer / Number</td>
+                                <td width="50%">Nomor / <i>Number</i></td>
                                 <td>: <?php echo $no_invoice; ?></td>
                             </tr>
                         </table>
                     </td>
                 </tr>
                 <tr>
-                    <td width="60%"><b><?php echo $tenan_name; ?></b></td>
+                    <td width="60%"><b><?php echo $tenan_name; ?> / {{$inv['unit_code']}}</b></td>
                     <td width="40%">
                         <table width="100%">
                             <tr>
-                                <td width="50%">Tanggal / Date</td>
+                                <td width="50%">Tanggal / <i>Date</i></td>
                                 <td>: <?php echo $invoice_date; ?></td>
                             </tr>
                         </table>
@@ -114,7 +117,7 @@ table tr td{font-size:9pt;}
                     <td width="40%">
                         <table width="100%">
                             <tr>
-                                <td width="50%">Jatuh Tempo</td>
+                                <td width="50%">Jatuh Tempo / <i>Due Date</i></td>
                                 <td>: <?php echo $invoice_due_date; ?></td>
                             </tr>
                         </table>
@@ -124,7 +127,7 @@ table tr td{font-size:9pt;}
                     <td width="40%">
                         <table width="100%">
                             <tr>
-                                <td width="50%">No. Virtual Account</td>
+                                <td width="50%"><i>Virtual Account</i></td>
                                 <td>: </td>
                             </tr>
                         </table>
@@ -134,9 +137,9 @@ table tr td{font-size:9pt;}
             <br>
             <table width="100%" style="border-collapse: collapse; border: solid 1px; line-height: 18px;">
                 <tr style="text-align: center;">
-                    <td width="5%" style="border-collapse: collapse; border: solid 1px; font-weight: bold;">NO</td>
-                    <td width="80%" style="border-collapse: collapse; border: solid 1px;"><b>KETERANGAN</b><br>Description</td>
-                    <td width="15%" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br>Amount</td>
+                    
+                    <td width="80%" style="border-collapse: collapse; border: solid 1px;"><b>KETERANGAN</b><br><i>Description</i></td>
+                    <td width="20%" colspan="2" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br><i>Amount</i></td>
                 </tr>
                 <?php
                     if(!empty($inv['details'])){
@@ -146,41 +149,43 @@ table tr td{font-size:9pt;}
                             $total += $value['invdt_amount'];
                 ?>
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px; text-align: center; vertical-align: top;"><?php echo $no++; ?></td>
-                    <td style="vertical-align: top;">
+                    <td style="vertical-align: top; padding-left:15px; padding-right:10px; padding-top:10px">
                         <?php echo $value['invdt_note'];?>
                     </td>
-                    <td style="border-collapse: collapse; border-left: solid 1px; text-align: right;">
-                        <div style="padding-right: 3px;">Rp. <?php echo number_format($value['invdt_amount']);?></div>
+                    <td style="border-left: solid 1px; text-align:right">Rp.</td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px">
+                        <div style="padding-right: 3px;"><?php echo number_format($value['invdt_amount']);?></div>
                     </td>
                 </tr>
                 <?php
                     }
                 ?>
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px; text-align: center; vertical-align: top;">4</td>
-                    <td>BIAYA ADMINISTRASI</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;"></td>
+                    
+                    <td style="padding-left:15px; padding-right:10px">BIAYA ADMINISTRASI</td>
+                    <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;"></td>
                 </tr>
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
+                    
                     <td>&nbsp;</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
+                    <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
-                    <td>Tagihan Bulan Ini</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px; text-align: right;">Rp. {{number_format($total,0)}}</td>
+                    
+                    <td style="padding-left:15px; padding-right:10px">Tagihan Bulan Ini</td>
+                    <td style="border-left: solid 1px; text-align:right">Rp.</td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px">{{number_format($total,0)}}</td>
                 </tr>
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
+                    
                     <td>&nbsp;</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
+                    <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
                 <tr>
-                    <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
-                    <td><b>TOTAL</b></td>
-                    <td style="border-collapse: collapse; border-left: solid 1px; text-align: right;"><b>Rp. {{number_format($total,0)}}</b></td>
+                    
+                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px"><b>TOTAL</b></td>
+                    <td style="border-left: solid 1px; text-align:right">Rp.</td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
                 </tr>
                 <?php
                     }
@@ -198,7 +203,7 @@ table tr td{font-size:9pt;}
                         {!!$inv['label']!!}
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
-                        Jakarta, <?php echo date('d F Y'); ?><br><br><br><br>
+                        Jakarta, <?php echo date('d M Y'); ?><br><br><br><br>
                         <br><br>
                         <b><u>{{$company_sign}}</u></b><br>
                         {{$company_position}}
@@ -213,7 +218,7 @@ table tr td{font-size:9pt;}
 
 <?php if($type != 'pdf'){ ?>
     <script type="text/javascript">
-        window.print();
+        // window.print();
     </script>
 <?php } ?>
 

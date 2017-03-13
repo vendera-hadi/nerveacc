@@ -73,7 +73,7 @@ class PaymentController extends Controller
 
             // olah data
             $count = TrInvoicePaymhdr::count();
-            $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.*', 'ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
+            $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.*', 'ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_code','ms_floor.floor_name', 'ms_payment_type.paymtp_name')
                     ->join('ms_payment_type',   'ms_payment_type.id',"=",'tr_invoice_paymhdr.paymtp_code')
                     ->join('tr_contract',       'tr_contract.id',"=",'tr_invoice_paymhdr.contr_id')
                     ->join('ms_unit',           'tr_contract.unit_id',"=",'ms_unit.id')
@@ -120,9 +120,9 @@ class PaymentController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['contr_no'] = $value->contr_no;
+                $temp['unit_code'] = $value->unit_code;
                 $temp['unit'] = $value->unit_name." (".$value->floor_name.")";
-                $temp['invpayh_checkno'] = $value->invpayh_checkno;
+                $temp['paymtp_name'] = $value->paymtp_name;
                 $temp['invpayh_date'] = date('d/m/Y',strtotime($value->invpayh_date));
                 $temp['invpayh_amount'] = "Rp. ".$value->invpayh_amount;
                 $temp['invtp_name'] = $value->invtp_name;
@@ -202,19 +202,17 @@ class PaymentController extends Controller
 
     public function insert(Request $request){
         $messages = [
-            'contr_id' => 'Contract id must be choose',
-            'cashbk_id' => 'cash bank must be choose',
-            'paymtp_code' => 'payment type must be choose',
-            'invpayh_date' => 'payment date must be fill',
-            'invpayh_checkno' => 'payment code must be fill'
+            'contr_id.required' => 'Tenan name is required',
+            'cashbk_id.required' => 'Bank is required',
+            'paymtp_code.required' => 'Payment Type is required',
+            'invpayh_date.required' => 'Payment Date is required',
         ];
 
         $validator = Validator::make($request->all(), [
             'contr_id' => 'required:tr_invoice_paymhdr',
             'cashbk_id' => 'required:tr_invoice_paymhdr',
             'paymtp_code' => 'required:tr_invoice_paymhdr',
-            'invpayh_date' => 'required:tr_invoice_paymhdr',
-            'invpayh_checkno' => 'required:tr_invoice_paymhdr',
+            'invpayh_date' => 'required:tr_invoice_paymhdr'
         ], $messages);
 
         if ($validator->fails()) {
@@ -223,12 +221,12 @@ class PaymentController extends Controller
         }
         
         $data_payment = $request->input('data_payment');
-        
+        // dd($data_payment);
         $detail_payment = array();
 
         $cek_pay = false;
         $total = 0;
-        if(!empty($data_payment['invpayd_amount'])){
+        if(!empty($data_payment) && count($data_payment['invpayd_amount']) > 0){
             foreach ($data_payment['invpayd_amount'] as $key => $value) {
                 if(!empty($value)){
                     $cek_pay = true;
@@ -249,6 +247,8 @@ class PaymentController extends Controller
                     }
                 }
             }
+        }else{
+            return ['status' => 0, 'message' => 'Please Check at least one of Invoice for payment'];
         }
 
         try{

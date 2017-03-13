@@ -24,14 +24,16 @@
 			        <th width="80">Amount</th> 
 			    </tr>
 			</thead>
+			@if(count($invoice['tr_invoice_paymdtl']) > 0)
 			<tbody>
 			    @foreach($invoice['tr_invoice_paymdtl'] as $value)
 			    <tr>
-			        <td>{{$value['inv_number']}}</td>
+			        <td>{{!empty(@$value['inv_number']) ? $value['inv_number'] : '(Deleted Invoice)' }}</td>
 			        <td>{{'Rp. '.number_format($value['invpayd_amount'])}}</td>
 			    </tr>
 			    @endforeach
 			</tbody>
+			@endif
 			</table>
 	  </div>
 	  

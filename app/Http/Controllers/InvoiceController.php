@@ -462,7 +462,10 @@ class InvoiceController extends Controller
             if(!is_array($inv_id)) $inv_id = [$inv_id];
             $type = $request->type;
 
-            $invoice_data = TrInvoice::whereIn('id',$inv_id)->with('MsTenant')->get()->toArray();
+            $invoice_data = TrInvoice::select('tr_invoice.*', 'ms_unit.unit_code')
+                                    ->join('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
+                                    ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                                    ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
                 $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
                 ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
@@ -472,10 +475,11 @@ class InvoiceController extends Controller
                 ->where('tr_invoice_detail.inv_id',$inv['id'])
                 ->get()->toArray();
                 $invoice_data[$key]['details'] = $result;
+                $terbilang = $this->terbilang($inv['inv_amount']);
+                $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
             }
             $total = $invoice_data[0]['inv_outstanding'];
-            $terbilang = $this->terbilang($total);
-            $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
+            
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
 
@@ -691,7 +695,10 @@ class InvoiceController extends Controller
             if(!is_array($inv_id)) $inv_id = [$inv_id];
             $type = $request->type;
 
-            $invoice_data = TrInvoice::whereIn('id',$inv_id)->with('MsTenant')->get()->toArray();
+            $invoice_data = TrInvoice::select('tr_invoice.*, ms_unit.unit_code')
+                                    ->join('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
+                                    ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                                    ->whereIn('id',$inv_id)->with('MsTenant')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
                 $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
                 ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
