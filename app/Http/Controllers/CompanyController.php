@@ -20,13 +20,26 @@ class CompanyController extends Controller
     public function config(){
         $data['footer'] = @MsConfig::where('name','footer_invoice')->first()->value;
         $data['label'] = @MsConfig::where('name','footer_label_inv')->first()->value;
+        $data['service_charge'] = @MsConfig::where('name','service_charge_alias')->first()->value;
+        $data['duedate'] = @MsConfig::where('name','duedate_interval')->first()->value;
+        $data['signature'] = @MsConfig::where('name','digital_signature')->first()->value;
         return view('config',$data);
     }
 
     public function configUpdate(Request $request){
         if(count($request->all()) > 0){
             foreach ($request->all() as $key => $value) {
-                MsConfig::where('name',$key)->update(['value' => $value]);
+                if($key == 'digital_signature'){
+                    if($request->hasFile('digital_signature')){
+                        $newname = 'sign'.date('Ymdhis').'.'.$request->file('digital_signature')->getClientOriginalExtension();
+                        $request->file('digital_signature')->move(
+                            base_path() . '/public/upload/', $newname
+                        );
+                        MsConfig::where('name',$key)->update(['value' => 'upload/'.$newname]);
+                    }
+                }else{
+                    MsConfig::where('name',$key)->update(['value' => $value]);
+                }
             }
         }
         $request->session()->flash('success', 'Update other configuration success');

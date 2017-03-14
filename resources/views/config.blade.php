@@ -75,7 +75,28 @@
                                           <textarea class="textarea" name="footer_label_inv" class='form-control' style="width: 100%;" required>{{$label}}</textarea>
                                         </div>
 
-                                                                            
+                                        <div class="form-group">
+                                          <label>Service Charge Alias</label>
+                                          <input type="text" name="service_charge_alias" class="form-control" value="{{$service_charge}}">
+                                        </div>
+                                              
+                                        <div class="form-group">
+                                          <label>Due Date Interval Invoice</label>
+                                          <input type="number" name="duedate_interval" class="form-control" value="{{$duedate}}">
+                                        </div>
+
+                                        @if(!empty($signature))
+                                        <div class="form-group">
+                                          <label>Current Signature</label><br>
+                                          <img src="{{asset($signature)}}" class="img-responsive" width="150">
+                                        </div>
+                                        @endif
+
+                                        <div class="form-group">
+                                          <label>Digital Signature</label>
+                                          <input type="file" name="digital_signature" class="form-control" accept="image/jpeg,image/jpg,image/png">
+                                        </div>
+
                                     </div>
                                   </div>
                                   <!-- /.box-body -->

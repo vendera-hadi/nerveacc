@@ -270,11 +270,11 @@ class InvoiceController extends Controller
                                         // KALAU ELECTRICITY
                                         if($value->cost_item_id == 1){
                                             // echo 'listrik '.$amount."<br>";
-                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Rate : ".number_format($meter->costd_rate,0)." Meter Akhir : ".number_format($meter->meter_end,0)." Meter Awal : ".number_format($meter->meter_start,0)." Konsumsi : ".number_format($meter->meter_used,0)."<br>BPJU 3%";
+                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Awal : ".number_format($meter->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($meter->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($meter->meter_used,0)."<br>BPJU 3%";
                                         }else if($value->cost_item_id == 2){
                                             // KALAU AIR
                                             // echo 'air '.$amount."<br>";
-                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Akhir : ".number_format($meter->meter_end,0)." Meter Awal : ".number_format($meter->meter_start,0)." Konsumsi : ".number_format($meter->meter_used,0)."<br>Biaya Pemakaian : ".number_format($meter->meter_used,0)." x ".number_format($meter->costd_rate,0)."<br>Biaya Beban Tetap Air : ".number_format($meter->meter_burden,0)."<br>Biaya Pemeliharaan Meter : ".number_format($meter->meter_admin,0); 
+                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Awal : ".number_format($meter->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($meter->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($meter->meter_used,0)."<br>Biaya Pemakaian : ".number_format($meter->meter_used,0)." x ".number_format($meter->costd_rate,0)."<br>Biaya Beban Tetap Air : ".number_format($meter->meter_burden,0)."<br>Biaya Pemeliharaan Meter : ".number_format($meter->meter_admin,0); 
                                         }else{
                                             // echo 'other '.$amount."<br>";
                                             $note = $meter->costd_name."<br>Konsumsi : ".number_format($meter->meter_used,0)." ".$meter->costd_unit." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));
@@ -320,7 +320,8 @@ class InvoiceController extends Controller
                                     if($value->is_service_charge){
                                         // SERVICE CHARGE
                                         $currUnit = MsUnit::find($value->unit_id);
-                                        $note = "IURAN PENGELOLAAN LINGKUNGAN (IPL) ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costd_rate);
+                                        $alias = @MsConfig::where('name','service_charge_alias')->first()->value;
+                                        $note = $alias." ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costd_rate);
                                         $amount = ($value->unit_sqrt * $value->costd_rate) + $value->costd_burden + $value->costd_admin;
                                         $amount = round($amount,2);
                                     }else if($value->is_sinking_fund){
@@ -405,7 +406,10 @@ class InvoiceController extends Controller
                             $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
 
                             $now = date('Y-m-d');
-                            $duedate = date('Y-m-d', strtotime('+'.$value->continv_period.' month'));
+                            // $duedate = date('Y-m-d', strtotime('+'.$value->continv_period.' month'));
+                            $duedate_interval = @MsConfig::where('name','duedate_interval')->first()->value;
+                            $duedate = date('Y-m-d', strtotime('+'.$duedate_interval.' days'));
+
                             // $totalWithTaxStamp = ($totalPay * 1.1) + $totalStamp;
                             $totalWithStamp = $totalPay + $totalStamp;
 
@@ -482,12 +486,14 @@ class InvoiceController extends Controller
             
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
+            $signature = @MsConfig::where('name','digital_signature')->first()->value;
 
             $set_data = array(
                 'invoice_data' => $invoice_data,
                 'result' => $result,
                 'company' => $company,
-                'type' => $type
+                'type' => $type,
+                'signature' => $signature
             );
             
             if($type == 'pdf'){
