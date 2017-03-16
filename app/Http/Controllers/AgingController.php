@@ -81,6 +81,14 @@ class AgingController extends Controller
                         default:
                             break;
                     }
+                     // special condition
+                    if($filter->field == 'unit_isactive'){
+                        if(strtolower($filter->value) == "yes") $filter->value = "true";
+                        else $filter->value = "false";
+                    }
+                    // end special condition
+                    if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                    else $fetch = $fetch->where($filter->field, $op, $filter->value);
                 }
             }
             $count = $fetch->count();
@@ -91,6 +99,8 @@ class AgingController extends Controller
                 $temp = [];
                 $temp['id'] = $value->tenan_id;
                 $temp['gabung'] = $value->gabung;
+                $temp['unit_code'] = $value->unit_code;
+                $temp['tenan_name'] = $value->tenan_name;
                 $temp['total'] ="Rp. ".number_format($value->total);
                 $temp['currents'] = "Rp. ".number_format($value->currents);
                 $temp['ag30'] = "Rp. ".number_format($value->ag30);
