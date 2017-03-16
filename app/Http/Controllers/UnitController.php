@@ -166,23 +166,27 @@ class UnitController extends Controller
                         'unit_isactive' => 1
                     ]);
 
-                $tenant = MsTenant::create([
-                        'tenan_code' => "TN".date('ymdhis'),
-                        'tenan_name' => @$request->tenan_name,
-                        'tenan_email' => @$request->tenan_email,
-                        'tenan_idno' => @$request->tenan_idno,
-                        'tenan_phone' => @$request->tenan_phone,
-                        'tenan_fax' => @$request->tenan_fax,
-                        'tenan_address' => @$request->tenan_address,
-                        'tenan_npwp' => @$request->tenan_npwp,
-                        'tenan_taxname' => @$request->tenan_taxname,
-                        'tenan_tax_address' => @$request->tenan_tax_address,
-                        'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
-                        'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
-                        'tent_id' => 1,
-                        'created_by' => Auth::id(),
-                        'updated_by' => Auth::id()
-                    ]);
+                if(empty(@$request->owner)){
+                    $tenant = MsTenant::create([
+                            'tenan_code' => "TN".date('ymdhis'),
+                            'tenan_name' => @$request->tenan_name,
+                            'tenan_email' => @$request->tenan_email,
+                            'tenan_idno' => @$request->tenan_idno,
+                            'tenan_phone' => @$request->tenan_phone,
+                            'tenan_fax' => @$request->tenan_fax,
+                            'tenan_address' => @$request->tenan_address,
+                            'tenan_npwp' => @$request->tenan_npwp,
+                            'tenan_taxname' => @$request->tenan_taxname,
+                            'tenan_tax_address' => @$request->tenan_tax_address,
+                            'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
+                            'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
+                            'tent_id' => 1,
+                            'created_by' => Auth::id(),
+                            'updated_by' => Auth::id()
+                        ]);
+                }else{
+                    $tenant = MsTenant::find($request->tenan_id);
+                }
 
                 MsUnitOwner::create(['unit_id'=>$unit->id, 'tenan_id'=>$tenant->id, 'unitow_start_date' => @$request->unitow_start_date]);
             });
