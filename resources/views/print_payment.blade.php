@@ -85,22 +85,22 @@ table tr td{font-size:9pt;}
                         <table width="100%">
                             <tr>
                                 <td width="50%">Nomor Kwitansi</td>
-                                <td>: ABCD</td>
+                                <td>: </td>
                             </tr>
                             <tr>
                                 <td width="50%">Tanggal</td>
-                                <td>: ABCD</td>
+                                <td>: </td>
                             </tr>
                             <tr>
                                 <td colspan="2">
                                     <table width="100%" style="padding: 5px; border: 1px solid; margin-top: 15px;">
                                         <tr>
                                             <td width="50%">Nomor Dokumen</td>
-                                            <td>: ABCD</td>
+                                            <td>: {{$header->no_kwitansi}}</td>
                                         </tr>
                                         <tr>
                                             <td width="50%">Tanggal Terbit</td>
-                                            <td>: ABCD</td>
+                                            <td>: {{date('d M Y',strtotime($header->created_at))}}</td>
                                         </tr>
                                         <tr>
                                             <td width="50%">Revisi</td>
@@ -125,13 +125,40 @@ table tr td{font-size:9pt;}
                     <td colspan="2" width="20%" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br><i>Amount</i></td>
                 </tr>
 
-
+                <?php
+                    if(count($details) > 0){
+                        $total = 0;
+                        foreach ($details as $key => $value) {
+                            $total += $value->inv_amount;
+                ?>
+                <tr>
+                    <td style="vertical-align: top; padding-left:15px; padding-right:10px; padding-top:10px">
+                        Invoice {{$value->inv_number}}
+                    </td>
+                    <td style="border-left: solid 1px; text-align:right; padding-top:10px">Rp.</td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px; padding-top:10px">
+                        <div style="padding-right: 3px;">{{ number_format($value->inv_amount) }}</div>
+                    </td>
+                </tr>
+                <?php
+                    }
+                }
+                ?>
+                <tr>
+                    <td >&nbsp;</td>
+                    <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px"><b>TOTAL</b></td>
+                    <td style="border-left: solid 1px; text-align:right;"><b>Rp.</b></td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
+                </tr>
             </table>
             <br>
             <table width="100%">
                 <tr>
                     <td width="15%">Terbilang :</td>
-                    <td width="85%" style="padding:5px; border:1px solid">Seratus ribu</td>
+                    <td width="85%" style="padding:5px; border:1px solid">{{$terbilang}}</td>
                 </tr>
             </table>
             <br>

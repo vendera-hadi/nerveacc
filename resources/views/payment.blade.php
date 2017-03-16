@@ -286,6 +286,7 @@
         
         $.post('{{route('payment.insert')}}',allFormData, function(result){
             alert(result.message);
+            window.open("{{url('invoice/print_kwitansi?id=')}}"+result.paym_id,null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
             if(result.status == 1) location.reload();
         });
 

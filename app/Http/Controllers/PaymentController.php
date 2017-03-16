@@ -256,7 +256,9 @@ class PaymentController extends Controller
             if($total <= 0){
                 return ['status' => 0, 'message' => 'You have not entered payment'];
             }else{
-                $lastPayment = TrInvoicePaymhdr::where('created_at','like',date('Y-m-').'%')->orderBy('created_at','desc')->first();
+                $lastPayment = TrInvoicePaymhdr::where(\DB::raw('EXTRACT(YEAR FROM created_at)'),'=',date('Y'))
+                                ->where(\DB::raw('EXTRACT(MONTH FROM created_at)'),'=',date('m'))
+                                ->orderBy('created_at','desc')->first();
                 if($lastPayment){
                     $index = explode('.',$lastPayment->no_kwitansi);
                     $index = (int) end($index);
@@ -335,7 +337,7 @@ class PaymentController extends Controller
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }
-        return ['status' => 1, 'message' => 'Insert Success'];
+        return ['status' => 1, 'message' => 'Insert Success', 'paym_id' => $payment_id];
     }
     
     public function posting(Request $request){

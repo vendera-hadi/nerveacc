@@ -23,6 +23,8 @@ use App\Models\MsConfig;
 use App\Models\TrLedger;
 use App\Models\MsUnit;
 use App\Models\TrInvoiceJournal;
+use App\Models\TrInvoicePaymhdr;
+use App\Models\TrInvoicePaymdtl;
 use DB;
 use PDF;
 
@@ -415,6 +417,8 @@ class InvoiceController extends Controller
 
                             $footer = @MsConfig::where('name','footer_invoice')->first()->value;
                             $label = @MsConfig::where('name','footer_label_inv')->first()->value;
+                            $sendEmail = @MsConfig::where('name','send_inv_email')->first()->value;
+                            $ccEmail = @MsConfig::where('name','cc_email')->first()->value;
                             $inv = [
                                 'tenan_id' => $value->tenan_id,
                                 'inv_number' => $value->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
@@ -445,6 +449,24 @@ class InvoiceController extends Controller
                             // update periode di tr contract inv
                             foreach ($updateCtrInv as $key => $contractInvoice) {
                                 TrContractInvoice::where('id',$key)->update($contractInvoice);
+                            }
+
+                            // email
+                            if(!empty($sendEmail)){
+                                // BTH SMTP BUAT TESTING, UNSTABLE
+                                try{
+                                    $txtMessage = 'Yth Customer kami di tempat, Berikut adalah Invoice yang harus dibayarkan. Detail bisa di download di attachment';
+                                    \Mail::raw($txtMessage, function($message) use($inv, $companyData, $ccEmail, $insertInvoice){
+                                        $tenan = MsTenant::find($inv['inv_id']);
+                                        $data = file_get_contents(url('invoice/print_faktur').'?id='.$insertInvoice->id.'&type=pdf');
+                                        $message->attachData($data, 'Invoice-'.$inv['inv_number'].'.pdf');
+                                        $message->from('admin@ptjlm.com', 'Admin Unit');
+                                        if(!empty($ccEmail)) $message->cc($ccEmail);
+                                        $message->to($tenan->tenan_email)->subject('Tagihan '.$inv['inv_number'].' - '.$companyData->comp_name);
+                                    });
+                                }catch(\Exception $e){
+
+                                }
                             }
                         });
                         $invoiceGenerated++;
@@ -511,10 +533,24 @@ class InvoiceController extends Controller
     public function print_kwitansi(Request $request){
         $company = MsCompany::with('MsCashbank')->first()->toArray();
         $signature = @MsConfig::where('name','digital_signature')->first()->value;
+        $paymentHeader = TrInvoicePaymhdr::find($request->id);
+        $paymentDetails = TrInvoicePaymdtl::select('tr_invoice.inv_number','tr_invoice.inv_amount')
+                                ->join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
+                                ->where('tr_invoice_paymdtl.invpayh_id',$request->id)->get();
+        $total = 0;
+        if(count($paymentDetails) > 0){
+            foreach ($paymentDetails as $key => $value) {
+                $total += $value->inv_amount;
+            }
+        }
+        $terbilang = $this->terbilang($total);
 
         $set_data = array(
                 'company' => $company,
-                'signature' => $signature
+                'signature' => $signature,
+                'header' => $paymentHeader,
+                'details' => $paymentDetails,
+                'terbilang' => $terbilang
             );
 
         return view('print_payment', $set_data);

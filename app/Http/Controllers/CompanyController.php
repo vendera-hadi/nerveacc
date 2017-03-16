@@ -23,6 +23,8 @@ class CompanyController extends Controller
         $data['service_charge'] = @MsConfig::where('name','service_charge_alias')->first()->value;
         $data['duedate'] = @MsConfig::where('name','duedate_interval')->first()->value;
         $data['signature'] = @MsConfig::where('name','digital_signature')->first()->value;
+        $data['cc_email'] = @MsConfig::where('name','cc_email')->first()->value;
+        $data['sendEmail'] = @MsConfig::where('name','send_inv_email')->first()->value;
         return view('config',$data);
     }
 

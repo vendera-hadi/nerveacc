@@ -97,6 +97,17 @@
                                           <input type="file" name="digital_signature" class="form-control" accept="image/jpeg,image/jpg,image/png">
                                         </div>
 
+                                        <div class="form-group">
+                                          <label>CC Email Address</label>
+                                          <input type="text" name="cc_email" class="form-control" value="{{$cc_email}}">
+                                        </div>
+
+                                        <div class="form-group">
+                                          <label>Send Invoice Email</label><br>
+                                          <input type="radio" name="send_inv_email" value="1" @if($sendEmail==1) checked @endif> &nbsp; Active &nbsp;&nbsp;
+                                          <input type="radio" name="send_inv_email" value="0" @if($sendEmail==0) checked @endif> &nbsp; Not Active
+                                        </div>
+
                                     </div>
                                   </div>
                                   <!-- /.box-body -->
