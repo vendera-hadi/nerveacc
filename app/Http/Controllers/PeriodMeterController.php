@@ -345,6 +345,17 @@ class PeriodMeterController extends Controller
         } 
     }
 
+    public function unposting(Request $request){
+        try{
+            $id = $request->id;
+            $input['status'] = false;
+            TrPeriodMeter::find($id)->update($input);
+            return response()->json(['success'=>true]);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
     public function update(Request $request){
         try{
             $id = $request->id;

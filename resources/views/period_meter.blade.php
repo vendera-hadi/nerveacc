@@ -69,6 +69,7 @@ Period Meter
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="detail()">View</a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="approve()">Approve</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="unposting()">UnPosting</a>
                 </div>
                 <!-- end icon -->
             
@@ -159,6 +160,26 @@ function approve(){
                     // console.log(result);
                     if (result.success){
                         $.messager.alert('Warning','Approve Success');
+                        $('#dg').datagrid('reload');
+                    } else {
+                        $.messager.alert('Warning',result.errorMsg);
+                    }
+                },'json');
+            }
+        });
+    }
+}
+
+function unposting(){
+    var row = $('#dg').datagrid('getSelected');
+    if (row){
+        $.messager.confirm('Confirm','Are you sure you want to unposting this '+entity+'?',function(r){
+            if (r){
+                id = row.id;
+                $.post('{{route('period_meter.unposting')}}',{id:id},function(result){
+                    // console.log(result);
+                    if (result.success){
+                        $.messager.alert('Warning','Unposting Success');
                         $('#dg').datagrid('reload');
                     } else {
                         $.messager.alert('Warning',result.errorMsg);

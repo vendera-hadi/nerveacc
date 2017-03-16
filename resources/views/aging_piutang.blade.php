@@ -36,7 +36,8 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="gabung" width="200" sortable="true">Nama Tenan</th>
+                            <th field="tenan_name" width="150" sortable="true">Nama Tenan</th>
+                            <th field="unit_code" width="50" sortable="true">Unit</th>
                             <th field="total" width="100" sortable="true" align="right">Total</th>
                             <th field="currents" width="100" sortable="true" align="right">Current</th>  
                             <th field="ag30" width="100" sortable="true" align="right">1 - 30 Hari</th>
@@ -111,6 +112,7 @@ $(function(){
             $('#dg').datagrid('fixDetailRowHeight',index);
         }
     });
+   $('#dg').datagrid('enableFilter');
 });
 function formatPost(val,row){
     if (val == true){
