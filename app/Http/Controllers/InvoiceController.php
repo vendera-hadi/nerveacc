@@ -59,9 +59,9 @@ class InvoiceController extends Controller
             $count = TrInvoice::count();
             $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_iscancel','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name','ms_unit.unit_code')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
-                    ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
-                    ->join('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
-                    ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
+                    ->leftJoin('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                    ->leftJoin('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
+                    ->leftJoin('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                     ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -508,6 +508,18 @@ class InvoiceController extends Controller
          } 
     }
 
+    public function print_kwitansi(Request $request){
+        $company = MsCompany::with('MsCashbank')->first()->toArray();
+        $signature = @MsConfig::where('name','digital_signature')->first()->value;
+
+        $set_data = array(
+                'company' => $company,
+                'signature' => $signature
+            );
+
+        return view('print_payment', $set_data);
+    }
+
     public function posting(Request $request){
         $id = $request->id;
         $coayear = date('Y');
@@ -633,10 +645,14 @@ class InvoiceController extends Controller
         }
         $newPrefix = $lastPrefix + 1;
         $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
-        $contract = TrContract::find($request->contr_id);
+        $tenanId = $request->tenan_id;
+        // $contract = TrContract::find($request->contr_id);
+        $contract = TrContract::where('tenan_id',$tenanId)->where('contr_status','confirmed')->first();
+        if($contract) $contractId = $contract->id;
+        else $contractId = 0;
 
         $invHeader = [
-            'tenan_id' => $contract->tenan_id,
+            'tenan_id' => $tenanId,
             'inv_number' => $invtp->invtp_prefix."-".substr($inv_date[0], -2).$inv_date[1]."-".$newPrefix,
             'inv_faktur_no' => $invtp->invtp_prefix."-".substr($inv_date[0], -2).$inv_date[1]."-".$newPrefix,
             'inv_faktur_date' => $request->inv_date,
@@ -648,7 +664,8 @@ class InvoiceController extends Controller
             'inv_ppn_amount' => $request->amount, // sementara begini dulu, ikutin cara di foto invoice
             'inv_post' => 0,
             'invtp_id' => $request->invtp_id,
-            'contr_id' => $request->contr_id,
+            // 'contr_id' => $request->contr_id,
+            'contr_id' => $contractId,
             'created_by' => Auth::id(),
             'updated_by' => Auth::id()
         ];
@@ -669,7 +686,7 @@ class InvoiceController extends Controller
         }
 
         try{
-            DB::transaction(function () use($invHeader, $invDtl, $request, $updateCtrInv){
+            // DB::transaction(function () use($invHeader, $invDtl, $request, $updateCtrInv){
                 $insertInvoice = TrInvoice::create($invHeader);
 
                 // insert detail
@@ -679,11 +696,11 @@ class InvoiceController extends Controller
 
                     TrContractInvoice::where('invtp_id',$request->invtp_id)->where('contr_id',$request->contr_id)->where('costd_id',$indt['costd_id'])->update($updateCtrInv[$key]);
                 }
-            });
+            // });
         }catch(\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Error Occured']);
         }
-        return response()->json(['success' => 1, 'message' => 'Insert Invoice Success']);
+        return response()->json(['success' => 1, 'inv_id' => $insertInvoice->id, 'message' => 'Insert Invoice Success']);
     }
 
     public function cancel(Request $request){
@@ -701,10 +718,10 @@ class InvoiceController extends Controller
             if(!is_array($inv_id)) $inv_id = [$inv_id];
             $type = $request->type;
 
-            $invoice_data = TrInvoice::select('tr_invoice.*, ms_unit.unit_code')
+            $invoice_data = TrInvoice::select('tr_invoice.*', 'ms_unit.unit_code')
                                     ->join('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
                                     ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
-                                    ->whereIn('id',$inv_id)->with('MsTenant')->get()->toArray();
+                                    ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
                 $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
                 ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
@@ -720,12 +737,14 @@ class InvoiceController extends Controller
             $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
+            $signature = @MsConfig::where('name','digital_signature')->first()->value;
 
             $set_data = array(
                 'invoice_data' => $invoice_data,
                 'result' => $result,
                 'company' => $company,
-                'type' => $type
+                'type' => $type,
+                'signature' => $signature
             );
             return view('print_kuitansi', $set_data);
     }

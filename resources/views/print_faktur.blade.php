@@ -223,7 +223,7 @@ table tr td{font-size:9pt;}
 
 <?php if($type != 'pdf'){ ?>
     <script type="text/javascript">
-        // window.print();
+        window.print();
     </script>
 <?php } ?>
 

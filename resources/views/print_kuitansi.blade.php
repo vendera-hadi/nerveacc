@@ -79,10 +79,13 @@ table tr td{font-size:9pt;}
     ?>
     <div class="page">
         <div class="subpage">
-            <div style="float:left;"><img src="{{asset('/upload/'.$company_logo)}}" style="width:110px;"/></div>
-            <div style="font-size:10pt; font-weight: bold; text-align: center; width: 600px;"><?php echo $company_name; ?></div>
-            <div style="font-size:10pt; text-align: center; width: 600px;"><?php echo $company_address; ?></div>
-            <div style="font-size:10pt; text-align: center; width: 600px;"><?php echo 'Tlp: '.$company_phone.'/Fax: '.$company_fax; ?></div>
+            <div style="position:absolute;"><img src="{{asset($company_logo)}}" style="width:110px;"/></div>
+            <div style="font-size:10pt; text-align: center; width: 100%;">
+                    <b>{{ $company_name }}</b><br>
+                    {{ $company_address }}<br>
+                    {{'Tlp: '.$company_phone.'/Fax: '.$company_fax}}<br><br><br>
+            </div>
+
             <table style="width:100%;">
                 <tr>
                     <td style="text-align:center;" colspan="2">
@@ -106,7 +109,7 @@ table tr td{font-size:9pt;}
             <table width="100%" style="border-collapse: collapse; border: solid 1px; line-height: 18px;">
                 <tr style="text-align: center;">
                     <td width="80%" style="border-collapse: collapse; border: solid 1px;"><b>KETERANGAN</b><br>Description</td>
-                    <td width="20%" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br>Amount</td>
+                    <td colspan="2" width="20%" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br>Amount</td>
                 </tr>
                 <?php
                     if(!empty($inv['details'])){
@@ -117,11 +120,12 @@ table tr td{font-size:9pt;}
                 ?>
                 <tr>
                     
-                    <td style="vertical-align: top;">
+                    <td style="vertical-align: top; padding-left:15px; padding-right:10px; padding-bottom:10px">
                         <?php echo $value['invdt_note'];?>
                     </td>
-                    <td style="border-collapse: collapse; border-left: solid 1px; text-align: right;">
-                        <div style="padding-right: 3px;">Rp. <?php echo number_format($value['invdt_amount']);?></div>
+                    <td style="border-left: solid 1px; text-align:right">Rp.</td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px">
+                        <div style="padding-right: 3px;"><?php echo number_format($value['invdt_amount']);?></div>
                     </td>
                 </tr>
                 <?php
@@ -134,8 +138,8 @@ table tr td{font-size:9pt;}
                 </tr> -->
                 <tr>
                     
-                    <td>&nbsp;</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
+                    <td >&nbsp;</td>
+                    <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
                 <!-- <tr>
                     <td style="border-collapse: collapse; border-right: solid 1px;">&nbsp;</td>
@@ -154,13 +158,14 @@ table tr td{font-size:9pt;}
                 </tr> -->
                 <tr>
                     
-                    <td>&nbsp;</td>
-                    <td style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
+                    <td >&nbsp;</td>
+                    <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
                 <tr>
                     
-                    <td><b>TOTAL</b></td>
-                    <td style="border-collapse: collapse; border-left: solid 1px; text-align: right"><b>Rp. {{number_format($total,0)}}</b></td>
+                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px"><b>TOTAL</b></td>
+                    <td style="border-left: solid 1px; text-align:right"><b>Rp.</b></td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
                 </tr>
                 <?php
                     }
@@ -173,7 +178,12 @@ table tr td{font-size:9pt;}
                         <p style="padding-right: 50px;">Pembayaran dengan cek/giro belum dianggap sah selama cek/giro itu belum diclearing oleh bank bersangkutan.</p>
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
-                        Jakarta, <?php echo date('d F Y'); ?><br><br><br><br>
+                        Jakarta, <?php echo date('d M Y'); ?><br><br>
+                        @if(!empty($signature))
+                        <img src="{{asset($signature)}}" width="150">
+                        @else
+                        <br><br><br>
+                        @endif
                         <br><br>
                         <b><u>{{$company_sign}}</u></b><br>
                         {{$company_position}}

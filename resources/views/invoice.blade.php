@@ -187,18 +187,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-sm-6">
+
+                                    <div class="col-xs-6">
                                         <div class="form-group">
-                                            <label>Billing Info</label>
+                                            <label>Tenant</label>
                                             <div class="input-group">
-                                                <input type="hidden" name="contr_id" id="txtContrId" required>
-                                                <input type="text" class="form-control" id="txtContr" disabled>
-                                                <span class="input-group-btn">
-                                                    <button class="btn btn-info" type="button" id="chooseContractButton">Choose Billing Info</button>
-                                                </span>
+                                              <input type="hidden" name="tenan_id" id="txtTenanId" required>
+                                              <input type="text" class="form-control" id="txtTenan" disabled>
+                                              <span class="input-group-btn">
+                                                <button class="btn btn-info" type="button" id="chooseTenanButton">Choose Tenant</button>
+                                              </span>
                                             </div>
                                         </div>
                                     </div>
+
                                 </div>
                                 
                                 <div class="row">
@@ -312,13 +314,13 @@
                 <!-- End Modal -->
 
                 <!-- Modal select contract -->
-                <div id="contractModal" class="modal fade" role="dialog">
+                <div id="tenanModal" class="modal fade" role="dialog">
                   <div class="modal-dialog">
 
                     <!-- Modal content-->
                     <div class="modal-content">
                       
-                      <div class="modal-body" id="contractModalContent">
+                      <div class="modal-body" id="tenanModalContent">
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -562,13 +564,40 @@ $(function(){
         });
     });
 
+    $('#chooseTenanButton').click(function(){
+        $('#tenanModal').modal("show");
+        currenturl = '{{route('tenant.popup')}}';
+        $.post(currenturl,null, function(data){
+            $('#tenanModalContent').html(data);
+        });
+    });
+
+    $(document).delegate('#searchTenant','submit',function(e){
+        e.preventDefault();
+        var data = $('#searchTenant').serialize();
+        currenturl = '{{route('tenant.popup')}}';
+        $.post(currenturl, data, function(data){
+            $('#tenanModalContent').html(data);
+        });
+    });
+
     // paging
     $(document).delegate('.pagination li a','click',function(e){
         e.preventDefault();
         currenturl = $(this).attr('href');
         $.post(currenturl, null, function(data){
-            $('#contractModalContent').html(data);
+            $('#tenanModalContent').html(data);
         });
+    });
+
+    $(document).delegate('#chooseTenant','click',function(e){
+        e.preventDefault();
+        var tenanid = $('input[name="tenant"]:checked').val();
+        var tenanname = $('input[name="tenant"]:checked').data('name');
+        $('#txtTenanId').val(tenanid);
+        $('#txtTenan').val(tenanname);
+        $('#tenanModalContent').text('');
+        $('#tenanModal').modal("hide");
     });
 
     $(document).delegate('#searchContract','submit',function(e){
@@ -639,6 +668,7 @@ $(function(){
             if(result.error) $.messager.alert('Warning',result.message);
             if(result.success){
                 $.messager.alert('Success',result.message);
+                window.open("{{url('invoice/receipt?id=')}}"+result.inv_id,null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
                 $('#addInvModal').modal("hide");
                 $('#dg').datagrid('reload');
             }

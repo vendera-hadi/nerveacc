@@ -136,6 +136,7 @@ class PaymentController extends Controller
                     $action_button .= ' | <a href="#" data-id="'.$value->id.'" title="Posting Payment" class="posting-confirm"><i class="fa fa-arrow-circle-o-up"></i></a>';
                     $action_button .= ' | <a href="payment/void?id='.$value->id.'" title="Void" class="void-confirm"><i class="fa fa-ban"></i></a>';
                 }
+                $action_button .= ' | <a href="'.url('invoice/print_kwitansi?id='.$value->id).'" class="print-window" data-width="640" data-height="660"><i class="fa fa-file"></i></a>';
 
                 $temp['action_button'] = $action_button;
 
@@ -255,8 +256,19 @@ class PaymentController extends Controller
             if($total <= 0){
                 return ['status' => 0, 'message' => 'You have not entered payment'];
             }else{
+                $lastPayment = TrInvoicePaymhdr::where('created_at','like',date('Y-m-').'%')->orderBy('created_at','desc')->first();
+                if($lastPayment){
+                    $index = explode('.',$lastPayment->no_kwitansi);
+                    $index = (int) end($index);
+                    $index+= 1;
+                    $index = str_pad($index, 3, "0", STR_PAD_LEFT);
+                }else{
+                    $index = "001";
+                }
+
                 $action = new TrInvoicePaymhdr;
 
+                $action->no_kwitansi = 'PAY-'.date('Y-m').'.'.$index;
                 $action->invpayh_date = $request->input('invpayh_date');
                 $action->invpayh_checkno = $request->input('invpayh_checkno');
                 $action->invpayh_giro = !empty($request->input('invpayh_giro')) ? $request->input('invpayh_giro') : null ;
