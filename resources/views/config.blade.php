@@ -108,6 +108,12 @@
                                           <input type="radio" name="send_inv_email" value="0" @if($sendEmail==0) checked @endif> &nbsp; Not Active
                                         </div>
 
+                                        <div class="form-group">
+                                          <label>Active Invoice Signature</label><br>
+                                          <input type="radio" name="invoice_signature_flag" value="1" @if($signatureFlag==1) checked @endif> &nbsp; Active &nbsp;&nbsp;
+                                          <input type="radio" name="invoice_signature_flag" value="0" @if($signatureFlag==0) checked @endif> &nbsp; Not Active
+                                        </div>
+
                                     </div>
                                   </div>
                                   <!-- /.box-body -->

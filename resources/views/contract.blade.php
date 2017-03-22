@@ -488,16 +488,16 @@
 
         $('#formContract2').submit(function(e){
             e.preventDefault();
-            if(!$('#formContract2').serialize()){
-                alert('Please fill the Component Billing first');
-            }else{
+            // if(!$('#formContract2').serialize()){
+            //     alert('Please fill the Component Billing first');
+            // }else{
                 var allFormData = $('#formContract,#formContract2').serialize();
                 console.log(allFormData);
                 $.post('{{route('contract.insert')}}',allFormData, function(result){
                     alert(result.message);
                     if(result.status == 1) location.reload();
                 });
-            }
+            // }
         });
 
         $('#backStep1').click(function(){

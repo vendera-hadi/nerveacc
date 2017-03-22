@@ -158,6 +158,7 @@ class PaymentController extends Controller
         ->join('ms_floor', 'ms_unit.floor_id',"=",'ms_floor.id')
         ->where('tr_invoice.contr_id', '=',$contract_id)
         ->where('tr_invoice.inv_outstanding', '>', 0)
+        ->where('tr_invoice.inv_post', 1)
         ->get();
 
         if(!empty($invoice_data)){

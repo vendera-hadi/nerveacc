@@ -78,41 +78,23 @@ table tr td{font-size:9pt;}
                     <td width="30%" style="vertical-align:top">
                         <img src="{{asset($company_logo)}}" style="width:110px;"/>
                         <br><br>
-                        <div style="width:100%; height:110px; border:1px solid"></div>
+                        <div style="width:100%; height:110px; border:1px solid">
+                            <p style="padding-left:10px; padding-right:10px">Diterima dari:<br><br>
+                                {{$tenan}} / {{$unit}}</p>
+                        </div>
                     </td>
                     <td width="40%" style="vertical-align:top"><center><h1>KWITANSI</h1></center></td>
                     <td width="30%">
                         <table width="100%">
                             <tr>
                                 <td width="50%">Nomor Kwitansi</td>
-                                <td>: </td>
+                                <td>: {{$header->no_kwitansi}}</td>
                             </tr>
                             <tr>
                                 <td width="50%">Tanggal</td>
-                                <td>: </td>
+                                <td>: {{date('d M Y',strtotime($header->created_at))}}</td>
                             </tr>
-                            <tr>
-                                <td colspan="2">
-                                    <table width="100%" style="padding: 5px; border: 1px solid; margin-top: 15px;">
-                                        <tr>
-                                            <td width="50%">Nomor Dokumen</td>
-                                            <td>: {{$header->no_kwitansi}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td width="50%">Tanggal Terbit</td>
-                                            <td>: {{date('d M Y',strtotime($header->created_at))}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td width="50%">Revisi</td>
-                                            <td>:</td>
-                                        </tr>
-                                        <tr>
-                                            <td width="50%">Halaman</td>
-                                            <td>: 1 dari 1</td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
+                            
                         </table>
                     </td>
                 </tr>
@@ -134,6 +116,11 @@ table tr td{font-size:9pt;}
                 <tr>
                     <td style="vertical-align: top; padding-left:15px; padding-right:10px; padding-top:10px">
                         Invoice {{$value->inv_number}}
+                        @if(count($value->details) > 0)
+                        @foreach($value->details as $val)
+                        <br>&nbsp;&nbsp;&nbsp;- {{$val}}
+                        @endforeach
+                        @endif
                     </td>
                     <td style="border-left: solid 1px; text-align:right; padding-top:10px">Rp.</td>
                     <td style="border-collapse: collapse; text-align: right; padding-right:15px; padding-top:10px">
@@ -148,8 +135,8 @@ table tr td{font-size:9pt;}
                     <td >&nbsp;</td>
                     <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
-                <tr>
-                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px"><b>TOTAL</b></td>
+                <tr style="border-top: 1px solid black;">
+                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px; padding-top:10px"><b>TOTAL</b></td>
                     <td style="border-left: solid 1px; text-align:right;"><b>Rp.</b></td>
                     <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
                 </tr>
@@ -173,14 +160,10 @@ table tr td{font-size:9pt;}
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
                         Jakarta, <?php echo date('d M Y'); ?><br><br>
-                        @if(!empty($signature))
-                        <img src="{{asset($signature)}}" width="150">
-                        @else
+                        
                         <br><br><br>
-                        @endif
                         <br><br>
-                        <b><u>{{$company_sign}}</u></b><br>
-                        {{$company_position}}
+                        <div style="width:115px; border:1px solid black"></div>
                     </td> 
                 </tr>
                 
@@ -191,7 +174,7 @@ table tr td{font-size:9pt;}
 </body>
 
     <script type="text/javascript">
-        // window.print();
+        window.print();
     </script>
 
 </html>

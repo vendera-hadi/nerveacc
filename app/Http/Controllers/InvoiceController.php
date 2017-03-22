@@ -166,6 +166,7 @@ class InvoiceController extends Controller
     }
 
     public function postGenerateInvoice(Request $request){
+        try{
         $include_outstanding = @MsConfig::where('name','inv_outstanding_active')->first()->value;
         $month = $request->input('month');
         // bulan dikurang 1 karna generate invoice utk bulan kemarin
@@ -479,6 +480,9 @@ class InvoiceController extends Controller
         }
 
         return '<h3>'.$invoiceGenerated.' of '.$totalInvoice.' Invoices Generated, Please Check Invoice List <a href="'.url('invoice').'">Here</a></h3>';
+        }catch(\Exception $e){
+            return response()->json(['errorMsg'=>$e->getMessage()]);
+        }
     }
 
     public function print_faktur(Request $request){
@@ -509,13 +513,15 @@ class InvoiceController extends Controller
             
             $company = MsCompany::with('MsCashbank')->first()->toArray();
             $signature = @MsConfig::where('name','digital_signature')->first()->value;
+            $signatureFlag = @MsConfig::where('name','invoice_signature_flag')->first()->value;
 
             $set_data = array(
                 'invoice_data' => $invoice_data,
                 'result' => $result,
                 'company' => $company,
                 'type' => $type,
-                'signature' => $signature
+                'signature' => $signature,
+                'signatureFlag' => $signatureFlag
             );
             
             if($type == 'pdf'){
@@ -532,25 +538,41 @@ class InvoiceController extends Controller
 
     public function print_kwitansi(Request $request){
         $company = MsCompany::with('MsCashbank')->first()->toArray();
-        $signature = @MsConfig::where('name','digital_signature')->first()->value;
+        // $signature = @MsConfig::where('name','digital_signature')->first()->value;
         $paymentHeader = TrInvoicePaymhdr::find($request->id);
-        $paymentDetails = TrInvoicePaymdtl::select('tr_invoice.inv_number','tr_invoice.inv_amount')
+        $contract = TrContract::select('ms_tenant.tenan_name','ms_unit.unit_code')->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                            ->join('ms_tenant','tr_contract.tenan_id','=','ms_tenant.id')
+                            ->where('tr_contract.id',$paymentHeader->contr_id)->first();
+        $paymentDetails = TrInvoicePaymdtl::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_amount')
                                 ->join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
                                 ->where('tr_invoice_paymdtl.invpayh_id',$request->id)->get();
         $total = 0;
         if(count($paymentDetails) > 0){
             foreach ($paymentDetails as $key => $value) {
                 $total += $value->inv_amount;
+                // get detail invoice
+                $temp = [];
+                $inv_details = TrInvoiceDetail::where('inv_id',$value->id)->get();
+                if(count($inv_details) > 0){
+                    foreach ($inv_details as $value2) {
+                        $note = explode('<br>', $value2->invdt_note);
+                        if(count($note) > 1) $temp[] = @$note[0];
+                        else $temp[] = $value2->invdt_note;
+                    }
+                }
+                $paymentDetails[$key]->details = $temp;
             }
         }
         $terbilang = $this->terbilang($total);
 
         $set_data = array(
                 'company' => $company,
-                'signature' => $signature,
+                // 'signature' => $signature,
                 'header' => $paymentHeader,
                 'details' => $paymentDetails,
-                'terbilang' => $terbilang
+                'terbilang' => $terbilang,
+                'tenan' => @$contract->tenan_name,
+                'unit' => @$contract->unit_code
             );
 
         return view('print_payment', $set_data);

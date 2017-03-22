@@ -35,7 +35,7 @@
                 <form id="search">
                 <div class="row" style="margin-bottom:20px">
                     <div class="col-sm-3">
-                        <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Billing Info or Tenan Name">
+                        <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Billing Info or Tenant Name">
                     </div>
                     <div class="col-sm-2">
                         <select class="form-control" name="inv_type">
@@ -76,7 +76,7 @@
                             <th field="checkbox" width="25" sortable="true"></th>
                             <th field="inv_number" width="70" sortable="true">No.Invoice</th>
                             <!-- <th field="contr_no" width="100" sortable="true">No Kontrak</th> -->
-                            <th field="tenan_name" width="100" sortable="true">Nama Tenan</th>
+                            <th field="tenan_name" width="100" sortable="true">Nama Tenant</th>
                             <th field="unit" width="45" sortable="true">Unit</th>  
                             <th field="inv_date" width="80" sortable="true">Tgl Invoice</th>
                             <th field="inv_duedate" width="80" sortable="true">Jatuh Tempo</th>

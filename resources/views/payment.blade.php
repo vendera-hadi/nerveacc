@@ -79,16 +79,8 @@
                   <form method="POST" id="formPayment">
                       
                       <div class="form-group">
-                          <label>Tenan Name</label>
-                          <select class="form-control contrId choose-style" name="contr_id" style="width:100%">
-                            <option value="">-</option>
-                            <?php
-                                foreach ($contract_data as $key => $value) {
-                            ?>
-                            <option value="<?php echo $value['id']?>"><?php echo $value['tenan_name']?></option>
-                            <?php
-                                }
-                            ?>
+                          <label>Tenant Name</label>
+                          <select class="form-control contrId choose-contract" name="contr_id" style="width:100%">
                           </select>
                       </div>
 
@@ -298,6 +290,24 @@
     });
 
     $(".choose-style").select2();
+
+    $(".choose-contract").select2({
+              ajax: {
+                url: "{{route('contract.optParent')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              minimumInputLength: 0
+        });
 
     $(".contrId").change(function(){
         var url = "{{route('payment.get_invoice')}}";

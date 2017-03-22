@@ -282,11 +282,15 @@ class ContractController extends Controller
 
     public function optionParent(Request $request){
         $key = $request->q;
-        $fetch = TrContract::select('id','contr_code','contr_no')->where(\DB::raw('LOWER(contr_code)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(contr_no)'),'like','%'.$key.'%')->get();
+        $fetch = TrContract::select('tr_contract.id','contr_code','contr_no','ms_tenant.tenan_name','ms_unit.unit_code')
+                ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                ->join('ms_tenant','tr_contract.tenan_id','=','ms_tenant.id')
+                ->where(\DB::raw('LOWER(ms_tenant.tenan_name)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(ms_unit.unit_code)'),'like','%'.$key.'%')
+                ->orderBy('ms_tenant.tenan_name')->limit(15)->get();
         $result['results'] = [];
-        array_push($result['results'], ['id'=>"0",'text'=>'No Parent']);
+        // array_push($result['results'], ['id'=>"0",'text'=>'No Tenan / Unit']);
         foreach ($fetch as $key => $value) {
-            $temp = ['id'=>$value->id, 'text'=>$value->contr_code." (".$value->contr_no.")"];
+            $temp = ['id'=>$value->id, 'text'=>$value->tenan_name." / ".$value->unit_code];
             array_push($result['results'], $temp);
         }
         return json_encode($result);

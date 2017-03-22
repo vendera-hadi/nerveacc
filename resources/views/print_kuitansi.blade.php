@@ -161,9 +161,9 @@ table tr td{font-size:9pt;}
                     <td >&nbsp;</td>
                     <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
-                <tr>
+                <tr style="border-top: 1px solid black;">
                     
-                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px"><b>TOTAL</b></td>
+                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px; padding-top:10px"><b>TOTAL</b></td>
                     <td style="border-left: solid 1px; text-align:right"><b>Rp.</b></td>
                     <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
                 </tr>
@@ -179,14 +179,10 @@ table tr td{font-size:9pt;}
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
                         Jakarta, <?php echo date('d M Y'); ?><br><br>
-                        @if(!empty($signature))
-                        <img src="{{asset($signature)}}" width="150">
-                        @else
+                        
                         <br><br><br>
-                        @endif
                         <br><br>
-                        <b><u>{{$company_sign}}</u></b><br>
-                        {{$company_position}}
+                        <div style="width:115px; border:1px solid black"></div>
                     </td> 
                 </tr>
                 

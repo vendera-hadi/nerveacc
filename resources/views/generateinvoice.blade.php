@@ -79,7 +79,10 @@
         var data = $(this).serialize();
         $('#generateResult').html('<img src="{{asset('img/facebook.gif')}}">');
         $.post('{{route('invoice.generate')}}',data, function(result){
-            if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
+            if(result.errorMsg){ 
+                $.messager.alert('Warning',result.errorMsg); 
+                $('#generateResult').html('');
+            }
             else{ $('#generateResult').html(result); }
         });
     });
