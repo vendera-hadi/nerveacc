@@ -294,4 +294,5 @@ class TenantController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
+
 }

@@ -73,7 +73,7 @@
               $unitUrls = [url('unit'), url('unittype'), route('floor.index')];
             ?>
             <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$unitUrls) || Request::url() == url('cost_item') || Request::url() == url('tenant') || Request::url() == url('typetenant')
-            || Request::url() == route('marketing.index') || Request::url() == url('vaccount')){{'active'}}@endif">
+            || Request::url() == route('marketing.index') || Request::url() == route('report.tenancyview') ||  Request::url() == url('vaccount')){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-building-o"></i> <span>TENANCY</span>
                 <span class="pull-right-container">
@@ -116,7 +116,7 @@
                 </li>
                
                 <li @if(Request::url() == url('cost_item')) class="active" @endif><a href="{{url('cost_item')}}"><i class="fa fa-circle-o"></i> Component Billing</a></li>       
-              
+                <li @if(Request::url() == route('report.tenancyview')) class="active" @endif><a href="{{route('report.tenancyview')}}"><i class="fa fa-circle-o"></i> Reports</a></li>
               </ul>
             </li>
 

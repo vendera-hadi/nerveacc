@@ -7,8 +7,12 @@ use App\Models\TrInvoice;
 use App\Models\TrInvoiceDetail;
 use App\Models\MsCompany;
 use App\Models\TrContract;
+use App\Models\TrMeter;
+use App\Models\MsUnit;
+use App\Models\MsTenant;
 use PDF;
 use DB;
+use Excel;
 
 class ReportController extends Controller
 {
@@ -211,6 +215,113 @@ class ReportController extends Controller
             return $pdf->download('Outstanding_By_Invoice_'.$from.'_to_'.$to.'.pdf');
         }else{
             return view('layouts.report_template', $data);
+        }
+    }
+
+    public function tenancyview(){
+        return view('report_tenancy');
+    }
+
+    public function HistoryMeter(Request $request){
+        $year = @$request->year;
+        $cost = @$request->cost;
+        $pdf = @$request->pdf;
+
+        if($cost == 1){
+            $ctname = 'Electricity';
+        }else{
+            $ctname = 'Water';
+        }
+        $data['title'] = "History Reading Meter ". $ctname;
+        $data['tahun'] = 'Year : '.$year;
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['template'] = 'report_history_meter';
+        $fetch = TrMeter::select('ms_unit.unit_code',
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 1 THEN tr_meter.meter_used ELSE 0 END)) AS jan"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 2 THEN tr_meter.meter_used ELSE 0 END)) AS feb"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 3 THEN tr_meter.meter_used ELSE 0 END)) AS mar"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 4 THEN tr_meter.meter_used ELSE 0 END)) AS apr"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 5 THEN tr_meter.meter_used ELSE 0 END)) AS may"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 6 THEN tr_meter.meter_used ELSE 0 END)) AS jun"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 7 THEN tr_meter.meter_used ELSE 0 END)) AS jul"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 8 THEN tr_meter.meter_used ELSE 0 END)) AS aug"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 9 THEN tr_meter.meter_used ELSE 0 END)) AS sep"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 10 THEN tr_meter.meter_used ELSE 0 END)) AS okt"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 11 THEN tr_meter.meter_used ELSE 0 END)) AS nov"),
+                DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 12 THEN tr_meter.meter_used ELSE 0 END)) AS des"),
+                DB::raw("SUM(meter_used) AS total")
+                )
+                ->join('ms_cost_detail','tr_meter.costd_id',"=",'ms_cost_detail.id')
+                ->join('ms_cost_item','ms_cost_detail.cost_id',"=",'ms_cost_item.id')
+                ->join('ms_unit','tr_meter.unit_id',"=",'ms_unit.id')
+                ->join('tr_period_meter','tr_meter.prdmet_id',"=",'tr_period_meter.id')
+                ->where('ms_cost_item.id',$cost)
+                ->whereYear('prd_billing_date','=',$year)
+                ->groupBy('ms_unit.unit_code');
+        $fetch = $fetch->get();
+        $data['invoices'] = $fetch;
+        if($pdf){
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('Report_ReadingMeter_'.$year.'_'.$ctname.'.pdf');
+        }else{
+            return view('layouts.report_template2', $data);
+        }
+    }
+
+    public function ReportUnit(Request $request){
+        $pdf = @$request->pdf;
+
+        $data['title'] = "Report Unit";
+        $data['tahun'] = '';
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['template'] = 'report_unit';
+        $fetch = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.virtual_account','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
+                ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
+                ->leftjoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
+                ->leftjoin('ms_tenant','ms_tenant.id',"=",'ms_unit_owner.tenan_id');
+        $fetch = $fetch->get();
+        $data['invoices'] = $fetch;
+        if($pdf){
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('Report_Unit.pdf');
+        }else{
+            return view('layouts.report_template2', $data);
+        }
+    }
+
+    public function ReportTenant(Request $request){
+        $pdf = @$request->pdf;
+        $excel = @$request->excel;
+
+        $data['title'] = "Report Tenant";
+        $data['tahun'] = '';
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['template'] = 'report_tenant';
+        $fetch = MsTenant::select('ms_tenant.*')
+                ->orWhereNull('deleted_at');
+        $fetch = $fetch->get();
+        $data['invoices'] = $fetch;
+        if($pdf){
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('Report_Tenant.pdf');
+        }else if($excel){
+            $data = MsTenant::select('tenan_name AS Name','tenan_idno AS NIP','tenan_phone AS Phone','tenan_fax AS Fax','tenan_email AS Email','tenan_address AS Address','tenan_npwp AS NPWP','tenan_taxname AS Taxname','tenan_tax_address AS TaxAddress')
+                ->orWhereNull('deleted_at')->get()->toArray();
+            $border = 'A1:I';
+            $tp = 'xls';
+            return Excel::create('Tenant Report', function($excel) use ($data,$border) {
+                $excel->sheet('Tenant Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
+            return view('layouts.report_template2', $data);
         }
     }
 }
