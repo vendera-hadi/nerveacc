@@ -1,4 +1,4 @@
-<table class="table table-bordered" width="100%"> 
+<table class="table table-striped" width="100%"> 
     <thead>
       <tr>
         <th>Invoice Number</th>

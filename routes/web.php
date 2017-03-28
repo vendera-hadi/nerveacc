@@ -327,6 +327,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/araging','ReportController@arAging')->name('report.aging');
 	Route::get('report/outinv','ReportController@outInv')->name('report.outinv');
 	Route::get('report/outcontr','ReportController@outContr')->name('report.outcontr');
+	Route::get('report/payment','ReportController@paymHistory')->name('report.payment');
 	Route::get('report/tenancyview','ReportController@tenancyview')->name('report.tenancyview');
 	Route::get('report/r_meter','ReportController@HistoryMeter')->name('report.r_meter');
 	Route::get('report/r_unit','ReportController@ReportUnit')->name('report.r_unit');

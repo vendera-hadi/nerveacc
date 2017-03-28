@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TrInvoice;
 use App\Models\TrInvoiceDetail;
+use App\Models\TrInvoicePaymhdr;
 use App\Models\MsCompany;
 use App\Models\TrContract;
 use App\Models\TrMeter;
@@ -24,7 +25,9 @@ class ReportController extends Controller
     	$from = @$request->from;
     	$to = @$request->to;
     	$pdf = @$request->pdf;
-    	$data['title'] = "AR Invoices";
+        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['name'] = MsCompany::first()->comp_name;
+    	$data['title'] = "AR Invoices Report";
     	$data['logo'] = MsCompany::first()->comp_image;
     	$data['template'] = 'report_ar_invoice';
     	$fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
@@ -61,7 +64,7 @@ class ReportController extends Controller
             foreach ($result as $key => $value) {
                 $tempInv['details'][] = [
                 	'invdt_note' => $value->invdt_note,
-                	'invdt_amount' => "Rp. ".$value->invdt_amount,
+                	'invdt_amount' => "Rp. ".number_format($value->invdt_amount),
                 	'meter_start' => (int)$value->meter_start,
                 	'meter_end' => (int)$value->meter_end,
                 	'meter_used' => !empty($value->meter_used) ? (int)$value->meter_used." ".$value->costd_unit : (int)$value->meter_used
@@ -70,10 +73,10 @@ class ReportController extends Controller
             $data['invoices'][] = $tempInv;
         }
     	if($pdf){
-    		$pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
+    		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
         	return $pdf->download('AR_Invoice_'.$from.'_to_'.$to.'.pdf');
     	}else{
-    		return view('layouts.report_template', $data);
+    		return view('layouts.report_template2', $data);
     	}
     }
 
@@ -81,6 +84,8 @@ class ReportController extends Controller
     	$from = @$request->from;
     	$to = @$request->to;
     	$pdf = @$request->pdf;
+        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['name'] = MsCompany::first()->comp_name;
     	$data['title'] = "AR Cancelled Invoices";
     	$data['logo'] = MsCompany::first()->comp_image;
     	$data['template'] = 'report_ar_invoice';
@@ -127,10 +132,10 @@ class ReportController extends Controller
             $data['invoices'][] = $tempInv;
         }
     	if($pdf){
-    		$pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
+    		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
         	return $pdf->download('AR_Invoice_Cancel_'.$from.'_to_'.$to.'.pdf');
     	}else{
-    		return view('layouts.report_template', $data);
+    		return view('layouts.report_template2', $data);
     	}
     }
 
@@ -138,6 +143,8 @@ class ReportController extends Controller
     	$from = @$request->from;
     	$to = @$request->to;
     	$pdf = @$request->pdf;
+         $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['name'] = MsCompany::first()->comp_name;
     	$data['title'] = "Aging Invoices";
     	$data['logo'] = MsCompany::first()->comp_image;
     	$data['template'] = 'report_ar_aging';
@@ -159,10 +166,10 @@ class ReportController extends Controller
         $fetch = $fetch->get();
     	$data['invoices'] = $fetch;
     	if($pdf){
-    		$pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
+    		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
         	return $pdf->download('AR_Aging_'.$from.'_to_'.$to.'.pdf');
     	}else{
-    		return view('layouts.report_template', $data);
+    		return view('layouts.report_template2', $data);
     	}
     }
 
@@ -170,6 +177,8 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
+         $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "Outstanding By Contract";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_out_contr';
@@ -185,10 +194,10 @@ class ReportController extends Controller
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
-            $pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Outstanding_By_Contract_'.$from.'_to_'.$to.'.pdf');
         }else{
-            return view('layouts.report_template', $data);
+            return view('layouts.report_template2', $data);
         }
     }
 
@@ -196,6 +205,8 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
+        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "Outstanding By Invoices";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_out_inv';
@@ -211,10 +222,37 @@ class ReportController extends Controller
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
-            $pdf = PDF::loadView('layouts.report_template', $data)->setPaper('a4', 'landscape');
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Outstanding_By_Invoice_'.$from.'_to_'.$to.'.pdf');
         }else{
-            return view('layouts.report_template', $data);
+            return view('layouts.report_template2', $data);
+        }
+    }
+
+    public function paymHistory(Request $request){
+        $from = @$request->from;
+        $to = @$request->to;
+        $pdf = @$request->pdf;
+        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['title'] = "Payment History";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['template'] = 'report_payment';
+        $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.invpayh_date','ms_payment_type.paymtp_name','ms_cash_bank.cashbk_name','tr_invoice_paymhdr.invpayh_checkno','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount')
+                    ->join('tr_invoice_paymdtl','tr_invoice_paymhdr.id','=','tr_invoice_paymdtl.invpayh_id')
+                    ->join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
+                    ->join('ms_cash_bank','tr_invoice_paymhdr.cashbk_id','=','ms_cash_bank.id')
+                    ->join('ms_payment_type','tr_invoice_paymhdr.paymtp_code','=','ms_payment_type.id');
+                    // ->where('invpayh_post',1)
+        if($from) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','>=',$from);
+        if($to) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','<=',$to);
+        $fetch = $fetch->get();
+        $data['payments'] = $fetch;
+        if($pdf){
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('Payment_'.$from.'_to_'.$to.'.pdf');
+        }else{
+            return view('layouts.report_template2', $data);
         }
     }
 

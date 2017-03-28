@@ -41,6 +41,7 @@
                                     <option value="araging">Aging Invoices</option>
                                     <option value="outinv">Outstanding By Invoice</option>
                                     <option value="outcontr">Outstanding By Billing Info</option>
+                                    <option value="payment">Payment History</option>
                                 </select>
                             </div>
                             <div class="col-sm-3">

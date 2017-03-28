@@ -16,11 +16,18 @@
     <section class="invoice">
     <div class="box-body table-responsive">
       <table class="" width="100%" style="margin-bottom: 10px;">
+        <tr class="page-header">
+          <td width="50%">
+            <h2>
+              {{$name}}
+            </h2>
+          </td>
+          <td width="50%">
+            <img src="@if(!empty($logo)){{asset($logo)}}@endif" width="120" class="pull-right">
+          </td>
+        </tr>
         <tr>
           <td width="50%">
-            <h2 class="page-header">
-              {{$name}}<br>
-            </h2>
             <h4>{{$title}}</h4>
             <h4>{{$tahun}}</h4>
           </td>

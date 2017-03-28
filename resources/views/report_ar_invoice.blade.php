@@ -1,4 +1,4 @@
-<table class="table table-bordered" width="100%"> 
+<table class="table table-striped" width="100%"> 
     <thead>
       <tr>
         <th>No.Invoice</th>
@@ -23,30 +23,24 @@
           <td>{{$invoice['inv_duedate']}}</td>
           
           <td>{{$invoice['invtp_name']}}</td>
-          <td>{{$invoice['inv_amount']}}</td>
+          <td><span style="float:right">{{$invoice['inv_amount']}}</span></td>
         </tr>
 
         <tr>
-          <td>Details</td>
+          <td>Cost Components</td>
           <td colspan="8">
             <table class="table" width="100%">
                 <thead>
                   <tr>
-                    <th>Note</th>
-                    <th>Start</th>
-                    <th>End</th>  
-                    <th>Consumption</th>
-                    <th>Amount</th>
+                    <th>Cost</th>
+                    <th></th>
                   </tr> 
                 </thead>
                 <tbody>
                     @foreach($invoice['details'] as $detail)
                     <tr>
                       <td>{!!$detail['invdt_note']!!}</td>
-                      <td>{{$detail['meter_start']}}</td>
-                      <td>{{$detail['meter_end']}}</td>
-                      <td>{{$detail['meter_used']}}</td>
-                      <td>{{$detail['invdt_amount']}}</td>
+                      <td><span style="float:right">{{$detail['invdt_amount']}}</span></td>
                     </tr>
                     @endforeach
                 </tbody>
