@@ -1,3 +1,7 @@
+<?php
+  // hardcode sementara
+  $access = Auth::user()->name;
+?>
 <!-- Left side column. contains the logo and sidebar -->
 <aside class="main-sidebar">
 
@@ -35,6 +39,7 @@
               $masterUrls = [url('coa'), url('department'), url('invtype'), url('groupaccount'), url('company'), url('config')];
               
             ?>
+            @if($access=='admin')
             <li class="treeview @if(in_array(Request::url(),$masterUrls)){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-gears"></i> <span>MASTER DATA</span>
@@ -66,12 +71,13 @@
                 <!-- <li><a href="{{url('supplier')}}"><i class="fa fa-circle-o"></i> Supplier</a></li> -->
               </ul>
             </li>
-
+            @endif
 
             <?php
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $unitUrls = [url('unit'), url('unittype'), route('floor.index')];
             ?>
+            @if($access=='admin' || $access=='tro')
             <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$unitUrls) || Request::url() == url('cost_item') || Request::url() == url('tenant') || Request::url() == url('typetenant')
             || Request::url() == route('marketing.index') || Request::url() == route('report.tenancyview') ||  Request::url() == url('vaccount')){{'active'}}@endif">
               <a href="#">
@@ -119,14 +125,14 @@
                 <li @if(Request::url() == route('report.tenancyview')) class="active" @endif><a href="{{route('report.tenancyview')}}"><i class="fa fa-circle-o"></i> Reports</a></li>
               </ul>
             </li>
-
-            
+            @endif
 
             
             <?php
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index'),url('period_meter')];
               
             ?>
+            @if($access=='admin' || $access=='finance')
             <li class="treeview @if(in_array(Request::url(),$arUrls)){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-book"></i> <span>FINANCE</span>
@@ -176,6 +182,7 @@
 
               </ul>
             </li>
+            @endif
 
         </ul><!-- /.sidebar-menu -->
     </section>
