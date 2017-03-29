@@ -326,6 +326,7 @@ class UnitController extends Controller
                         ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id');
                         // ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id');
 
+        // KOMEN INI BIAR KELUAR SEMUA
         if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
         if(!empty($tenan_id)) $fetch = $fetch->orWhere('ms_unit_owner.tenan_id','=',$tenan_id);
         $fetch = $fetch->paginate(10);

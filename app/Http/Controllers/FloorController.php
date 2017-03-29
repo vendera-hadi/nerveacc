@@ -49,10 +49,9 @@ class FloorController extends Controller
                             break;
                     }
                 }
-            }
-            if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
-            else $fetch = $fetch->where($filter->field, $op, $filter->value);
-            
+                if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                else $fetch = $fetch->where($filter->field, $op, $filter->value);
+            }       
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
             $fetch = $fetch->skip($offset)->take($perPage)->get();
@@ -60,7 +59,6 @@ class FloorController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['floor_id'] = $value->floor_id;
                 $temp['floor_name'] = $value->floor_name;
                 $temp['created_at'] = $value->created_at;
                 $result['rows'][] = $temp;
@@ -74,7 +72,6 @@ class FloorController extends Controller
     public function insert(Request $request){
         try{
             $input = $request->all();
-            $input['floor_id'] = md5(date('Y-m-d H:i:s'));
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
             return MsFloor::create($input);        
