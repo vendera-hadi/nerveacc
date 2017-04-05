@@ -26,6 +26,8 @@ class CompanyController extends Controller
         $data['cc_email'] = @MsConfig::where('name','cc_email')->first()->value;
         $data['sendEmail'] = @MsConfig::where('name','send_inv_email')->first()->value;
         $data['signatureFlag'] = @MsConfig::where('name','invoice_signature_flag')->first()->value;
+        $data['prefixKuitansi'] = @MsConfig::where('name','prefix_kuitansi')->first()->value;
+        $data['invBodyEmail'] = @MsConfig::where('name','inv_body_email')->first()->value;
         return view('config',$data);
     }
 

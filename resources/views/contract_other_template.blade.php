@@ -48,6 +48,9 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            @if($pageType == 'Confirmation')
+                            <th field="checkbox" width="25"></th>
+                            @endif
                             <th field="unit_code" width="120" sortable="true">Unit</th>
                             <th field="tenan_name" width="120" sortable="true">Tenant</th>
                             <th field="contr_startdate" width="120" sortable="true">Start Date</th>
@@ -60,7 +63,12 @@
                     </thead>
                 </table>
                 <!-- end table -->
-
+                @if($pageType == 'Confirmation')
+                <div id="toolbar" class="datagrid-toolbar">
+                    <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
+                  <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="confirmMany()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Confirm Selected</span></a>
+                </div>
+                @endif
 
                 <div id="addendumModal" class="modal fade" role="dialog">
                   <div class="modal-dialog">
@@ -187,6 +195,38 @@
         $('.datepicker').datepicker({
             autoclose: true
         });
+
+        $('input[name=checkall]').change(function() {
+            if($(this).is(':checked')){ 
+                $('input[name=check]').each(function(){
+                    $(this).prop('checked',true);
+                });
+            }else{
+                $('input[name=check]').each(function(){
+                    $(this).prop('checked',false);
+                });
+            }
+         });
+
+        function confirmMany(){
+            var ids = [];
+            $('input[name=check]:checked').each(function() {
+               ids.push($(this).val());
+            });
+            if(ids.length > 0){
+              $.messager.confirm('Confirm','Are you sure you want to confirm this '+ids.length+' Billing Information ?',function(r){
+                  if (r){
+                      $.post('{{route('contract.confirm')}}',{id:ids},function(result){
+                            if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+                            if(result.success){ 
+                                $.messager.alert('Warning','Status updated to Confirmed');
+                                location.reload();
+                            }
+                        });
+                  }
+              });
+            }
+        }
 
         $(document).delegate('.confirmStatus','click',function(){
             var r = confirm("Are you sure want to change this status to 'Confirmed' ?");

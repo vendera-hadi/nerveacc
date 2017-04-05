@@ -128,6 +128,7 @@ class PaymentController extends Controller
                 $temp['invtp_name'] = $value->invtp_name;
                 $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
+                $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'">';
                 $invpayh_post = $temp['invpayh_post'] = !empty($value->invpayh_post) ? 'yes' : 'no';
 
                 $action_button = '<a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>';
@@ -271,7 +272,8 @@ class PaymentController extends Controller
 
                 $action = new TrInvoicePaymhdr;
 
-                $action->no_kwitansi = 'PAY-'.date('Y-m').'.'.$index;
+                $prefixKuitansi = @MsConfig::where('name','prefix_kuitansi')->first()->value;
+                $action->no_kwitansi = $prefixKuitansi.'-'.date('Y-m').'.'.$index;
                 $action->invpayh_date = $request->input('invpayh_date');
                 $action->invpayh_checkno = $request->input('invpayh_checkno');
                 $action->invpayh_giro = !empty($request->input('invpayh_giro')) ? $request->input('invpayh_giro') : null ;
@@ -342,19 +344,14 @@ class PaymentController extends Controller
     }
     
     public function posting(Request $request){
-    	$id = $request->id;
+    	$ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+        
     	$coayear = date('Y');
         $month = date('m');
         $journal = [];
         $payJournal = [];
     	
-    	// get payment header
-    	$paymentHd = TrInvoicePaymhdr::with('Cashbank')->find($id);
-        if(!isset($paymentHd->Cashbank->coa_code)) return response()->json(['error'=>1, 'message'=> 'Cashbank Name: '.$paymentHd->Cashbank->cashbk_name.' need to be set with COA code']);
-        // create journal DEBET utk piutang
-        $coaDebet = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$paymentHd->Cashbank->coa_code)->first();
-        if(empty($coaDebet)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$paymentHd->Cashbank->coa_code.' is not found on this year list. Please ReInsert this COA Code']);
-
         // cari last prefix, order by journal type
         $jourType = MsJournalType::where('jour_type_prefix','AR')->first();
         if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "AR" first before posting an invoice']);
@@ -366,89 +363,115 @@ class PaymentController extends Controller
         }else{
             $nextJournalNumber = 1;
         }
-        $nextJournalNumber = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
-        $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumber;
-        // Cashbank Jadi DEBET di Payment
-        $journal[] = [
-                        'ledg_id' => "JRNL".str_replace(".", "", str_replace(" ", "",microtime())),
-                        'ledge_fisyear' => $coayear,
-                        'ledg_number' => $journalNumber,
-                        'ledg_date' => date('Y-m-d'),
-                        'ledg_refno' => $paymentHd->invpayh_checkno,
-                        'ledg_debit' => $paymentHd->invpayh_amount,
-                        'ledg_credit' => 0,
-                        'ledg_description' => $coaDebet->coa_name,
-                        'coa_year' => $coaDebet->coa_year,
-                        'coa_code' => $coaDebet->coa_code,
-                        'created_by' => Auth::id(),
-                        'updated_by' => Auth::id(),
-                        'jour_type_id' => $jourType->id,
-                        'dept_id' => 3 //hardcode utk finance
-                    ];
+        $successPosting = 0;
+        $successIds = [];
+        foreach ($ids as $id) {
+        	// get payment header
+        	$paymentHd = TrInvoicePaymhdr::with('Cashbank')->find($id);
+            if(!isset($paymentHd->Cashbank->coa_code)) return response()->json(['error'=>1, 'message'=> 'Cashbank Name: '.$paymentHd->Cashbank->cashbk_name.' need to be set with COA code']);
+            // create journal DEBET utk piutang
+            $coaDebet = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$paymentHd->Cashbank->coa_code)->first();
+            if(empty($coaDebet)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$paymentHd->Cashbank->coa_code.' is not found on this year list. Please ReInsert this COA Code']);
+            
+            $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+            $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+            $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+            // Cashbank Jadi DEBET di Payment
+            $journal[] = [
+                            'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                            'ledge_fisyear' => $coayear,
+                            'ledg_number' => $journalNumber,
+                            'ledg_date' => date('Y-m-d'),
+                            'ledg_refno' => $paymentHd->invpayh_checkno,
+                            'ledg_debit' => $paymentHd->invpayh_amount,
+                            'ledg_credit' => 0,
+                            'ledg_description' => $coaDebet->coa_name,
+                            'coa_year' => $coaDebet->coa_year,
+                            'coa_code' => $coaDebet->coa_code,
+                            'created_by' => Auth::id(),
+                            'updated_by' => Auth::id(),
+                            'jour_type_id' => $jourType->id,
+                            'dept_id' => 3 //hardcode utk finance
+                        ];
 
-        $payJournal[] = [
-        		'ipayjour_date' => date('Y-m-d'),
-        		'ipayjour_voucher' => $journalNumber,
-        		'ipayjour_note' => 'Posting Payment '.$paymentHd->invpayh_checkno,
-        		'coa_code' => $coaDebet->coa_code,
-        		'ipayjour_debit' => $paymentHd->invpayh_amount,
-        		'ipayjour_credit' => 0,
-        		'invpayh_id' => $id
-        	];
-        // End DEBET
+            $payJournal[] = [
+            		'ipayjour_date' => date('Y-m-d'),
+            		'ipayjour_voucher' => $journalNumber,
+            		'ipayjour_note' => 'Posting Payment '.$paymentHd->invpayh_checkno,
+            		'coa_code' => $coaDebet->coa_code,
+            		'ipayjour_debit' => $paymentHd->invpayh_amount,
+            		'ipayjour_credit' => 0,
+            		'invpayh_id' => $id
+            	];
+            // End DEBET
 
-        // Create CREDIT
-        // Piutang yang dijadiin debet di Invoice, sekarang jadiin kredit
-        $paymentDtl = TrInvoicePaymdtl::join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
-        								->join('ms_invoice_type','tr_invoice.invtp_id','=','ms_invoice_type.id')
-        								->where('invpayh_id',$id)->first();
-        if(!isset($paymentDtl->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$paymentDtl->invtp_name.' need to be set with COA code']);
-        
-       	$coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$paymentDtl->invtp_coa_ar)->first();
-        if(empty($coaCredit)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$paymentDtl->invtp_coa_ar.' is not found on this year list. Please ReInsert this COA Code']);
-        
-        $journal[] = [
-                        'ledg_id' => "JRNL".str_replace(".", "", str_replace(" ", "",microtime())),
-                        'ledge_fisyear' => $coayear,
-                        'ledg_number' => $journalNumber,
-                        'ledg_date' => date('Y-m-d'),
-                        'ledg_refno' => $paymentHd->invpayh_checkno,
-                        'ledg_debit' => 0,
-                        'ledg_credit' => $paymentHd->invpayh_amount,
-                        'ledg_description' => $coaCredit->coa_name,
-                        'coa_year' => $coaCredit->coa_year,
-                        'coa_code' => $coaCredit->coa_code,
-                        'created_by' => Auth::id(),
-                        'updated_by' => Auth::id(),
-                        'jour_type_id' => $jourType->id,
-                        'dept_id' => 3 //hardcode utk finance
-                    ];
+            // Create CREDIT
+            // Piutang yang dijadiin debet di Invoice, sekarang jadiin kredit
+            try{
+                $paymentDtl = TrInvoicePaymdtl::join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
+                								->join('ms_invoice_type','tr_invoice.invtp_id','=','ms_invoice_type.id')
+                								->where('invpayh_id',$id)->first();
+                if(empty(@$paymentDtl->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$paymentDtl->invtp_name.' need to be set with COA code']);
+                
+               	$coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$paymentDtl->invtp_coa_ar)->first();
+                if(empty($coaCredit)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$paymentDtl->invtp_coa_ar.' is not found on this year list. Please ReInsert this COA Code']);
+                
+                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => date('Y-m-d'),
+                                'ledg_refno' => $paymentHd->invpayh_checkno,
+                                'ledg_debit' => 0,
+                                'ledg_credit' => $paymentHd->invpayh_amount,
+                                'ledg_description' => $coaCredit->coa_name,
+                                'coa_year' => $coaCredit->coa_year,
+                                'coa_code' => $coaCredit->coa_code,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id,
+                                'dept_id' => 3 //hardcode utk finance
+                            ];
 
-        $payJournal[] = [
-        		'ipayjour_date' => date('Y-m-d'),
-        		'ipayjour_voucher' => $journalNumber,
-        		'ipayjour_note' => 'Posting Payment '.$paymentHd->invpayh_checkno,
-        		'coa_code' => $coaCredit->coa_code,
-        		'ipayjour_debit' => 0,
-        		'ipayjour_credit' => $paymentHd->invpayh_amount,
-        		'invpayh_id' => $id
-        	];
+                $payJournal[] = [
+                		'ipayjour_date' => date('Y-m-d'),
+                		'ipayjour_voucher' => $journalNumber,
+                		'ipayjour_note' => 'Posting Payment '.$paymentHd->invpayh_checkno,
+                		'coa_code' => $coaCredit->coa_code,
+                		'ipayjour_debit' => 0,
+                		'ipayjour_credit' => $paymentHd->invpayh_amount,
+                		'invpayh_id' => $id
+                	];
+                $successIds[] = $id;
+                $nextJournalNumber++;
+                $successPosting++;
+            }catch(\Exception $e){
+                // do nothing
+            }
+        }
+        // var_dump($journal);
+        // var_dump($payJournal);
         
         // INSERT DATABASE
         try{
-            DB::transaction(function () use($id, $payJournal, $journal){
+            DB::transaction(function () use($successIds, $payJournal, $journal){
                 // insert journal
                 TrLedger::insert($journal);
                 // insert invoice payment journal
                 TrInvpaymJournal::insert($payJournal);
                 // update posting to yes
-                TrInvoicePaymhdr::where('id', $id)->update(['invpayh_post'=>1, 'posting_at'=>date('Y-m-d'), 'posting_by'=>Auth::id()]);
+                if(count($successIds) > 0){
+                    foreach ($successIds as $id) {
+                        TrInvoicePaymhdr::where('id', $id)->update(['invpayh_post'=>1, 'posting_at'=>date('Y-m-d'), 'posting_by'=>Auth::id()]);
+                    }
+                }
             });
         }catch(\Exception $e){
             return response()->json(['error'=>1, 'message'=> 'Error occured when posting invoice payment']);
-        }
+        } 
 
-        return response()->json(['success'=>1, 'message'=>'Invoice Payment posted Successfully']);
+        return response()->json(['success'=>1, 'message'=>$successPosting.' Invoice Payment posted Successfully']);
     }
 
     public function void(Request $request){

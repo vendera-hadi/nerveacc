@@ -630,6 +630,7 @@ class ContractController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['contr_status'] = $value->contr_status;
                 $temp['contr_terminate_date'] = $value->contr_terminate_date;
+                $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'">';
                 if(strtolower($pageName) == 'confirmation'){
                     $temp['action'] = '<a href="#" data-id="'.$value->id.'" class="confirmStatus"><i class="fa fa-check" aria-hidden="true"></i></a>';
                 }else if(strtolower($pageName) == 'addendum'){
@@ -650,8 +651,12 @@ class ContractController extends Controller
     }
 
     public function confirm(Request $request){
-        $id = $request->id;
-        TrContract::where('id',$id)->update(['contr_status'=>'confirmed']);
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+        
+        foreach($ids as $id){
+            TrContract::where('id',$id)->update(['contr_status'=>'confirmed']);
+        }
         return response()->json(['success'=>true]);
     }
 

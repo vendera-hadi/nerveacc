@@ -45,6 +45,12 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-sm-3">
+                        <select class="form-control" name="outstanding">
+                            <option value="">-- outstanding & not --</option>
+                            <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>Outstanding only</option>
+                        </select>
+                    </div>
                     <div class="col-sm-2">
                         <div class="input-group date">
                           <div class="input-group-addon">
@@ -61,8 +67,8 @@
                           <input type="text" id="startDate" name="date_to" placeholder="To" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
                         </div>
                     </div>
-                    <div class="col-sm-3">
-                        <button class="btn btn-info">Cari</button>
+                    <div class="col-sm-offset-9 col-sm-3" style="margin-top:10px">
+                        <button class="btn btn-info pull-right">Cari</button>
                     </div>
                 </div>
                 </form>
@@ -518,13 +524,14 @@ $(function(){
     });
     // $('#dg').datagrid('enableFilter');
 
-    var query, invtype, from, to;
+    var query, invtype, from, to, outstanding;
     $('#search').submit(function(e){
         e.preventDefault();
         query = $(this).find('input[name=q]').val();
         invtype = $(this).find('select[name=inv_type]').val();
         datefrom = $(this).find('input[name=date_from]').val();
         dateto = $(this).find('input[name=date_to]').val();
+        outstanding = $(this).find('select[name=outstanding]').val();
 
         if((datefrom == "" && dateto !="") || (datefrom!="" && dateto=="")){
             alert('Isi kedua tanggal From dan To untuk melakukan filter tanggal');
@@ -548,7 +555,8 @@ $(function(){
                 q: query,
                 invtype: invtype,
                 datefrom: datefrom,
-                dateto: dateto
+                dateto: dateto,
+                outstanding: outstanding
             });
             $('#dg').datagrid('reload');
         // }

@@ -58,19 +58,26 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                            <th field="checkbox" width="25"></th>
                             <th field="tenan_name" width="120" sortable="true">Nama Tenant</th>
                             <th field="unit_code" width="120" sortable="true">No Unit</th>
                             <th field="paymtp_name" width="120" sortable="true">Payment Type</th>
                             <th field="invpayh_date" width="120" sortable="true">Payment Date</th>
                             <th field="invpayh_amount" width="120" sortable="true">Total</th>
                             
-                            <th field="invpayh_post" width="120" sortable="true">Posting Status</th>
+                            <th field="invpayh_post" width="80" sortable="true">Posting Status</th>
                             <th field="action_button">Action</th>
                         </tr>
                     </thead>
                 </table>
                 <!-- end table -->
                 
+                <!-- icon2 atas table -->
+                <div id="toolbar" class="datagrid-toolbar">
+                    <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
+                  <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected Payment</span></a>
+                </div>
+                <!-- end icon -->
                 
               </div>
               <!-- /.tab-pane -->
@@ -338,6 +345,18 @@
         });
     });
 
+    $('input[name=checkall]').change(function() {
+        if($(this).is(':checked')){ 
+            $('input[name=check]').each(function(){
+                $(this).prop('checked',true);
+            });
+        }else{
+            $('input[name=check]').each(function(){
+                $(this).prop('checked',false);
+            });
+        }
+     });
+
     var print_window = function(){
         $('.print-window').off('click');
         $('.print-window').click(function(){
@@ -352,6 +371,27 @@
             return false;
         });
     };
+
+    function postingInv(){
+        var ids = [];
+        $('input[name=check]:checked').each(function() {
+           ids.push($(this).val());
+        });
+        if(ids.length > 0){
+          $.messager.confirm('Confirm','Are you sure you want to post this '+ids.length+' Payment ?',function(r){
+              if (r){
+                  $.post('{{route('payment.posting')}}',{id:ids}, function(data){
+                      alert(data.message);
+                      if(data.success == 1){
+                        location.reload();
+                      } else{
+                        return false;
+                      }
+                  });
+              }
+          });
+        }
+    }
 
     function openWindow(url, title, w, h){
         // Fixes dual-screen position                         Most browsers      Firefox

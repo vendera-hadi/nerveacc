@@ -114,6 +114,16 @@
                                           <input type="radio" name="invoice_signature_flag" value="0" @if($signatureFlag==0) checked @endif> &nbsp; Not Active
                                         </div>
 
+                                        <div class="form-group">
+                                          <label>Prefix Kuitansi (max 3 Character)</label>
+                                          <input type="text" name="prefix_kuitansi" class="form-control" value="{{$prefixKuitansi}}" maxlength="3">
+                                        </div>
+
+                                        <div class="form-group">
+                                          <label>Invoice Email Template</label>
+                                          <textarea class="textarea" name="inv_body_email" class="form-control" style="width: 100%;" required>{{$invBodyEmail}}</textarea>
+                                        </div>
+
                                     </div>
                                   </div>
                                   <!-- /.box-body -->

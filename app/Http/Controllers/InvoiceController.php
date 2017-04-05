@@ -45,7 +45,8 @@ class InvoiceController extends Controller
             $keyword = @$request->q;
             $invtype = @$request->invtype;
             $datefrom = @$request->datefrom;
-            $dateto = @$request->dateto;  
+            $dateto = @$request->dateto;
+            $outstanding = @$request->outstanding;  
 
             $page = $request->page;
             $perPage = $request->rows; 
@@ -102,6 +103,8 @@ class InvoiceController extends Controller
             if(!empty($datefrom)) $fetch = $fetch->where('tr_invoice.inv_faktur_date','>=',$datefrom);
             // jika ada date to
             if(!empty($dateto)) $fetch = $fetch->where('tr_invoice.inv_faktur_date','<=',$dateto);
+            // outstanding
+            if(!empty($outstanding)) $fetch = $fetch->where('tr_invoice.inv_outstanding','>',0);
 
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
@@ -456,8 +459,9 @@ class InvoiceController extends Controller
                             if(!empty($sendEmail)){
                                 // BTH SMTP BUAT TESTING, UNSTABLE
                                 try{
-                                    $txtMessage = 'Yth Customer kami di tempat, Berikut adalah Invoice yang harus dibayarkan. Detail bisa di download di attachment';
-                                    \Mail::raw($txtMessage, function($message) use($inv, $companyData, $ccEmail, $insertInvoice){
+                                    // $txtMessage = 'Yth Customer kami di tempat, Berikut adalah Invoice yang harus dibayarkan. Detail bisa di download di attachment';
+                                    $txtMessage = @MsConfig::where('name','inv_body_email')->first()->value;
+                                    \Mail::send('email-template',['message', $txtMessage], function($message) use($inv, $companyData, $ccEmail, $insertInvoice){
                                         $tenan = MsTenant::find($inv['inv_id']);
                                         $data = file_get_contents(url('invoice/print_faktur').'?id='.$insertInvoice->id.'&type=pdf');
                                         $message->attachData($data, 'Invoice-'.$inv['inv_number'].'.pdf');
