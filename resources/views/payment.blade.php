@@ -28,6 +28,15 @@
     .pagination > li > span{
       padding-bottom: 9px;
     }
+
+    .loadingScreen{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: black;
+        z-index: 100;
+        background: rgba(204, 204, 204, 0.5);
+    }
     </style>
 @endsection
 
@@ -43,6 +52,9 @@
         <div class="row">
             <div class="col-md-11">
 
+                <div class="loadingScreen" style="display:none">
+                    <h3 style="line-height: 400px; text-align: center;">LOADING</h3>
+                </div>
           <!-- Tabs -->
           <div class="nav-tabs-custom">
             <ul class="nav nav-tabs">
@@ -380,8 +392,10 @@
         if(ids.length > 0){
           $.messager.confirm('Confirm','Are you sure you want to post this '+ids.length+' Payment ?',function(r){
               if (r){
+                  $('.loadingScreen').show();
                   $.post('{{route('payment.posting')}}',{id:ids}, function(data){
                       alert(data.message);
+                      $('.loadingScreen').hide();
                       if(data.success == 1){
                         location.reload();
                       } else{

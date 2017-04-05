@@ -18,6 +18,16 @@
     <!-- datepicker -->
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+    <style type="text/css">
+        .loadingScreen{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 100;
+            background: rgba(204, 204, 204, 0.5);
+        }
+    </style>
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -31,6 +41,9 @@
 	<div class="container spark-screen">
 		<div class="row">
 			<div class="col-md-11">
+                <div class="loadingScreen" style="display:none">
+                    <h3 style="line-height: 400px; text-align: center;">LOADING</h3>
+                </div>
           		<!-- content -->
                 <form id="search">
                 <div class="row" style="margin-bottom:20px">
@@ -361,14 +374,21 @@ $('.datepicker').datepicker({
         });
 
 function postingInv(){
-    var row = $('#dg').datagrid('getSelected');
+    // var row = $('#dg').datagrid('getSelected');
+    var ids = [];
+    $('input[name=check]:checked').each(function() {
+       if($(this).data('posting') == "") ids.push($(this).val());
+    });
     // console.log(row);
-    if(row.inv_post == 'no'){
-        $.messager.confirm('Confirm','Are you sure you want to post this Invoice ?',function(r){
+    // if(row.inv_post == 'no'){
+    if(ids.length > 0){
+        $.messager.confirm('Confirm','Are you sure you want to post this '+ids.length+' unposted Invoice ?',function(r){
             if (r){
+                $('.loadingScreen').show();
                 // posting invoice
-                $.post('{{route('invoice.posting')}}',{id:row.id},function(result){
+                $.post('{{route('invoice.posting')}}',{id:ids},function(result){
                     console.log(result);
+                    $('.loadingScreen').hide();
                     if(result.error){
                         $.messager.alert('Warning',result.message);
                     }
@@ -379,9 +399,10 @@ function postingInv(){
                 },'json');
             }
         });
-    }else{
-        $.messager.alert('Warning', 'You can\'t post invoice that already posted');
     }
+    // }else{
+    //     $.messager.alert('Warning', 'You can\'t post invoice that already posted');
+    // }
 }
 
 function addInv(){

@@ -612,19 +612,19 @@
 
         $('input[name=owner]').change(function(){
             if($(this).val() == 1){
+                $('input[name=tenan_name]').removeAttr('required');
+                $('input[name=tenan_idno]').removeAttr('required');
+                $('input[name=tenan_phone]').removeAttr('required');
+                $('input[name=tenan_email]').removeAttr('required');
                 $('#newowner').addClass('hidden');
                 $('#oldowner').removeClass('hidden');
-                $('input[name=tenan_name]').attr('disabled','disabled');
-                $('input[name=tenan_idno]').attr('disabled','disabled');
-                $('input[name=tenan_phone]').attr('disabled','disabled');
-                $('input[name=tenan_email]').attr('disabled','disabled');
             }else{
+                $('input[name=tenan_name]').attr('required','required');
+                $('input[name=tenan_idno]').attr('required','required');
+                $('input[name=tenan_phone]').attr('required','required');
+                $('input[name=tenan_email]').attr('required','required');
                 $('#newowner').removeClass('hidden');
                 $('#oldowner').addClass('hidden');
-                $('input[name=tenan_name]').removeAttr('disabled');
-                $('input[name=tenan_idno]').removeAttr('disabled');
-                $('input[name=tenan_phone]').removeAttr('disabled');
-                $('input[name=tenan_email]').removeAttr('disabled');
             }
         });
 
