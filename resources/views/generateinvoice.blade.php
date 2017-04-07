@@ -58,6 +58,14 @@
                         </form>
 
                         <div class ="row" style="margin-top:80px">
+                            <div id="progressLoading" class="col-sm-6 col-sm-offset-3 text-center" style="display:none">
+                                <h3>Loading</h3>
+                                <div class="progress progress-sm active">
+                                    <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="col-sm-12 text-center" id="generateResult">
                             </div>
                         </div>
@@ -77,13 +85,56 @@
     $('#formGenerate').submit(function(e){
         e.preventDefault();
         var data = $(this).serialize();
-        $('#generateResult').html('<img src="{{asset('img/facebook.gif')}}">');
-        $.post('{{route('invoice.generate')}}',data, function(result){
-            if(result.errorMsg){ 
-                $.messager.alert('Warning',result.errorMsg); 
-                $('#generateResult').html('');
+        var progressBar = $('.progress-bar').first();
+        $('#progressLoading').show();
+        $.ajax({
+            xhr: function() {
+                var xhr = $.ajaxSettings.xhr();
+                if(xhr.upload){
+                    xhr.upload.addEventListener("progress", function(evt) {
+                        if (evt.lengthComputable) {
+                            var max = evt.total;
+                            var current = evt.loaded;
+                            var Percentage = (current * 100)/max;
+                            console.log(Percentage, 'upload');
+                            //Do something with upload progress here
+                            progressBar.width(Math.round(Percentage) + '%');
+                            if(Percentage >= 100) {
+                                $('#progressLoading').fadeOut(500);
+                            }
+                        }
+                   }, false);
+                }
+
+               xhr.addEventListener("progress", function(evt) {
+                   if (evt.lengthComputable) {
+                        var max = evt.total;
+                        var current = evt.loaded;
+                        var Percentage = (current * 100)/max;
+                        console.log(Percentage, 'download');
+                        //Do something with download progress
+                        progressBar.width(Math.round(Percentage) + '%');
+                        if(Percentage >= 100) {
+                            $('#progressLoading').fadeOut(500);
+                        }
+                   }
+               }, false);
+
+               return xhr;
+            },
+            // cache:false,
+            // contentType: false,
+            // processData: false,
+            type: 'POST',
+            url: '{{route('invoice.generate')}}',
+            data: data,
+            success: function(result){
+                if(result.errorMsg){ 
+                    $.messager.alert('Warning',result.errorMsg); 
+                    $('#generateResult').html('');
+                }
+                else{ $('#generateResult').html(result); }
             }
-            else{ $('#generateResult').html(result); }
         });
     });
 </script>
