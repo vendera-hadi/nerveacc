@@ -36,6 +36,7 @@ class InvoiceController extends Controller
                                 ->where('ms_cost_detail.costd_ismeter',0)->where('is_service_charge',0)
                                 ->where('is_sinking_fund',0)->where('is_insurance',0)->get();
         $data['inv_type'] = MsInvoiceType::all();
+        $data['coa'] = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',FALSE)->get();
         return view('invoice',$data);
     }
 
@@ -153,6 +154,7 @@ class InvoiceController extends Controller
                 ->where('tr_invoice_detail.inv_id',$inv_id)
                 ->get();
             foreach ($result as $key => $value) {
+                if(empty($result[$key]->costd_name)) $result[$key]->costd_name = 'Lain-lain';
                 $result[$key]->invdt_amount = "Rp. ".number_format($value->invdt_amount);
                 $result[$key]->meter_start = (int)$value->meter_start;
                 $result[$key]->meter_end = (int)$value->meter_end;
@@ -650,12 +652,16 @@ class InvoiceController extends Controller
             $invDetails = TrInvoiceDetail::where('inv_id',$id)->get();
             foreach ($invDetails as $detail) {
                 // coa credit diambil dari cost item
-                if($detail->costd_id != 0){ 
-                    $costItem = MsCostDetail::join('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')->where('ms_cost_detail.id',$detail->costd_id)->first();
-                }else{ 
-                    $costItem = MsCostItem::where('cost_code','STAMP')->first();
+                if(!empty($detail->coa_code)){
+                    $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$detail->coa_code)->first();
+                }else{
+                    if($detail->costd_id != 0){ 
+                        $costItem = MsCostDetail::join('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')->where('ms_cost_detail.id',$detail->costd_id)->first();
+                    }else{ 
+                        $costItem = MsCostItem::where('cost_code','STAMP')->first();
+                    }
+                    $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$costItem->cost_coa_code)->first();
                 }
-                $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$costItem->cost_coa_code)->first();
                 $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
                 $journal[] = [
                             'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
@@ -749,14 +755,15 @@ class InvoiceController extends Controller
             'updated_by' => Auth::id()
         ];
 
-        $costd_ids = $request->costd_id;
-        $costd_amounts = $request->costd_amount;
-        $costd_names = $request->costd_name;
-        foreach ($costd_ids as $key => $costd_id) {
+        $coa_codes = $request->coa_code;
+        $invdt_notes = $request->invdt_note;
+        $invdt_amounts = $request->invdt_amount;
+        foreach ($coa_codes as $key => $code) {
             $invDtl[] = [
-                'invdt_amount' => $costd_amounts[$key],
-                'invdt_note' => $costd_names[$key],
-                'costd_id' => $costd_id
+                'invdt_amount' => $invdt_amounts[$key],
+                'invdt_note' => $invdt_notes[$key],
+                'costd_id' => 0,
+                'coa_code' => $code
             ];
             $updateCtrInv[] = [
                 'continv_start_inv' => $request->inv_date,

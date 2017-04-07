@@ -185,16 +185,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label>Invoice Type</label>
-                                            <select name="invtp_id" class="form-control" required>
-                                            @foreach($inv_type as $invtp)
-                                                <option value="{{$invtp->id}}">{{$invtp->invtp_name}}</option>
-                                            @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
+                                    <input type="hidden" name="invtp_id" value="3">
                                     <div class="col-sm-6">
                                         <div class="form-group">
                                             <label>Invoice Due Date</label>
@@ -223,19 +214,8 @@
                                 </div>
                                 
                                 <div class="row">
-                                    <div class="col-sm-4">
-                                        <div class="form-group">
-                                            <label>Add Component Billing</label>
-                                            <select id="selectCostItemEdit" class="form-control">
-                                                <?php $tempGroup = ''; ?>
-                                                @foreach($cost_items as $key => $citm)
-                                                  @if($citm->cost_name != $tempGroup && $key > 0){!!'</optgroup>'!!}@endif
-                                                  @if($citm->cost_name != $tempGroup){!!'<optgroup label="'.$citm->cost_name.' ('.$citm->cost_code.')">'!!}@endif
-                                                  <option value="{{$citm->id}}">{{$citm->costd_name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <button type="button" id="clickCostItemEdit">Add Component Billing</button>
+                                    <div class="col-sm-offset-8 col-sm-4">
+                                        <button class="pull-right" type="button" id="clickCostItemEdit">Tambah Detail Biaya</button>
                                     </div>
                                 </div>
 
@@ -243,13 +223,23 @@
                                     <div class="col-sm-12">
                                         <table id="tableCost" width="100%" class="table table-bordered" >
                                             <tr class="text-center">
-                                              <td>Component Billing</td>
-                                              <td>Name</td>
-                                              <td>Unit</td>
-                                              <td>Cost Rate</td>
-                                              <td>Cost Burden</td>
-                                              <td>Cost Admin</td>
+                                              <td width="220">COA</td>
+                                              <td>Description</td>
+                                              <td width="150">Amount (IDR)</td>
                                               <td></td>
+                                            </tr>
+
+                                            <tr class="text-center">
+                                                <td id="coalist">
+                                                    <select class="form-control" name="coa_code[]">
+                                                        @foreach($coa as $code)
+                                                            <option value="{{$code->coa_code}}">{{ trim($code->coa_code).' - '.trim($code->coa_name) }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
+                                                <td><input type="text" class="form-control" name="invdt_note[]" required></td>
+                                                <td><input type="number" class="form-control amount" name="invdt_amount[]" value="0" required></td>
+                                                <td></td>
                                             </tr>
                                             
                                           </table>
@@ -651,23 +641,18 @@ $(function(){
     $('#clickCostItemEdit').click(function(){
           var flag = false;
           var subtotal = 0;
-          costItem = $('#selectCostItemEdit').val();
-          $('.costdid').each(function(){
-              console.log($(this).val());
-              if($(this).val() == costItem){ 
-                $.messager.alert('Warning', "Component Billing already exist in the list below");
-                flag = true;
-              }
-          });
-          if(!flag){
-            costItemName = $('#selectCostItemEdit option:selected').parent().attr('label');
-            $.post('{{route('cost_item.getDetail')}}', {id: costItem}, function(result){
-                subtotal = parseFloat(result.costd_rate) + parseFloat(result.costd_burden) + parseFloat(result.costd_admin);
-                $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_id[]" class="costdid" value="'+result.id+'" data-total="'+subtotal+'"><input type="hidden" name="costd_amount[]" value="'+subtotal+'"><input type="hidden" name="costd_name[]" value="'+result.costitem.cost_name+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>Rp. '+result.costd_rate+'</td><td>Rp. '+result.costd_burden+'</td><td>Rp. '+result.costd_admin+'</td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
-                updateTotal();
-            });
-          }
-            // $('#editTableCost').append('<tr class="text-center"><input type="hidden" name="contr_id[]" value="'+contractID+'"><input type="hidden" name="cost_id[]" value="'+costItem+'"><td>'+costItemName+'</td><td><strong>Name :</strong> <input type="text" name="costd_name[]" class="form-control costd_name"  required><strong>Unit :</strong> <input type="text" name="costd_unit[]" class="form-control costd_unit" required><strong>Cost Rate :</strong> <input type="text" name="costd_rate[]" class="form-control costd_rate" required><strong>Cost Burden :</strong> <input type="text" name="costd_burden[]" class="form-control costd_burden" required><strong>Cost Admin :</strong> <input type="text" name="costd_admin[]" class="form-control costd_admin" required><strong>Invoice Type :</strong> <select name="inv_type[]" class="form-control">'+invoiceTypes+'</select><strong>Use Meter :</strong> <select name="is_meter[]" class="form-control"><option value="1">yes</option><option value="0">no</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+          var coa_clone = $('#coalist').html();
+          $('#tableCost').append('<tr class="text-center"><td>'+coa_clone+'</td><td><input type="text" class="form-control" name="invdt_note[]" required></td><td><input type="number" class="form-control amount" name="invdt_amount[]" value="0" required></td><td><a class="deleteRow" style="cursor:pointer"><i class="fa fa-times"></i></a></td></tr>');
+    });
+
+    $(document).delegate('.amount','change',function(){
+        if($(this).val() < 0) $(this).val(0);
+        updateTotal(); 
+    });
+
+    $(document).delegate('.deleteRow','click',function(){
+        $(this).parents('tr').remove();
+        updateTotal(); 
     });
 
     $('#formEditFooter').submit(function(e){
@@ -684,14 +669,6 @@ $(function(){
 
     $('#formAddInv').submit(function(e){
         e.preventDefault();
-        if($('#txtContrId').val() == ""){ 
-            $.messager.alert('Warning','Billing Info is required');
-            return false;
-        }
-        if($('.costdid').length == 0){ 
-            $.messager.alert('Warning','Component Billing is required');
-            return false;
-        }
         $.post('{{route('invoice.insert')}}', $(this).serialize(), function(result){
             console.log(result);
             if(result.error) $.messager.alert('Warning',result.message);
@@ -706,9 +683,10 @@ $(function(){
 
     function updateTotal(){
         var total = 0;
-        $('.costdid').each(function(){
-            total = total + $(this).data('total');
+        $('.amount').each(function(){
+            total = total + parseInt($(this).val());
         });
+        console.log(total);
         // console.log(total);
         $('input[name=amount]').val(total);
         total = total.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');

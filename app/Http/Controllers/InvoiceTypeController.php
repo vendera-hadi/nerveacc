@@ -98,8 +98,12 @@ class InvoiceTypeController extends Controller
     public function delete(Request $request){
         try{
         	$id = $request->id;
-        	MsInvoiceType::destroy($id);
-        	return response()->json(['success'=>true]);
+            if($id == 3){
+                return response()->json(['errorMsg' => 'Invoice Lain-lain adalah varibel tetap dan tidak dapat dihapus']);
+            }else{
+        	   // MsInvoiceType::destroy($id);
+        	   return response()->json(['success'=>true]);
+            }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 

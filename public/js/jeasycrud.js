@@ -54,7 +54,7 @@ function destroyUser(){
                         //     title: 'Error',
                         //     msg: result.errorMsg
                         // });
-                        $.messager.alert('Warning','The warning message');
+                        $.messager.alert('Warning',result.errorMsg);
                     }
                 },'json');
             }
