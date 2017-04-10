@@ -339,6 +339,13 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('payment/get_invoice','PaymentController@get_invoice')->name('payment.get_invoice');
 	Route::post('payment/insert','PaymentController@insert')->name('payment.insert');
 	Route::get('payment/void','PaymentController@void')->name('payment.void');
+
+	// acl
+	Route::get('roles','AccountController@roles')->name('roles.index');
+	Route::post('roles/insert','AccountController@rolesInsert')->name('roles.insert');
+	Route::post('roles/update/{id}','AccountController@rolesUpdate')->name('roles.update');
+	Route::post('roles/detail','AccountController@rolesDetail')->name('roles.detail');
+	Route::post('roles/delete','AccountController@rolesDelete')->name('roles.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');
