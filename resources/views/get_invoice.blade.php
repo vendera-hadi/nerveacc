@@ -32,7 +32,7 @@
                 <td><?php echo sprintf('%s %s', $value['unit_name'], $value['floor_name']);?></td>
                 <td><?php echo date('d/m/y', $inv_date);?></td>
                 <td><?php echo date('d/m/y', $inv_duedate);?></td>
-                <td><?php echo 'Rp. '.$value['inv_outstanding'];?></td>
+                <td><?php echo 'Rp. '.number_format($value['inv_outstanding']);?></td>
                 
             </tr>
             <?php

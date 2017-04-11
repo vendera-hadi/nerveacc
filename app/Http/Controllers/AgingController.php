@@ -132,10 +132,9 @@ class AgingController extends Controller
 
     public function downloadAgingExcel()
     {
-        $data = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
-                    DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS gabung"),
-                    DB::raw("SUM(inv_outstanding) AS total"),
-                    DB::raw("SUM((CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END)) AS current"),
+        $data_ori = TrInvoice::select('ms_unit.unit_code AS Unit','ms_tenant.tenan_name AS Tenant',
+                    DB::raw("SUM(inv_outstanding) AS Total"),
+                    DB::raw("SUM((CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END)) AS Current"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
@@ -146,6 +145,18 @@ class AgingController extends Controller
                 ->where('tr_invoice.inv_outstanding','>',0)
                 ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name')
                 ->get()->toArray();
+        $data = array();
+        for($i=0; $i<count($data_ori); $i++){
+            $data[$i]=array(
+                'Unit Code'=>$data_ori[$i]['Unit'],
+                'Nama Tenant'=>$data_ori[$i]['Tenant'],
+                'Total'=>number_format($data_ori[$i]['total']),
+                'Current'=>number_format($data_ori[$i]['current']),
+                '1-30 Days'=>number_format($data_ori[$i]['ag30']),
+                '31-60 Days'=>number_format($data_ori[$i]['ag60']),
+                '61-90 Days'=>number_format($data_ori[$i]['ag90']),
+                '90 Days'=>number_format($data_ori[$i]['agl180']));
+        }
         $tp = 'xls';
         return Excel::create('report_aging', function($excel) use ($data) {
             $excel->sheet('mySheet', function($sheet) use ($data)

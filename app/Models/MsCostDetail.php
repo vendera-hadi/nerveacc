@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MsCostDetail extends Model
 {
    protected $table ='ms_cost_detail';
-   protected $fillable =['costd_is','cost_id','costd_name','costd_rate','costd_burden','costd_admin','costd_ismeter','costd_unit','daya'];
+   protected $fillable =['cost_id','costd_name','costd_unit','costd_rate','costd_burden','costd_admin','costd_ismeter','daya'];
    public $timestamps  = false;
 
    public function costitem(){

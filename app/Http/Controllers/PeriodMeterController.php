@@ -396,10 +396,11 @@ class PeriodMeterController extends Controller
                         ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
                         ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
                         ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
+                        ->leftJoin('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                         ->where('tr_meter.prdmet_id',$type)
                         ->where('ms_cost_detail.cost_id',$cost)
+                        ->orderBy('ms_floor.id','asc')
                         ->orderBy('ms_unit.unit_code','asc')
-                        ->orderBy('ms_cost_detail.costd_name','asc')
                         ->get()->toArray();
             $border = 'A1:E';
         }else{
@@ -407,10 +408,11 @@ class PeriodMeterController extends Controller
                         ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
                         ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
                         ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
+                        ->leftJoin('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                         ->where('tr_meter.prdmet_id',$type)
                         ->where('ms_cost_detail.cost_id',$cost)
+                        ->orderBy('ms_floor.id','asc')
                         ->orderBy('ms_unit.unit_code','asc')
-                        ->orderBy('ms_cost_detail.costd_name','asc')
                         ->get()->toArray();
             $border = 'A1:D';
         }

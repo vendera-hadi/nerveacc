@@ -66,7 +66,6 @@ class CostDetailController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['costd_is'] = $value->costd_is;
                 $temp['cost_id'] = $value->cost_id;
                 $temp['cost_name'] = $value->cost_name;
                 $temp['costd_name'] = $value->costd_name;
@@ -74,6 +73,7 @@ class CostDetailController extends Controller
                 $temp['costd_burden'] = $value->costd_burden;
                 $temp['costd_admin'] = $value->costd_admin;
                 $temp['costd_unit'] = $value->costd_unit;
+                $temp['daya'] = $value->daya;
                 $temp['costd_ismeter'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }
