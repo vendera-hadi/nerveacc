@@ -7,6 +7,7 @@ use Validator;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -71,7 +72,8 @@ class AuthController extends Controller
         ]);
     }
 
-    protected function logout(){
+    protected function logout(Request $request){
+        $request->session()->flush();
         \Auth::logout();
         return redirect('login');
     }

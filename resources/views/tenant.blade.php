@@ -65,10 +65,16 @@
                 
                 <!-- icon2 atas table -->
                 <div id="toolbar">
+                    @if(Session::get('role')==1 || in_array(28,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newUser()">New</a>
+                    @endif
+                    @if(Session::get('role')==1 || in_array(29,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Edit</a>
+                    @endif
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="detail()">View Detail</a>
+                    @if(Session::get('role')==1 || in_array(30,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
+                    @endif
                 </div>
                 <!-- end icon -->
             

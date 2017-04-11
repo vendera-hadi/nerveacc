@@ -48,7 +48,9 @@
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Owner Lists</a></li>
               <li><a href="#tab_5" class="tenan_tab" data-toggle="tab">Tenant Lists</a></li>
+              @if(Session::get('role')==1 || in_array(36,Session::get('permissions')))
               <li><a href="#tab_2" data-toggle="tab">Add Billing Info</a></li>
+              @endif
               <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Billing Info</a></li>
               <li class="hidden"><a href="#tab_4" data-toggle="tab">Edit Component Billing</a></li>
             </ul>

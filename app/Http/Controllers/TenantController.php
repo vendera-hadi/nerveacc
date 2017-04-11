@@ -85,7 +85,10 @@ class TenantController extends Controller
                 $temp['tent_name'] = $value->tent_name;
                 $temp['tenan_isppn'] = $value->tenan_isppn;
                 $temp['tenan_ispkp'] = $value->tenan_ispkp;
-                $temp['action'] = '<a href="#" data-id="'.$value->id.'" class="addUnit" title="Add Unit"><i class="fa fa-home" aria-hidden="true"></i> Add Unit</a>';
+                $temp['action'] = '';
+                if(\Session::get('role')==1 || in_array(29,\Session::get('permissions'))){
+                    $temp['action'] = '<a href="#" data-id="'.$value->id.'" class="addUnit" title="Add Unit"><i class="fa fa-home" aria-hidden="true"></i> Add Unit</a>';
+                }
                 $result['rows'][] = $temp;
             }
             return response()->json($result);

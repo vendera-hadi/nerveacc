@@ -99,11 +99,22 @@ class ContractController extends Controller
                 else $status = '<strong>'.$value->contr_status.'</strong>';
                 $temp['contr_status'] = $status;
                 $temp['contr_terminate_date'] = !empty($value->contr_terminate_date) ? date('d/m/Y',strtotime($value->contr_terminate_date)) : '';
-                if($value->contr_status != 'confirmed') $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-                                                                    &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>
-                                                                    &nbsp;<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
-                else if($value->contr_status == 'confirmed' && !empty($value->contr_terminate_date) ) $confirmed = '<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
-                else $confirmed = '';
+                if($value->contr_status != 'confirmed'){ 
+                    $confirmed = '';
+                    if(\Session::get('role')==1 || in_array(37,\Session::get('permissions'))){
+                        $confirmed .= '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>&nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>';
+                    }
+                    if(\Session::get('role')==1 || in_array(38,\Session::get('permissions'))){
+                        $confirmed .= '&nbsp;<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                    }
+                }else if($value->contr_status == 'confirmed' && !empty($value->contr_terminate_date) ){ 
+                    $confirmed = '';
+                    if(\Session::get('role')==1 || in_array(38,\Session::get('permissions'))){
+                        $confirmed .= '<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                    }
+                }else{ 
+                    $confirmed = '';
+                }
                 
                 if($value->contr_status != 'cancelled') $temp['action'] = '<a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>&nbsp; '.$confirmed;
                 else $temp['action'] = '';

@@ -45,7 +45,9 @@
           <div class="nav-tabs-custom">
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
+              @if(Session::get('role')==1 || in_array(65,Session::get('permissions')))
               <li><a href="#tab_2" data-toggle="tab">Add Journal Entry</a></li>
+              @endif
               <li class="hidden"><a href="#tab_3">Edit Journal</a></li>
             </ul>
             <div class="tab-content">

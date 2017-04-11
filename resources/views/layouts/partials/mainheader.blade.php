@@ -19,7 +19,7 @@
         <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
                 
-
+                @if(Session::get('role')==1 || in_array(43,Session::get('permissions')))
                 <!-- Notifications Menu -->
                 <li class="dropdown notifications-menu">
                     <!-- Menu toggle button -->
@@ -39,6 +39,7 @@
                         <!-- <li class="footer"><a href="#">{{ trans('adminlte_lang::message.viewall') }}</a></li> -->
                     </ul>
                 </li>
+                @endif
                 
                 @if (Auth::guest())
                     <li><a href="{{ url('/register') }}">{{ trans('adminlte_lang::message.register') }}</a></li>

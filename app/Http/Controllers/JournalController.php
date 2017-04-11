@@ -155,9 +155,13 @@ class JournalController extends Controller
                 $temp['ledg_description'] = $value->ledg_description;
                 $temp['debit'] = ($value->debit > 0) ? $value->debit : $value->credit;
                 // $temp['credit'] = $value->credit;
-                
-                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> <a href="#" data-id="'.$value->ledg_refno.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
-                
+                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> ';
+                if(\Session::get('role')==1 || in_array(66,\Session::get('permissions'))){
+                    $temp['action'] .= ' <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> '; 
+                }
+                if(\Session::get('role')==1 || in_array(67,\Session::get('permissions'))){
+                    $temp['action'] .=  '<a href="#" data-id="'.$value->ledg_refno.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                }
                 $result['rows'][] = $temp;
             }
             return response()->json($result);

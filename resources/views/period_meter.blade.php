@@ -64,12 +64,22 @@ Period Meter
                 
                 <!-- icon2 atas table -->
                 <div id="toolbar">
+                    @if(Session::get('role')==1 || in_array(53,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newUser()">New</a>
+                    @endif
+                    @if(Session::get('role')==1 || in_array(54,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Edit</a>
+                    @endif
+                    @if(Session::get('role')==1 || in_array(55,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
+                    @endif
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="detail()">View</a>
+                    @if(Session::get('role')==1 || in_array(56,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="approve()">Approve</a>
+                    @endif
+                    @if(Session::get('role')==1 || in_array(57,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="unposting()">UnPosting</a>
+                    @endif
                 </div>
                 <!-- end icon -->
             

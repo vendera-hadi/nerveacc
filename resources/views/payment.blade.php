@@ -59,7 +59,9 @@
           <div class="nav-tabs-custom">
             <ul class="nav nav-tabs">
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
+              @if(Session::get('role')==1 || in_array(69,Session::get('permissions')))
               <li><a href="#tab_2" data-toggle="tab">Add Payment</a></li>
+              @endif
               <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Payment</a></li>
             </ul>
             <div class="tab-content">
@@ -87,7 +89,9 @@
                 <!-- icon2 atas table -->
                 <div id="toolbar" class="datagrid-toolbar">
                     <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
-                  <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected Payment</span></a>
+                    @if(Session::get('role')==1 || in_array(70,Session::get('permissions')))
+                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected Payment</span></a>
+                    @endif
                 </div>
                 <!-- end icon -->
                 

@@ -47,9 +47,15 @@
                 
                 <!-- icon2 atas table -->
                 <div id="toolbar">
+                    @if(Session::get('role')==1 || in_array(45,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newUser()">New</a>
+                    @endif
+                    @if(Session::get('role')==1 || in_array(46,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUser()">Edit</a>
+                    @endif
+                    @if(Session::get('role')==1 || in_array(47,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
+                    @endif
                 </div>
                 <!-- end icon -->
             
@@ -155,6 +161,15 @@
                 detailFormatter:function(index,row){
                     return '<div style="padding:2px"><table class="ddv"></table></div>';
                 },
+                <?php 
+                    $detailcommand = '';
+                    if(\Session::get('role')==1 || in_array(49,\Session::get('permissions'))){
+                        $detailcommand .= '<button onclick="editRecord(this)">Edit</button>&nbsp;';
+                    }
+                    if(\Session::get('role')==1 || in_array(50,\Session::get('permissions'))){
+                        $detailcommand .= '<button onclick="RemoveRecord(this)">Remove</button>';
+                    }
+                ?>
                 onExpandRow: function(index,row){
                     var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
                     ddv.datagrid({
@@ -164,7 +179,9 @@
                         rownumbers:true,
                         loadMsg:'Loading',
                         height:'auto',
+                        @if(Session::get('role')==1 || in_array(48,\Session::get('permissions')))
                         toolbar:toolbar,
+                        @endif
                         columns:[[
                             {field:'costd_name',title:'Component Name',width:100},
                             {field:'costd_rate',title:'Cost Rate',width:100},
@@ -176,7 +193,7 @@
                             {field: 'action', title: 'Action',
                                  formatter:function(value,row,index)
                                  {
-                                    var s = '<button onclick="editRecord(this)">Edit</button>&nbsp;<button onclick="RemoveRecord(this)">Remove</button>';
+                                    var s = '{!!$detailcommand!!}';
                                     return s;
                                 }
                             }
