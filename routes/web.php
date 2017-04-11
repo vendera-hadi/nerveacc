@@ -346,6 +346,12 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('roles/update/{id}','AccountController@rolesUpdate')->name('roles.update');
 	Route::post('roles/detail','AccountController@rolesDetail')->name('roles.detail');
 	Route::post('roles/delete','AccountController@rolesDelete')->name('roles.delete');
+
+	Route::get('users','AccountController@users')->name('users.index');	
+	Route::post('users/insert','AccountController@usersInsert')->name('users.insert');
+	Route::post('users/update','AccountController@usersUpdate')->name('users.update');
+	Route::post('users/detail','AccountController@usersDetail')->name('users.detail');
+	Route::post('users/delete','AccountController@usersDelete')->name('users.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');

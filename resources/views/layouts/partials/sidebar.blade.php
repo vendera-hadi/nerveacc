@@ -36,7 +36,7 @@
         <!-- Sidebar Menu -->
         <ul class="sidebar-menu">
             <?php
-              $masterUrls = [url('coa'), url('department'), url('invtype'), url('groupaccount'), url('company'), url('config'), url('roles')];
+              $masterUrls = [url('coa'), url('department'), url('invtype'), url('groupaccount'), url('company'), url('config'), url('roles'), url('users')];
               $companySetup = [1,5,6];
               $masterdata = [1,5,6,7,11];
             ?>
@@ -79,7 +79,10 @@
 
                 @if(Session::get('role')==1)
                 <li @if(Request::url() == url('roles')) class="active" @endif><a href="{{url('roles')}}"><i class="fa fa-circle-o"></i> ACL Roles</a></li>
-                @endif                
+                @endif
+                @if(Session::get('role')==1)
+                <li @if(Request::url() == url('users')) class="active" @endif><a href="{{url('users')}}"><i class="fa fa-circle-o"></i> ACL Users</a></li>
+                @endif                   
                 <!-- <li @if(Request::url() == url('groupaccount')) class="active" @endif><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li> -->
                 
                 <!-- <li><a href="{{url('groupaccdetail')}}"><i class="fa fa-circle-o"></i> Group Account Detail</a></li> -->
