@@ -1342,8 +1342,8 @@ class ContractController extends Controller
                                 $query->whereNull('contr_terminate_date')->orWhere('contr_terminate_date','<',date('Y-m-d'));
                             });
         if($keyword) $fetch = $fetch->where(function($query) use($keyword){
-                                            $query->where('contr_no','like','%'.$keyword.'%')->orWhere('contr_code','like','%'.$keyword.'%')
-                                                ->orWhere('unit_name','like','%'.$keyword.'%')->orWhere('tenan_name','like','%'.$keyword.'%');
+                                            $query->where(\DB::raw('LOWER(contr_no)'),'like','%'.$keyword.'%')->orWhere(\DB::raw('LOWER(contr_code)'),'like','%'.$keyword.'%')
+                                                ->orWhere(\DB::raw('LOWER(unit_name)'),'like','%'.$keyword.'%')->orWhere(\DB::raw('LOWER(tenan_name)'),'like','%'.$keyword.'%');
                                         });
         $fetch = $fetch->paginate(10);
         return view('modal.popupcontract', ['contracts'=>$fetch, 'keyword'=>$keyword, 'edit'=> null]);

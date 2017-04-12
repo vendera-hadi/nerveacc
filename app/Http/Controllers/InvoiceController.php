@@ -738,7 +738,7 @@ class InvoiceController extends Controller
         // else $contractId = 0;
 
         $invHeader = [
-            'tenan_id' => $tenanId,
+            'tenan_id' => $contract->tenan_id,
             'inv_number' => $invtp->invtp_prefix."-".substr($inv_date[0], -2).$inv_date[1]."-".$newPrefix,
             'inv_faktur_no' => $invtp->invtp_prefix."-".substr($inv_date[0], -2).$inv_date[1]."-".$newPrefix,
             'inv_faktur_date' => $request->inv_date,
