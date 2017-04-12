@@ -882,4 +882,19 @@ class InvoiceController extends Controller
         }
     }
 
+    public function progressGenerate(Request $request){
+        $month = $request->input('month');
+        $year = $request->input('year');
+        if($month == 1) $year = $year-1;
+
+        if($month == 1) $month = 12;
+        else $month = $month - 1;
+        $month = str_pad($month, 2, 0, STR_PAD_LEFT);
+        $year = substr($year, -2);
+        
+        $generated = TrInvoice::where('inv_faktur_no', 'like', '%-'.$year.$month.'-%')->count();
+        $totalInvoice = $request->session()->get('totalInv');
+        return response()->json(['generated' => $generated, 'total' => $totalInvoice]);
+    }
+
 }

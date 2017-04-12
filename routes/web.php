@@ -303,6 +303,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('invoice/get','InvoiceController@get')->name('invoice.get');
 	Route::post('invoice/getdetail','InvoiceController@getdetail')->name('invoice.getdetail');
 	Route::get('generateinvoice','InvoiceController@generateInvoice');
+	Route::post('progressgenerate','InvoiceController@progressGenerate');
 	Route::post('generateinvoice','InvoiceController@postGenerateInvoice')->name('invoice.generate');
 	Route::get('invoice/print_faktur', 'InvoiceController@print_faktur');
 	Route::get('invoice/print_kwitansi', 'InvoiceController@print_kwitansi');

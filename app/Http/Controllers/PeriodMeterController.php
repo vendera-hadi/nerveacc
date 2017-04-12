@@ -471,31 +471,33 @@ class PeriodMeterController extends Controller
 
             if(!empty($data) && $data->count()){
                 foreach ($data as $key => $value) {
-                    $meter_used = ($value->end - $value->start);
-                    $formula = explode('~', $array_rate[$value->daya]);
+                    if(!empty(@$value->unit)){
+                        $meter_used = ($value->end - $value->start);
+                        $formula = explode('~', $array_rate[$value->daya]);
 
-                    if (strpos($value->cost, 'ELECTRICITY') !== false) {
-                        //CEK MIN 40 JAM PEMAKAIAN LISTRIK
-                        $min = 40 * ($value->daya/1000) * $formula[0];
-                        $elec_cost = $meter_used * $formula[0];
-                        if($elec_cost > $min){
-                            $meter_cost = $elec_cost;
+                        if (strpos($value->cost, 'ELECTRICITY') !== false) {
+                            //CEK MIN 40 JAM PEMAKAIAN LISTRIK
+                            $min = 40 * ($value->daya/1000) * $formula[0];
+                            $elec_cost = $meter_used * $formula[0];
+                            if($elec_cost > $min){
+                                $meter_cost = $elec_cost;
+                            }else{
+                                $meter_cost = $min;
+                            }
+                            $bpju = (0.03 * $meter_cost);
+                            $total = $meter_cost + $bpju;
                         }else{
-                            $meter_cost = $min;
+                            $bpju = 0;
+                            $meter_cost = $meter_used * $formula[0];
+                            $total =  $meter_cost + $formula[1] + $formula[2];
                         }
-                        $bpju = (0.03 * $meter_cost);
-                        $total = $meter_cost + $bpju;
-                    }else{
-                        $bpju = 0;
-                        $meter_cost = $meter_used * $formula[0];
-                        $total =  $meter_cost + $formula[1] + $formula[2];
+                        
+                        DB::table('tr_meter')
+                        ->where('prdmet_id', $prd)
+                        ->where('costd_id', $array_meter[$value->cost])
+                        ->where('unit_id', $array_unit[$value->unit])
+                        ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>$bpju,'total'=>$total]);
                     }
-                    
-                    DB::table('tr_meter')
-                    ->where('prdmet_id', $prd)
-                    ->where('costd_id', $array_meter[$value->cost])
-                    ->where('unit_id', $array_unit[$value->unit])
-                    ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>$bpju,'total'=>$total]);
                 }
                 Session::flash('msg', 'Upload Success.');
                 return back();
