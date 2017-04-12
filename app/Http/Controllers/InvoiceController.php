@@ -730,11 +730,12 @@ class InvoiceController extends Controller
         }
         $newPrefix = $lastPrefix + 1;
         $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
-        $tenanId = $request->tenan_id;
-        // $contract = TrContract::find($request->contr_id);
-        $contract = TrContract::where('tenan_id',$tenanId)->where('contr_status','confirmed')->first();
-        if($contract) $contractId = $contract->id;
-        else $contractId = 0;
+        // $tenanId = $request->tenan_id;
+        $contract = TrContract::find($request->contr_id);
+        $contractId = $contract->id;
+        // $contract = TrContract::where('tenan_id',$tenanId)->where('contr_status','confirmed')->first();
+        // if($contract) $contractId = $contract->id;
+        // else $contractId = 0;
 
         $invHeader = [
             'tenan_id' => $tenanId,

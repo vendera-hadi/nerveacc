@@ -176,12 +176,6 @@
                                 <div class="row">
                                     <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label>Invoice Number (No. Faktur)</label>
-                                            <input type="text" class="form-control" name="inv_number" placeholder="No. Faktur" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
                                             <label>Invoice Date</label>
                                             <div class="input-group date">
                                                 <div class="input-group-addon">
@@ -208,11 +202,11 @@
                                         <div class="form-group">
                                             <label>Tenant</label>
                                             <div class="input-group">
-                                              <input type="hidden" name="tenan_id" id="txtTenanId" required>
-                                              <input type="text" class="form-control" id="txtTenan" disabled>
-                                              <span class="input-group-btn">
-                                                <button class="btn btn-info" type="button" id="chooseTenanButton">Choose Tenant</button>
-                                              </span>
+                                                <input type="hidden" name="contr_id" id="txtContrId" required>
+                                                <input type="text" class="form-control" id="txtContr" disabled>
+                                                <span class="input-group-btn">
+                                                    <button class="btn btn-info" type="button" id="chooseContractButton">Choose Billing Info</button>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -336,6 +330,25 @@
                     <div class="modal-content">
                       
                       <div class="modal-body" id="tenanModalContent">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+                <!-- End Modal -->
+
+
+                <!-- Modal select contract -->
+                <div id="contractModal" class="modal fade" role="dialog">
+                  <div class="modal-dialog">
+
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                      
+                      <div class="modal-body" id="contractModalContent">
                       </div>
                       <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -607,11 +620,20 @@ $(function(){
     });
 
     // paging
+    // $(document).delegate('.pagination li a','click',function(e){
+    //     e.preventDefault();
+    //     currenturl = $(this).attr('href');
+    //     $.post(currenturl, null, function(data){
+    //         $('#tenanModalContent').html(data);
+    //     });
+    // });
+
+    // paging
     $(document).delegate('.pagination li a','click',function(e){
         e.preventDefault();
         currenturl = $(this).attr('href');
         $.post(currenturl, null, function(data){
-            $('#tenanModalContent').html(data);
+            $('#contractModalContent').html(data);
         });
     });
 
@@ -637,7 +659,7 @@ $(function(){
      $(document).delegate('#chooseContract','click',function(e){
         e.preventDefault();
         var contractid = $('input[name="contract"]:checked').val();
-        var contractname = $('input[name="contract"]:checked').data('name');
+        var contractname = $('input[name="contract"]:checked').data('tenant')+" - "+$('input[name="contract"]:checked').data('unit');
         $('input[name=contr_id]').val(contractid);
         $('#txtContr').val(contractname);
         $('#contractModalContent').text('');

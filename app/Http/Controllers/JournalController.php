@@ -216,12 +216,13 @@ class JournalController extends Controller
             $refno = $request->id;
             $coayear = date('Y');
             $data['id'] = $refno;
-            $data['fetch'] = TrLedger::select('ledg_number','ledg_date','ledg_refno','ledg_debit','ledg_credit','ledg_description','tr_ledger.jour_type_id','tr_ledger.coa_code','ms_master_coa.coa_name','tr_ledger.dept_id','ms_department.dept_name','ms_journal_type.jour_type_name')
+            $data['fetch'] = TrLedger::select('ledg_number','tr_ledger.coa_year','ledg_date','ledg_refno','ledg_debit','ledg_credit','ledg_description','tr_ledger.jour_type_id','tr_ledger.coa_code','ms_master_coa.coa_name','tr_ledger.dept_id','ms_department.dept_name','ms_journal_type.jour_type_name')
                     ->join('ms_master_coa','tr_ledger.coa_code','=','ms_master_coa.coa_code')
                     ->join('ms_department','tr_ledger.dept_id','=','ms_department.id')
                     ->join('ms_journal_type',\DB::raw('tr_ledger.jour_type_id::integer'),'=','ms_journal_type.id')
-                    ->where('tr_ledger.coa_year',$coayear)->where('tr_ledger.ledg_refno',$refno)
+                    ->where('tr_ledger.coa_year',$coayear)->where('ms_master_coa.coa_year',$coayear)->where('tr_ledger.ledg_refno',$refno)
                     ->get();
+
             $data['accounts'] = MsMasterCoa::where('coa_year',$coayear)->where('coa_isparent',0)->orderBy('coa_type')->get();
             $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
             $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();

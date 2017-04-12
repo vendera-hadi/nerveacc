@@ -94,6 +94,8 @@
             }
             else{ $('#generateResult').html(result); }
         });
+    }).fail(function() {
+        $('#generateResult').html("<h3>Process Done in Background</h3>");
     });
 </script>
 @endsection

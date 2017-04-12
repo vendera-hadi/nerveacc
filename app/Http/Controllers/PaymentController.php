@@ -14,6 +14,7 @@ use App\Models\TrInvoicePaymdtl;
 use App\Models\TrInvpaymJournal;
 use App\Models\MsMasterCoa;
 use App\Models\MsJournalType;
+use App\Models\MsConfig;
 use Auth;
 use DB;
 use Validator;
