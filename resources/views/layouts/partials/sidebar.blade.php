@@ -37,10 +37,11 @@
         <ul class="sidebar-menu">
             <?php
               $masterUrls = [url('coa'), url('department'), url('invtype'), url('groupaccount'), url('company'), url('config'), url('roles'), url('users')];
+              $masters = [1,5,6,7,11];
               $companySetup = [1,5,6];
-              $masterdata = [1,5,6,7,11];
+              $otorisasi = [7,11];
             ?>
-            @if(Session::get('role')==1 || !empty(array_intersect($masterdata, Session::get('permissions'))) )
+            @if(Session::get('role')==1 || !empty(array_intersect($masters, Session::get('permissions'))) )
             <li class="treeview @if(in_array(Request::url(),$masterUrls)){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-gears"></i> <span>MASTER DATA</span>
@@ -69,6 +70,24 @@
                     </ul>
                 </li>
                 @endif
+
+                @if(Session::get('role')==1)
+                <li>
+                    <a href="#"><i class="fa fa-circle"></i> Otorisasi
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+                    <ul class="treeview-menu @if(in_array(Request::url(),$masterUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$masterUrls)) style="display:block" @endif>               
+                        @if(Session::get('role')==1)
+                        <li @if(Request::url() == url('roles')) class="active" @endif><a href="{{url('roles')}}"><i class="fa fa-circle-o"></i> Roles</a></li>
+                        @endif
+                        @if(Session::get('role')==1)
+                        <li @if(Request::url() == url('users')) class="active" @endif><a href="{{url('users')}}"><i class="fa fa-circle-o"></i> Users List</a></li>
+                        @endif
+                    </ul>
+                </li>
+                @endif
                 
                 @if(Session::get('role')==1 || in_array(7,Session::get('permissions')))
                 <li @if(Request::url() == url('invtype')) class="active" @endif><a href="{{url('invtype')}}"><i class="fa fa-circle-o"></i> Invoice Type</a></li>
@@ -77,12 +96,7 @@
                 <li @if(Request::url() == url('coa')) class="active" @endif><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
                 @endif
 
-                @if(Session::get('role')==1)
-                <li @if(Request::url() == url('roles')) class="active" @endif><a href="{{url('roles')}}"><i class="fa fa-circle-o"></i> ACL Roles</a></li>
-                @endif
-                @if(Session::get('role')==1)
-                <li @if(Request::url() == url('users')) class="active" @endif><a href="{{url('users')}}"><i class="fa fa-circle-o"></i> ACL Users</a></li>
-                @endif                   
+                                   
                 <!-- <li @if(Request::url() == url('groupaccount')) class="active" @endif><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li> -->
                 
                 <!-- <li><a href="{{url('groupaccdetail')}}"><i class="fa fa-circle-o"></i> Group Account Detail</a></li> -->
@@ -183,7 +197,9 @@
             
             <?php
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index'),url('period_meter')];
-              $accreceivables = [52,58,59,63,64,68,72,76];
+              $accreceivables = [52,58,59,63,68,76];
+              $generalledger = [64];
+              $cashbanks = [72];
             ?>
             <li class="treeview @if(in_array(Request::url(),$arUrls)){{'active'}}@endif">
               <a href="#">
@@ -213,20 +229,47 @@
                       @if(Session::get('role')==1 || in_array(63,Session::get('permissions')))
                       <li @if(Request::url() == route('aging.index')) class="active" @endif><a href="{{route('aging.index')}}"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>
                       @endif
-                      @if(Session::get('role')==1 || in_array(64,Session::get('permissions')))
-                      <li @if(Request::url() == route('journal.index')) class="active" @endif><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
-                      @endif
+                      
                       @if(Session::get('role')==1 || in_array(68,Session::get('permissions')))
                       <li @if(Request::url() == route('payment.index')) class="active" @endif><a href="{{route('payment.index')}}"><i class="fa fa-circle-o"></i> Payment Invoice</a></li>
                       @endif
-                      @if(Session::get('role')==1 || in_array(72,Session::get('permissions')))
-                      <li @if(Request::url() == route('cash_bank.index')) class="active" @endif><a href="{{route('cash_bank.index')}}"><i class="fa fa-circle-o"></i> Cash Bank List</a></li>
-                      @endif
+                      
                       @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                       <li @if(Request::url() == route('report.arview')) class="active" @endif><a href="{{route('report.arview')}}"><i class="fa fa-circle-o"></i> Reports</a></li>
                       @endif
                     </ul>
                 </li>
+                @endif
+
+                @if(Session::get('role')==1 || !empty(array_intersect($generalledger, Session::get('permissions'))) ) 
+                <li>
+                    <a href="#"><i class="fa fa-circle"></i> General Ledger (GL)
+                        <span class="pull-right-container">
+                          <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
+                      @if(Session::get('role')==1 || in_array(64,Session::get('permissions')))
+                      <li @if(Request::url() == route('journal.index')) class="active" @endif><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
+                      @endif
+                    </ul>
+                </li>
+                @endif
+
+                @if(Session::get('role')==1 || !empty(array_intersect($cashbanks, Session::get('permissions'))) )
+                  <li>
+                    <a href="#"><i class="fa fa-circle"></i> Bank Book
+                        <span class="pull-right-container">
+                          <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
+                      @if(Session::get('role')==1 || in_array(72,Session::get('permissions')))
+                      <li @if(Request::url() == route('cash_bank.index')) class="active" @endif><a href="{{route('cash_bank.index')}}"><i class="fa fa-circle-o"></i> Cash Bank List</a></li>
+                      @endif
+                      <li ><a href="#"><i class="fa fa-circle-o"></i> Reconcile Bank</a></li>
+                    </ul>
+                  </li>
                 @endif
 
                 <li ><a href="#"><i class="fa fa-circle-o"></i> Account Payable</a></li>

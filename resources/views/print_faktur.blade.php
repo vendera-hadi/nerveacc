@@ -1,6 +1,6 @@
 <?php
     $company_name = $company['comp_name'];
-    $company_logo = $company['comp_image'];
+    $company_logo = 'upload/'.$company['comp_image'];
     $company_address = $company['comp_address'];
     $company_phone = $company['comp_phone'];
     $company_fax = $company['comp_fax'];

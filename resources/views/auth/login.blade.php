@@ -10,7 +10,7 @@
         <div class="login-logo">
             <img src="{{ asset('/img/logo.png') }}" style="max-height: 150px;">
             <br>
-            <a href="{{ url('/home') }}"><b>Accounting</b> Apps</a>
+            <div style="size: 12pt;"><a href="{{ url('/home') }}">Standard Operational Procedure</a></div>
         </div><!-- /.login-logo -->
 
     @if (count($errors) > 0)

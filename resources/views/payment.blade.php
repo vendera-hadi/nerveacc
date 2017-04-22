@@ -75,6 +75,7 @@
                             <th field="checkbox" width="25"></th>
                             <th field="tenan_name" width="120" sortable="true">Nama Tenant</th>
                             <th field="unit_code" width="120" sortable="true">No Unit</th>
+                            <th field="inv_no"  sortable="true">INV No</th>
                             <th field="paymtp_name" width="120" sortable="true">Payment Type</th>
                             <th field="invpayh_date" width="120" sortable="true">Payment Date</th>
                             <th field="invpayh_amount" width="120" sortable="true">Total</th>
@@ -176,7 +177,7 @@
 
                       <div class="ajax-detail"></div>
                       
-                      <button type="submit" class="btn btn-primary">submit</button>
+                      <button type="submit" id="submitForm" class="btn btn-primary">submit</button>
                   </form>
                 </div>
               </div>
@@ -285,6 +286,7 @@
 
     $('#formPayment').submit(function(e){
         e.preventDefault();
+        $('#submitForm').attr('disabled','disabled');
         var startdate = $('#invpayhDate').val();
         
         if(startdate == ''){
@@ -300,6 +302,7 @@
         var allFormData = $('#formPayment').serialize();
         
         $.post('{{route('payment.insert')}}',allFormData, function(result){
+            $('#submitForm').removeAttr('disabled');
             alert(result.message);
             window.open("{{url('invoice/print_kwitansi?id=')}}"+result.paym_id,null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
             if(result.status == 1) location.reload();

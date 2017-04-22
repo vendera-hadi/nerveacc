@@ -60,8 +60,9 @@
                     </div>
                     <div class="col-sm-3">
                         <select class="form-control" name="outstanding">
-                            <option value="">-- outstanding & not --</option>
-                            <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>Outstanding only</option>
+                            <option value="">-- PAID & NOT PAID --</option>
+                            <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>NOT PAID ONLY</option>
+                            <option value="2" @if(Request::get('inv_type')==2){{'selected="selected"'}}@endif>PAID ONLY</option>
                         </select>
                     </div>
                     <div class="col-sm-2">
@@ -507,11 +508,12 @@ $(function(){
         view: detailview,
         url: get_url,
         pagination: true,
-        pageSize:50,
+        pageSize:100,
         remoteFilter: true,
         rownumbers: true,
         singleSelect: true,
         fitColumns: true,
+        pageList: [100,500,1000],
         detailFormatter:function(index,row){
             return '<div style="padding:2px"><table class="ddv"></table></div>';
         },

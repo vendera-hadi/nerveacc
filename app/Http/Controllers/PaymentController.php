@@ -116,7 +116,7 @@ class PaymentController extends Controller
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
             
-            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $fetch = $fetch->with('TrInvoicePaymdtl.TrInvoice')->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
                 $temp = [];
@@ -131,6 +131,13 @@ class PaymentController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'">';
                 $invpayh_post = $temp['invpayh_post'] = !empty($value->invpayh_post) ? 'yes' : 'no';
+
+                $temp['inv_no'] = "";
+                if(count($value->TrInvoicePaymdtl) > 0){
+                    foreach ($value->TrInvoicePaymdtl as $paydt) {
+                        if(!empty(@$paydt->TrInvoice->inv_number)) $temp['inv_no'] .= $paydt->TrInvoice->inv_number."<br>";
+                    }
+                }
 
                 $action_button = '<a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>';
                 

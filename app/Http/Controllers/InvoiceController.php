@@ -105,7 +105,10 @@ class InvoiceController extends Controller
             // jika ada date to
             if(!empty($dateto)) $fetch = $fetch->where('tr_invoice.inv_faktur_date','<=',$dateto);
             // outstanding
-            if(!empty($outstanding)) $fetch = $fetch->where('tr_invoice.inv_outstanding','>',0);
+            if(!empty($outstanding)){
+                if($outstanding == 1) $fetch = $fetch->where('tr_invoice.inv_outstanding','>',0);
+                else $fetch = $fetch->where('tr_invoice.inv_outstanding',0);
+            }
 
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
@@ -118,8 +121,8 @@ class InvoiceController extends Controller
                 $temp['contr_no'] = $value->contr_no;
                 $temp['unit'] = $value->unit_code;
                 $temp['inv_number'] = $value->inv_number;
-                $temp['inv_date'] = date('d/m/Y',strtotime($value->inv_date));
-                $temp['inv_duedate'] = date('d/m/Y',strtotime($value->inv_duedate));
+                $temp['inv_date'] = date('d-m-y',strtotime($value->inv_date));
+                $temp['inv_duedate'] = date('d-m-Y',strtotime($value->inv_duedate));
                 $temp['inv_amount'] = "Rp. ".number_format($value->inv_amount);
                 $temp['inv_ppn'] = $value->inv_ppn * 100;
                 $temp['inv_ppn'] = $temp['inv_ppn']."%";

@@ -153,7 +153,7 @@ class JournalController extends Controller
                 $temp['ledg_date'] = date('d/m/Y',strtotime($value->ledg_date));
                 $temp['ledg_refno'] = $value->ledg_refno;
                 $temp['ledg_description'] = $value->ledg_description;
-                $temp['debit'] = ($value->debit > 0) ? $value->debit : $value->credit;
+                $temp['debit'] = ($value->debit > 0) ? number_format($value->debit,0,',','.') : number_format($value->credit,0,',','.');
                 // $temp['credit'] = $value->credit;
                 $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> ';
                 if(\Session::get('role')==1 || in_array(66,\Session::get('permissions'))){

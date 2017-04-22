@@ -158,13 +158,13 @@ class CompanyController extends Controller
         $company = MsCompany::first();
         if ($request->hasFile('image')) {
             $extension = $request->image->extension();
-            if(strtolower($extension)!='jpg' && strtolower($extension)!='png'){ 
+            if(strtolower($extension)!='jpg' && strtolower($extension)!='png' && strtolower($extension)!='jpeg'){ 
                 $request->session()->flash('error', 'Image Format must be jpg or png');
                 return redirect()->back();
             }
             $path = $request->image->move(public_path('upload'), 'company.'.$extension);
             // dd($path);
-            $input['comp_image'] = 'upload/company.'.$extension;
+            $input['comp_image'] = 'company.'.$extension;
         }
         $company->update($input);
         $request->session()->flash('success', 'Update company data success');

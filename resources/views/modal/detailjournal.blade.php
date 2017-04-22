@@ -41,8 +41,8 @@
             	<td>{{$ledger->coa_name}}</td>
             	<td>{{$ledger->ledg_description}}</td>
             	<td>{{$ledger->dept_name}}</td>
-            	<td>@if(empty((int)$ledger->ledg_debit)){{'-'}}@else{{"Rp. ".number_format($ledger->ledg_debit)}}@endif</td>
-            	<td>@if(empty((int)$ledger->ledg_credit)){{'-'}}@else{{"Rp. ".number_format($ledger->ledg_credit)}}@endif</td>
+            	<td>@if(empty((int)$ledger->ledg_debit)){{'-'}}@else{{"Rp. ".number_format($ledger->ledg_debit,0,',','.')}}@endif</td>
+            	<td>@if(empty((int)$ledger->ledg_credit)){{'-'}}@else{{"Rp. ".number_format($ledger->ledg_credit,0,',','.')}}@endif</td>
             </tr>
             <?php 
             	$totalDebet+=$ledger->ledg_debit;
@@ -51,8 +51,8 @@
             @endforeach
             <tr>
             	<td colspan="4">Total</td>
-            	<td>{{"Rp. ".number_format($totalDebet) }}</td>
-            	<td>{{"Rp. ".number_format($totalCredit) }}</td>
+            	<td>{{"Rp. ".number_format($totalDebet,0,',','.') }}</td>
+            	<td>{{"Rp. ".number_format($totalCredit,0,',','.') }}</td>
             </tr>
 		</table>
 	</div>
