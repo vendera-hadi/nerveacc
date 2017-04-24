@@ -140,34 +140,50 @@ class ReportController extends Controller
     }
 
     public function arAging(Request $request){
-    	$from = @$request->from;
-    	$to = @$request->to;
+        $ty = @$request->ty;
+    	$ag30 = @$request->ag30;
+    	$ag60 = @$request->ag60;
+        $ag90 = @$request->ag90;
+        $ag180 = @$request->ag180;
     	$pdf = @$request->pdf;
-         $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+
+        $data['tahun'] = 'Periode Sampai : '.date('M Y');
         $data['name'] = MsCompany::first()->comp_name;
     	$data['title'] = "Aging Invoices";
     	$data['logo'] = MsCompany::first()->comp_image;
     	$data['template'] = 'report_ar_aging';
-    	$fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
-                    DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS gabung"),
+        $data['ty'] = $ty;
+        $data['label'] = explode('~', '1 - '.$ag30.'~'.$ag30.' - '.$ag60.'~'.$ag60.' - '.$ag90.'~'.'> '.$ag180);
+        if($ty == 1){
+            $fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
                     DB::raw("SUM(inv_outstanding) AS total"),
-                    DB::raw("SUM((CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END)) AS current"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >= -1 AND (current_date::date - inv_date::date) <=".$ag30." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag30." AND (current_date::date - inv_date::date)<=".$ag60." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >".$ag60." AND (current_date::date - inv_date::date)<=".$ag90." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag180." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->where('tr_invoice.inv_post','=',TRUE)
                 ->where('tr_invoice.inv_outstanding','>',0)
                 ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name');
-    	if($from) $fetch = $fetch->where('inv_date','>=',$from);
-        if($to) $fetch = $fetch->where('inv_date','<=',$to);
+        }else if ($ty == 2){
+            $fetch = TrInvoicePaymhdr::select('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name',
+                    DB::raw("SUM(invpayh_amount) AS total"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) >= -1 AND (current_date::date - invpayh_date::date) <=".$ag30." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) > ".$ag30." AND (current_date::date - invpayh_date::date)<=".$ag60." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS ag60"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) >".$ag60." AND (current_date::date - invpayh_date::date)<=".$ag90." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS ag90"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) > ".$ag180." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS agl180"))
+                ->join('tr_contract','tr_contract.id',"=",'tr_invoice_paymhdr.contr_id')
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->groupBy('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name');
+        }
         $fetch = $fetch->get();
     	$data['invoices'] = $fetch;
     	if($pdf){
     		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
-        	return $pdf->download('AR_Aging_'.$from.'_to_'.$to.'.pdf');
+        	return $pdf->download('AR_Aging_periode_'.date('M Y').'.pdf');
     	}else{
     		return view('layouts.report_template2', $data);
     	}

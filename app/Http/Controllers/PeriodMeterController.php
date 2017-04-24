@@ -399,7 +399,6 @@ class PeriodMeterController extends Controller
                         ->leftJoin('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                         ->where('tr_meter.prdmet_id',$type)
                         ->where('ms_cost_detail.cost_id',$cost)
-                        ->orderBy('ms_floor.id','asc')
                         ->orderBy('ms_unit.unit_code','asc')
                         ->get()->toArray();
             $border = 'A1:E';
@@ -411,7 +410,6 @@ class PeriodMeterController extends Controller
                         ->leftJoin('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                         ->where('tr_meter.prdmet_id',$type)
                         ->where('ms_cost_detail.cost_id',$cost)
-                        ->orderBy('ms_floor.id','asc')
                         ->orderBy('ms_unit.unit_code','asc')
                         ->get()->toArray();
             $border = 'A1:D';

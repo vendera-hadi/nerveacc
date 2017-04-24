@@ -36,10 +36,9 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="tenan_name" width="150" sortable="true">Nama Tenan</th>
                             <th field="unit_code" width="50" sortable="true">Unit</th>
+                            <th field="tenan_name" width="150" sortable="true">Nama Tenan</th>
                             <th field="total" width="100" sortable="true" align="right">Total</th>
-                            <th field="currents" width="100" sortable="true" align="right">Current</th>  
                             <th field="ag30" width="100" sortable="true" align="right">1 - 30 Hari</th>
                             <th field="ag60" width="100" sortable="true" align="right">31 - 60 Hari</th> 
                             <th field="ag90" width="100" sortable="true" align="right">61 - 90 Hari</th>
@@ -80,13 +79,15 @@ $(function(){
         rownumbers: true,
         singleSelect: true,
         fitColumns: true,
+        pageSize:100,
+        pageList: [100,500,1000],
         detailFormatter:function(index,row){
             return '<div style="padding:2px"><table class="ddv"></table></div>';
         },
         onExpandRow: function(index,row){
             var ddv = $(this).datagrid('getRowDetail',index).find('table.ddv');
             ddv.datagrid({
-                url: get_url2+"?id="+row.id,
+                url: get_url2+"?id="+row.ids,
                 singleSelect:true,
                 rownumbers:true,
                 loadMsg:'Please Wait',
@@ -94,10 +95,10 @@ $(function(){
                 columns:[[
                     {field:'inv_number',title:'Inv Number',width:100},
                     {field:'invtp_name',title:'Invoice Type',width:150},
-                    {field:'inv_date',title:'Inv Date',width:100},
-                    {field:'inv_duedate',title:'Inv Due Date',width:100},
-                    {field:'inv_amount',title:'Amount',width:100,formatter:addCommas},
-                    {field:'inv_outstanding',title:'Sisa',width:100,formatter:addCommas},
+                    {field:'tanggal',title:'Inv Date',width:100},
+                    {field:'tanggaldue',title:'Inv Due Date',width:100},
+                    {field:'inv_amount',title:'Amount',width:100,formatter:addCommas,align:'right'},
+                    {field:'inv_outstanding',title:'Sisa',width:100,formatter:addCommas,align:'right'},
                     {field:'inv_post',title:'Posting',width:50,align:'center',formatter:formatPost}
                 ]],
                 onResize:function(){

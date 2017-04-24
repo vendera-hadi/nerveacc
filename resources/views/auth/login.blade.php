@@ -14,7 +14,7 @@
         </div><!-- /.login-logo -->
 
     @if (count($errors) > 0)
-        <div class="alert alert-danger">
+        <div class="alert alert-danger" style="margin-bottom: 0px;">
             <strong>Whoops!</strong> {{ trans('adminlte_lang::message.someproblems') }}<br><br>
             <ul>
                 @foreach ($errors->all() as $error)

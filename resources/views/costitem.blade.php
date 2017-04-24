@@ -249,7 +249,7 @@
                         });
                     } else {
                         $('#dlg2').dialog('close');      // close the dialog
-                        $('.ddv').datagrid('reload');    // reload the user data
+                        $('#dg').datagrid('reload');    // reload the user data
                     }
                 },
                 error: function (request, status, error) {

@@ -47,7 +47,7 @@
           		<!-- content -->
                 <form id="search">
                 <div class="row" style="margin-bottom:20px">
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                         <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Billing Info or Tenant Name">
                     </div>
                     <div class="col-sm-2">
@@ -58,11 +58,11 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                         <select class="form-control" name="outstanding">
-                            <option value="">-- PAID & NOT PAID --</option>
-                            <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>NOT PAID ONLY</option>
-                            <option value="2" @if(Request::get('inv_type')==2){{'selected="selected"'}}@endif>PAID ONLY</option>
+                            <option value="">ALL</option>
+                            <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>NOT PAID</option>
+                            <option value="2" @if(Request::get('inv_type')==2){{'selected="selected"'}}@endif>PAID</option>
                         </select>
                     </div>
                     <div class="col-sm-2">
@@ -81,8 +81,8 @@
                           <input type="text" id="startDate" name="date_to" placeholder="To" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
                         </div>
                     </div>
-                    <div class="col-sm-offset-9 col-sm-3" style="margin-top:10px">
-                        <button class="btn btn-info pull-right">Cari</button>
+                    <div class="col-sm-2">
+                         <button class="btn btn-info">Cari</button>
                     </div>
                 </div>
                 </form>

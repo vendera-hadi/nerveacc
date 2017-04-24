@@ -136,7 +136,7 @@
 						                @if($company->comp_image)
 										<div class="form-group">
 						                  <label>Current Image</label>
-						                  <img src="{{asset('/upload/'.$company->comp_image)}}" class="img-responsive">
+						                  <img src="{{asset('upload/'.$company->comp_image)}}" class="img-responsive">
 						                </div>						                
 						                @endif
 

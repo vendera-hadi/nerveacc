@@ -23,7 +23,7 @@
             </h2>
           </td>
           <td width="50%">
-            <img src="@if(!empty($logo)){{asset($logo)}}@endif" width="120" class="pull-right">
+            <img src="@if(!empty($logo)){{asset('upload/'.$logo)}}@endif" width="300" class="pull-right">
           </td>
         </tr>
         <tr>

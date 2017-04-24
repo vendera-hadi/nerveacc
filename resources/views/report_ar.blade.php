@@ -44,23 +44,49 @@
                                     <option value="payment">Payment History</option>
                                 </select>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2 history" style="display: none;">
+                                <select class="form-control" name="jenis" id="ty">
+                                    <option value="1">NOT PAID</option>
+                                    <option value="2">PAID</option>
+                                  </select>
+                            </div>
+                            <div class="col-sm-1 history" style="display: none;">
+                                <div class="form-group">
+                                 <input type="text" name="ag30" class="form-control" value="30" />
+                                </div>
+                            </div>
+                            <div class="col-sm-1 history" style="display: none;">
+                                <div class="form-group">
+                                 <input type="text" name="ag60" class="form-control" value="60" />
+                                </div>
+                            </div>
+                            <div class="col-sm-1 history" style="display: none;">
+                                <div class="form-group">
+                                 <input type="text" name="ag90" class="form-control" value="90" />
+                                </div>
+                            </div>
+                            <div class="col-sm-1 history" style="display: none;">
+                                <div class="form-group">
+                                 <input type="text" name="ag180" class="form-control" value="180" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3 dates">
                                 <div class="form-group">
                                     <div class="input-group date">
                                         <div class="input-group-addon">
                                             <i class="fa fa-calendar"></i>
                                         </div>
-                                        <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd" required>
+                                        <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-3 dates">
                                 <div class="form-group">
                                     <div class="input-group date">
                                         <div class="input-group-addon">
                                             <i class="fa fa-calendar"></i>
                                         </div>
-                                        <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd" required>
+                                        <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd">
                                     </div>
                                 </div>
                             </div>
@@ -102,13 +128,34 @@
         var report_url = '{!! url('/') !!}/report/';
         var from = $('input[name=from]').val();
         var to = $('input[name=to]').val(); 
-        current_url = report_url+type+'?from='+from+'&to='+to;
+        if(type == 'araging'){
+            var jenis = $('#ty').val();
+            var ag30 = $('input[name=ag30]').val();
+            var ag60 = $('input[name=ag60]').val();
+            var ag90 = $('input[name=ag90]').val();
+            var ag180 = $('input[name=ag180]').val();
+
+            current_url = report_url+type+'?ty='+jenis+'&ag30='+ag30+'&ag60='+ag60+'&ag90='+ag90+'&ag180='+ag180;
+        }else{
+            current_url = report_url+type+'?from='+from+'&to='+to;
+        }
         $('#frame').attr('src', current_url);
         $('#pdf').show();
     });
 
     $('#pdf').click(function(){
         $('#frame').attr('src', current_url+'&pdf=1');
+    });
+
+    $('#type').on('change', function() {
+      var hasil = this.value;
+      if(hasil != "araging"){
+        $( ".history" ).hide();
+        $( ".dates" ).show();
+      }else{
+        $( ".dates" ).hide();
+        $( ".history" ).show();
+      }
     });
 </script>
 @endsection

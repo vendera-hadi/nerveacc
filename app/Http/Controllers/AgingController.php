@@ -40,8 +40,8 @@ class AgingController extends Controller
             $count = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
                     DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS gabung"),
                     DB::raw("SUM(inv_outstanding) AS total"),
-                    DB::raw("SUM((CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END)) AS current"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("CONCAT(ms_tenant.tenan_id,'-',tr_invoice.contr_id) AS ids"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >= -1 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
@@ -49,13 +49,14 @@ class AgingController extends Controller
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->where('tr_invoice.inv_outstanding','>',0)
-                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name')
+                ->where('tr_invoice.inv_post','=',TRUE)
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.contr_id')
                 ->count();
             $fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
                     DB::raw("CONCAT(ms_tenant.tenan_name,' - ',ms_unit.unit_code) AS gabung"),
                     DB::raw("SUM(inv_outstanding) AS total"),
-                    DB::raw("SUM((CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END)) AS currents"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("CONCAT(tr_invoice.tenan_id,'-',tr_invoice.contr_id) AS ids"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >= -1 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
@@ -63,7 +64,8 @@ class AgingController extends Controller
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->where('tr_invoice.inv_outstanding','>',0)
-                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name');
+                ->where('tr_invoice.inv_post','=',TRUE)
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_invoice.contr_id');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -102,12 +104,11 @@ class AgingController extends Controller
                 $temp['unit_code'] = $value->unit_code;
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['total'] ="Rp. ".number_format($value->total);
-                $temp['currents'] = "Rp. ".number_format($value->currents);
                 $temp['ag30'] = "Rp. ".number_format($value->ag30);
                 $temp['ag60'] = "Rp. ".number_format($value->ag60);
                 $temp['ag90'] = "Rp. ".number_format($value->ag90);
-                // $temp['ag180'] = "Rp. ".number_format($value->ag180);
                 $temp['agl180'] = "Rp. ".number_format($value->agl180);
+                $temp['ids'] = $value->ids;
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
@@ -118,10 +119,13 @@ class AgingController extends Controller
 
     public function getdetail(Request $request){
         try{
-            $id = $request->id;
-            $result = TrInvoice::select('tr_invoice.*','ms_invoice_type.invtp_name')
+            $id = explode('-', $request->id);
+            $result = TrInvoice::select('tr_invoice.*','ms_invoice_type.invtp_name',
+                                DB::raw("to_char(inv_date, 'DD/MM/YYYY') AS tanggal"),
+                                DB::raw("to_char(inv_duedate, 'DD/MM/YYYY') AS tanggaldue"))
                 ->leftJoin('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
-                ->where('tr_invoice.tenan_id',$id)
+                ->where('tr_invoice.tenan_id',$id[0])
+                ->where('tr_invoice.contr_id',$id[1])
                 ->where('inv_outstanding','>',0)
                 ->get();
             return response()->json($result);
@@ -134,8 +138,7 @@ class AgingController extends Controller
     {
         $data_ori = TrInvoice::select('ms_unit.unit_code AS Unit','ms_tenant.tenan_name AS Tenant',
                     DB::raw("SUM(inv_outstanding) AS Total"),
-                    DB::raw("SUM((CASE WHEN tr_invoice.inv_date::date = current_date::date THEN tr_invoice.inv_outstanding ELSE 0 END)) AS Current"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 0 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >= -1 AND (current_date::date - inv_date::date)<=30 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 30 AND (current_date::date - inv_date::date)<=60 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >60 AND (current_date::date - inv_date::date)<=90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > 90 THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
@@ -143,6 +146,7 @@ class AgingController extends Controller
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->where('tr_invoice.inv_outstanding','>',0)
+                ->where('tr_invoice.inv_post','=',TRUE)
                 ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name')
                 ->get()->toArray();
         $data = array();
@@ -151,7 +155,6 @@ class AgingController extends Controller
                 'Unit Code'=>$data_ori[$i]['Unit'],
                 'Nama Tenant'=>$data_ori[$i]['Tenant'],
                 'Total'=>number_format($data_ori[$i]['total']),
-                'Current'=>number_format($data_ori[$i]['current']),
                 '1-30 Days'=>number_format($data_ori[$i]['ag30']),
                 '31-60 Days'=>number_format($data_ori[$i]['ag60']),
                 '61-90 Days'=>number_format($data_ori[$i]['ag90']),
