@@ -394,6 +394,14 @@ class InvoiceController extends Controller
                         }
                         // KARNA DENDA ITU KAN UTK PAYMENT TELAT, GENERATOR DIGENERATE SEBELUM WKT BAYAR JD BLUM TENTU ADA DISINI
 
+                        // PPN
+                        $usePPN = @MsConfig::where('name','use_ppn')->first()->value;
+                        if(!empty($usePPN)){
+                            $totalPPN = 0.1 * $totalPay;
+                            $invDetail[] = ['invdt_amount' => $totalPPN, 'invdt_note' => 'PPH 10%', 'costd_id'=> 0, 'coa_code' => '40900'];
+                            $totalPay += $totalPPN;
+                        }
+
                         // TAMBAHIN STAMP DUTY
                         if($totalPay <= $companyData->comp_materai1_amount){ 
                             $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];

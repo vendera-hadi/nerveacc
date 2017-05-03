@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Journal Entries
+    General Ledger
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Journal Entries
+   General Ledger
 @endsection
 
 <!-- tambahan script atas -->
@@ -37,7 +37,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Journal Entries</li>
+        <li class="active">General Ledger</li>
     </ol>
 @stop
 
@@ -52,10 +52,11 @@
               <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
               <li class="hidden"><a href="#tab_3">Edit Journal</a></li>
             </ul>
+
             <div class="tab-content">
               <div class="tab-pane active" id="tab_1">
                 
-                <form id="formFilter" action="" method="GET">
+<form id="formFilter" action="" method="GET">
                 <div class="row">
                 <div class="col-sm-4">
                     <!-- date range -->
@@ -82,14 +83,13 @@
                 </div>
 
                 <div class="col-sm-3">
-                  <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
-                    <option value="">Choose COA</option>
-                    
-                    @foreach($accounts as $key => $coa)
-                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                    @endforeach
-                  </select>
-                </div>                
+                    <select class="form-control" name="jour_type_id">
+                      <option value="">All Journal Type</option>
+                      @foreach($journal_types as $jourtype)
+                      <option value="{{$jourtype->id}}" @if(Request::input('jour_type_id') == $jourtype->id){{'selected="selected"'}}@endif>{{$jourtype->jour_type_name}}</option>
+                      @endforeach
+                    </select>
+                </div>
 
                 <div class="col-sm-2">
                     <button type="submit" class="btn btn-success">Filter</button>
@@ -98,9 +98,18 @@
               </div>
 
               <div class="row" style="margin-bottom:15px">
+                  <div class="col-sm-3">
+                  <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
+                              <option value="">Choose COA</option>
+                              
+                              @foreach($accounts as $key => $coa)
+                                  <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                              @endforeach
+                            </select>
+                </div>
 
                   <div class="col-sm-4">
-                    <input class="form-control" type="text" name="q" placeholder="Keyword">
+                    <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name or Description)">
                   </div>
               </div> 
             </form>
@@ -114,7 +123,7 @@
             @endif
 
                   <!-- template tabel -->
-                <table id="dg" title="Latest Journal Entry" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <table id="dg" title="General Ledger Entries" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>
@@ -127,6 +136,7 @@
                             <th field="debit" width="120" sortable="true">Debit</th>
                             <th field="credit" width="120" sortable="true">Credit</th>
                             <th field="jour_type_prefix" width="120" sortable="true">Jrnl Type</th>
+                            <th field="tenan_name" width="120" sortable="true">Tenant Name</th>
                             <th field="action">Action</th>
                         </tr>
                     </thead>
@@ -135,6 +145,7 @@
                 
                 
               </div>
+
               <!-- /.tab-pane -->
               <div class="tab-pane" id="tab_2">
                 <!-- add journal -->
@@ -238,6 +249,7 @@
                 </form>
                 <!-- add journal -->
               </div>
+              
 
               <div class="tab-pane" id="tab_3">
               </div>
@@ -289,7 +301,7 @@ $(document).ready(function() {
 });
 
 var entity = "Journal"; // nama si tabel, ditampilin di dialog
-var get_url = "{!!route('journal.get', ['date'=> Request::get('filterdate'), 'dept'=> Request::get('dept'), 'jour_type_id'=> Request::get('jour_type_id')])!!}";
+var get_url = "{!!route('genledger.get', ['date'=> Request::get('filterdate'), 'dept'=> Request::get('dept'), 'jour_type_id'=> Request::get('jour_type_id')])!!}";
 
 $(function(){
     var dg = $('#dg').datagrid({
@@ -305,7 +317,7 @@ $(function(){
     // dg.datagrid('enableFilter');
 });
 
- $('#datepicker').datepicker({
+$('#datepicker').datepicker({
       format: 'yyyy-mm-dd',
       autoclose: true
     });
@@ -464,7 +476,7 @@ var formData;
       // edit
       $(document).delegate(".edit","click",function() {
           var id = $(this).data('id');
-          $.post('{{route('journal.edittab')}}',{id:id, page:'je'},function(result){
+          $.post('{{route('journal.edittab')}}',{id:id},function(result){
               if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
               else{
                 $('#tab_3').html(result);
@@ -479,15 +491,16 @@ var formData;
     var query = $(this).find('input[name=q]').val();
     var date = $(this).find('input[name=filterdate]').val();
     var dept = $(this).find('select[name=dept]').val();
-    // var jour_type_id = $(this).find('select[name=jour_type_id]').val();
+    var jour_type_id = $(this).find('select[name=jour_type_id]').val();
     $('#dg').datagrid('load', {
         q: query,
         coa: coafilter,
         date: date,
         dept: dept,
-        // jour_type_id: jour_type_id
+        jour_type_id: jour_type_id
     });
     $('#dg').datagrid('reload');
  });
+
 </script>
 @endsection

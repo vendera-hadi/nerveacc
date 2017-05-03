@@ -9,8 +9,13 @@ use App\Models\TrInvoicePaymhdr;
 use App\Models\MsCompany;
 use App\Models\TrContract;
 use App\Models\TrMeter;
+use App\Models\TrLedger;
 use App\Models\MsUnit;
 use App\Models\MsTenant;
+use App\Models\MsInvoiceType;
+use App\Models\MsMasterCoa;
+use App\Models\MsJournalType;
+use App\Models\MsDepartment;
 use PDF;
 use DB;
 use Excel;
@@ -18,7 +23,8 @@ use Excel;
 class ReportController extends Controller
 {
 	public function arview(){
-		return view('report_ar');
+        $data['invtypes'] = MsInvoiceType::all();
+		return view('report_ar',$data);
 	}
 
     public function arbyInvoice(Request $request){
@@ -140,7 +146,7 @@ class ReportController extends Controller
     }
 
     public function arAging(Request $request){
-        $ty = @$request->ty;
+        $ty = @$request->jenis;
     	$ag30 = @$request->ag30;
     	$ag60 = @$request->ag60;
         $ag90 = @$request->ag90;
@@ -221,9 +227,19 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
+        // tambahan
+        $unit_id = @$request->unit;
+        $inv_type_id = @$request->inv_type;
+
         $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
         $data['name'] = MsCompany::first()->comp_name;
-        $data['title'] = "Outstanding By Invoices";
+        $data['title'] = "Outstanding By Unit";
+        if(!empty($unit_id)){
+            $data['title'] .= " - Unit ".@MsUnit::find($unit_id)->unit_code;
+        }
+        if(!empty($inv_type_id)){
+            $data['title'] .= " - ".@MsInvoiceType::find($inv_type_id)->invtp_name;
+        }
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_out_inv';
         $fetch = TrInvoice::select('tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','ms_unit.unit_name','ms_tenant.tenan_name','tr_invoice.inv_outstanding')
@@ -235,6 +251,9 @@ class ReportController extends Controller
                 ->orderBy('tr_invoice.inv_date','ms_unit.unit_name');
         if($from) $fetch = $fetch->where('inv_date','>=',$from);
         if($to) $fetch = $fetch->where('inv_date','<=',$to);
+        if(!empty($unit_id)) $fetch = $fetch->where('ms_unit.id',$unit_id);
+        if(!empty($inv_type_id)) $fetch = $fetch->where('tr_invoice.invtp_id',$inv_type_id);
+
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
@@ -374,6 +393,58 @@ class ReportController extends Controller
                     $sheet->fromArray($data);
                 });
             })->download($tp);
+        }else{
+            return view('layouts.report_template2', $data);
+        }
+    }
+
+    public function glview(){
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
+        return view('report_gl',$data);
+    }
+
+    public function glreport(Request $request){
+        $from = @$request->from;
+        $to = @$request->to;
+        $pdf = @$request->pdf;
+        // tambahan
+        $keyword = $request->input('q');
+        $coa = $request->input('coa');
+        $deptParam = $request->input('dept');
+        $jourTypeParam = $request->input('jour_type_id');
+
+        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['title'] = "General Ledger Report";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['template'] = 'report_gl_template';
+        if(!empty($to)) $year = date('Y',strtotime($to));
+        else $year = date('Y');
+
+        $fetch = TrLedger::join('ms_master_coa','ms_master_coa.coa_code','=','tr_ledger.coa_code')
+                            ->join('ms_journal_type','ms_journal_type.id','=','tr_ledger.jour_type_id')
+                            ->leftJoin('tr_invoice','tr_invoice.inv_number','=','tr_ledger.ledg_refno')
+                            ->leftJoin('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
+                            ->select('tr_ledger.coa_code','tr_ledger.closed_at','coa_name','ledg_date','ledg_description','ledg_debit','ledg_credit','jour_type_prefix','ledg_refno','tenan_id','tenan_name')
+                            ->where('ms_master_coa.coa_year',$year)->where('tr_ledger.coa_year',$year);
+        if(!empty($date)) $fetch = $fetch->where('ledg_date','>=',$from)->where('ledg_date','<=',$to);
+        if(!empty($deptParam)) $fetch = $fetch->where('dept_id',$deptParam);
+        if(!empty($jourTypeParam)) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
+        if(!empty($coa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
+        if(!empty($keyword)){ 
+            $fetch = $fetch->where(function($query) use($keyword){
+                    $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%');
+                });
+        }
+
+        $fetch = $fetch->get();
+        $data['ledger'] = $fetch;
+        if($pdf){
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('GL_Report_'.$from.'_to_'.$to.'.pdf');
         }else{
             return view('layouts.report_template2', $data);
         }

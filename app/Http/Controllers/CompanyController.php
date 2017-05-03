@@ -28,6 +28,7 @@ class CompanyController extends Controller
         $data['signatureFlag'] = @MsConfig::where('name','invoice_signature_flag')->first()->value;
         $data['prefixKuitansi'] = @MsConfig::where('name','prefix_kuitansi')->first()->value;
         $data['invBodyEmail'] = @MsConfig::where('name','inv_body_email')->first()->value;
+        $data['usePPN'] = @MsConfig::where('name','use_ppn')->first()->value;
         return view('config',$data);
     }
 

@@ -16,6 +16,22 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
+    <!-- select2 -->
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/select2.min.css') }}">
+    <style type="text/css">
+    .select2-container--default .select2-selection--single{
+      border-radius: 0px;
+      height: 36px;
+      width: 235px;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow{
+        top: 3px;
+        right: -130px;
+    }
+    .select2-container--open .select2-dropdown--below{
+        width: 235px !important;
+    }
+    </style>
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -39,7 +55,7 @@
                                     <option value="arbyinvoice">Invoice</option>
                                     <option value="arbyinvoicecancel">Invoice Cancel</option>
                                     <option value="araging">Aging Invoices</option>
-                                    <option value="outinv">Outstanding By Invoice</option>
+                                    <option value="outinv">Outstanding By Unit</option>
                                     <option value="outcontr">Outstanding By Billing Info</option>
                                     <option value="payment">Payment History</option>
                                 </select>
@@ -70,6 +86,7 @@
                                  <input type="text" name="ag180" class="form-control" value="180" />
                                 </div>
                             </div>
+                            
                             <div class="col-sm-3 dates">
                                 <div class="form-group">
                                     <div class="input-group date">
@@ -94,6 +111,23 @@
                                 <button class="btn btn-info">Submit</button>
                             </div>
                         </div>
+
+                        <div class="row unit" style="display:none">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                 <select class="form-control choose-unit" name="unit"></select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                 <select class="form-control" name="inv_type">
+                                    @foreach($invtypes as $invtype)
+                                    <option value="{{$invtype->id}}">{{$invtype->invtp_name}}</option>
+                                    @endforeach
+                                 </select>
+                                </div>
+                            </div>
+                        </div>
                         </form>
 
                         <div class ="row" style="margin-top:80px">
@@ -116,6 +150,8 @@
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <!-- datepicker -->
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
+<!-- select2 -->
+<script type="text/javascript" src="{{ asset('plugins/select2/select2.min.js') }}"></script>
 <script type="text/javascript">
     $('.datepicker').datepicker({
             autoclose: true
@@ -128,17 +164,20 @@
         var report_url = '{!! url('/') !!}/report/';
         var from = $('input[name=from]').val();
         var to = $('input[name=to]').val(); 
-        if(type == 'araging'){
-            var jenis = $('#ty').val();
-            var ag30 = $('input[name=ag30]').val();
-            var ag60 = $('input[name=ag60]').val();
-            var ag90 = $('input[name=ag90]').val();
-            var ag180 = $('input[name=ag180]').val();
+        
+        var queryString = $(this).serialize();
+        current_url = report_url+type+'?'+queryString;
+        // if(type == 'araging'){
+        //     var jenis = $('#ty').val();
+        //     var ag30 = $('input[name=ag30]').val();
+        //     var ag60 = $('input[name=ag60]').val();
+        //     var ag90 = $('input[name=ag90]').val();
+        //     var ag180 = $('input[name=ag180]').val();
 
-            current_url = report_url+type+'?ty='+jenis+'&ag30='+ag30+'&ag60='+ag60+'&ag90='+ag90+'&ag180='+ag180;
-        }else{
-            current_url = report_url+type+'?from='+from+'&to='+to;
-        }
+        //     current_url = report_url+type+'?ty='+jenis+'&ag30='+ag30+'&ag60='+ag60+'&ag90='+ag90+'&ag180='+ag180;
+        // }else{
+        //     current_url = report_url+type+'?from='+from+'&to='+to;
+        // }
         $('#frame').attr('src', current_url);
         $('#pdf').show();
     });
@@ -149,13 +188,35 @@
 
     $('#type').on('change', function() {
       var hasil = this.value;
-      if(hasil != "araging"){
-        $( ".history" ).hide();
-        $( ".dates" ).show();
-      }else{
-        $( ".dates" ).hide();
+      if(hasil == "araging"){
+        $( ".dates,.unit" ).hide();
         $( ".history" ).show();
+      }else if(hasil == 'outinv'){
+        $( ".unit,.dates" ).show();
+        $( ".history" ).hide();
+      }else{
+        $( ".history,.unit" ).hide();
+        $( ".dates" ).show();
       }
+    });
+
+    $(".choose-unit").select2({
+          placeholder: "Select an Unit",
+          ajax: {
+            url: "{{route('unit.select2')}}",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+              return {
+                q: params.term, // search term
+                page: params.page
+              };
+            },
+            
+            cache: true
+          },
+          escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+          minimumInputLength: 1
     });
 </script>
 @endsection

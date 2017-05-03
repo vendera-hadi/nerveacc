@@ -2,12 +2,12 @@
 
 <!-- title tab -->
 @section('htmlheader_title')
-    Journal Entries
+    Transaction Entry
 @endsection
 
 <!-- page title -->
 @section('contentheader_title')
-   Journal Entries
+   Transaction Entry
 @endsection
 
 <!-- tambahan script atas -->
@@ -26,18 +26,13 @@
         height: 400px;
     }
     .datepicker{z-index:1151 !important;}
-
-    .select2-container--default .select2-selection--single{
-      border-radius: 0px;
-      height: 36px;
-    }
     </style>
 @endsection
 
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Journal Entries</li>
+        <li class="active">Transaction Entry</li>
     </ol>
 @stop
 
@@ -48,95 +43,16 @@
 
           <!-- Tabs -->
           <div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
-              <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
-              <li class="hidden"><a href="#tab_3">Edit Journal</a></li>
-            </ul>
+            
             <div class="tab-content">
-              <div class="tab-pane active" id="tab_1">
-                
-                <form id="formFilter" action="" method="GET">
-                <div class="row">
-                <div class="col-sm-4">
-                    <!-- date range -->
-                
-                <div class="form-group">
-                    <div class="input-group">
-                      <div class="input-group-addon">
-                        <i class="fa fa-calendar"></i>
-                      </div>
-                      <input type="text" name="filterdate" class="form-control pull-right" placeholder="Filter by date" id="reservation">
-                    </div>
-                    <!-- /.input group -->
-                  </div>
-                  <!-- /.form group -->
-                </div>
-
-                <div class="col-sm-3">
-                  <select name="dept" class="form-control">
-                    <option value="">All Department</option> 
-                    @foreach($departments as $dept)
-                    <option value="{{$dept->id}}" @if(Request::input('dept') == $dept->id){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <div class="col-sm-3">
-                  <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
-                    <option value="">Choose COA</option>
-                    
-                    @foreach($accounts as $key => $coa)
-                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                    @endforeach
-                  </select>
-                </div>                
-
-                <div class="col-sm-2">
-                    <button type="submit" class="btn btn-success">Filter</button>
-                </div>
-
+              
+              @if(Session::has('success'))
+              <div class="alert alert-success alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                <h4><i class="icon fa fa-check"></i> Insert entry success</h4>
               </div>
-
-              <div class="row" style="margin-bottom:15px">
-
-                  <div class="col-sm-4">
-                    <input class="form-control" type="text" name="q" placeholder="Keyword">
-                  </div>
-              </div> 
-            </form>
-
-            @if(Request::input('filterdate'))
-            <div class="row">
-              <div class="col-xs-12">
-                <h3>Searh Journal by : {{Request::input('filterdate')}}</h3>
-              </div>
-            </div>
-            @endif
-
-                  <!-- template tabel -->
-                <table id="dg" title="Latest Journal Entry" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
-                    <!-- kolom -->
-                    <thead>
-                        <tr>
-                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="coa_code" width="120" sortable="true">Acc No</th>
-                            <th field="coa_name" width="120" sortable="true">Acc Name</th>
-                            <th field="ledg_date" width="120" sortable="true">Date</th>
-                            <th field="ledg_refno" width="120" sortable="true">Invoice No</th>
-                            <th field="ledg_description" width="120" sortable="true">Description</th>
-                            <th field="debit" width="120" sortable="true">Debit</th>
-                            <th field="credit" width="120" sortable="true">Credit</th>
-                            <th field="jour_type_prefix" width="120" sortable="true">Jrnl Type</th>
-                            <th field="action">Action</th>
-                        </tr>
-                    </thead>
-                </table>
-                <!-- end table -->
-                
-                
-              </div>
-              <!-- /.tab-pane -->
-              <div class="tab-pane" id="tab_2">
+              @endif
+              
                 <!-- add journal -->
                 <form method="POST" id="formJournal">
                   <div class="row">
@@ -237,10 +153,7 @@
 
                 </form>
                 <!-- add journal -->
-              </div>
-
-              <div class="tab-pane" id="tab_3">
-              </div>
+              
 
               </div>
 
@@ -291,19 +204,6 @@ $(document).ready(function() {
 var entity = "Journal"; // nama si tabel, ditampilin di dialog
 var get_url = "{!!route('journal.get', ['date'=> Request::get('filterdate'), 'dept'=> Request::get('dept'), 'jour_type_id'=> Request::get('jour_type_id')])!!}";
 
-$(function(){
-    var dg = $('#dg').datagrid({
-        url: get_url,
-        pagination: true,
-        // remoteFilter: true, //utk jalanin search filter
-        rownumbers: true,
-        singleSelect: true,
-        fitColumns: true,
-        pageList: [100,500,1000],
-        pageSize:100,
-    });
-    // dg.datagrid('enableFilter');
-});
 
  $('#datepicker').datepicker({
       format: 'yyyy-mm-dd',
@@ -439,55 +339,5 @@ var formData;
       }
  });
 
- $(document).delegate('.remove','click',function(){
-      var r = confirm("Are you sure want to delete entry ?");
-      if(r == true){
-          var id = $(this).data('id');
-          $.post('{{route('journal.delete')}}',{id:id},function(result){
-              if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-              if(result.success){ 
-                $.messager.alert('Success','Delete journal success');
-                  location.reload();
-              }
-          });
-      }
-  });
-
- $(document).delegate('.getDetail','click',function(){
-            $('#detailModalContent').html('<center><img src="{{ asset('img/loading.gif') }}"><p>Loading ...</p></center>');
-            var id = $(this).data('id');
-            $.post('{{route('journal.getdetail')}}',{id:id}, function(data){
-                $('#detailModalContent').html(data);
-            });
-        });
-
-      // edit
-      $(document).delegate(".edit","click",function() {
-          var id = $(this).data('id');
-          $.post('{{route('journal.edittab')}}',{id:id, page:'je'},function(result){
-              if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
-              else{
-                $('#tab_3').html(result);
-              }
-          });
-          $('.nav-tabs a[href="#tab_3"]').tab('show');
-      });
-
-  $('#formFilter').submit(function(e){
-    e.preventDefault();
-    var coafilter = $('#selectAccount').val();
-    var query = $(this).find('input[name=q]').val();
-    var date = $(this).find('input[name=filterdate]').val();
-    var dept = $(this).find('select[name=dept]').val();
-    // var jour_type_id = $(this).find('select[name=jour_type_id]').val();
-    $('#dg').datagrid('load', {
-        q: query,
-        coa: coafilter,
-        date: date,
-        dept: dept,
-        // jour_type_id: jour_type_id
-    });
-    $('#dg').datagrid('reload');
- });
 </script>
 @endsection

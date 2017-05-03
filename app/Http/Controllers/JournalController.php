@@ -84,14 +84,17 @@ class JournalController extends Controller
                     TrLedger::create($input);
                 }
             });
+            session()->flash('success','success');
             return ['status' => 1, 'message' => 'Insert Journal Success'];
         }
     }
 
     public function get(Request $request){
         try{
+            $keyword = $request->input('q');
+            $coa = $request->input('coa');
             $deptParam = $request->input('dept');
-            $jourTypeParam = $request->input('jour_type_id');
+            // $jourTypeParam = $request->input('jour_type_id');
 
             // params
             $date = $request->input('date');
@@ -110,36 +113,28 @@ class JournalController extends Controller
             $order = @$request->order;
             $filters = @$request->filterRules;
             if(!empty($filters)) $filters = json_decode($filters);
+            if($date) $year = date('Y',strtotime($enddate));
+            else $year = date('Y');
 
             // olah data
-            $count = TrLedger::from(DB::raw('(select distinct on("ledg_refno") "id", "ledg_number", "ledg_date", "ledg_refno", "ledg_description", "dept_id", "jour_type_id", sum(ledg_debit) as debit, sum(ledg_credit) as credit from "tr_ledger" group by "id", "ledg_number", "ledg_refno", "ledg_date", "ledg_description", "dept_id","jour_type_id") as test'));
-            if($date) $count = $count->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
-            $count = $count->count();
-
-            $fetch = TrLedger::from(DB::raw('(select distinct on("ledg_refno") "id", "ledg_number", "ledg_date", "ledg_refno", "ledg_description", "dept_id", "jour_type_id", sum(ledg_debit) as debit, sum(ledg_credit) as credit from "tr_ledger" group by "id", "ledg_number", "ledg_refno", "ledg_date", "ledg_description", "dept_id", "jour_type_id") as test'));
-            if($date) $fetch = $fetch->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
-            if($deptParam) $fetch = $fetch->where('dept_id',$deptParam);
-            if($jourTypeParam) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
-            if(!empty($filters) && count($filters) > 0){
-                foreach($filters as $filter){
-                    $op = "like";
-                    // tentuin operator
-                    switch ($filter->op) {
-                        case 'contains':
-                            $op = 'like';
-                            $fetch = $fetch->where(DB::raw("LOWER(".$filter->field.")"),$op,'%'.$filter->value.'%');
-                            break;
-                        case 'less':
-                            $op = '<=';
-                            break;
-                        case 'greater':
-                            $op = '>=';
-                            break;
-                        default:
-                            break;
-                    }
-                }
+            // beda sama GL, ini cm get Jurnal Umum aja
+            $fetch = TrLedger::join('ms_master_coa','ms_master_coa.coa_code','=','tr_ledger.coa_code')
+                            ->join('ms_journal_type','ms_journal_type.id','=','tr_ledger.jour_type_id')
+                            ->leftJoin('tr_invoice','tr_invoice.inv_number','=','tr_ledger.ledg_refno')
+                            ->leftJoin('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
+                            ->select('tr_ledger.coa_code','tr_ledger.closed_at','coa_name','ledg_date','ledg_description','ledg_debit','ledg_credit','jour_type_prefix','ledg_refno','tenan_id','tenan_name')
+                            ->where('ms_master_coa.coa_year',$year)->where('tr_ledger.coa_year',$year)
+                            ->where('jour_type_id',1);
+            if(!empty($date)) $fetch = $fetch->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
+            if(!empty($deptParam)) $fetch = $fetch->where('dept_id',$deptParam);
+            // if(!empty($jourTypeParam)) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
+            if(!empty($coa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
+            if(!empty($keyword)){ 
+                $fetch = $fetch->where(function($query) use($keyword){
+                        $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%');
+                    });
             }
+
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
             $fetch = $fetch->skip($offset)->take($perPage)->get();
@@ -149,18 +144,24 @@ class JournalController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 // $temp['id'] = $value->id;
-                $temp['ledg_number'] = $value->ledg_number;
                 $temp['ledg_date'] = date('d/m/Y',strtotime($value->ledg_date));
                 $temp['ledg_refno'] = $value->ledg_refno;
                 $temp['ledg_description'] = $value->ledg_description;
-                $temp['debit'] = ($value->debit > 0) ? number_format($value->debit,0,',','.') : number_format($value->credit,0,',','.');
-                // $temp['credit'] = $value->credit;
+                $temp['debit'] = $value->ledg_debit;
+                $temp['credit'] = $value->ledg_credit;
+                $temp['coa_code'] = $value->coa_code;
+                $temp['coa_name'] = $value->coa_name;
+                $temp['jour_type_prefix'] = $value->jour_type_prefix;
+                $temp['tenan_name'] = $value->tenan_name;
+
                 $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> ';
-                if(\Session::get('role')==1 || in_array(66,\Session::get('permissions'))){
-                    $temp['action'] .= ' <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> '; 
-                }
-                if(\Session::get('role')==1 || in_array(67,\Session::get('permissions'))){
-                    $temp['action'] .=  '<a href="#" data-id="'.$value->ledg_refno.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                if(empty($value->closed_at)){
+                    if(\Session::get('role')==1 || in_array(66,\Session::get('permissions'))){
+                        $temp['action'] .= ' <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> '; 
+                    }
+                    if(\Session::get('role')==1 || in_array(67,\Session::get('permissions'))){
+                        $temp['action'] .=  '<a href="#" data-id="'.$value->ledg_refno.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                    }
                 }
                 $result['rows'][] = $temp;
             }
@@ -188,7 +189,8 @@ class JournalController extends Controller
                     ->join('ms_master_coa','tr_ledger.coa_code','=','ms_master_coa.coa_code')
                     ->join('ms_department','tr_ledger.dept_id','=','ms_department.id')
                     ->join('ms_journal_type',\DB::raw('tr_ledger.jour_type_id::integer'),'=','ms_journal_type.id')
-                    ->where('tr_ledger.coa_year',$coayear)->where('tr_ledger.ledg_refno',$refno)
+                    ->where('tr_ledger.coa_year',$coayear)->where('ms_master_coa.coa_year',$coayear)
+                    ->where('tr_ledger.ledg_refno',$refno)
                     ->get();
             return view('modal.detailjournal', ['fetch' => $fetch]);
         }catch(\Exception $e){
@@ -214,6 +216,7 @@ class JournalController extends Controller
     public function edit(Request $request){
         try{
             $refno = $request->id;
+            $page = @$request->page;
             $coayear = date('Y');
             $data['id'] = $refno;
             $data['fetch'] = TrLedger::select('ledg_number','tr_ledger.coa_year','ledg_date','ledg_refno','ledg_debit','ledg_credit','ledg_description','tr_ledger.jour_type_id','tr_ledger.coa_code','ms_master_coa.coa_name','tr_ledger.dept_id','ms_department.dept_name','ms_journal_type.jour_type_name')
@@ -225,7 +228,8 @@ class JournalController extends Controller
 
             $data['accounts'] = MsMasterCoa::where('coa_year',$coayear)->where('coa_isparent',0)->orderBy('coa_type')->get();
             $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
-            $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
+            if($page == 'je') $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->where('id',1)->get();
+            else $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
             return view('editjournal', $data);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -289,6 +293,143 @@ class JournalController extends Controller
         }  
     }
 
+    public function generalLedger(){
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
+        return view('generalledger', $data);
+    }
 
+    public function glGet(Request $request){
+        try{
+            $keyword = $request->input('q');
+            $coa = $request->input('coa');
+            $deptParam = $request->input('dept');
+            $jourTypeParam = $request->input('jour_type_id');
+
+            // params
+            $date = $request->input('date');
+            if($date){
+                $date = explode(' - ',$date);
+                $startdate = date('Y-m-d',strtotime($date[0]));
+                $enddate = date('Y-m-d',strtotime($date[1]));
+            }
+
+            $page = $request->page;
+            $perPage = $request->rows; 
+            $page-=1;
+            $offset = $page * $perPage;
+            // @ -> isset(var) ? var : null
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+            if($date) $year = date('Y',strtotime($enddate));
+            else $year = date('Y');
+
+            // olah data
+
+            $fetch = TrLedger::join('ms_master_coa','ms_master_coa.coa_code','=','tr_ledger.coa_code')
+                            ->join('ms_journal_type','ms_journal_type.id','=','tr_ledger.jour_type_id')
+                            ->leftJoin('tr_invoice','tr_invoice.inv_number','=','tr_ledger.ledg_refno')
+                            ->leftJoin('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
+                            ->select('tr_ledger.coa_code','tr_ledger.closed_at','coa_name','ledg_date','ledg_description','ledg_debit','ledg_credit','jour_type_prefix','ledg_refno','tenan_id','tenan_name')
+                            ->where('ms_master_coa.coa_year',$year)->where('tr_ledger.coa_year',$year);
+            if(!empty($date)) $fetch = $fetch->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
+            if(!empty($deptParam)) $fetch = $fetch->where('dept_id',$deptParam);
+            if(!empty($jourTypeParam)) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
+            if(!empty($coa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
+            if(!empty($keyword)){ 
+                $fetch = $fetch->where(function($query) use($keyword){
+                        $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%');
+                    });
+            }
+
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            // echo $fetch; die();
+
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                // $temp['id'] = $value->id;
+                $temp['ledg_date'] = date('d/m/Y',strtotime($value->ledg_date));
+                $temp['ledg_refno'] = $value->ledg_refno;
+                $temp['ledg_description'] = $value->ledg_description;
+                $temp['debit'] = "Rp. ".$value->ledg_debit;
+                $temp['credit'] = "Rp. ".$value->ledg_credit;
+                $temp['coa_code'] = $value->coa_code;
+                $temp['coa_name'] = $value->coa_name;
+                $temp['jour_type_prefix'] = $value->jour_type_prefix;
+                $temp['tenan_name'] = $value->tenan_name;
+
+                $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> ';
+                if(empty($value->closed_at)){
+                    if(\Session::get('role')==1 || in_array(66,\Session::get('permissions'))){
+                        $temp['action'] .= ' <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> '; 
+                    }
+                    if(\Session::get('role')==1 || in_array(67,\Session::get('permissions'))){
+                        $temp['action'] .=  '<a href="#" data-id="'.$value->ledg_refno.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                    }
+                }
+                $result['rows'][] = $temp;
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        } 
+    }
+
+    public function trEntry(){
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
+        return view('transaction_entry', $data);
+    }
+
+    public function clEntry(){
+        return view('close_entry', []);
+    }
+
+    public function clEntryUpdate(Request $request){
+        $closingType = @$request->closing_type;
+        $month = @$request->month;
+        $year = @$request->year;
+
+        if($closingType == 'monthly'){
+            $startdate = date('Y-m-01',strtotime($year."-".$month."-01"));
+            $enddate = date('Y-m-t', strtotime($startdate));
+            $checkClosed = TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNotNull('closed_at')->count();
+            $checkNotClosed = TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->count();
+
+            if($checkNotClosed == 0 && $checkClosed == 0){
+                return response()->json(['errorMsg' => 'There is no entries at this month']);                
+            }else if($checkNotClosed == 0 && $checkClosed > 0){
+                return response()->json(['errorMsg' => 'All entries this month was already closed']);                
+            }else{
+                TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->update(['closed_at' => date('Y-m-d')]);
+                return response()->json(['success' => 'Closing Success']);
+            }
+        }else if($closingType == 'yearly'){
+            $startdate = date('Y-m-d',strtotime($year."-01-01"));
+            $enddate = date('Y-m-t', strtotime($year."-12-01"));
+            $checkClosed = TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNotNull('closed_at')->count();
+            $checkNotClosed = TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->count();
+
+            if($checkNotClosed == 0 && $checkClosed == 0){
+                return response()->json(['errorMsg' => 'There is no entries at this year']);                
+            }else if($checkNotClosed == 0 && $checkClosed > 0){
+                return response()->json(['errorMsg' => 'All entries this year was already closed']);                
+            }else{
+                TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->update(['closed_at' => date('Y-m-d')]);
+                return response()->json(['success' => 'Closing Success']);
+            }
+        }
+
+        // return response()->json();
+    }
 
 }

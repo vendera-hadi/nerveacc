@@ -196,7 +196,7 @@
 
             
             <?php
-              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index'),url('period_meter')];
+              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index'),url('period_meter'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview')];
               $accreceivables = [52,58,59,63,68,76];
               $generalledger = [64];
               $cashbanks = [72];
@@ -250,8 +250,24 @@
                     </a>
                     <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
                       @if(Session::get('role')==1 || in_array(64,Session::get('permissions')))
-                      <li @if(Request::url() == route('journal.index')) class="active" @endif><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entry</a></li>
+                      <li @if(Request::url() == route('journal.index')) class="active" @endif><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entries</a></li>
                       @endif
+                      @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                      <li @if(Request::url() == route('genledger.index')) class="active" @endif><a href="{{route('genledger.index')}}"><i class="fa fa-circle-o"></i> General Ledger</a></li>
+                      @endif
+                      @if(Session::get('role')==1 || in_array(65,Session::get('permissions')))
+                      <li @if(Request::url() == route('trentry.index')) class="active" @endif><a href="{{route('trentry.index')}}"><i class="fa fa-circle-o"></i> Transaction Entry</a></li>
+                      @endif
+                      @if(Session::get('role')==1 || in_array(78,Session::get('permissions')))
+                      <li @if(Request::url() == route('clentry.index')) class="active" @endif><a href="{{route('clentry.index')}}"><i class="fa fa-circle-o"></i> Close Entry</a></li>
+                      @endif
+                       @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                      <li @if(Request::url() == route('report.glview')) class="active" @endif><a href="{{route('report.glview')}}"><i class="fa fa-circle-o"></i> GL Report</a></li>
+                      @endif
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Profit and Loss</a></li>
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Trial Balance</a></li>
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Budget</a></li>
                     </ul>
                 </li>
                 @endif
@@ -274,23 +290,6 @@
 
                 <li ><a href="#"><i class="fa fa-circle-o"></i> Account Payable</a></li>
                 
-                
-              
-                <!-- report -->
-                <li>
-                    <a href="#"><i class="fa fa-circle"></i> Report
-                        <span class="pull-right-container">
-                          <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
-                    <ul class="treeview-menu" >
-                      <li><a href="#"><i class="fa fa-circle-o"></i> General Ledger</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Profit and Loss</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Trial Balance</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
-                <li><a href="#"><i class="fa fa-circle-o"></i> Budget</a></li>
-                    </ul>
-                </li>
 
               </ul>
             </li>

@@ -297,6 +297,13 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('journal/insert','JournalController@insert')->name('journal.insert');
 	Route::post('journal/delete','JournalController@delete')->name('journal.delete');
 	Route::get('journal/optLedger','JournalController@accountSelect2')->name('ledger.select2');
+	Route::get('transactionentry','JournalController@trEntry')->name('trentry.index');
+	Route::get('closeentry','JournalController@clEntry')->name('clentry.index');
+	Route::post('docloseentry','JournalController@clEntryUpdate')->name('clentry.update');
+
+	// ledger
+	Route::get('generalledger','JournalController@generalLedger')->name('genledger.index');
+	Route::post('generalledger/get','JournalController@glGet')->name('genledger.get');
 
 	// invoice list
 	Route::get('invoice','InvoiceController@index')->name('invoice.index');
@@ -333,6 +340,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/r_meter','ReportController@HistoryMeter')->name('report.r_meter');
 	Route::get('report/r_unit','ReportController@ReportUnit')->name('report.r_unit');
 	Route::get('report/r_tenant','ReportController@ReportTenant')->name('report.r_tenant');
+
+	Route::get('report/glreport','ReportController@glview')->name('report.glview');
+	Route::get('report/doglreport','ReportController@glreport')->name('report.glget');
 	// payment
 	Route::get('payment','PaymentController@index')->name('payment.index');
 	Route::post('payment/get','PaymentController@get')->name('payment.get');
