@@ -63,7 +63,7 @@
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                         <div style="margin-bottom:10px">
-                            <input name="floor_name" class="easyui-textbox" label="Name:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                            <input name="floor_name" class="easyui-textbox" label="Name:" style="width:100%" data-options="required:true,validType:'length[0,20]'">
                         </div>
                     </form>
                 </div>

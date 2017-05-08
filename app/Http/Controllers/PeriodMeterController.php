@@ -486,6 +486,7 @@ class PeriodMeterController extends Controller
                             $total = $meter_cost + $bpju;
                         }else{
                             $bpju = 0;
+                            $formula = explode('~', $array_rate[0]);
                             $meter_cost = $meter_used * $formula[0];
                             $total =  $meter_cost + $formula[1] + $formula[2];
                         }
