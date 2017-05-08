@@ -68,8 +68,8 @@
 
                         <div class ="row" style="margin-top:80px">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <button id="pdf" class="btn btn-success pull-right" style="margin-bottom:15px; display:none">Download Pdf</button>
-                                <button id="excel" class="btn btn-primary pull-right" style="margin-bottom:15px; display:none">Download Excel</button>
+                                <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Download Pdf</button>
+                                <button id="excel" class="btn btn-primary" style="margin-bottom:15px; display:none;">Download Excel</button>
                                 <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:500px"></iframe>
                             </div>
                         </div>
@@ -104,6 +104,9 @@
         if(type == "r_tenant"){
             $('#pdf').hide();
             $('#excel').show();
+        }else if(type == "r_unit"){
+            $('#excel').show();
+            $('#pdf').show();
         }else{
             $('#excel').hide();
             $('#pdf').show();

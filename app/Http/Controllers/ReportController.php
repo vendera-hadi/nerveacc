@@ -344,6 +344,7 @@ class ReportController extends Controller
 
     public function ReportUnit(Request $request){
         $pdf = @$request->pdf;
+        $excel = @$request->excel;
 
         $data['title'] = "Report Unit";
         $data['tahun'] = '';
@@ -353,12 +354,30 @@ class ReportController extends Controller
         $fetch = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.virtual_account','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
                 ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                 ->leftjoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
-                ->leftjoin('ms_tenant','ms_tenant.id',"=",'ms_unit_owner.tenan_id');
+                ->leftjoin('ms_tenant','ms_tenant.id',"=",'ms_unit_owner.tenan_id')
+                ->orderBy('ms_unit.unit_code');
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Report_Unit.pdf');
+        }else if($excel){
+            $data = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.virtual_account','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
+                ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
+                ->leftjoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
+                ->leftjoin('ms_tenant','ms_tenant.id',"=",'ms_unit_owner.tenan_id')
+                ->orderBy('ms_unit.unit_code')
+                ->get()->toArray();
+            $border = 'A1:M';
+            $tp = 'xls';
+            return Excel::create('Unit Report', function($excel) use ($data,$border) {
+                $excel->sheet('Unit Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
         }else{
             return view('layouts.report_template2', $data);
         }
