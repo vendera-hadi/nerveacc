@@ -8,7 +8,8 @@
                 <th width="100">Unit</th>  
                 <th width="50">Tgl Invoice</th>
                 <th width="50">Jatuh Tempo</th>
-                <th width="80">Outstanding Amount</th>  
+                <th width="80">Outstanding Amount</th>
+                <th width="100">Terbayar</th>  
             </tr>
         </thead>
         <tbody>
@@ -27,13 +28,13 @@
                         }
             ?>
             <tr class="<?php echo $class;?>">
-                <td><input type="checkbox" name="data_payment[invpayd_amount][<?php echo $inv_id;?>]" value="<?php echo $value['inv_outstanding'];?>"></td>
+                <td><input type="checkbox" name="data_payment[invpayd_amount][<?php echo $inv_id;?>]" value="<?php echo $value['inv_outstanding'];?>" class="paid-check"></td>
                 <td><?php echo $value['inv_number'];?></td>
                 <td><?php echo sprintf('%s %s', $value['unit_name'], $value['floor_name']);?></td>
                 <td><?php echo date('d/m/y', $inv_date);?></td>
                 <td><?php echo date('d/m/y', $inv_duedate);?></td>
                 <td><?php echo 'Rp. '.number_format($value['inv_outstanding']);?></td>
-                
+                <td><input type="number" name="data_payment[totalpay][{{$inv_id}}]" value="{{$value['inv_outstanding']}}" maxlength="{{$value['inv_outstanding']}}" minlength="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
             </tr>
             <?php
                     }

@@ -473,5 +473,17 @@
         return false;
       }
     });
+
+    $(document).delegate('.paid-amount','change',function(){
+        var maxVal = parseFloat($(this).attr('maxlength'));
+        var currentVal = parseFloat($(this).val());
+        if(currentVal > maxVal) $(this).val(maxVal);
+        if(currentVal < 1) $(this).val(1);
+      });
+
+    $(document).delegate('.paid-check','change',function(){
+        if($(this).is(':checked')) $(this).parents('tr').find('.paid-amount').removeAttr('disabled');
+        else $(this).parents('tr').find('.paid-amount').attr('disabled','disabled');
+      });
 </script>
 @endsection

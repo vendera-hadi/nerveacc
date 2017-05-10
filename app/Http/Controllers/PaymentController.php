@@ -246,16 +246,20 @@ class PaymentController extends Controller
                 if(!empty($value)){
                     $cek_pay = true;
 
-                    $total += (int) $value;
+                    $payVal = (int)$data_payment['totalpay'][$key];
+                    $total += $payVal;
+                    // $total += (int) $value;
                     $detail_payment[] = array(
-                        'invpayd_amount' => $value,
+                        // 'invpayd_amount' => $value,
+                        'invpayd_amount' => $payVal,
                         'inv_id' => $key
                     );
 
                     $tempAmount = 0;
                     $invoice = TrInvoice::find($key);
                     if(isset($invoice->inv_outstanding)){
-                        $tempAmount = $invoice->inv_outstanding - $value;
+                        // $tempAmount = $invoice->inv_outstanding - $value;
+                        $tempAmount = $invoice->inv_outstanding - $payVal;
                         // update
                         $invoice->inv_outstanding = $tempAmount;
                         $invoice->save();
