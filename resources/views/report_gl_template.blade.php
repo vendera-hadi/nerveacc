@@ -20,8 +20,8 @@
                 <td>{{date('d/m/Y',strtotime($ledg->ledg_date))}}</td>
                 <td>{{!empty($ledg->ledg_refno) ? $ledg->ledg_refno : '-'}}</td>
                 <td>{{$ledg->ledg_description}}</td>
-                <td>{{"Rp. ".$ledg->ledg_debit}}</td>
-                <td>{{"Rp. ".$ledg->ledg_credit}}</td>
+                <td>{{"Rp. ".number_format($ledg->ledg_debit)}}</td>
+                <td>{{"Rp. ".number_format($ledg->ledg_credit)}}</td>
                 <td>{{$ledg->jour_type_prefix}}</td>
                 <td>{{!empty($ledg->tenan_name) ? $ledg->tenan_name : '-'}}</td>
             </tr>

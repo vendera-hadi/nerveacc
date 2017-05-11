@@ -88,7 +88,7 @@
                 </form>
 
                 <!-- template tabel -->
-          		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;height:380px" toolbar="#toolbar">
+          		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;min-height:500px" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>

@@ -172,7 +172,8 @@ class ReportController extends Controller
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->where('tr_invoice.inv_post','=',TRUE)
                 ->where('tr_invoice.inv_outstanding','>',0)
-                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name');
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name')
+                ->orderBy('unit_code', 'asc');
         }else if ($ty == 2){
             $fetch = TrInvoicePaymhdr::select('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name',
                     DB::raw("SUM(invpayh_amount) AS total"),
@@ -183,13 +184,16 @@ class ReportController extends Controller
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice_paymhdr.contr_id')
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
-                ->groupBy('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name');
+                ->groupBy('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name')
+                ->orderBy('unit_code', 'asc');;
         }
-        $fetch = $fetch->get();
+        //memory exhause/keperluan demo aja makanya dilimit
+        $fetch = $fetch->limit(100)->get();
+        //$fetch = $fetch->get();
     	$data['invoices'] = $fetch;
     	if($pdf){
     		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
-        	return $pdf->download('AR_Aging_periode_'.date('M Y').'.pdf');
+        	return $pdf->download('AR_Aging_periode.pdf');
     	}else{
     		return view('layouts.report_template2', $data);
     	}
@@ -435,7 +439,9 @@ class ReportController extends Controller
         $deptParam = $request->input('dept');
         $jourTypeParam = $request->input('jour_type_id');
 
-        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        if(!empty($from) && !empty($to)){
+            $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        }
         $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "General Ledger Report";
         $data['logo'] = MsCompany::first()->comp_image;
@@ -458,7 +464,8 @@ class ReportController extends Controller
                     $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%');
                 });
         }
-
+        //memory exhause/keperluan demo aja makanya dilimit
+        // $fetch = $fetch->limit(100)->get();
         $fetch = $fetch->get();
         $data['ledger'] = $fetch;
         if($pdf){

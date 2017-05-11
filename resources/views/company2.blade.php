@@ -90,6 +90,11 @@
 						                </div>
 
 						                <div class="form-group">
+						                  <label>Invoice Signature Postion</label>
+						                  <input type="text" value="{{$company->comp_sign_position}}" name="comp_sign_position" class="form-control" id="compSignPosition" placeholder="Company Signature Postion" required>
+						                </div>
+
+						                <div class="form-group">
 						                  <label>Building Insurance (IDR)</label>
 						                  <input type="text" value="{{(int)$company->comp_build_insurance}}" name="comp_build_insurance" class="form-control numeric" id="compBuildInsurance" placeholder="Company Insurance" required>
 						                </div>

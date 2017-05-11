@@ -147,8 +147,8 @@ class JournalController extends Controller
                 $temp['ledg_date'] = date('d/m/Y',strtotime($value->ledg_date));
                 $temp['ledg_refno'] = $value->ledg_refno;
                 $temp['ledg_description'] = $value->ledg_description;
-                $temp['debit'] = $value->ledg_debit;
-                $temp['credit'] = $value->ledg_credit;
+                $temp['debit'] = number_format($value->ledg_debit,2);
+                $temp['credit'] = number_format($value->ledg_credit,2);
                 $temp['coa_code'] = $value->coa_code;
                 $temp['coa_name'] = $value->coa_name;
                 $temp['jour_type_prefix'] = $value->jour_type_prefix;
@@ -358,8 +358,8 @@ class JournalController extends Controller
                 $temp['ledg_date'] = date('d/m/Y',strtotime($value->ledg_date));
                 $temp['ledg_refno'] = $value->ledg_refno;
                 $temp['ledg_description'] = $value->ledg_description;
-                $temp['debit'] = "Rp. ".$value->ledg_debit;
-                $temp['credit'] = "Rp. ".$value->ledg_credit;
+                $temp['debit'] = "Rp. ".number_format($value->ledg_debit,2);
+                $temp['credit'] = "Rp. ".number_format($value->ledg_credit,2);
                 $temp['coa_code'] = $value->coa_code;
                 $temp['coa_name'] = $value->coa_name;
                 $temp['jour_type_prefix'] = $value->jour_type_prefix;

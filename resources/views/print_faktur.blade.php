@@ -211,7 +211,8 @@ table tr td{font-size:9pt;}
                         {{$company_position}}
                         @else
                         <br><br><br><br><br>
-                        <div style="width:115px; border:1px solid black"></div>
+                        <b><u>{{$company_sign}}</u></b><br>
+                        {{$company_position}}
                         @endif
                         
                     </td>

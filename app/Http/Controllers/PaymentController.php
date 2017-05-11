@@ -125,7 +125,7 @@ class PaymentController extends Controller
                 $temp['unit'] = $value->unit_name." (".$value->floor_name.")";
                 $temp['paymtp_name'] = $value->paymtp_name;
                 $temp['invpayh_date'] = date('d/m/Y',strtotime($value->invpayh_date));
-                $temp['invpayh_amount'] = "Rp. ".$value->invpayh_amount;
+                $temp['invpayh_amount'] = "Rp. ".number_format($value->invpayh_amount);
                 $temp['invtp_name'] = $value->invtp_name;
                 $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
@@ -261,7 +261,7 @@ class PaymentController extends Controller
                         // $tempAmount = $invoice->inv_outstanding - $value;
                         $tempAmount = $invoice->inv_outstanding - $payVal;
                         // update
-                        $invoice->inv_outstanding = $tempAmount;
+                        $invoice->inv_outstanding = (int)$tempAmount;
                         $invoice->save();
                     }
                 }
@@ -310,8 +310,6 @@ class PaymentController extends Controller
                     foreach ($detail_payment as $key => $value) {
                         $action_detail = new TrInvoicePaymdtl;
 
-                        $invoice = TrInvoice::find($value['inv_id']);
-
                         $invoice_data = $invoice->get()->first();
                         
                         if(!empty($invoice_data)){
@@ -343,10 +341,6 @@ class PaymentController extends Controller
                             $action_detail->invpayh_id = $payment_id;
 
                             $action_detail->save();
-                            
-                            $invoice->inv_outstanding = $outstand;
-
-                            $invoice->save();
                         }
                     }
                 }else{
