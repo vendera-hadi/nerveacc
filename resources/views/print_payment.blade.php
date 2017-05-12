@@ -111,7 +111,7 @@ table tr td{font-size:9pt;}
                     if(count($details) > 0){
                         $total = 0;
                         foreach ($details as $key => $value) {
-                            $total += $value->inv_amount;
+                            $total += $value->invpayd_amount;
                 ?>
                 <tr>
                     <td style="vertical-align: top; padding-left:15px; padding-right:10px; padding-top:10px">
@@ -124,7 +124,7 @@ table tr td{font-size:9pt;}
                     </td>
                     <td style="border-left: solid 1px; text-align:right; padding-top:10px">Rp.</td>
                     <td style="border-collapse: collapse; text-align: right; padding-right:15px; padding-top:10px">
-                        <div style="padding-right: 3px;">{{ number_format($value->inv_amount) }}</div>
+                        <div style="padding-right: 3px;">{{ number_format($value->invpayd_amount) }}</div>
                     </td>
                 </tr>
                 <?php

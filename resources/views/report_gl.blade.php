@@ -67,7 +67,7 @@
                                         <div class="input-group-addon">
                                             <i class="fa fa-calendar"></i>
                                         </div>
-                                        <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd">
+                                        <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
                                     </div>
                                 </div>
                             </div>
@@ -97,7 +97,7 @@
                                         <div class="input-group-addon">
                                             <i class="fa fa-calendar"></i>
                                         </div>
-                                        <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd">
+                                        <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
                                     </div>
                                 </div>
                             </div>
@@ -139,11 +139,20 @@
         var report_url = '{!! route('report.glget') !!}';
         var from = $('input[name=from]').val();
         var to = $('input[name=to]').val(); 
+
+        if(from !="" && to ==""){
+            alert("Please Choose Start Date");
+        }else if(from =="" && to !=""){
+            alert("Please Choose End Date");
+        }else if(from > to){
+            alert("Start Date cannot Greater than End Date");
+        }else{
         
         var queryString = $(this).serialize();
         current_url = report_url+'?'+queryString;
         $('#frame').attr('src', current_url);
         $('#pdf').show();
+        }
     });
 
     $('#pdf').click(function(){

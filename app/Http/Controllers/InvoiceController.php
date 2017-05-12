@@ -560,13 +560,13 @@ class InvoiceController extends Controller
         $contract = TrContract::select('ms_tenant.tenan_name','ms_unit.unit_code')->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                             ->join('ms_tenant','tr_contract.tenan_id','=','ms_tenant.id')
                             ->where('tr_contract.id',$paymentHeader->contr_id)->first();
-        $paymentDetails = TrInvoicePaymdtl::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_amount')
+        $paymentDetails = TrInvoicePaymdtl::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount')
                                 ->join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
                                 ->where('tr_invoice_paymdtl.invpayh_id',$request->id)->get();
         $total = 0;
         if(count($paymentDetails) > 0){
             foreach ($paymentDetails as $key => $value) {
-                $total += $value->inv_amount;
+                $total += $value->invpayd_amount;
                 // get detail invoice
                 $temp = [];
                 $inv_details = TrInvoiceDetail::where('inv_id',$value->id)->get();

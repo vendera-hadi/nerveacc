@@ -73,14 +73,14 @@
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                             <th field="checkbox" width="25"></th>
-                            <th field="tenan_name" width="120" sortable="true">Nama Tenant</th>
-                            <th field="unit_code" width="120" sortable="true">No Unit</th>
-                            <th field="inv_no"  sortable="true">INV No</th>
-                            <th field="paymtp_name" width="120" sortable="true">Payment Type</th>
-                            <th field="invpayh_date" width="120" sortable="true">Payment Date</th>
-                            <th field="invpayh_amount" width="120" sortable="true">Total</th>
+                            <th field="tenan_name" sortable="true">Nama Tenant</th>
+                            <th field="unit_code" width="50" sortable="true">No Unit</th>
+                            <th field="inv_no" sortable="true">Invoice No</th>
+                            <th field="paymtp_name" width="50" sortable="true">Payment Type</th>
+                            <th field="invpayh_date" width="50" sortable="true">Payment Date</th>
+                            <th field="invpayh_amount" sortable="true">Total</th>
                             
-                            <th field="invpayh_post" width="80" sortable="true">Posting Status</th>
+                            <th field="invpayh_post" width="50" sortable="true">Posting Status</th>
                             <th field="action_button">Action</th>
                         </tr>
                     </thead>
@@ -297,18 +297,20 @@
           $.messager.alert('Warning','Bank must be choose');
         }else if($('#paymtpCode').val() == ""){
           $.messager.alert('Warning','Payment type must be choose');
+        }else{
+          var allFormData = $('#formPayment').serialize();
+          
+          $.post('{{route('payment.insert')}}',allFormData, function(result){
+              $('#submitForm').removeAttr('disabled');
+              alert(result.message);
+              if(result.status == 1){
+                window.open("{{url('invoice/print_kwitansi?id=')}}"+result.paym_id,null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
+                location.reload();
+              } 
+          });
+
+          return false;
         }
-
-        var allFormData = $('#formPayment').serialize();
-        
-        $.post('{{route('payment.insert')}}',allFormData, function(result){
-            $('#submitForm').removeAttr('disabled');
-            alert(result.message);
-            window.open("{{url('invoice/print_kwitansi?id=')}}"+result.paym_id,null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
-            if(result.status == 1) location.reload();
-        });
-
-        return false;
     });
 
     $('.datepicker').datepicker({

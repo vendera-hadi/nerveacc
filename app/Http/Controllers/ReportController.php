@@ -441,6 +441,8 @@ class ReportController extends Controller
 
         if(!empty($from) && !empty($to)){
             $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        }else{
+            $data['tahun'] = 'All Periode';
         }
         $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "General Ledger Report";
@@ -455,7 +457,7 @@ class ReportController extends Controller
                             ->leftJoin('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
                             ->select('tr_ledger.coa_code','tr_ledger.closed_at','coa_name','ledg_date','ledg_description','ledg_debit','ledg_credit','jour_type_prefix','ledg_refno','tenan_id','tenan_name')
                             ->where('ms_master_coa.coa_year',$year)->where('tr_ledger.coa_year',$year);
-        if(!empty($date)) $fetch = $fetch->where('ledg_date','>=',$from)->where('ledg_date','<=',$to);
+        if(!empty($from) && !empty($to)) $fetch = $fetch->where('ledg_date','>=',$from)->where('ledg_date','<=',$to);
         if(!empty($deptParam)) $fetch = $fetch->where('dept_id',$deptParam);
         if(!empty($jourTypeParam)) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
         if(!empty($coa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);

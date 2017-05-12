@@ -33,7 +33,9 @@
           </td>
         </tr>
       </table>
+      <div style="font-size: 9pt !important;">
       @include($template)
+      </div>
     </div>
       </section>
 
