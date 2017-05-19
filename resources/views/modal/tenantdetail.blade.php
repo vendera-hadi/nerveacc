@@ -18,7 +18,6 @@
 	<tr><td><strong>Tax Name</strong></td><td>:</td><td>{{$fetch['tenan_taxname']}}</td></tr>
 	<tr><td><strong>Tax Address</strong></td><td>:</td><td>{{$fetch['tenan_tax_address']}}</td></tr>
 	<tr><td><strong>PPN</strong></td><td>:</td><td>{{$fetch['tenan_isppn'] ? 'yes' : 'no'}}</td></tr>
-	<tr><td><strong>PKP</strong></td><td>:</td><td>{{$fetch['tenan_ispkp'] ? 'yes' : 'no'}}</td></tr>
 	<tr><td><strong>Tenan Type</strong></td><td>:</td><td>{{$fetch['tent_name']}}</td></tr>
 	
 	</table>

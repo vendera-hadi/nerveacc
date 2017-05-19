@@ -189,8 +189,8 @@ class InvoiceController extends Controller
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
         $companyData = MsCompany::first();
         $stampData = MsCostItem::where('cost_code','STAMP')->first();
-        // if(!empty($stampData)) $stampCoa = $stampData->cost_coa_code;
-        // else $stampCoa = 21400;
+        if(!empty($stampData)) $stampCoa = $stampData->cost_coa_code;
+        else $stampCoa = 21400;
 
         $maxTime = date('Y-m-d',strtotime("first day of previous month"));
         // invoice dpt di generate paling lama bulan sekarang, generate utk bulan kmaren
@@ -395,7 +395,8 @@ class InvoiceController extends Controller
                         // KARNA DENDA ITU KAN UTK PAYMENT TELAT, GENERATOR DIGENERATE SEBELUM WKT BAYAR JD BLUM TENTU ADA DISINI
 
                         // PPN
-                        $usePPN = @MsConfig::where('name','use_ppn')->first()->value;
+                        $tenan = MsTenant::find($value->tenan_id);
+                        $usePPN = !empty($tenan) ? $tenan->tenan_isppn : 0;
                         if(!empty($usePPN)){
                             $totalPPN = 0.1 * $totalPay;
                             $invDetail[] = ['invdt_amount' => $totalPPN, 'invdt_note' => 'PPH 10%', 'costd_id'=> 0, 'coa_code' => '40900'];
@@ -404,10 +405,10 @@ class InvoiceController extends Controller
 
                         // TAMBAHIN STAMP DUTY
                         if($totalPay <= $companyData->comp_materai1_amount){ 
-                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
+                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0, 'coa_code' => $stampCoa];
                             $totalStamp = $companyData->comp_materai1;
                         }else{ 
-                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0];
+                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0, 'coa_code' => $stampCoa];
                             $totalStamp = $companyData->comp_materai2;
                         }
 
@@ -509,7 +510,7 @@ class InvoiceController extends Controller
             if(!is_array($inv_id)) $inv_id = [$inv_id];
             $type = $request->type;
 
-            $invoice_data = TrInvoice::select('tr_invoice.*', 'ms_unit.unit_code')
+            $invoice_data = TrInvoice::select('tr_invoice.*', 'ms_unit.unit_code', 'ms_unit.virtual_account')
                                     ->join('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
                                     ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                     ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant')->get()->toArray();
@@ -619,43 +620,69 @@ class InvoiceController extends Controller
         $successIds = [];
         
         foreach ($ids as $id) {
-            // get coa code dari invoice type
-            $invoiceHd = TrInvoice::with('InvoiceType')->find($id);
-            if(!isset($invoiceHd->InvoiceType->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$invoiceHd->InvoiceType->invtp_name.' need to be set with COA code']);
-            // create journal DEBET utk piutang
-            $coaDebet = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$invoiceHd->InvoiceType->invtp_coa_ar)->first();
-            if(empty($coaDebet)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$invoiceHd->InvoiceType->invtp_coa_ar.' is not found on this year list. Please ReInsert this COA Code']);
-            
-            $nextJournalNumber = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
-            $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumber;
-            $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
-            // Debet
-            $journal[] = [
-                            'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
-                            'ledge_fisyear' => $coayear,
-                            'ledg_number' => $journalNumber,
-                            'ledg_date' => date('Y-m-d'),
-                            'ledg_refno' => $invoiceHd->inv_faktur_no,
-                            'ledg_debit' => $invoiceHd->inv_amount,
-                            'ledg_credit' => 0,
-                            'ledg_description' => $coaDebet->coa_name,
-                            'coa_year' => $coaDebet->coa_year,
-                            'coa_code' => $coaDebet->coa_code,
-                            'created_by' => Auth::id(),
-                            'updated_by' => Auth::id(),
-                            'jour_type_id' => $jourType->id,
-                            'dept_id' => 3 //hardcode utk finance
-                        ];
+            // coa ambil dari grouping cost detail
+            $invDetails = TrInvoiceDetail::select('coa_code','cost_coa_code','cost_name','invdt_amount','invdt_note')->leftJoin('ms_cost_detail','ms_cost_detail.id','=','tr_invoice_detail.costd_id')
+                                        ->leftJoin('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')
+                                        ->where('inv_id',$id)->get();
+            $debetCoa = [];
+            $debetCoaAmount = [];
+            $debetCoaName = [];
+            foreach ($invDetails as $key => $value) {
+                if(empty($value->coa_code) && !in_array($value->cost_coa_code, $debetCoa)){
+                    $debetCoa[] = $value->cost_coa_code;
+                    $debetCoaAmount[$value->cost_coa_code] = $value->invdt_amount;
+                    $debetCoaName[$value->cost_coa_code] = !empty($value->cost_name) ? $value->cost_name : $value->invdt_note;
+                }else if(!empty($value->coa_code) && !in_array($value->coa_code, $debetCoa)){
+                    $debetCoa[] = $value->coa_code;
+                    $debetCoaAmount[$value->coa_code] = $value->invdt_amount;
+                    $debetCoaName[$value->coa_code] = !empty($value->cost_name) ? $value->cost_name : $value->invdt_note;
+                }else if(empty($value->coa_code) && in_array($value->cost_coa_code, $debetCoa)){
+                    $debetCoaAmount[$value->cost_coa_code] += $value->invdt_amount;
+                }else if(!empty($value->coa_code) && in_array($value->coa_code, $debetCoa)){
+                    $debetCoaAmount[$value->coa_code] += $value->invdt_amount;
+                }
+            }
 
-            $invJournal[] = [
-                            'inv_id' => $id,
-                            'invjour_voucher' => $journalNumber,
-                            'invjour_date' => date('Y-m-d'),
-                            'invjour_note' => 'Posting Invoice '.$invoiceHd->inv_faktur_no,
-                            'coa_code' => $coaDebet->coa_code,
-                            'invjour_debit' => $invoiceHd->inv_amount,
-                            'invjour_credit' => 0
-                        ];
+            // get coa code dari invoice type
+            $invoiceHd = TrInvoice::find($id);
+            // if(!isset($invoiceHd->InvoiceType->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$invoiceHd->InvoiceType->invtp_name.' need to be set with COA code']);
+            // create journal DEBET utk piutang
+            foreach($debetCoaAmount as $key => $value){
+                $coaDebet = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$key)->first();
+                if(empty($coaDebet)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$key.' is not found on this year list. Please ReInsert this COA Code']);
+                
+                $nextJournalNumber = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumber;
+                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                // Debet
+                $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => date('Y-m-d'),
+                                'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                'ledg_debit' => $value,
+                                'ledg_credit' => 0,
+                                'ledg_description' => $debetCoaName[$key],
+                                'coa_year' => $coaDebet->coa_year,
+                                'coa_code' => $coaDebet->coa_code,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id,
+                                'dept_id' => 3 //hardcode utk finance
+                            ];
+
+                $invJournal[] = [
+                                'inv_id' => $id,
+                                'invjour_voucher' => $journalNumber,
+                                'invjour_date' => date('Y-m-d'),
+                                'invjour_note' => 'Posting Invoice '.$invoiceHd->inv_faktur_no,
+                                'coa_code' => $coaDebet->coa_code,
+                                'invjour_debit' => $value,
+                                'invjour_credit' => 0
+                            ];
+                $nextJournalNumber++;
+            }
             // End DEBET
 
             // Create CREDIT

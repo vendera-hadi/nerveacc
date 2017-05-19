@@ -98,7 +98,8 @@
                 rownumbers: true,
                 singleSelect: true,
                 fitColumns: true,
-                pageSize: 50
+                pageSize:100,
+                pageList: [100,500,1000],
             });
             dg.datagrid('enableFilter');
         });

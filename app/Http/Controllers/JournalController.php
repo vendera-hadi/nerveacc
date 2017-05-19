@@ -305,6 +305,7 @@ class JournalController extends Controller
         try{
             $keyword = $request->input('q');
             $coa = $request->input('coa');
+            $tocoa = $request->input('tocoa');
             $deptParam = $request->input('dept');
             $jourTypeParam = $request->input('jour_type_id');
 
@@ -339,10 +340,15 @@ class JournalController extends Controller
             if(!empty($date)) $fetch = $fetch->where('ledg_date','>=',$startdate)->where('ledg_date','<=',$enddate);
             if(!empty($deptParam)) $fetch = $fetch->where('dept_id',$deptParam);
             if(!empty($jourTypeParam)) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
-            if(!empty($coa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
+
+            if(!empty($coa) && empty($tocoa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
+            else if(empty($coa) && !empty($tocoa)) $fetch = $fetch->where('tr_ledger.coa_code',$tocoa);
+            else if(!empty($coa) && !empty($tocoa) && $coa > $tocoa) $fetch = $fetch->whereBetween('tr_ledger.coa_code',[$tocoa,$coa]);
+            else if(!empty($coa) && !empty($tocoa) && $coa < $tocoa) $fetch = $fetch->whereBetween('tr_ledger.coa_code',[$coa,$tocoa]);
+
             if(!empty($keyword)){ 
                 $fetch = $fetch->where(function($query) use($keyword){
-                        $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%');
+                        $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(ledg_refno)"),'like','%'.$keyword.'%');
                     });
             }
 

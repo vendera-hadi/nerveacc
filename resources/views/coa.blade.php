@@ -142,7 +142,8 @@
                 rownumbers: true,
                 singleSelect: true,
                 fitColumns: true,
-                pageSize:30
+                pageSize:100,
+                pageList: [100,500,1000],
             });
             dg.datagrid('enableFilter');
         });

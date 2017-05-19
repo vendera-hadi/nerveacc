@@ -122,12 +122,8 @@
                             </select>
                         </div>
                         <div style="margin-bottom:10px">
-                            <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">Use PPN</label>
+                            <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">PPN/NON PPN</label>
                             <input type="checkbox" name="tenan_isppn" value="1" >
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">Use PKP</label>
-                            <input type="checkbox" name="tenan_ispkp" value="1" >    
                         </div>
                         <div style="margin-bottom:10px" id="unitColumn">
                             <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">Unit Owned</label>
@@ -246,7 +242,8 @@
                 rownumbers: true,
                 singleSelect: true,
                 fitColumns: true,
-                pageSize:30
+                pageSize:100,
+                pageList: [100,500,1000],
             });
             dg.datagrid('enableFilter');
         });

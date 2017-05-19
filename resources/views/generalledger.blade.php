@@ -100,7 +100,17 @@
               <div class="row" style="margin-bottom:15px">
                   <div class="col-sm-3">
                   <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
-                              <option value="">Choose COA</option>
+                              <option value="">From COA Code</option>
+                              
+                              @foreach($accounts as $key => $coa)
+                                  <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                              @endforeach
+                            </select>
+                </div>
+
+                <div class="col-sm-3">
+                  <select class="form-control js-example-basic-single" id="selectAccount2" style="width:100%">
+                              <option value="">To COA Code</option>
                               
                               @foreach($accounts as $key => $coa)
                                   <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
@@ -109,7 +119,7 @@
                 </div>
 
                   <div class="col-sm-4">
-                    <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name or Description)">
+                    <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name / Description / Ref No)">
                   </div>
               </div> 
             </form>
@@ -131,7 +141,7 @@
                             <th field="coa_code" width="120" sortable="true">Acc No</th>
                             <th field="coa_name" width="120" sortable="true">Acc Name</th>
                             <th field="ledg_date" width="120" sortable="true">Date</th>
-                            <th field="ledg_refno" width="120" sortable="true">Invoice No</th>
+                            <th field="ledg_refno" width="120" sortable="true">Inv No/Ref No</th>
                             <th field="ledg_description" width="120" sortable="true">Description</th>
                             <th field="debit" width="120" sortable="true">Debit</th>
                             <th field="credit" width="120" sortable="true">Credit</th>
@@ -488,6 +498,7 @@ var formData;
   $('#formFilter').submit(function(e){
     e.preventDefault();
     var coafilter = $('#selectAccount').val();
+    var coafilterto = $('#selectAccount2').val();
     var query = $(this).find('input[name=q]').val();
     var date = $(this).find('input[name=filterdate]').val();
     var dept = $(this).find('select[name=dept]').val();
@@ -495,6 +506,7 @@ var formData;
     $('#dg').datagrid('load', {
         q: query,
         coa: coafilter,
+        tocoa: coafilterto,
         date: date,
         dept: dept,
         jour_type_id: jour_type_id

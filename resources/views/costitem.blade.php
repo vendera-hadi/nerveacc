@@ -158,6 +158,8 @@
                 rownumbers: true,
                 singleSelect: true,
                 fitColumns: true,
+                pageSize:100,
+                pageList: [100,500,1000],
                 detailFormatter:function(index,row){
                     return '<div style="padding:2px"><table class="ddv"></table></div>';
                 },

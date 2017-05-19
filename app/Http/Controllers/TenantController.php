@@ -154,6 +154,7 @@ class TenantController extends Controller
             }
             $input = $request->all();
             // update otomatis tenancode
+            $input['tenan_ispkp'] = false;
             $input['tenan_code'] = "TN".date('ymdHis');
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
@@ -183,14 +184,14 @@ class TenantController extends Controller
         // var_dump($request->all()); die();
             $id = $request->id;
             $messages = [
-                'tenan_code.unique' => 'Tenant Code must be unique',
+                // 'tenan_code.unique' => 'Tenant Code must be unique',
                 'tent_id.required' => 'Choose Tenant Type First',
                 'tenan_idno.numeric' => 'KTP No must be in numeric format',
                 'tenan_phone.numeric' => 'Phone must be in numeric format',
                 'tenan_fax.numeric' => 'Fax must be in numeric format'
             ];
             $validator = Validator::make($request->all(), [
-                'tenan_code' => 'required|unique:ms_tenant,tenan_code,'.$id,
+                // 'tenan_code' => 'required|unique:ms_tenant,tenan_code,'.$id,
                 'tenan_idno' => 'numeric',
                 'tenan_phone' => 'numeric',
                 'tenan_fax' => 'numeric',

@@ -107,15 +107,13 @@
             @endif
 
             <?php
-              $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $unitUrls = [url('unit'), url('unittype'), route('floor.index')];
 
-              $billingInfos = [35,39,40,41,42,43];
               $units = [15,19,23];
-              $tenancys = [15,19,23,27,31,35,39,40,41,42,43,44,51];
+              $tenancys = [15,19,23,27,31,51];
             ?>
             @if(Session::get('role')==1 || !empty(array_intersect($tenancys, Session::get('permissions'))) ) 
-            <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$unitUrls) || Request::url() == url('cost_item') || Request::url() == url('tenant') || Request::url() == url('typetenant')
+            <li class="treeview @if(in_array(Request::url(),$unitUrls) || Request::url() == url('tenant') || Request::url() == url('typetenant')
             || Request::url() == route('marketing.index') || Request::url() == route('report.tenancyview') ||  Request::url() == url('vaccount')){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-building-o"></i> <span>TENANCY</span>
@@ -123,7 +121,7 @@
                   <i class="fa fa-angle-left pull-right"></i>
                 </span>
               </a>
-              <ul class="treeview-menu @if(in_array(Request::url(),$tenancyUrls)){{'active'}}@endif">
+              <ul class="treeview-menu @if(in_array(Request::url(),$unitUrls)){{'active'}}@endif">
                 @if(Session::get('role')==1 || !empty(array_intersect($units, Session::get('permissions'))) ) 
                 <li>
                     <a href="#"><i class="fa fa-circle"></i> Units
@@ -152,41 +150,6 @@
                 <li @if(Request::url() == url('typetenant')) class="active" @endif><a href="{{url('typetenant')}}"><i class="fa fa-circle-o"></i> Tenant/Owner Type</a></li>
                 @endif
 
-                @if(Session::get('role')==1 || !empty(array_intersect($billingInfos, Session::get('permissions'))) )
-                <li>
-                  <a href="#"><i class="fa fa-circle"></i> Billing Information
-                    <span class="pull-right-container">
-                      <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                  </a>
-                  <ul class="treeview-menu @if(in_array(Request::url(),$tenancyUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$tenancyUrls)) style="display:block" @endif>
-                    @if(Session::get('role')==1 || in_array(35,Session::get('permissions')))
-                    <li @if(Request::url() == route('contract.index')) class="active" @endif><a href="{{route('contract.index')}}"><i class="fa fa-circle-o"></i> Billing Info</a></li>
-                    @endif
-                    @if(Session::get('role')==1 || in_array(39,Session::get('permissions')))
-                    <li @if(Request::url() == route('contract.confirmation')) class="active" @endif><a href="{{route('contract.confirmation')}}"><i class="fa fa-circle-o"></i> Billing Info Confirmation</a></li>
-                    @endif
-                    @if(Session::get('role')==1 || in_array(40,Session::get('permissions')))
-                    <li @if(Request::url() == route('contract.addendum')) class="active" @endif><a href="{{route('contract.addendum')}}"><i class="fa fa-circle-o"></i> Billing Info Addendum</a></li>
-                    @endif
-                    @if(Session::get('role')==1 || in_array(41,Session::get('permissions')))
-                    <li @if(Request::url() == route('contract.renewal')) class="active" @endif><a href="{{route('contract.renewal')}}"><i class="fa fa-circle-o"></i> Billing Info Renewal</a></li>
-                    @endif
-                    @if(Session::get('role')==1 || in_array(42,Session::get('permissions')))
-                    <li @if(Request::url() == route('contract.termination')) class="active" @endif><a href="{{route('contract.termination')}}"><i class="fa fa-circle-o"></i> Billing Info Termination</a></li>
-                    @endif
-                    @if(Session::get('role')==1 || in_array(43,Session::get('permissions')))
-                    <li @if(Request::url() == route('contract.unclosed')) class="active" @endif><a href="{{route('contract.unclosed')}}"><i class="fa fa-circle-o"></i> Reminder Billing <span class="pull-right-container">
-                    @endif
-              <span class="label label-primary pull-right">{{$notif_unclosed}}</span>
-            </span></a></li>
-                  </ul>
-                </li>
-                @endif
-               
-                @if(Session::get('role')==1 || in_array(44,Session::get('permissions')))
-                <li @if(Request::url() == url('cost_item')) class="active" @endif><a href="{{url('cost_item')}}"><i class="fa fa-circle-o"></i> Component Billing</a></li>       
-                @endif
                 @if(Session::get('role')==1 || in_array(51,Session::get('permissions')))
                 <li @if(Request::url() == route('report.tenancyview')) class="active" @endif><a href="{{route('report.tenancyview')}}"><i class="fa fa-circle-o"></i> Reports</a></li>
                 @endif
@@ -197,11 +160,14 @@
             
             <?php
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index'),url('period_meter'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview')];
-              $accreceivables = [52,58,59,63,68,76];
+              $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
+              
+              $accreceivables = [52,58,59,63,68,76,35,39,40,41,42,43,44];
+              $billingInfos = [35,39,40,41,42,43];
               $generalledger = [64];
               $cashbanks = [72];
             ?>
-            <li class="treeview @if(in_array(Request::url(),$arUrls)){{'active'}}@endif">
+            <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || Request::url() == url('cost_item')){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-book"></i> <span>FINANCE</span>
                 <span class="pull-right-container">
@@ -216,7 +182,7 @@
                           <i class="fa fa-angle-left pull-right"></i>
                         </span>
                     </a>
-                    <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
+                    <ul class="treeview-menu @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || Request::url() == url('cost_item')){{'active menu-open'}}@endif" @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || Request::url() == url('cost_item')) style="display:block" @endif>
                       @if(Session::get('role')==1 || in_array(52,Session::get('permissions')))
                       <li @if(Request::url() == url('period_meter')) class="active" @endif><a href="{{url('period_meter')}}"><i class="fa fa-circle-o"></i> Meter Input</a></li>
                       @endif
@@ -237,6 +203,43 @@
                       @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                       <li @if(Request::url() == route('report.arview')) class="active" @endif><a href="{{route('report.arview')}}"><i class="fa fa-circle-o"></i> Reports</a></li>
                       @endif
+
+                      @if(Session::get('role')==1 || in_array(44,Session::get('permissions')))
+                      <li @if(Request::url() == url('cost_item')) class="active" @endif><a href="{{url('cost_item')}}"><i class="fa fa-circle-o"></i> Component Billing</a></li>       
+                      @endif
+
+                      @if(Session::get('role')==1 || !empty(array_intersect($billingInfos, Session::get('permissions'))) )
+                      <li>
+                        <a href="#"><i class="fa fa-circle"></i> Billing Information
+                          <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                          </span>
+                        </a>
+                        <ul class="treeview-menu @if(in_array(Request::url(),$tenancyUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$tenancyUrls)) style="display:block" @endif>
+                          @if(Session::get('role')==1 || in_array(35,Session::get('permissions')))
+                          <li @if(Request::url() == route('contract.index')) class="active" @endif><a href="{{route('contract.index')}}"><i class="fa fa-circle-o"></i> Billing Info</a></li>
+                          @endif
+                          @if(Session::get('role')==1 || in_array(39,Session::get('permissions')))
+                          <li @if(Request::url() == route('contract.confirmation')) class="active" @endif><a href="{{route('contract.confirmation')}}"><i class="fa fa-circle-o"></i> Billing Info Confirmation</a></li>
+                          @endif
+                          @if(Session::get('role')==1 || in_array(40,Session::get('permissions')))
+                          <li @if(Request::url() == route('contract.addendum')) class="active" @endif><a href="{{route('contract.addendum')}}"><i class="fa fa-circle-o"></i> Billing Info Addendum</a></li>
+                          @endif
+                          @if(Session::get('role')==1 || in_array(41,Session::get('permissions')))
+                          <li @if(Request::url() == route('contract.renewal')) class="active" @endif><a href="{{route('contract.renewal')}}"><i class="fa fa-circle-o"></i> Billing Info Renewal</a></li>
+                          @endif
+                          @if(Session::get('role')==1 || in_array(42,Session::get('permissions')))
+                          <li @if(Request::url() == route('contract.termination')) class="active" @endif><a href="{{route('contract.termination')}}"><i class="fa fa-circle-o"></i> Billing Info Termination</a></li>
+                          @endif
+                          @if(Session::get('role')==1 || in_array(43,Session::get('permissions')))
+                          <li @if(Request::url() == route('contract.unclosed')) class="active" @endif><a href="{{route('contract.unclosed')}}"><i class="fa fa-circle-o"></i> Reminder Billing <span class="pull-right-container">
+                          @endif
+                    <span class="label label-primary pull-right">{{$notif_unclosed}}</span>
+                  </span></a></li>
+                        </ul>
+                      </li>
+                      @endif
+
                     </ul>
                 </li>
                 @endif
@@ -249,9 +252,9 @@
                         </span>
                     </a>
                     <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
-                      @if(Session::get('role')==1 || in_array(64,Session::get('permissions')))
-                      <li @if(Request::url() == route('journal.index')) class="active" @endif><a href="{{route('journal.index')}}"><i class="fa fa-circle-o"></i> Journal Entries</a></li>
-                      @endif
+                      <!-- if(Session::get('role')==1 || in_array(64,Session::get('permissions')))
+                      <li if(Request::url() == route('journal.index')) class="active" endif><a href="route('journal.index')"><i class="fa fa-circle-o"></i> Journal Entries</a></li>
+                      endif -->
                       @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                       <li @if(Request::url() == route('genledger.index')) class="active" @endif><a href="{{route('genledger.index')}}"><i class="fa fa-circle-o"></i> General Ledger</a></li>
                       @endif

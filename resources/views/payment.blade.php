@@ -277,6 +277,8 @@
             rownumbers: true,
             singleSelect: true,
             fitColumns: true,
+            pageSize:100,
+            pageList: [100,500,1000],
             onLoadSuccess:function(target){
                 print_window();
             }

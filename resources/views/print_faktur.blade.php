@@ -128,7 +128,7 @@ table tr td{font-size:9pt;}
                         <table width="100%">
                             <tr>
                                 <td width="50%"><i>Virtual Account</i></td>
-                                <td>: </td>
+                                <td>: {{$inv['virtual_account']}}</td>
                             </tr>
                         </table>
                     </td>
