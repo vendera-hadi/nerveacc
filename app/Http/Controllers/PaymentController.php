@@ -375,6 +375,7 @@ class PaymentController extends Controller
         }
         $successPosting = 0;
         $successIds = [];
+        $piutangIds = [];
         foreach ($ids as $id) {
         	// get payment header
         	$paymentHd = TrInvoicePaymhdr::with('Cashbank')->find($id);
@@ -387,32 +388,40 @@ class PaymentController extends Controller
             $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
             $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
             // Cashbank Jadi DEBET di Payment
-            $journal[] = [
-                            'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
-                            'ledge_fisyear' => $coayear,
-                            'ledg_number' => $journalNumber,
-                            'ledg_date' => date('Y-m-d'),
-                            'ledg_refno' => $paymentHd->invpayh_checkno,
-                            'ledg_debit' => $paymentHd->invpayh_amount,
-                            'ledg_credit' => 0,
-                            'ledg_description' => $coaDebet->coa_name,
-                            'coa_year' => $coaDebet->coa_year,
-                            'coa_code' => $coaDebet->coa_code,
-                            'created_by' => Auth::id(),
-                            'updated_by' => Auth::id(),
-                            'jour_type_id' => $jourType->id,
-                            'dept_id' => 3 //hardcode utk finance
-                        ];
+            $paymentDtl = TrInvoicePaymdtl::join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
+                                            ->join('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
+                                            ->where('invpayh_id',$id)->get();
+            $refno = !empty($paymentHd->invpayh_checkno) ? $paymentHd->invpayh_checkno : $paymentHd->no_kwitansi;
+            foreach ($paymentDtl as $dtl) {
+                if($dtl->inv_outstanding <= 0){
+                    $journal[] = [
+                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                    'ledge_fisyear' => $coayear,
+                                    'ledg_number' => $journalNumber,
+                                    'ledg_date' => date('Y-m-d'),
+                                    'ledg_refno' => $refno,
+                                    'ledg_debit' => $dtl->invpayd_amount,
+                                    'ledg_credit' => 0,
+                                    'ledg_description' => $dtl->tenan_name." - ".$dtl->inv_number,
+                                    'coa_year' => $coaDebet->coa_year,
+                                    'coa_code' => $coaDebet->coa_code,
+                                    'created_by' => Auth::id(),
+                                    'updated_by' => Auth::id(),
+                                    'jour_type_id' => $jourType->id,
+                                    'dept_id' => 3 //hardcode utk finance
+                                ];
 
-            $payJournal[] = [
-            		'ipayjour_date' => date('Y-m-d'),
-            		'ipayjour_voucher' => $journalNumber,
-            		'ipayjour_note' => 'Posting Payment '.$paymentHd->invpayh_checkno,
-            		'coa_code' => $coaDebet->coa_code,
-            		'ipayjour_debit' => $paymentHd->invpayh_amount,
-            		'ipayjour_credit' => 0,
-            		'invpayh_id' => $id
-            	];
+                    $payJournal[] = [
+                    		'ipayjour_date' => date('Y-m-d'),
+                    		'ipayjour_voucher' => $journalNumber,
+                    		'ipayjour_note' => $dtl->tenan_name." - ".$dtl->inv_number,
+                    		'coa_code' => $coaDebet->coa_code,
+                    		'ipayjour_debit' => $dtl->invpayd_amount,
+                    		'ipayjour_credit' => 0,
+                    		'invpayh_id' => $id
+                    	];
+                }
+            }
             // End DEBET
 
             // Create CREDIT
@@ -420,46 +429,67 @@ class PaymentController extends Controller
             try{
                 $paymentDtl = TrInvoicePaymdtl::join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
                 								->join('ms_invoice_type','tr_invoice.invtp_id','=','ms_invoice_type.id')
-                								->where('invpayh_id',$id)->first();
-                if(empty(@$paymentDtl->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$paymentDtl->invtp_name.' need to be set with COA code']);
-                
-               	$coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$paymentDtl->invtp_coa_ar)->first();
-                if(empty($coaCredit)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$paymentDtl->invtp_coa_ar.' is not found on this year list. Please ReInsert this COA Code']);
-                
-                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
-                $journal[] = [
-                                'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
-                                'ledge_fisyear' => $coayear,
-                                'ledg_number' => $journalNumber,
-                                'ledg_date' => date('Y-m-d'),
-                                'ledg_refno' => $paymentHd->invpayh_checkno,
-                                'ledg_debit' => 0,
-                                'ledg_credit' => $paymentHd->invpayh_amount,
-                                'ledg_description' => $coaCredit->coa_name,
-                                'coa_year' => $coaCredit->coa_year,
-                                'coa_code' => $coaCredit->coa_code,
-                                'created_by' => Auth::id(),
-                                'updated_by' => Auth::id(),
-                                'jour_type_id' => $jourType->id,
-                                'dept_id' => 3 //hardcode utk finance
-                            ];
+                								->where('invpayh_id',$id)->get();
+                // setiap pembayaran inv, cek where outstanding nya yg 0 aja yg di post
+                foreach($paymentDtl as $dtl){
+                    // if(empty(@$paymentDtl->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$paymentDtl->invtp_name.' need to be set with COA code']);
+                    
+                    //ambil salah satu dr ledger cek lawanan nya suda ada belum 
+                    $checkDebitLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('ledg_credit',0)->first();
+                    $checkCreditLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('coa_code',$checkDebitLedger->coa_code)->where('ledg_debit',0)->first();
+                    // blum ada lawanan & outstanding suda 0, insert
+                    if(empty($checkCreditLedger) && $dtl->inv_outstanding <= 0){
+                        $debitLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('ledg_credit',0)->get();
+                        if(!in_array($dtl->inv_number, $piutangIds)){
+                            foreach($debitLedger as $dbt){
+                                // clone dr debit
+                                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                                $journal[] = [
+                                                'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
+                                                'ledge_fisyear' => $dbt->ledge_fisyear,
+                                                'ledg_number' => $dbt->ledg_number,
+                                                'ledg_date' => date('Y-m-d'),
+                                                'ledg_refno' => $dbt->ledg_refno,
+                                                'ledg_debit' => 0,
+                                                'ledg_credit' => $dbt->ledg_debit,
+                                                'ledg_description' => $dbt->ledg_description,
+                                                'coa_year' => $dbt->coa_year,
+                                                'coa_code' => $dbt->coa_code,
+                                                'created_by' => Auth::id(),
+                                                'updated_by' => Auth::id(),
+                                                'jour_type_id' => $dbt->jour_type_id,
+                                                'dept_id' => $dbt->dept_id
+                                            ];
 
-                $payJournal[] = [
-                		'ipayjour_date' => date('Y-m-d'),
-                		'ipayjour_voucher' => $journalNumber,
-                		'ipayjour_note' => 'Posting Payment '.$paymentHd->invpayh_checkno,
-                		'coa_code' => $coaCredit->coa_code,
-                		'ipayjour_debit' => 0,
-                		'ipayjour_credit' => $paymentHd->invpayh_amount,
-                		'invpayh_id' => $id
-                	];
-                $successIds[] = $id;
-                $nextJournalNumber++;
-                $successPosting++;
+                                $payJournal[] = [
+                                        'ipayjour_date' => date('Y-m-d'),
+                                        'ipayjour_voucher' => $journalNumber,
+                                        'ipayjour_note' => $dbt->ledg_refno." - ".$dbt->ledg_description,
+                                        'coa_code' => $dbt->coa_code,
+                                        'ipayjour_debit' => 0,
+                                        'ipayjour_credit' => $dbt->ledg_debit,
+                                        'invpayh_id' => $id
+                                    ];
+                                
+                            }
+                            $piutangIds[] = $dtl->inv_number;
+                            $successIds[] = $id;
+                        }
+                    }
+               	
+                }
             }catch(\Exception $e){
                 // do nothing
             }
+                
+                $nextJournalNumber++;
+                // $successPosting++;
         }
+        $successPosting = count($piutangIds);
+        $unsuccessPosting = count($ids) - $successPosting;
+        $message = $successPosting.' Invoice Terposting';
+        if($unsuccessPosting  > 0) $message .= ', Invoice Belum Lunas / Terposting masih tersisa '.$unsuccessPosting;
+        // echo $message; die();
         // var_dump($journal);
         // var_dump($payJournal);
         
@@ -481,7 +511,7 @@ class PaymentController extends Controller
             return response()->json(['error'=>1, 'message'=> 'Error occured when posting invoice payment']);
         } 
 
-        return response()->json(['success'=>1, 'message'=>$successPosting.' Invoice Payment posted Successfully']);
+        return response()->json(['success'=>1, 'message'=> $message]);
     }
 
     public function void(Request $request){

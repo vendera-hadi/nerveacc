@@ -621,30 +621,31 @@ class InvoiceController extends Controller
         
         foreach ($ids as $id) {
             // coa ambil dari grouping cost detail
-            $invDetails = TrInvoiceDetail::select('coa_code','cost_coa_code','cost_name','invdt_amount','invdt_note')->leftJoin('ms_cost_detail','ms_cost_detail.id','=','tr_invoice_detail.costd_id')
+            $invDetails = TrInvoiceDetail::select('coa_code','ar_coa_code','cost_name','invdt_amount','invdt_note')->leftJoin('ms_cost_detail','ms_cost_detail.id','=','tr_invoice_detail.costd_id')
                                         ->leftJoin('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')
                                         ->where('inv_id',$id)->get();
             $debetCoa = [];
             $debetCoaAmount = [];
             $debetCoaName = [];
             foreach ($invDetails as $key => $value) {
-                if(empty($value->coa_code) && !in_array($value->cost_coa_code, $debetCoa)){
-                    $debetCoa[] = $value->cost_coa_code;
-                    $debetCoaAmount[$value->cost_coa_code] = $value->invdt_amount;
-                    $debetCoaName[$value->cost_coa_code] = !empty($value->cost_name) ? $value->cost_name : $value->invdt_note;
+                if(empty($value->coa_code) && !in_array($value->ar_coa_code, $debetCoa)){
+                    if(empty($value->ar_coa_code)) $value->ar_coa_code = 10390;
+                    $debetCoa[] = (int)$value->ar_coa_code;
+                    $debetCoaAmount[(int)$value->ar_coa_code] = $value->invdt_amount;
+                    $debetCoaName[(int)$value->ar_coa_code] = !empty($value->cost_name) ? $value->cost_name : $value->invdt_note;
                 }else if(!empty($value->coa_code) && !in_array($value->coa_code, $debetCoa)){
-                    $debetCoa[] = $value->coa_code;
-                    $debetCoaAmount[$value->coa_code] = $value->invdt_amount;
-                    $debetCoaName[$value->coa_code] = !empty($value->cost_name) ? $value->cost_name : $value->invdt_note;
-                }else if(empty($value->coa_code) && in_array($value->cost_coa_code, $debetCoa)){
-                    $debetCoaAmount[$value->cost_coa_code] += $value->invdt_amount;
+                    $debetCoa[] = (int)$value->coa_code;
+                    $debetCoaAmount[(int)$value->coa_code] = $value->invdt_amount;
+                    $debetCoaName[(int)$value->coa_code] = !empty($value->cost_name) ? $value->cost_name : $value->invdt_note;
+                }else if(empty($value->coa_code) && in_array($value->ar_coa_code, $debetCoa)){
+                    $debetCoaAmount[(int)$value->ar_coa_code] += $value->invdt_amount;
                 }else if(!empty($value->coa_code) && in_array($value->coa_code, $debetCoa)){
-                    $debetCoaAmount[$value->coa_code] += $value->invdt_amount;
+                    $debetCoaAmount[(int)$value->coa_code] += $value->invdt_amount;
                 }
             }
 
             // get coa code dari invoice type
-            $invoiceHd = TrInvoice::find($id);
+            $invoiceHd = TrInvoice::with('MsTenant')->find($id);
             // if(!isset($invoiceHd->InvoiceType->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$invoiceHd->InvoiceType->invtp_name.' need to be set with COA code']);
             // create journal DEBET utk piutang
             foreach($debetCoaAmount as $key => $value){
@@ -695,12 +696,17 @@ class InvoiceController extends Controller
                 }else{
                     if($detail->costd_id != 0){ 
                         $costItem = MsCostDetail::join('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')->where('ms_cost_detail.id',$detail->costd_id)->first();
+                        $cost_coa_code = $costItem->cost_coa_code;
                     }else{ 
-                        $costItem = MsCostItem::where('cost_code','STAMP')->first();
+                        // $costItem = MsCostItem::where('cost_code','STAMP')->first();
+                        $costItem = "";
+                        if(empty($detail->coa_code)) $detail->coa_code = 40900;
+                        $cost_coa_code = $detail->coa_code;
                     }
-                    $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$costItem->cost_coa_code)->first();
+                    $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$cost_coa_code)->first();
                 }
                 $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                $ledgNote = !empty($costItem) ? $costItem->cost_name : $detail->invdt_note;
                 $journal[] = [
                             'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
                             'ledge_fisyear' => $coayear,
@@ -709,7 +715,7 @@ class InvoiceController extends Controller
                             'ledg_refno' => $invoiceHd->inv_faktur_no,
                             'ledg_debit' => 0,
                             'ledg_credit' => $detail->invdt_amount,
-                            'ledg_description' => $coaCredit->coa_name,
+                            'ledg_description' => $invoiceHd->MsTenant->tenan_name." : ".$ledgNote,
                             'coa_year' => $coaCredit->coa_year,
                             'coa_code' => $coaCredit->coa_code,
                             'created_by' => Auth::id(),
