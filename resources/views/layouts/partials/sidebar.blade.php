@@ -244,6 +244,10 @@
                 </li>
                 @endif
 
+                @if(Session::get('role')==1 || in_array(65,Session::get('permissions')))
+                <li @if(Request::url() == route('trentry.index')) class="active" @endif><a href="{{route('trentry.index')}}"><i class="fa fa-circle-o"></i> Transaction Entry</a></li>
+                @endif
+
                 @if(Session::get('role')==1 || !empty(array_intersect($generalledger, Session::get('permissions'))) ) 
                 <li>
                     <a href="#"><i class="fa fa-circle"></i> General Ledger (GL)
@@ -258,22 +262,30 @@
                       @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                       <li @if(Request::url() == route('genledger.index')) class="active" @endif><a href="{{route('genledger.index')}}"><i class="fa fa-circle-o"></i> General Ledger</a></li>
                       @endif
-                      @if(Session::get('role')==1 || in_array(65,Session::get('permissions')))
-                      <li @if(Request::url() == route('trentry.index')) class="active" @endif><a href="{{route('trentry.index')}}"><i class="fa fa-circle-o"></i> Transaction Entry</a></li>
-                      @endif
                       @if(Session::get('role')==1 || in_array(78,Session::get('permissions')))
                       <li @if(Request::url() == route('clentry.index')) class="active" @endif><a href="{{route('clentry.index')}}"><i class="fa fa-circle-o"></i> Close Entry</a></li>
                       @endif
                        @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                       <li @if(Request::url() == route('report.glview')) class="active" @endif><a href="{{route('report.glview')}}"><i class="fa fa-circle-o"></i> GL Report</a></li>
                       @endif
-                      <li><a href="#"><i class="fa fa-circle-o"></i> Profit and Loss</a></li>
-                      <li><a href="#"><i class="fa fa-circle-o"></i> Trial Balance</a></li>
-                      <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
-                      <li><a href="#"><i class="fa fa-circle-o"></i> Budget</a></li>
                     </ul>
                 </li>
                 @endif
+
+                <li>
+                    <a href="#"><i class="fa fa-circle"></i> Report
+                        <span class="pull-right-container">
+                          <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Profit and Loss</a></li>
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Trial Balance</a></li>
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Perubahan Modal</a></li>
+                      <li><a href="#"><i class="fa fa-circle-o"></i> Budget</a></li>
+                    </ul>
+                </li>
 
                 @if(Session::get('role')==1 || !empty(array_intersect($cashbanks, Session::get('permissions'))) )
                   <li>

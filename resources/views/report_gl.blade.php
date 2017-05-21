@@ -72,26 +72,7 @@
                                 </div>
                             </div>
                             
-                            <div class="col-sm-3">
-                                <button class="btn btn-info">Submit</button>
-                            </div>
-                        </div>
-
-                        <div class="row" style="margin-bottom:15px">
-                            <div class="col-sm-3">
-                                <select name="coa" class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
-                                      <option value="">Choose COA</option>                                     
-                                      @foreach($accounts as $key => $coa)
-                                          <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                                      @endforeach
-                                </select>
-                            </div>
-
-                            <div class="col-sm-3">
-                                <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name or Description)">
-                            </div>
-
-                            <div class="col-sm-3 dates">
+                             <div class="col-sm-3 dates">
                                 <div class="form-group">
                                     <div class="input-group date">
                                         <div class="input-group-addon">
@@ -100,6 +81,35 @@
                                         <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
                                     </div>
                                 </div>
+                            </div>
+                            
+                        </div>
+
+                        <div class="row" style="margin-bottom:15px">
+                            <div class="col-sm-3">
+                                <select name="coa" class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
+                                      <option value="">From COA</option>                                     
+                                      @foreach($accounts as $key => $coa)
+                                          <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                                      @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <select name="tocoa" class="form-control js-example-basic-single" id="selectAccount2" style="width:100%">
+                                      <option value="">To COA</option>                                     
+                                      @foreach($accounts as $key => $coa)
+                                          <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                                      @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-sm-3">
+                                <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name / Description / Ref No)">
+                            </div>
+
+                            <div class="col-sm-3">
+                                <button class="btn btn-info">Submit</button>
                             </div>
                         </div> 
 

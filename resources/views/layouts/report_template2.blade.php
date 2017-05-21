@@ -29,7 +29,7 @@
         <tr>
           <td width="50%">
             <h4>{{$title}}</h4>
-            <h4>{{$tahun}}</h4>
+            <h4>{!! $tahun !!}</h4>
           </td>
         </tr>
       </table>

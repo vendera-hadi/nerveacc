@@ -16,6 +16,8 @@ use App\Models\MsInvoiceType;
 use App\Models\MsMasterCoa;
 use App\Models\MsJournalType;
 use App\Models\MsDepartment;
+use App\Models\MsCashBank;
+use App\Models\MsPaymentType;
 use PDF;
 use DB;
 use Excel;
@@ -24,14 +26,17 @@ class ReportController extends Controller
 {
 	public function arview(){
         $data['invtypes'] = MsInvoiceType::all();
-		return view('report_ar',$data);
+        $data['banks'] = MsCashBank::all();
+		$data['payment_types'] = MsPaymentType::all();
+        return view('report_ar',$data);
 	}
 
     public function arbyInvoice(Request $request){
     	$from = @$request->from;
     	$to = @$request->to;
     	$pdf = @$request->pdf;
-        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['tahun'] = '';
+        if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
         $data['name'] = MsCompany::first()->comp_name;
     	$data['title'] = "AR Invoices Report";
     	$data['logo'] = MsCompany::first()->comp_image;
@@ -90,7 +95,8 @@ class ReportController extends Controller
     	$from = @$request->from;
     	$to = @$request->to;
     	$pdf = @$request->pdf;
-        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['tahun'] = '';
+        if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
         $data['name'] = MsCompany::first()->comp_name;
     	$data['title'] = "AR Cancelled Invoices";
     	$data['logo'] = MsCompany::first()->comp_image;
@@ -203,7 +209,9 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
-         $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+
+        $data['tahun'] = '';
+        if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
         $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "Outstanding By Contract";
         $data['logo'] = MsCompany::first()->comp_image;
@@ -235,7 +243,8 @@ class ReportController extends Controller
         $unit_id = @$request->unit;
         $inv_type_id = @$request->inv_type;
 
-        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        $data['tahun'] = '';
+        if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
         $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "Outstanding By Unit";
         if(!empty($unit_id)){
@@ -272,19 +281,53 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
-        $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+
+        $unit_id = @$request->unit2;
+        $bank_id = @$request->bank_id;
+        $inv_number = @$request->inv_number;
+        if(!empty($inv_number)) $inv_number = strtolower($inv_number);
+        $paym_type_id = @$request->payment_id;
+        $post_status = @$request->post_status;
+        if(!empty($post_status)){
+            if($post_status == 1) $post_flag = 1;
+            else $post_flag = 0;
+        }
+
+        $data['tahun'] = '';
+        if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to))."<br>";
         $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "Payment History";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_payment';
-        $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.invpayh_date','ms_payment_type.paymtp_name','ms_cash_bank.cashbk_name','tr_invoice_paymhdr.invpayh_checkno','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount')
+        $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.invpayh_date','ms_payment_type.paymtp_name','ms_cash_bank.cashbk_name','tr_invoice_paymhdr.invpayh_checkno','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount','ms_tenant.tenan_name','tr_invoice.inv_post')
                     ->join('tr_invoice_paymdtl','tr_invoice_paymhdr.id','=','tr_invoice_paymdtl.invpayh_id')
                     ->join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
+                    ->join('tr_contract','tr_invoice.contr_id','=','tr_contract.id')
+                    ->join('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
                     ->join('ms_cash_bank','tr_invoice_paymhdr.cashbk_id','=','ms_cash_bank.id')
                     ->join('ms_payment_type','tr_invoice_paymhdr.paymtp_code','=','ms_payment_type.id');
                     // ->where('invpayh_post',1)
         if($from) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','>=',$from);
         if($to) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','<=',$to);
+
+        if(!empty($unit_id)){ 
+            $fetch = $fetch->where('tr_contract.unit_id',$unit_id);
+            $unit = MsUnit::find($unit_id);
+            $data['tahun'] .= "Unit : ".$unit->unit_code."<br>";
+        }
+        if(!empty($inv_number)) $fetch = $fetch->where(DB::raw("LOWER(inv_number)"),'like','%'.$inv_number.'%');
+        if(!empty($post_status)) $fetch = $fetch->where('tr_invoice.inv_post',$post_flag);
+        if(!empty($paym_type_id)){ 
+            $fetch = $fetch->where('paymtp_code',$paym_type_id);
+            $paymtype = MsPaymentType::find($paym_type_id);
+            $data['tahun'] .= "Payment Type : ".$paymtype->paymtp_name."<br>";
+        }
+        if(!empty($bank_id)){ 
+            $fetch = $fetch->where('cashbk_id',$bank_id);
+            $bank = MsCashBank::find($bank_id);
+            $data['tahun'] .= "Bank : ".$bank->cashbk_name."<br>";
+        }
+
         $fetch = $fetch->get();
         $data['payments'] = $fetch;
         if($pdf){
@@ -435,7 +478,9 @@ class ReportController extends Controller
         $pdf = @$request->pdf;
         // tambahan
         $keyword = $request->input('q');
+        if(!empty($keyword)) $keyword = strtolower($keyword);
         $coa = $request->input('coa');
+        $tocoa = $request->input('tocoa');
         $deptParam = $request->input('dept');
         $jourTypeParam = $request->input('jour_type_id');
 
@@ -460,10 +505,15 @@ class ReportController extends Controller
         if(!empty($from) && !empty($to)) $fetch = $fetch->where('ledg_date','>=',$from)->where('ledg_date','<=',$to);
         if(!empty($deptParam)) $fetch = $fetch->where('dept_id',$deptParam);
         if(!empty($jourTypeParam)) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
-        if(!empty($coa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
+
+        if(!empty($coa) && empty($tocoa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
+        else if(empty($coa) && !empty($tocoa)) $fetch = $fetch->where('tr_ledger.coa_code',$tocoa);
+        else if(!empty($coa) && !empty($tocoa) && $coa > $tocoa) $fetch = $fetch->whereBetween('tr_ledger.coa_code',[$tocoa,$coa]);
+        else if(!empty($coa) && !empty($tocoa) && $coa < $tocoa) $fetch = $fetch->whereBetween('tr_ledger.coa_code',[$coa,$tocoa]);
+        
         if(!empty($keyword)){ 
             $fetch = $fetch->where(function($query) use($keyword){
-                    $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%');
+                    $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(ledg_refno)"),'like','%'.$keyword.'%');
                 });
         }
         //memory exhause/keperluan demo aja makanya dilimit

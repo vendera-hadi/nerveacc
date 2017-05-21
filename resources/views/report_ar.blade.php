@@ -128,6 +128,49 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row payment" style="display:none">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                 <select class="form-control choose-unit" name="unit2"></select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                 <input type="text" name="inv_number" class="form-control" placeholder="No Invoice"/>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                 <select class="form-control" name="bank_id">
+                                    <option value="">Choose Bank</option>
+                                    @foreach($banks as $bank)
+                                    <option value="{{$bank->id}}">{{$bank->cashbk_name}}</option>
+                                    @endforeach
+                                 </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                 <select class="form-control" name="payment_id">
+                                    <option value="">Choose Payment Type</option>
+                                    @foreach($payment_types as $paym)
+                                    <option value="{{$paym->id}}">{{$paym->paymtp_name}}</option>
+                                    @endforeach
+                                 </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                 <select class="form-control" name="post_status">
+                                    <option value="">Choose Post Status</option>
+                                    <option value="1">POSTED</option>
+                                    <option value="2">NOT POSTED</option>
+                                </select>
+                                </div>
+                            </div>
+                        </div>
+
                         </form>
 
                         <div class ="row" style="margin-top:80px">
@@ -189,13 +232,16 @@
     $('#type').on('change', function() {
       var hasil = this.value;
       if(hasil == "araging"){
-        $( ".dates,.unit" ).hide();
+        $( ".dates,.unit,.payment" ).hide();
         $( ".history" ).show();
       }else if(hasil == 'outinv'){
         $( ".unit,.dates" ).show();
-        $( ".history" ).hide();
-      }else{
+        $( ".history,.payment" ).hide();
+      }else if(hasil == 'payment'){
+        $( ".dates,.payment" ).show();
         $( ".history,.unit" ).hide();
+      }else{
+        $( ".history,.unit,.payment" ).hide();
         $( ".dates" ).show();
       }
     });

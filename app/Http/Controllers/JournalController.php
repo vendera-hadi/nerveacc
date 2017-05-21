@@ -304,6 +304,7 @@ class JournalController extends Controller
     public function glGet(Request $request){
         try{
             $keyword = $request->input('q');
+            if(!empty($keyword)) $keyword = strtolower($keyword);
             $coa = $request->input('coa');
             $tocoa = $request->input('tocoa');
             $deptParam = $request->input('dept');
