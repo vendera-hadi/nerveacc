@@ -39,6 +39,7 @@
                             <th field="cost_code" width="50" sortable="true">Component Code</th>
                             <th field="cost_name" width="50" sortable="true">Component Name</th>
                             <th field="cost_coa_code" width="50" sortable="true">Coa Code</th>
+                            <th field="ar_coa_code" width="50" sortable="true">Coa AR Code</th>
                             <th field="cost_isactive" width="50" sortable="true">Active</th>
                         </tr>
                     </thead>
@@ -72,6 +73,9 @@
                         </div>
                         <div style="margin-bottom:10px">
                             <input id="cc" class="easyui-combobox" required="true" name="cost_coa_code" style="width:100%" label="Coa Component:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input id="cc2" class="easyui-combobox" required="true" name="ar_coa_code" style="width:100%" label="Coa AR Component:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="cost_isactive" label="Active:" style="width:300px;">
