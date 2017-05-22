@@ -152,7 +152,6 @@ class JournalController extends Controller
                 $temp['coa_code'] = $value->coa_code;
                 $temp['coa_name'] = $value->coa_name;
                 $temp['jour_type_prefix'] = $value->jour_type_prefix;
-                $temp['tenan_name'] = $value->tenan_name;
 
                 $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> ';
                 if(empty($value->closed_at)){

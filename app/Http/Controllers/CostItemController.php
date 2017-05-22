@@ -71,6 +71,7 @@ class CostItemController extends Controller
                 $temp['cost_code'] = $value->cost_code;
                 $temp['cost_name'] = $value->cost_name;
                 $temp['cost_coa_code'] = $value->cost_coa_code;
+                $temp['ar_coa_code'] = $value->ar_coa_code;
                 $temp['cost_isactive'] = !empty($value->cost_isactive) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }

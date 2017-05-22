@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class MsCostItem extends Model
 {
    protected $table ='ms_cost_item';
-   protected $fillable =['cost_code','cost_name','cost_coa_code','cost_isactive','created_by','updated_by','is_service_charge','is_insurance','is_sinking_fund'];
+   protected $fillable =['cost_code','cost_name','cost_coa_code','cost_isactive','created_by','updated_by','is_service_charge','is_insurance','is_sinking_fund','ar_coa_code'];
 }

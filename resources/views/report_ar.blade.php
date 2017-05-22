@@ -175,7 +175,9 @@
 
                         <div class ="row" style="margin-top:80px">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <button id="pdf" class="btn btn-success pull-right" style="margin-bottom:15px; display:none">Download Pdf</button>
+                                <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Pdf</button>
+                                <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
+                                <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
                                 <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:500px"></iframe>
                             </div>
                         </div>
@@ -223,6 +225,8 @@
         // }
         $('#frame').attr('src', current_url);
         $('#pdf').show();
+        $('#excel').show();
+        $('#print').show();
     });
 
     $('#pdf').click(function(){

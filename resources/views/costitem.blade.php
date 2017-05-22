@@ -36,10 +36,11 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="cost_code" width="50" sortable="true">Component Code</th>
-                            <th field="cost_name" width="50" sortable="true">Component Name</th>
-                            <th field="cost_coa_code" width="50" sortable="true">Coa Code</th>
-                            <th field="cost_isactive" width="50" sortable="true">Active</th>
+                            <th field="cost_code" width="150" sortable="true">Component Code</th>
+                            <th field="cost_name" width="150" sortable="true">Component Name</th>
+                            <th field="cost_coa_code" width="150" sortable="true">Coa Code</th>
+                            <th field="cost_coa_code" width="150" sortable="true">AR Coa Code</th>
+                            <th field="ar_coa_code" width="150" sortable="true">Active</th>
                         </tr>
                     </thead>
                 </table>
@@ -72,6 +73,9 @@
                         </div>
                         <div style="margin-bottom:10px">
                             <input id="cc" class="easyui-combobox" required="true" name="cost_coa_code" style="width:100%" label="Coa Component:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
+                        </div>
+                        <div style="margin-bottom:10px">
+                            <input id="cc" class="easyui-combobox" required="true" name="ar_coa_code" style="width:100%" label="AR Coa Component:" data-options="valueField:'id',textField:'text',url:'{{route('cost_item.getOptionsCoa')}}'">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="cost_isactive" label="Active:" style="width:300px;">

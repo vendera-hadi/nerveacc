@@ -138,15 +138,14 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="coa_code" width="120" sortable="true">Acc No</th>
-                            <th field="coa_name" width="120" sortable="true">Acc Name</th>
-                            <th field="ledg_date" width="120" sortable="true">Date</th>
-                            <th field="ledg_refno" width="120" sortable="true">Inv No/Ref No</th>
-                            <th field="ledg_description" width="120" sortable="true">Description</th>
-                            <th field="debit" width="120" sortable="true">Debit</th>
-                            <th field="credit" width="120" sortable="true">Credit</th>
-                            <th field="jour_type_prefix" width="120" sortable="true">Jrnl Type</th>
-                            <th field="tenan_name" width="120" sortable="true">Tenant Name</th>
+                            <th field="coa_code" width="50" sortable="true">COA</th>
+                            <th field="coa_name" width="150" sortable="true">COA Name</th>
+                            <th field="ledg_date" width="70" sortable="true">Date</th>
+                            <th field="ledg_refno" width="80" sortable="true">Inv No/Ref No</th>
+                            <th field="ledg_description" width="250" sortable="true">Description</th>
+                            <th field="debit" width="100" sortable="true">Debit</th>
+                            <th field="credit" width="100" sortable="true">Credit</th>
+                            <th field="jour_type_prefix" width="50" sortable="true">Type</th>
                             <th field="action">Action</th>
                         </tr>
                     </thead>
