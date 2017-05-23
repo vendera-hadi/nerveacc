@@ -173,7 +173,7 @@
         $('#frame').attr('src', current_url+'&pdf=1');
     });
 
-     $('#excel').click(function(){
+    $('#excel').click(function(){
         $('#frame').attr('src', current_url+'&excel=1');
     });
 

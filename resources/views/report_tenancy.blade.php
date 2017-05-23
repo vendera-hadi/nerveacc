@@ -68,8 +68,8 @@
 
                         <div class ="row" style="margin-top:80px">
                             <div class="col-lg-12 col-md-12 col-sm-12">
-                                <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Download Pdf</button>
-                                <button id="excel" class="btn btn-primary" style="margin-bottom:15px; display:none;">Download Excel</button>
+                                <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
+                                <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
                                 <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:500px"></iframe>
                             </div>
                         </div>
@@ -101,16 +101,8 @@
         var cost =$( "#ty option:selected" ).val();
         current_url = report_url+type+'?year='+year+'&cost='+cost;
         $('#frame').attr('src', current_url);
-        if(type == "r_tenant"){
-            $('#pdf').hide();
-            $('#excel').show();
-        }else if(type == "r_unit"){
-            $('#excel').show();
-            $('#pdf').show();
-        }else{
-            $('#excel').hide();
-            $('#pdf').show();
-        }
+        $('#excel').show();
+        $('#print').show();
     });
 
     $('#pdf').click(function(){
@@ -119,6 +111,34 @@
 
     $('#excel').click(function(){
         $('#frame').attr('src', current_url+'&excel=1');
+    });
+
+    function openWindow(url, title, w, h){
+        // Fixes dual-screen position                         Most browsers      Firefox
+        var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+        var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+        var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+        var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+        var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+        var top = ((height / 2) - (h / 2)) + dualScreenTop;
+        var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+        // Puts focus on the newWindow
+        if (window.focus) {
+            newWindow.focus();
+        }
+    }
+
+    $('#print').click(function(){
+        var url = current_url+'&print=1';
+        var title = 'PRINT REPORT';
+        var w = 640;
+        var h = 660;
+        
+        openWindow(url, title, w, h);
+        return false;
     });
 
     $('#type').on('change', function() {

@@ -562,6 +562,8 @@ class ReportController extends Controller
         $year = @$request->year;
         $cost = @$request->cost;
         $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
 
         if($cost == 1){
             $ctname = 'Electricity';
@@ -573,6 +575,7 @@ class ReportController extends Controller
         $data['logo'] = MsCompany::first()->comp_image;
         $data['name'] = MsCompany::first()->comp_name;
         $data['template'] = 'report_history_meter';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $fetch = TrMeter::select('ms_unit.unit_code',
                 DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 1 THEN tr_meter.meter_used ELSE 0 END)) AS jan"),
                 DB::raw("SUM((CASE WHEN DATE_PART('MONTH', prd_billing_date) = 2 THEN tr_meter.meter_used ELSE 0 END)) AS feb"),
@@ -598,8 +601,41 @@ class ReportController extends Controller
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
+            $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Report_ReadingMeter_'.$year.'_'.$ctname.'.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $data[$i]=array(
+                    'No Unit' =>$data_ori[$i]['unit_code'],
+                    'JANUARI' =>$data_ori[$i]['jan'],
+                    'FEBRUARI' =>$data_ori[$i]['feb'],
+                    'MARET' =>$data_ori[$i]['mar'],
+                    'APRIL' =>$data_ori[$i]['apr'],
+                    'MEI' =>$data_ori[$i]['may'],
+                    'JUNI' =>$data_ori[$i]['jun'],
+                    'JULI' =>$data_ori[$i]['jul'],
+                    'AGUSTUS' =>$data_ori[$i]['aug'],
+                    'SEPTEMBER' =>$data_ori[$i]['sep'],
+                    'OKTOBER' =>$data_ori[$i]['okt'],
+                    'NOVEMBER' =>$data_ori[$i]['nov'],
+                    'DESEMBER' =>$data_ori[$i]['des'],
+                    'TOTAL KONSUMSI' =>$data_ori[$i]['total']
+                    );
+            }
+            $border = 'A1:N';
+            $tp = 'xls';
+            return Excel::create('Reading Meter Report', function($excel) use ($data,$border) {
+                $excel->sheet('Reading Meter Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
         }else{
             return view('layouts.report_template2', $data);
         }
@@ -608,12 +644,14 @@ class ReportController extends Controller
     public function ReportUnit(Request $request){
         $pdf = @$request->pdf;
         $excel = @$request->excel;
+        $print = @$request->print;
 
         $data['title'] = "Report Unit";
         $data['tahun'] = '';
         $data['logo'] = MsCompany::first()->comp_image;
         $data['name'] = MsCompany::first()->comp_name;
         $data['template'] = 'report_unit';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $fetch = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.virtual_account','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
                 ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                 ->leftjoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
@@ -622,9 +660,11 @@ class ReportController extends Controller
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
+            $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Report_Unit.pdf');
         }else if($excel){
+            $data['type'] = 'excel';
             $data = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.virtual_account','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
                 ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                 ->leftjoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
@@ -649,20 +689,24 @@ class ReportController extends Controller
     public function ReportTenant(Request $request){
         $pdf = @$request->pdf;
         $excel = @$request->excel;
+        $print = @$request->print;
 
         $data['title'] = "Report Tenant";
         $data['tahun'] = '';
         $data['logo'] = MsCompany::first()->comp_image;
         $data['name'] = MsCompany::first()->comp_name;
         $data['template'] = 'report_tenant';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $fetch = MsTenant::select('ms_tenant.*')
                 ->orWhereNull('deleted_at');
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
+            $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Report_Tenant.pdf');
         }else if($excel){
+            $data['type'] = 'excel';
             $data = MsTenant::select('tenan_name AS Name','tenan_idno AS NIP','tenan_phone AS Phone','tenan_fax AS Fax','tenan_email AS Email','tenan_address AS Address','tenan_npwp AS NPWP','tenan_taxname AS Taxname','tenan_tax_address AS TaxAddress')
                 ->orWhereNull('deleted_at')->get()->toArray();
             $border = 'A1:I';

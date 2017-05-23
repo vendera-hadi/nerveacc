@@ -19,8 +19,8 @@
                 <td>{{date('d/m/Y',strtotime($ledg->ledg_date))}}</td>
                 <td>{{!empty($ledg->ledg_refno) ? $ledg->ledg_refno : '-'}}</td>
                 <td>{{$ledg->ledg_description}}</td>
-                <td>{{"Rp. ".number_format($ledg->ledg_debit)}}</td>
-                <td>{{"Rp. ".number_format($ledg->ledg_credit)}}</td>
+                <td>{{"Rp. ".number_format($ledg->ledg_debit,2)}}</td>
+                <td>{{"Rp. ".number_format($ledg->ledg_credit,2)}}</td>
                 <td>{{$ledg->jour_type_prefix}}</td>
             </tr>
             @endforeach
