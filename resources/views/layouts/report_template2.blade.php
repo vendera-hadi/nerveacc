@@ -18,18 +18,19 @@
       <table class="" width="100%" style="margin-bottom: 10px;">
         <tr class="page-header">
           <td width="50%">
-            <h2>
+            <h3>
               {{$name}}
-            </h2>
+            </h3>
           </td>
           <td width="50%">
-            <img src="@if(!empty($logo)){{asset('upload/'.$logo)}}@endif" width="300" class="pull-right">
+            <img src="@if(!empty($logo)){{asset('upload/'.$logo)}}@endif" width="150" class="pull-right">
           </td>
         </tr>
         <tr>
           <td width="50%">
-            <h4>{{$title}}</h4>
-            <h4>{!! $tahun !!}</h4>
+            <h5>{{$title}}</h5>
+            <h5>{!! $tahun !!}</h5>
+            
           </td>
         </tr>
       </table>
@@ -40,4 +41,9 @@
       </section>
 
   </body>
+<?php if($type == 'print'){ ?>
+    <script type="text/javascript">
+        window.print();
+    </script>
+<?php } ?>
   </html>

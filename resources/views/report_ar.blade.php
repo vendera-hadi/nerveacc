@@ -212,17 +212,6 @@
         
         var queryString = $(this).serialize();
         current_url = report_url+type+'?'+queryString;
-        // if(type == 'araging'){
-        //     var jenis = $('#ty').val();
-        //     var ag30 = $('input[name=ag30]').val();
-        //     var ag60 = $('input[name=ag60]').val();
-        //     var ag90 = $('input[name=ag90]').val();
-        //     var ag180 = $('input[name=ag180]').val();
-
-        //     current_url = report_url+type+'?ty='+jenis+'&ag30='+ag30+'&ag60='+ag60+'&ag90='+ag90+'&ag180='+ag180;
-        // }else{
-        //     current_url = report_url+type+'?from='+from+'&to='+to;
-        // }
         $('#frame').attr('src', current_url);
         $('#pdf').show();
         $('#excel').show();
@@ -231,6 +220,38 @@
 
     $('#pdf').click(function(){
         $('#frame').attr('src', current_url+'&pdf=1');
+    });
+
+    $('#excel').click(function(){
+        $('#frame').attr('src', current_url+'&excel=1');
+    });
+
+    function openWindow(url, title, w, h){
+        // Fixes dual-screen position                         Most browsers      Firefox
+        var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+        var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+        var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+        var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+        var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+        var top = ((height / 2) - (h / 2)) + dualScreenTop;
+        var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+        // Puts focus on the newWindow
+        if (window.focus) {
+            newWindow.focus();
+        }
+    }
+
+    $('#print').click(function(){
+        var url = current_url+'&print=1';
+        var title = 'PRINT REPORT';
+        var w = 640;
+        var h = 660;
+        
+        openWindow(url, title, w, h);
+        return false;
     });
 
     $('#type').on('change', function() {

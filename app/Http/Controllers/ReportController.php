@@ -35,19 +35,23 @@ class ReportController extends Controller
     	$from = @$request->from;
     	$to = @$request->to;
     	$pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
         $data['tahun'] = '';
         if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
         $data['name'] = MsCompany::first()->comp_name;
     	$data['title'] = "AR Invoices Report";
     	$data['logo'] = MsCompany::first()->comp_image;
     	$data['template'] = 'report_ar_invoice';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
     	$fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                     ->join('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
                     ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                     ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
-                    ->where('inv_iscancel',0);
+                    ->where('inv_iscancel',0)
+                    ->where('tr_invoice.inv_post','=',TRUE);
         if($from) $fetch = $fetch->where('inv_date','>=',$from);
         if($to) $fetch = $fetch->where('inv_date','<=',$to);
         $fetch = $fetch->get();
@@ -84,9 +88,35 @@ class ReportController extends Controller
             $data['invoices'][] = $tempInv;
         }
     	if($pdf){
+            $data['type'] = 'pdf';
     		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
         	return $pdf->download('AR_Invoice_'.$from.'_to_'.$to.'.pdf');
-    	}else{
+    	}else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $data[$i]=array(
+                    'No Invoice' =>$data_ori[$i]['inv_number'],
+                    'No Billing' =>$data_ori[$i]['contr_no'],
+                    'Tenan' =>$data_ori[$i]['tenan_name'],
+                    'Unit' =>$data_ori[$i]['unit_name'],
+                    'Tgl Invoice' =>$data_ori[$i]['inv_date'],
+                    'Jatuh Tempo' =>$data_ori[$i]['inv_duedate'],
+                    'Jenis Invoice' =>$data_ori[$i]['invtp_name'],
+                    'Amount' =>number_format($data_ori[$i]['inv_amount']));
+            }
+            $border = 'A1:H';
+            $tp = 'xls';
+            return Excel::create('Invoice Report', function($excel) use ($data,$border) {
+                $excel->sheet('Invoice Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
     		return view('layouts.report_template2', $data);
     	}
     }
@@ -95,12 +125,15 @@ class ReportController extends Controller
     	$from = @$request->from;
     	$to = @$request->to;
     	$pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
         $data['tahun'] = '';
         if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
         $data['name'] = MsCompany::first()->comp_name;
     	$data['title'] = "AR Cancelled Invoices";
     	$data['logo'] = MsCompany::first()->comp_image;
     	$data['template'] = 'report_ar_invoice';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
     	$fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
@@ -144,9 +177,35 @@ class ReportController extends Controller
             $data['invoices'][] = $tempInv;
         }
     	if($pdf){
+            $data['type'] = 'pdf';
     		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
         	return $pdf->download('AR_Invoice_Cancel_'.$from.'_to_'.$to.'.pdf');
-    	}else{
+    	}else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $data[$i]=array(
+                    'No Invoice' =>$data_ori[$i]['inv_number'],
+                    'No Billing' =>$data_ori[$i]['contr_no'],
+                    'Tenan' =>$data_ori[$i]['tenan_name'],
+                    'Unit' =>$data_ori[$i]['unit_name'],
+                    'Tgl Invoice' =>$data_ori[$i]['inv_date'],
+                    'Jatuh Tempo' =>$data_ori[$i]['inv_duedate'],
+                    'Jenis Invoice' =>$data_ori[$i]['invtp_name'],
+                    'Amount' =>number_format($data_ori[$i]['inv_amount']));
+            }
+            $border = 'A1:H';
+            $tp = 'xls';
+            return Excel::create('Invoice Report', function($excel) use ($data,$border) {
+                $excel->sheet('Invoice Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
     		return view('layouts.report_template2', $data);
     	}
     }
@@ -158,6 +217,8 @@ class ReportController extends Controller
         $ag90 = @$request->ag90;
         $ag180 = @$request->ag180;
     	$pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
 
         $data['tahun'] = 'Periode Sampai : '.date('M Y');
         $data['name'] = MsCompany::first()->comp_name;
@@ -165,6 +226,7 @@ class ReportController extends Controller
     	$data['logo'] = MsCompany::first()->comp_image;
     	$data['template'] = 'report_ar_aging';
         $data['ty'] = $ty;
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $data['label'] = explode('~', '1 - '.$ag30.'~'.$ag30.' - '.$ag60.'~'.$ag60.' - '.$ag90.'~'.'> '.$ag180);
         if($ty == 1){
             $fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
@@ -191,16 +253,45 @@ class ReportController extends Controller
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->groupBy('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name')
-                ->orderBy('unit_code', 'asc');;
+                ->orderBy('unit_code', 'asc');
         }
         //memory exhause/keperluan demo aja makanya dilimit
-        $fetch = $fetch->limit(100)->get();
+        $fetch = $fetch->get();
         //$fetch = $fetch->get();
     	$data['invoices'] = $fetch;
     	if($pdf){
+            $data['type'] = 'pdf';
     		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
         	return $pdf->download('AR_Aging_periode.pdf');
-    	}else{
+    	}else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $name1 = '1-'.$ag30.' Days';
+                $name2 = $ag30.'-'.$ag60.' Days';
+                $name3 = $ag60.'-'.$ag90.' Days';
+                $name4 = '> '.$ag180.' Days';
+                $data[$i]=array(
+                    'Unit Code' =>$data_ori[$i]['unit_code'],
+                    'Nama Tenant' =>$data_ori[$i]['tenan_name'],
+                    'Total' =>number_format($data_ori[$i]['total']),
+                    $name1 =>number_format($data_ori[$i]['ag30']),
+                    $name2 =>number_format($data_ori[$i]['ag60']),
+                    $name3 =>number_format($data_ori[$i]['ag90']),
+                    $name4 =>number_format($data_ori[$i]['agl180']));
+            }
+            $border = 'A1:G';
+            $tp = 'xls';
+            return Excel::create('Aging Report', function($excel) use ($data,$border) {
+                $excel->sheet('Aging Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
     		return view('layouts.report_template2', $data);
     	}
     }
@@ -209,6 +300,8 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
 
         $data['tahun'] = '';
         if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
@@ -216,20 +309,44 @@ class ReportController extends Controller
         $data['title'] = "Outstanding By Contract";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_out_contr';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $fetch = TrInvoice::select('tr_contract.contr_code','ms_unit.unit_name','ms_tenant.tenan_name',
                     DB::raw("SUM(inv_outstanding) AS outstanding"))
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->where('tr_invoice.inv_outstanding','>',0)
+                ->where('tr_invoice.inv_post','=',TRUE)
                 ->groupBy('ms_unit.unit_name','ms_tenant.tenan_name','tr_contract.contr_code');
         if($from) $fetch = $fetch->where('inv_date','>=',$from);
         if($to) $fetch = $fetch->where('inv_date','<=',$to);
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
+            $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Outstanding_By_Contract_'.$from.'_to_'.$to.'.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $data[$i]=array(
+                    'Billing Code' =>$data_ori[$i]['contr_code'],
+                    'Nama Tenant' =>$data_ori[$i]['tenan_name'],
+                    'Unit' =>$data_ori[$i]['unit_name'],
+                    'Total Outstanding' =>number_format($data_ori[$i]['outstanding']));
+            }
+            $border = 'A1:D';
+            $tp = 'xls';
+            return Excel::create('Outstanding By Billing Report', function($excel) use ($data,$border) {
+                $excel->sheet('Outstanding By Billing Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
         }else{
             return view('layouts.report_template2', $data);
         }
@@ -239,6 +356,8 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
         // tambahan
         $unit_id = @$request->unit;
         $inv_type_id = @$request->inv_type;
@@ -255,11 +374,13 @@ class ReportController extends Controller
         }
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_out_inv';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $fetch = TrInvoice::select('tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','ms_unit.unit_name','ms_tenant.tenan_name','tr_invoice.inv_outstanding')
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->where('tr_invoice.inv_outstanding','>',0)
+                ->where('tr_invoice.inv_post','=',TRUE)
                 ->groupBy('tr_invoice.inv_number','ms_unit.unit_name','ms_tenant.tenan_name','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_outstanding')
                 ->orderBy('tr_invoice.inv_date','ms_unit.unit_name');
         if($from) $fetch = $fetch->where('inv_date','>=',$from);
@@ -270,8 +391,32 @@ class ReportController extends Controller
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
+            $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Outstanding_By_Invoice_'.$from.'_to_'.$to.'.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $data[$i]=array(
+                    'No Invoice' =>$data_ori[$i]['inv_number'],
+                    'Tgl Invoice' =>$data_ori[$i]['inv_date'],
+                    'Jatuh Tempo' =>$data_ori[$i]['inv_duedate'],
+                    'Tenan' =>$data_ori[$i]['tenan_name'],
+                    'Unit' =>$data_ori[$i]['unit_name'],
+                    'Total Outstanding' =>number_format($data_ori[$i]['inv_outstanding'],2));
+            }
+            $border = 'A1:F';
+            $tp = 'xls';
+            return Excel::create('Outstanding By Unit Report', function($excel) use ($data,$border) {
+                $excel->sheet('Outstanding By Unit Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
         }else{
             return view('layouts.report_template2', $data);
         }
@@ -281,6 +426,8 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
 
         $unit_id = @$request->unit2;
         $bank_id = @$request->bank_id;
@@ -299,21 +446,34 @@ class ReportController extends Controller
         $data['title'] = "Payment History";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_payment';
-        $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.invpayh_date','ms_payment_type.paymtp_name','ms_cash_bank.cashbk_name','tr_invoice_paymhdr.invpayh_checkno','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount','ms_tenant.tenan_name','tr_invoice.inv_post')
+        
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
+        $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.no_kwitansi','tr_invoice_paymhdr.invpayh_date','ms_payment_type.paymtp_name','ms_cash_bank.cashbk_name','tr_invoice_paymhdr.invpayh_checkno','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount','ms_tenant.tenan_name','tr_invoice.inv_post','ms_unit.unit_name')
                     ->join('tr_invoice_paymdtl','tr_invoice_paymhdr.id','=','tr_invoice_paymdtl.invpayh_id')
                     ->join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
                     ->join('tr_contract','tr_invoice.contr_id','=','tr_contract.id')
                     ->join('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
+                    ->join('ms_unit','ms_unit.id','=','tr_contract.unit_id')
                     ->join('ms_cash_bank','tr_invoice_paymhdr.cashbk_id','=','ms_cash_bank.id')
                     ->join('ms_payment_type','tr_invoice_paymhdr.paymtp_code','=','ms_payment_type.id');
-                    // ->where('invpayh_post',1)
+
+        $fetch2 = TrInvoice::select('tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_amount','ms_tenant.tenan_name','tr_contract.contr_no','ms_unit.unit_name','ms_floor.floor_name')
+                    ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
+                    ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                    ->join('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
+                    ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
+                    ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
+                    ->where('inv_iscancel',0)
+                    ->where('tr_invoice.inv_post','=',TRUE);
+
         if($from) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','>=',$from);
         if($to) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','<=',$to);
 
         if(!empty($unit_id)){ 
             $fetch = $fetch->where('tr_contract.unit_id',$unit_id);
+            $fetch2 = $fetch2->where('tr_contract.unit_id',$unit_id);
             $unit = MsUnit::find($unit_id);
-            $data['tahun'] .= "Unit : ".$unit->unit_code."<br>";
+            $data['tahun'] .= "<br>Unit : ".$unit->unit_code."<br>";
         }
         if(!empty($inv_number)) $fetch = $fetch->where(DB::raw("LOWER(inv_number)"),'like','%'.$inv_number.'%');
         if(!empty($post_status)) $fetch = $fetch->where('tr_invoice.inv_post',$post_flag);
@@ -330,9 +490,65 @@ class ReportController extends Controller
 
         $fetch = $fetch->get();
         $data['payments'] = $fetch;
+        
+        $fetch2 = $fetch2->get();
+        $data['inv'] = $fetch2;
+
         if($pdf){
+            $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('Payment_'.$from.'_to_'.$to.'.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data_ori2 = $fetch2->toArray();
+            $data = array();
+            $total_debet = 0;
+            $total_kredit =0;
+            for($i=0; $i<count($data_ori); $i++){
+                $data[$i]=array(
+                    'No Invoice / No Kwitansi' =>$data_ori[$i]['no_kwitansi'],
+                    'Tgl Invoice / Tgl Payment' =>$data_ori[$i]['invpayh_date'],
+                    'Unit' =>$data_ori[$i]['unit_name'],
+                    'Bank' =>$data_ori[$i]['cashbk_name'],
+                    'No Giro' =>$data_ori[$i]['invpayh_checkno'],
+                    'Debet' =>number_format($data_ori[$i]['invpayd_amount'],2),
+                    'Kredit' => ''
+                    );
+                $total_debet = $total_debet + $data_ori[$i]['invpayd_amount'];       
+            }
+            for($k=0; $k<count($data_ori2); $k++){
+                $data[$i]=array(
+                    'No Invoice / No Kwitansi' =>$data_ori2[$k]['inv_number'],
+                    'Tgl Invoice / Tgl Payment' =>$data_ori2[$k]['inv_date'],
+                    'Unit' =>$data_ori2[$k]['unit_name'],
+                    'Bank' =>'',
+                    'No Giro' =>'',
+                    'Debet' =>'',
+                    'Kredit' => number_format($data_ori2[$k]['inv_amount'],2)
+                    );
+                $total_kredit = $total_kredit + $data_ori2[$k]['inv_amount'];
+                $i++;  
+            } 
+            $data[$i]=array(
+                    'No Invoice / No Kwitansi' =>'',
+                    'Tgl Invoice / Tgl Payment' =>'',
+                    'Unit' =>'',
+                    'Bank' =>'',
+                    'No Giro' =>'TOTAL',
+                    'Debet' => number_format($total_debet,2),
+                    'Kredit' => number_format($total_kredit,2)
+                    );
+            $border = 'A1:G';
+            $tp = 'xls';
+            return Excel::create('Payment History Report', function($excel) use ($data,$border) {
+                $excel->sheet('Payment History Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
         }else{
             return view('layouts.report_template2', $data);
         }
