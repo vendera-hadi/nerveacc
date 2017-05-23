@@ -692,6 +692,8 @@ class ReportController extends Controller
         $from = @$request->from;
         $to = @$request->to;
         $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
         // tambahan
         $keyword = $request->input('q');
         if(!empty($keyword)) $keyword = strtolower($keyword);
@@ -709,6 +711,7 @@ class ReportController extends Controller
         $data['title'] = "General Ledger Report";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_gl_template';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         if(!empty($to)) $year = date('Y',strtotime($to));
         else $year = date('Y');
 
@@ -737,8 +740,35 @@ class ReportController extends Controller
         $fetch = $fetch->get();
         $data['ledger'] = $fetch;
         if($pdf){
+            $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
             return $pdf->download('GL_Report_'.$from.'_to_'.$to.'.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $data[$i]=array(
+                    'Account No' =>$data_ori[$i]['coa_code'],
+                    'Account Name' =>$data_ori[$i]['coa_name'],
+                    'Date' =>date('d/m/Y',strtotime($data_ori[$i]['ledg_date'])),
+                    'No Invoice/Payment' =>$data_ori[$i]['ledg_refno'],
+                    'Deskripsi'=>$data_ori[$i]['ledg_description'],
+                    'Debet' =>number_format($data_ori[$i]['ledg_debit'],2),
+                    'Kredit' =>number_format($data_ori[$i]['ledg_credit'],2),
+                    'Type' =>$data_ori[$i]['jour_type_prefix']
+                    );
+            }
+            $border = 'A1:H';
+            $tp = 'xls';
+            return Excel::create('General Ledger Report', function($excel) use ($data,$border) {
+                $excel->sheet('General Ledger Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
         }else{
             return view('layouts.report_template2', $data);
         }

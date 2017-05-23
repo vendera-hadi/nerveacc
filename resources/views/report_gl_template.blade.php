@@ -8,8 +8,7 @@
         <th>Description</th>
         <th>Debit</th>
         <th>Credit</th>
-        <th>Jrnl Type</th>
-        <th>Tenant Name</th>    
+        <th>Jrnl Type</th> 
       </tr>
     </thead>
         <tbody>
@@ -23,7 +22,6 @@
                 <td>{{"Rp. ".number_format($ledg->ledg_debit)}}</td>
                 <td>{{"Rp. ".number_format($ledg->ledg_credit)}}</td>
                 <td>{{$ledg->jour_type_prefix}}</td>
-                <td>{{!empty($ledg->tenan_name) ? $ledg->tenan_name : '-'}}</td>
             </tr>
             @endforeach
         </tbody>
