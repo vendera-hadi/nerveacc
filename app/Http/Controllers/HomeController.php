@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\TrContract;
 use App\Models\MsUnit;
 use App\Models\TrInvoice;
-use App\Models\TrInvoicePaymHdr;
+use App\Models\TrInvoicePaymhdr;
 use DB;
 
 /**
