@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\Permission;
+use App\Models\MsCompany;
 use Auth;
 
 class LoginController extends Controller
@@ -50,7 +51,9 @@ class LoginController extends Controller
         else $role_id = $check->role_id;
         // simpan all permissions
         $permissions = \DB::table('role_has_permissions')->where('role_id',$role_id)->pluck('permission_id')->toArray();
+        $company_detail =  MsCompany::first();
         $request->session()->put('permissions', $permissions);
         $request->session()->put('role', $role_id);
+        $request->session()->put('company_title', $company_detail->title);
     }
 }

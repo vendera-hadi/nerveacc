@@ -206,60 +206,6 @@ class PeriodMeterController extends Controller
         return ['status' => 1, 'message' => 'Insert Success'];          
     }
 
-    public function testing(){
-        $t1 = StrToTime ( '2006-04-14' );
-        $t2 = StrToTime ( '2006-04-12' );
-        $diff = $t1 - $t2;
-        $hours = $diff / ( 60 * 60 );
-        echo $hours;
-        /*
-        $unit_kontrak = MsUnit::select('ms_unit.id AS unit_id','ms_unit.unit_code','tr_contract.id AS contr_id','tr_contract_invoice.costd_id','ms_cost_detail.costd_rate','ms_cost_detail.costd_rate','costd_admin')
-            ->leftJoin('tr_contract','tr_contract.unit_id',"=",'ms_unit.id')
-            ->leftJoin('tr_contract_invoice','tr_contract_invoice.contr_id',"=",'tr_contract.id')
-            ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_contract_invoice.costd_id')
-            ->where('tr_contract_invoice.invtp_id', 1)
-            ->where('ms_cost_detail.costd_ismeter', TRUE)
-            ->get();
-        echo $unit_kontrak;
-        */
-        /*
-        $lst_meter = TrMeter::where('prdmet_id',$prd_last[0]->id)->get();
-                $ct_meter = CutoffHistory::select('unit_id','costd_id','meter_end')
-                    ->where('close_date', '>=', $request->input('prdmet_start_date'))
-                    ->where('close_date', '<=', $request->input('prdmet_end_date'))
-                    ->get();
-        $prd_last = TrPeriodMeter::select('id')
-                    ->where('tr_period_meter.status', TRUE)
-                    ->orderBy('prd_billing_date', 'desc')
-                    ->take(1)
-                    ->get();
-        $lst_meter = TrMeter::select('tr_meter.meter_end','tr_meter.unit_id','tr_meter.costd_id','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','cutoff_history.meter_end AS cutoff_end')
-            ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
-            ->leftJoin('cutoff_history', function ($join) {
-                $join->on('tr_meter.unit_id', '=', 'cutoff_history.unit_id');
-                $join->on('tr_meter.costd_id', '=', 'cutoff_history.costd_id');
-            })
-            ->where('prdmet_id',$prd_last[0]->id)->get();
-        
-        $ct_meter = CutoffHistory::select('unit_id','costd_id','meter_end')
-            ->where('close_date', '>=', '2016-04-01')
-            ->where('close_date', '<=', '2016-04-30')
-            ->get();
-        
-        $unit_kontrak = MsUnit::select('ms_unit.id AS unit_id','ms_unit.unit_code','tr_contract.id AS contr_id','tr_contract_invoice.costd_id','ms_cost_detail.costd_rate','ms_cost_detail.costd_rate','costd_admin')
-        ->leftJoin('tr_contract','tr_contract.unit_id',"=",'ms_unit.id')
-        ->leftJoin('tr_contract_invoice','tr_contract_invoice.contr_id',"=",'tr_contract.id')
-        ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_contract_invoice.costd_id')
-        ->where('tr_contract_invoice.invtp_id', 1)
-        ->where('ms_cost_detail.costd_ismeter', TRUE)
-        ->get();
-        echo $unit_kontrak;
-        
-        $check_unit = TrInvoice::select('tr_invoice.tenan_id','tr_tenan.inv_outstanding')->where('tr_invoice.inv_outstanding','>',0);
-        echo $check_unit;
-        */
-    }
-
     public function editModal(Request $request){
         try{
             $id = $request->id;

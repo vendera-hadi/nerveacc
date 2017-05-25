@@ -281,7 +281,7 @@ class InvoiceController extends Controller
                                         // KALAU ELECTRICITY
                                         if($value->cost_item_id == 1){
                                             // echo 'listrik '.$amount."<br>";
-                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Awal : ".number_format($meter->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($meter->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($meter->meter_used,0)."<br>BPJU 3%";
+                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Awal : ".number_format($meter->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($meter->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($meter->meter_used,2)." x ".$meter->costd_rate." : ".number_format($meter->meter_cost,2)."<br>BPJU 3% :".$meter->other_cost;
                                         }else if($value->cost_item_id == 2){
                                             // KALAU AIR
                                             // echo 'air '.$amount."<br>";
@@ -405,10 +405,10 @@ class InvoiceController extends Controller
 
                         // TAMBAHIN STAMP DUTY
                         if($totalPay <= $companyData->comp_materai1_amount){ 
-                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0, 'coa_code' => $stampCoa];
+                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'MATERAI', 'costd_id'=> 0, 'coa_code' => $stampCoa];
                             $totalStamp = $companyData->comp_materai1;
                         }else{ 
-                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'STAMP DUTY', 'costd_id'=> 0, 'coa_code' => $stampCoa];
+                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'MATERAI', 'costd_id'=> 0, 'coa_code' => $stampCoa];
                             $totalStamp = $companyData->comp_materai2;
                         }
 
@@ -692,6 +692,7 @@ class InvoiceController extends Controller
             foreach ($invDetails as $detail) {
                 // coa credit diambil dari cost item
                 if(!empty($detail->coa_code)){
+                    $costItem = "";
                     $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$detail->coa_code)->first();
                 }else{
                     if($detail->costd_id != 0){ 

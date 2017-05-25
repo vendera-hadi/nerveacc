@@ -25,9 +25,8 @@ Period Meter
 @stop
 
 @section('main-content')
-    <div class="container spark-screen">
         <div class="row">
-            <div class="col-md-11">
+            <div class="col-md-12">
             @if(Session::has('msg'))
                 <div class="alert alert-success alert-dismissible">
                     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
@@ -109,14 +108,12 @@ Period Meter
                 </div>
                 <!-- /.tab-pane -->
                 <div class="tab-pane" id="tab_2">
-                <div id="editData" style="height: 100%; width: 100%; overflow: hidden;">
-                 <div class="data-body"></div>
+                <div id="editData" style="max-height: 100%; width: 100%; overflow: hidden;">
+                <div class="data-body"></div>
                 </div>
                 </div>
             </div>
-        </div>
-    </div>
-    
+        </div>    
 @endsection
 
 @section('footer-scripts')

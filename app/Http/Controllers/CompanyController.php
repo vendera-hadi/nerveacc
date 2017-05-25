@@ -142,6 +142,7 @@ class CompanyController extends Controller
 
     public function update(Request $request){
         $this->validate($request, [
+            'title' => 'required|max:100',
             'comp_name' => 'required|max:100',
             'comp_address' => 'required|max:150',
             'comp_phone' => 'required|max:20',

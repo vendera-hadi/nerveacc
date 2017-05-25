@@ -161,9 +161,16 @@ table tr td{font-size:9pt;}
                     <td width="23%" style="text-align: center; vertical-align: top;">
                         Jakarta, <?php echo date('d M Y'); ?><br><br>
                         
-                        <br><br><br>
+                         @if(!empty($signature) && !empty($signatureFlag))
+                        <img src="{{asset($signature)}}" width="150">
                         <br><br>
-                        <div style="width:100%; border:1px solid black"></div>
+                        <b><u>{{$company_sign}}</u></b><br>
+                        {{$company_position}}
+                        @else
+                        <br><br><br><br><br>
+                        <b><u>{{$company_sign}}</u></b><br>
+                        {{$company_position}}
+                        @endif
                     </td> 
                 </tr>
                 

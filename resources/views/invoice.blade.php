@@ -38,332 +38,331 @@
 @stop
 
 @section('main-content')
-	<div class="container spark-screen">
-		<div class="row">
-			<div class="col-md-11">
-                <div class="loadingScreen" style="display:none">
-                    <h3 style="line-height: 400px; text-align: center;">LOADING</h3>
-                </div>
-          		<!-- content -->
-                <form id="search">
-                <div class="row" style="margin-bottom:20px">
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Billing Info or Tenant Name">
-                    </div>
-                    <div class="col-sm-2">
-                        <select class="form-control" name="inv_type">
-                            <option value="">-- tipe invoice --</option>
-                            @foreach($inv_type as $itype)
-                            <option value="{{$itype->id}}" @if(Request::get('inv_type') == $itype->id){{'selected="selected"'}}@endif>{{$itype->invtp_name}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-sm-2">
-                        <select class="form-control" name="outstanding">
-                            <option value="">ALL</option>
-                            <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>NOT PAID</option>
-                            <option value="2" @if(Request::get('inv_type')==2){{'selected="selected"'}}@endif>PAID</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="input-group date">
-                          <div class="input-group-addon">
-                            <i class="fa fa-calendar"></i>
-                          </div>
-                          <input type="text" id="startDate" name="date_from" placeholder="From" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="input-group date">
-                          <div class="input-group-addon">
-                            <i class="fa fa-calendar"></i>
-                          </div>
-                          <input type="text" id="startDate" name="date_to" placeholder="To" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                         <button class="btn btn-info">Cari</button>
-                    </div>
-                </div>
-                </form>
-
-                <!-- template tabel -->
-          		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;min-height:500px" toolbar="#toolbar">
-                    <!-- kolom -->
-                    <thead>
-                        <tr>
-                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="checkbox" width="25" sortable="true"></th>
-                            <th field="inv_number" width="70" sortable="true">No.Invoice</th>
-                            <!-- <th field="contr_no" width="100" sortable="true">No Kontrak</th> -->
-                            <th field="tenan_name" width="100" sortable="true">Nama Tenant</th>
-                            <th field="unit" width="45" sortable="true">Unit</th>  
-                            <th field="inv_date" width="80" sortable="true">Tgl Invoice</th>
-                            <th field="inv_duedate" width="80" sortable="true">Jatuh Tempo</th>
-                            <th field="inv_amount" width="70" sortable="true" align="right">Amount</th>
-                            <!-- <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th>  -->
-                            <th field="invtp_name" width="90" sortable="true">Jenis Invoice</th>
-                            <th field="inv_post" width="40" sortable="true">Posted</th>       
-                        <th field="action_button" width="80" sortable="true">action</th>
-                        </tr>
-                    </thead>
-                </table>
-                <!-- end table -->
-                
-                <!-- icon2 atas table -->
-                <div id="toolbar" class="datagrid-toolbar">
-                    <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
-                    @if(Session::get('role')==1 || in_array(60,Session::get('permissions')))
-                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Invoice Lain Lain</span></a>                    
-                    @endif
-                    @if(Session::get('role')==1 || in_array(61,Session::get('permissions')))
-                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
-                    @endif
-                    @if(Session::get('role')==1 || in_array(62,Session::get('permissions')))
-                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="cancelInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-ban"></i>&nbsp;Cancel Invoice</span></a>           
-                    @endif
-                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="printInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-print"></i>&nbsp;Print</span></a>
-                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="editFooter()" group="" id=""><span class="l-btn-text"><i class="fa fa-font"></i>&nbsp;Edit Footer/Label</span></a>
-                </div>
-                <!-- end icon -->
-            
-                <!-- hidden form buat create edit -->
-                <div id="dlg" class="easyui-dialog" style="width:60%"
-                        closed="true" buttons="#dlg-buttons">
-                    <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_name" class="easyui-textbox" label="Component Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_rate" class="easyui-textbox" label="Rate:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_burden" class="easyui-textbox" label="Biaya Abodemen:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="costd_admin" class="easyui-textbox" label="Biaya Admin:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Component Billing:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Active Meter:" style="width:300px;">
-                                <option value="true" >yes</option>
-                                <option value="false">no</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div id="dlg-buttons">
-                    <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
-                </div>
-                <!-- end form -->
-
-                <!-- Modal extra -->
-                <div id="addInvModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog" style="width:900px">
-
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Add Invoice</h4>
-                      </div>
-                      <div class="modal-body" id="addInvModalContent">
-                            <!-- isi form -->
-                            <form method="POST" id="formAddInv">
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label>Invoice Date</label>
-                                            <div class="input-group date">
-                                                <div class="input-group-addon">
-                                                    <i class="fa fa-calendar"></i>
-                                                </div>
-                                                <input type="text" class="form-control datepicker" name="inv_date" placeholder="Invoice Date" data-date-format="yyyy-mm-dd" required>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <input type="hidden" name="invtp_id" value="3">
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label>Invoice Due Date</label>
-                                            <div class="input-group date">
-                                                <div class="input-group-addon">
-                                                    <i class="fa fa-calendar"></i>
-                                                </div>
-                                                <input type="text" class="form-control datepicker" name="inv_duedate" placeholder="Invoice Due Date" data-date-format="yyyy-mm-dd" required>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-xs-6">
-                                        <div class="form-group">
-                                            <label>Tenant</label>
-                                            <div class="input-group">
-                                                <input type="hidden" name="contr_id" id="txtContrId" required>
-                                                <input type="text" class="form-control" id="txtContr" disabled>
-                                                <span class="input-group-btn">
-                                                    <button class="btn btn-info" type="button" id="chooseContractButton">Choose Billing Info</button>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-sm-offset-8 col-sm-4">
-                                        <button class="pull-right" type="button" id="clickCostItemEdit">Tambah Detail Biaya</button>
-                                    </div>
-                                </div>
-
-                                <div class="row" style="margin-top:40px">
-                                    <div class="col-sm-12">
-                                        <table id="tableCost" width="100%" class="table table-bordered" >
-                                            <tr class="text-center">
-                                              <td width="220">COA</td>
-                                              <td>Description</td>
-                                              <td width="150">Amount (IDR)</td>
-                                              <td></td>
-                                            </tr>
-
-                                            <tr class="text-center">
-                                                <td id="coalist">
-                                                    <select class="form-control" name="coa_code[]">
-                                                        @foreach($coa as $code)
-                                                            <option value="{{$code->coa_code}}">{{ trim($code->coa_code).' - '.trim($code->coa_name) }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                                <td><input type="text" class="form-control" name="invdt_note[]" required></td>
-                                                <td><input type="number" class="form-control amount" name="invdt_amount[]" value="0" required></td>
-                                                <td></td>
-                                            </tr>
-                                            
-                                          </table>
-                                            <table width="50%">
-                                                <input type="hidden" name="amount">
-                                                <tr>
-                                                    <td><b>Total</b></td>
-                                                    <td id="totalInv">0</td>
-                                                </tr>
-                                            </table>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-sm-3 col-sm-offset-9">
-                                        <button class="btn btn-info pull-right">Submit</button>
-                                    </div>
-                                </div>
-                                
-                            </form>
-                            <!-- end form -->
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
+<div class="row">
+	<div class="col-md-12">
+        <div class="loadingScreen" style="display:none">
+            <h3 style="line-height: 400px; text-align: center;">LOADING</h3>
+        </div>
+  		<!-- content -->
+        <form id="search">
+        <div class="row" style="margin-bottom:20px">
+            <div class="col-sm-2">
+                <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Billing Info or Tenant Name">
+            </div>
+            <div class="col-sm-2">
+                <select class="form-control" name="inv_type">
+                    <option value="">-- tipe invoice --</option>
+                    @foreach($inv_type as $itype)
+                    <option value="{{$itype->id}}" @if(Request::get('inv_type') == $itype->id){{'selected="selected"'}}@endif>{{$itype->invtp_name}}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <select class="form-control" name="outstanding">
+                    <option value="">ALL</option>
+                    <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>NOT PAID</option>
+                    <option value="2" @if(Request::get('inv_type')==2){{'selected="selected"'}}@endif>PAID</option>
+                </select>
+            </div>
+            <div class="col-sm-2">
+                <div class="input-group date">
+                  <div class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
                   </div>
+                  <input type="text" id="startDate" name="date_from" placeholder="From" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
                 </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="input-group date">
+                  <div class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </div>
+                  <input type="text" id="startDate" name="date_to" placeholder="To" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                </div>
+            </div>
+            <div class="col-sm-2">
+                 <button class="btn btn-info">Cari</button>
+            </div>
+        </div>
+        </form>
 
-                <!-- End Modal -->
+        <!-- template tabel -->
+  		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;min-height:500px" toolbar="#toolbar">
+            <!-- kolom -->
+            <thead>
+                <tr>
+                    <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                    <th field="checkbox" width="25" sortable="true"></th>
+                    <th field="inv_number" width="70" sortable="true">No.Invoice</th>
+                    <!-- <th field="contr_no" width="100" sortable="true">No Kontrak</th> -->
+                    <th field="tenan_name" width="100" sortable="true">Nama Tenant</th>
+                    <th field="unit" width="45" sortable="true">Unit</th>  
+                    <th field="inv_date" width="80" sortable="true">Tgl Invoice</th>
+                    <th field="inv_duedate" width="80" sortable="true">Jatuh Tempo</th>
+                    <th field="inv_amount" width="70" sortable="true" align="right">Amount</th>
+                    <!-- <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th>  -->
+                    <th field="invtp_name" width="90" sortable="true">Jenis Invoice</th>
+                    <th field="inv_post" width="40" sortable="true">Posted</th>       
+                <th field="action_button" width="80" sortable="true">action</th>
+                </tr>
+            </thead>
+        </table>
+        <!-- end table -->
+        
+        <!-- icon2 atas table -->
+        <div id="toolbar" class="datagrid-toolbar">
+            <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
+            @if(Session::get('role')==1 || in_array(60,Session::get('permissions')))
+            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Invoice Lain Lain</span></a>                    
+            @endif
+            @if(Session::get('role')==1 || in_array(61,Session::get('permissions')))
+            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
+            @endif
+            @if(Session::get('role')==1 || in_array(62,Session::get('permissions')))
+            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="cancelInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-ban"></i>&nbsp;Cancel Invoice</span></a>           
+            @endif
+            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="printInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-print"></i>&nbsp;Print</span></a>
+            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="editFooter()" group="" id=""><span class="l-btn-text"><i class="fa fa-font"></i>&nbsp;Edit Footer/Label</span></a>
+        </div>
+        <!-- end icon -->
+    
+        <!-- hidden form buat create edit -->
+        <div id="dlg" class="easyui-dialog" style="width:60%"
+                closed="true" buttons="#dlg-buttons">
+            <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
+                <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
+                <div style="margin-bottom:10px">
+                    <input name="costd_name" class="easyui-textbox" label="Component Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
+                </div>
+                <div style="margin-bottom:10px">
+                    <input name="costd_rate" class="easyui-textbox" label="Rate:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
+                </div>
+                <div style="margin-bottom:10px">
+                    <input name="costd_burden" class="easyui-textbox" label="Biaya Abodemen:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
+                </div>
+                <div style="margin-bottom:10px">
+                    <input name="costd_admin" class="easyui-textbox" label="Biaya Admin:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
+                </div>
+                <div style="margin-bottom:10px">
+                    <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Component Billing:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
+                </div>
+                <div style="margin-bottom:10px">
+                    <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Active Meter:" style="width:300px;">
+                        <option value="true" >yes</option>
+                        <option value="false">no</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div id="dlg-buttons">
+            <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
+        </div>
+        <!-- end form -->
 
-                <div id="editFooterModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog" style="width:900px">
+        <!-- Modal extra -->
+        <div id="addInvModal" class="modal fade" role="dialog">
+          <div class="modal-dialog" style="width:900px">
 
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Edit Footer & Label Invoice</h4>
-                      </div>
-                      <div class="modal-body" id="editFooterModalContent">
-                            <!-- isi form -->
-                            <form method="POST" id="formEditFooter">
-                                <input type="hidden" name="id" value="">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div class="form-group">
-                                          <label>Footer Invoice Text</label>
-                                          <div id="footer_invoice">
-                                          <textarea class="textarea" name="footer_invoice" class="form-control" style="width: 100%;" required></textarea>
-                                          </div>
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add Invoice</h4>
+              </div>
+              <div class="modal-body" id="addInvModalContent">
+                    <!-- isi form -->
+                    <form method="POST" id="formAddInv">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Invoice Date</label>
+                                    <div class="input-group date">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
                                         </div>
-
-                                        <div class="form-group">
-                                          <label>Footer Invoice Label</label>
-                                          <div id="footer_label_inv">
-                                          <textarea class="textarea" name="footer_label_inv" class='form-control' style="width: 100%;" required></textarea>
-                                          </div>
-                                        </div>
+                                        <input type="text" class="form-control datepicker" name="inv_date" placeholder="Invoice Date" data-date-format="yyyy-mm-dd" required>
                                     </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="invtp_id" value="3">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Invoice Due Date</label>
+                                    <div class="input-group date">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input type="text" class="form-control datepicker" name="inv_duedate" placeholder="Invoice Due Date" data-date-format="yyyy-mm-dd" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xs-6">
+                                <div class="form-group">
+                                    <label>Tenant</label>
+                                    <div class="input-group">
+                                        <input type="hidden" name="contr_id" id="txtContrId" required>
+                                        <input type="text" class="form-control" id="txtContr" disabled>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-info" type="button" id="chooseContractButton">Choose Billing Info</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-sm-offset-8 col-sm-4">
+                                <button class="pull-right" type="button" id="clickCostItemEdit">Tambah Detail Biaya</button>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-top:40px">
+                            <div class="col-sm-12">
+                                <table id="tableCost" width="100%" class="table table-bordered" >
+                                    <tr class="text-center">
+                                      <td width="220">COA</td>
+                                      <td>Description</td>
+                                      <td width="150">Amount (IDR)</td>
+                                      <td></td>
+                                    </tr>
+
+                                    <tr class="text-center">
+                                        <td id="coalist">
+                                            <select class="form-control" name="coa_code[]">
+                                                @foreach($coa as $code)
+                                                    <option value="{{$code->coa_code}}">{{ trim($code->coa_code).' - '.trim($code->coa_name) }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control" name="invdt_note[]" required></td>
+                                        <td><input type="number" class="form-control amount" name="invdt_amount[]" value="0" required></td>
+                                        <td></td>
+                                    </tr>
                                     
+                                  </table>
+                                    <table width="50%">
+                                        <input type="hidden" name="amount">
+                                        <tr>
+                                            <td><b>Total</b></td>
+                                            <td id="totalInv">0</td>
+                                        </tr>
+                                    </table>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3 col-sm-offset-9">
+                                <button class="btn btn-info pull-right">Submit</button>
+                            </div>
+                        </div>
+                        
+                    </form>
+                    <!-- end form -->
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- End Modal -->
+
+        <div id="editFooterModal" class="modal fade" role="dialog">
+          <div class="modal-dialog" style="width:900px">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit Footer & Label Invoice</h4>
+              </div>
+              <div class="modal-body" id="editFooterModalContent">
+                    <!-- isi form -->
+                    <form method="POST" id="formEditFooter">
+                        <input type="hidden" name="id" value="">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                  <label>Footer Invoice Text</label>
+                                  <div id="footer_invoice">
+                                  <textarea class="textarea" name="footer_invoice" class="form-control" style="width: 100%;" required></textarea>
+                                  </div>
                                 </div>
-                                
-                                <div class="row">
-                                    <div class="col-sm-3 col-sm-offset-9">
-                                        <button class="btn btn-info pull-right">Submit</button>
-                                    </div>
+
+                                <div class="form-group">
+                                  <label>Footer Invoice Label</label>
+                                  <div id="footer_label_inv">
+                                  <textarea class="textarea" name="footer_label_inv" class='form-control' style="width: 100%;" required></textarea>
+                                  </div>
                                 </div>
-                                
-                            </form>
-                            <!-- end form -->
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-sm-3 col-sm-offset-9">
+                                <button class="btn btn-info pull-right">Submit</button>
+                            </div>
+                        </div>
+                        
+                    </form>
+                    <!-- end form -->
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
 
-                  </div>
-                </div>
+          </div>
+        </div>
 
-                <!-- End Modal -->
+        <!-- End Modal -->
 
-                <!-- Modal select contract -->
-                <div id="tenanModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
+        <!-- Modal select contract -->
+        <div id="tenanModal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
 
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      
-                      <div class="modal-body" id="tenanModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
+            <!-- Modal content-->
+            <div class="modal-content">
+              
+              <div class="modal-body" id="tenanModalContent">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
 
-                  </div>
-                </div>
-                <!-- End Modal -->
+          </div>
+        </div>
+        <!-- End Modal -->
 
 
-                <!-- Modal select contract -->
-                <div id="contractModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
+        <!-- Modal select contract -->
+        <div id="contractModal" class="modal fade" role="dialog">
+          <div class="modal-dialog">
 
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      
-                      <div class="modal-body" id="contractModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
+            <!-- Modal content-->
+            <div class="modal-content">
+              
+              <div class="modal-body" id="contractModalContent">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
 
-                  </div>
-                </div>
-                <!-- End Modal -->
+          </div>
+        </div>
+        <!-- End Modal -->
 
-          		<!-- content -->
-        	</div>
-		</div>
+  		<!-- content -->
 	</div>
+</div>
+
 @endsection
 
 @section('footer-scripts')

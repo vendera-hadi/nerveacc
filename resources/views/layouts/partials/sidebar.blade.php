@@ -12,7 +12,7 @@
         @if (! Auth::guest())
             <div class="user-panel">
                 <div class="pull-left image">
-                    <img src="{{asset('/img/user2-160x160.jpg')}}" class="img-circle" alt="User Image" />
+                    <img src="{{asset('/upload/'.Auth::user()->image)}}" class="img-circle" alt="User Image" />
                 </div>
                 <div class="pull-left info">
                     <p>{{ Auth::user()->name }}</p>
@@ -304,12 +304,8 @@
                 @endif
 
                 <li ><a href="#"><i class="fa fa-circle-o"></i> Account Payable</a></li>
-                
-
               </ul>
             </li>
-           
-
         </ul><!-- /.sidebar-menu -->
     </section>
     <!-- /.sidebar -->

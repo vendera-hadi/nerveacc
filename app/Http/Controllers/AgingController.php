@@ -127,6 +127,7 @@ class AgingController extends Controller
                 ->where('tr_invoice.tenan_id',$id[0])
                 ->where('tr_invoice.contr_id',$id[1])
                 ->where('inv_outstanding','>',0)
+                ->where('inv_post',TRUE)
                 ->get();
             return response()->json($result);
         }catch(\Exception $e){

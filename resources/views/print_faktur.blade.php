@@ -170,20 +170,9 @@ table tr td{font-size:9pt;}
                     <td>&nbsp;</td>
                     <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
-                <tr>
-                    
-                    <td style="padding-left:15px; padding-right:10px">Tagihan Bulan Ini</td>
-                    <td style="border-left: solid 1px; text-align:right">Rp.</td>
-                    <td style="border-collapse: collapse; text-align: right; padding-right:15px">{{number_format($total,0)}}</td>
-                </tr>
-                <tr>
-                    
-                    <td>&nbsp;</td>
-                    <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
-                </tr>
                 <tr style="border-top: 1px solid black;">
                     
-                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px; padding-top:10px"><b>TOTAL</b></td>
+                    <td style="padding-left:15px; padding-right:10px; padding-bottom:10px; padding-top:10px"><b>TOTAL TAGIHAN BULAN INI</b></td>
                     <td style="border-left: solid 1px; text-align:right">Rp.</td>
                     <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
                 </tr>

@@ -362,6 +362,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('users/update','AccountController@usersUpdate')->name('users.update');
 	Route::post('users/detail','AccountController@usersDetail')->name('users.detail');
 	Route::post('users/delete','AccountController@usersDelete')->name('users.delete');
+
+	Route::get('profile','ProfileController@index');
+	Route::post('profile/update', 'ProfileController@update')->name('profile.update');
 });
 
 Route::get('logout','Auth\AuthController@logout');

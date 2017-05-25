@@ -3,15 +3,23 @@
 <!-- Custom Tabs -->
 <div class="nav-tabs-custom">
   <ul class="nav nav-tabs">
-    <li class="active"><a href="#tab_1a" data-toggle="tab">Electricity</a></li>
-    <li><a href="#tab_2a" data-toggle="tab">Water</a></li>
+    <li class="active"><a href="#tab_1a" data-toggle="tab">Listrik</a></li>
+    <li><a href="#tab_2a" data-toggle="tab">Air</a></li>
+    <li class="dropdown">
+      <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+        Download Template <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ url('period_meter/downloadExcel',[$st->id,1]) }}">Listrik</a></li>
+        <li role="presentation" class="divider"></li>
+        <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ url('period_meter/downloadExcel',[$st->id,2]) }}">Air</a></li>
+      </ul>
+      <li><a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-upload"></i> Upload</a></li>
+    </li>
   </ul>
   <div class="tab-content">
     <div class="tab-pane active" id="tab_1a">
       <div class="table-responsive">
-        <div style="padding-bottom: 10px;">
-        <a href="{{ url('period_meter/downloadExcel',[$st->id,1]) }}" class="btn btn-warning btn-xs">Template Excel Electricity</a>
-        </div>
         <table  width="100%" class="table table-bordered" style="font-size:12px !important;">
             <tr class="text-center">
               <th>No Unit</th>
@@ -52,9 +60,6 @@
     <!-- /.tab-pane -->
     <div class="tab-pane" id="tab_2a">
       <div class="table-responsive">
-        <div style="padding-bottom: 10px;">
-          <a href="{{ url('period_meter/downloadExcel',[$st->id,2]) }}" class="btn btn-success btn-xs">Template Excel Water</a>
-        </div>
         <table  width="100%" class="table table-bordered" style="font-size:12px !important;">
             <tr class="text-center">
               <th>No Unit</th>
@@ -98,8 +103,7 @@
 <!-- nav-tabs-custom -->
 </div>
 <div class="text-left">
-  <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">Upload Excel</button>
-  <button type="submit" class="btn btn-xs btn-info">Submit</button>
+  <button type="submit" class="btn btn-sm btn-flat btn-info">Submit</button>
 </div>
 </form>
 
