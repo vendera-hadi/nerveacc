@@ -87,24 +87,24 @@ Dashboard
 				</div>
 				<div class="box-body">
 				  <div class="chart">
-				    <canvas id="barChart" style="height:265px"></canvas>
+				    <canvas id="barChart" style="height:290px"></canvas>
 				  </div>
 				</div>
 				<!-- /.box-body -->
 				<div class="box-footer no-border">
 					<div class="row">
-		                <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
-		                	<div style="background-color:rgba(210, 214, 222, 1); width: 50px; margin-left: auto; margin-right: auto;">&nbsp;</div>
-		                  <div class="knob-label">Outstanding</div>
-		                </div>
-		                <!-- ./col -->
-		                <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
-		                	<div style="background-color:#229426; width: 50px; margin-left: auto; margin-right: auto;">&nbsp;</div>
-		                  <div class="knob-label">Payment</div>
-		                </div>
-		                <!-- ./col -->
-		              </div>
-		              <!-- /.row -->
+            <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
+            	<div style="background-color:rgba(210, 214, 222, 1); width: 50px; margin-left: auto; margin-right: auto;">&nbsp;</div>
+              <div class="knob-label">Outstanding</div>
+            </div>
+            <!-- ./col -->
+            <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
+            	<div style="background-color:#229426; width: 50px; margin-left: auto; margin-right: auto;">&nbsp;</div>
+              <div class="knob-label">Payment</div>
+            </div>
+            <!-- ./col -->
+          </div>
+          <!-- /.row -->
 				</div>
 			</div>
 			<!-- /.box -->
@@ -126,6 +126,23 @@ Dashboard
 				  <canvas id="pieChart" style="height:250px"></canvas>
 				</div>
 				<!-- /.box-body -->
+        <div class="box-footer no-border">
+          <div class="row">
+            <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
+              <label>Outstanding</label>
+              <div style="background-color:#f56954; width: 50px; margin-left: auto; margin-right: auto;">&nbsp;</div>
+              <div class="knob-label">{{ number_format($hutang_vs,2) }}</div>
+            </div>
+            <!-- ./col -->
+            <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
+              <label>Payment</label>
+              <div style="background-color:#00a65a; width: 50px; margin-left: auto; margin-right: auto;">&nbsp;</div>
+              <div class="knob-label">{{ number_format($bayar_vs,2) }}</div>
+            </div>
+            <!-- ./col -->
+          </div>
+          <!-- /.row -->
+        </div>
 			</div>
 			<!-- /.box -->
         </div>
@@ -209,16 +226,16 @@ Dashboard
     var pieChart = new Chart(pieChartCanvas);
     var PieData = [
       {
-        value: {{ $hutang_vs }},
+        value: {{ $hutang_persen }},
         color: "#f56954",
         highlight: "#f56954",
-        label: "Outstanding"
+        label: "Outstanding (%) "
       },
       {
-        value: {{ $bayar_vs }},
+        value: {{ $bayar_persen }},
         color: "#00a65a",
         highlight: "#00a65a",
-        label: "Payment"
+        label: "Payment (%) "
       }
     ];
     var pieOptions = {

@@ -25,39 +25,38 @@
 @stop
 
 @section('main-content')
-	<div class="container spark-screen">
-		<div class="row">
-			<div class="col-md-11">
-          		<!-- content -->
+	<div class="row">
+		<div class="col-md-12">
+      		<!-- content -->
 
-                <!-- template tabel -->
-          		<table id="dg" title="Aging Invoice" class="easyui-datagrid" style="width:100%;min-height:500px;" toolbar="#toolbar">
-                    <!-- kolom -->
-                    <thead>
-                        <tr>
-                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="unit_code" width="50" sortable="true">Unit</th>
-                            <th field="tenan_name" width="150" sortable="true">Nama Tenan</th>
-                            <th field="total" width="100" sortable="true" align="right">Total</th>
-                            <th field="ag30" width="100" sortable="true" align="right">1 - 30 Hari</th>
-                            <th field="ag60" width="100" sortable="true" align="right">31 - 60 Hari</th> 
-                            <th field="ag90" width="100" sortable="true" align="right">61 - 90 Hari</th>
-                            <th field="agl180" width="100" sortable="true" align="right">> 90 Hari</th>         
-                        </tr>
-                    </thead>
-                </table>
-                <!-- end table -->
-                
-                <!-- icon2 atas table -->
-                <div id="toolbar">
-                    <a href="{{ url('aging/downloadAgingExcel') }}" class="easyui-linkbutton" plain="false">Download Report</a>
-                </div>
-                <!-- end icon -->
+            <!-- template tabel -->
+      		<table id="dg" title="Aging Invoice" class="easyui-datagrid" style="width:100%;min-height:500px;" toolbar="#toolbar">
+                <!-- kolom -->
+                <thead>
+                    <tr>
+                        <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                        <th field="unit_code" width="50" sortable="true">Unit</th>
+                        <th field="tenan_name" width="150" sortable="true">Nama Tenan</th>
+                        <th field="total" width="100" sortable="true" align="right">Total</th>
+                        <th field="ag30" width="100" sortable="true" align="right">1 - 30 Hari</th>
+                        <th field="ag60" width="100" sortable="true" align="right">31 - 60 Hari</th> 
+                        <th field="ag90" width="100" sortable="true" align="right">61 - 90 Hari</th>
+                        <th field="agl180" width="100" sortable="true" align="right">> 90 Hari</th>         
+                    </tr>
+                </thead>
+            </table>
+            <!-- end table -->
+            
+            <!-- icon2 atas table -->
+            <div id="toolbar">
+                <a href="{{ url('aging/downloadAgingExcel') }}" class="easyui-linkbutton" plain="false">Download Report</a>
+            </div>
+            <!-- end icon -->
 
-          		<!-- content -->
-        	</div>
-		</div>
+      		<!-- content -->
+    	</div>
 	</div>
+
 @endsection
 
 @section('footer-scripts')

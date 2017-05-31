@@ -48,212 +48,207 @@
 @stop
 
 @section('main-content')
-    <div class="container spark-screen">
-        <div class="row">
-            <div class="col-md-11">
-
-                <div class="loadingScreen" style="display:none">
-                    <h3 style="line-height: 400px; text-align: center;">LOADING</h3>
-                </div>
-          <!-- Tabs -->
-          <div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
-              <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
-              @if(Session::get('role')==1 || in_array(69,Session::get('permissions')))
-              <li><a href="#tab_2" data-toggle="tab">Add Payment</a></li>
+  <div class="row">
+      <div class="col-md-12">
+        <div class="loadingScreen" style="display:none">
+            <h3 style="line-height: 400px; text-align: center;">LOADING</h3>
+        </div>
+    <!-- Tabs -->
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
+        @if(Session::get('role')==1 || in_array(69,Session::get('permissions')))
+        <li><a href="#tab_2" data-toggle="tab">Add Payment</a></li>
+        @endif
+        <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Payment</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="tab_1">
+            <!-- template tabel -->
+          <table id="dg" title="Payment" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+              <!-- kolom -->
+              <thead>
+                  <tr>
+                      <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                      <th field="checkbox" width="25"></th>
+                      <th field="tenan_name" sortable="true">Nama Tenant</th>
+                      <th field="unit_code" width="50" sortable="true">No Unit</th>
+                      <th field="inv_no" sortable="true">Invoice No</th>
+                      <th field="paymtp_name" width="50" sortable="true">Payment Type</th>
+                      <th field="invpayh_date" width="50" sortable="true">Payment Date</th>
+                      <th field="invpayh_amount" sortable="true">Total</th>
+                      
+                      <th field="invpayh_post" width="50" sortable="true">Posting Status</th>
+                      <th field="action_button">Action</th>
+                  </tr>
+              </thead>
+          </table>
+          <!-- end table -->
+          
+          <!-- icon2 atas table -->
+          <div id="toolbar" class="datagrid-toolbar">
+              <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
+              @if(Session::get('role')==1 || in_array(70,Session::get('permissions')))
+              <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected Payment</span></a>
               @endif
-              <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Payment</a></li>
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pane active" id="tab_1">
-                  <!-- template tabel -->
-                <table id="dg" title="Payment" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
-                    <!-- kolom -->
-                    <thead>
-                        <tr>
-                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="checkbox" width="25"></th>
-                            <th field="tenan_name" sortable="true">Nama Tenant</th>
-                            <th field="unit_code" width="50" sortable="true">No Unit</th>
-                            <th field="inv_no" sortable="true">Invoice No</th>
-                            <th field="paymtp_name" width="50" sortable="true">Payment Type</th>
-                            <th field="invpayh_date" width="50" sortable="true">Payment Date</th>
-                            <th field="invpayh_amount" sortable="true">Total</th>
-                            
-                            <th field="invpayh_post" width="50" sortable="true">Posting Status</th>
-                            <th field="action_button">Action</th>
-                        </tr>
-                    </thead>
-                </table>
-                <!-- end table -->
+          </div>
+          <!-- end icon -->
+          
+        </div>
+        <!-- /.tab-pane -->
+        <div class="tab-pane" id="tab_2">
+          <div id="contractStep1">
+            <form method="POST" id="formPayment">
                 
-                <!-- icon2 atas table -->
-                <div id="toolbar" class="datagrid-toolbar">
-                    <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
-                    @if(Session::get('role')==1 || in_array(70,Session::get('permissions')))
-                    <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected Payment</span></a>
-                    @endif
+                <div class="form-group">
+                    <label>Tenant Name</label>
+                    <select class="form-control contrId choose-contract" name="contr_id" style="width:100%">
+                    </select>
                 </div>
-                <!-- end icon -->
+
+                <div class="form-group">
+                    <label>No Giro</label>
+                    <input type="text" name="invpayh_checkno" class="form-control">
+                </div>
                 
-              </div>
-              <!-- /.tab-pane -->
-              <div class="tab-pane" id="tab_2">
-                <div id="contractStep1">
-                  <form method="POST" id="formPayment">
-                      
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Bank</label>
+                        <select class="form-control cashbkId choose-style" name="cashbk_id" style="width:100%">
+                          <option value="">-</option>
+                          <?php
+                              foreach ($cashbank_data as $key => $value) {
+                          ?>
+                          <option value="<?php echo $value['id']?>"><?php echo $value['cashbk_name']?></option>
+                          <?php
+                              }
+                          ?>
+                        </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Payment Type</label>
+                        <select class="form-control paymtpCode choose-style" name="paymtp_code" style="width:100%">
+                          <option value="">-</option>
+                          <?php
+                              foreach ($payment_type_data as $key => $value) {
+                          ?>
+                          <option value="<?php echo $value['id']?>"><?php echo $value['paymtp_name']?></option>
+                          <?php
+                              }
+                          ?>
+                        </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                   <div class="col-sm-6">
                       <div class="form-group">
-                          <label>Tenant Name</label>
-                          <select class="form-control contrId choose-contract" name="contr_id" style="width:100%">
-                          </select>
-                      </div>
-
-                      <div class="form-group">
-                          <label>No Giro</label>
-                          <input type="text" name="invpayh_checkno" class="form-control">
-                      </div>
-                      
-                      <div class="row">
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                              <label>Bank</label>
-                              <select class="form-control cashbkId choose-style" name="cashbk_id" style="width:100%">
-                                <option value="">-</option>
-                                <?php
-                                    foreach ($cashbank_data as $key => $value) {
-                                ?>
-                                <option value="<?php echo $value['id']?>"><?php echo $value['cashbk_name']?></option>
-                                <?php
-                                    }
-                                ?>
-                              </select>
-                          </div>
-                        </div>
-                        <div class="col-sm-6">
-                          <div class="form-group">
-                              <label>Payment Type</label>
-                              <select class="form-control paymtpCode choose-style" name="paymtp_code" style="width:100%">
-                                <option value="">-</option>
-                                <?php
-                                    foreach ($payment_type_data as $key => $value) {
-                                ?>
-                                <option value="<?php echo $value['id']?>"><?php echo $value['paymtp_name']?></option>
-                                <?php
-                                    }
-                                ?>
-                              </select>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row">
-                         <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Payment Date</label>
-                                <div class="input-group date">
-                                  <div class="input-group-addon">
-                                    <i class="fa fa-calendar"></i>
-                                  </div>
-                                  <input type="text" id="invpayhDate" name="invpayh_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                                </div>
+                          <label>Payment Date</label>
+                          <div class="input-group date">
+                            <div class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
                             </div>
-                         </div>
-                         <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Cheque/Giro Date</label>
-                                <div class="input-group date">
-                                  <div class="input-group-addon">
-                                    <i class="fa fa-calendar"></i>
-                                  </div>
-                                  <input type="text" id="invpayhGiro" name="invpayh_giro" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                                </div>
-                            </div>
-                         </div>
-                      </div>    
-
-                      <div class="form-group">
-                          <label>Note</label>
-                          <input type="text" name="invpayh_note" class="form-control">
+                            <input type="text" id="invpayhDate" name="invpayh_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                          </div>
                       </div>
+                   </div>
+                   <div class="col-sm-6">
+                      <div class="form-group">
+                          <label>Cheque/Giro Date</label>
+                          <div class="input-group date">
+                            <div class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" id="invpayhGiro" name="invpayh_giro" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                          </div>
+                      </div>
+                   </div>
+                </div>    
 
-                      <div class="ajax-detail"></div>
-                      
-                      <button type="submit" id="submitForm" class="btn btn-primary">submit</button>
-                  </form>
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="text" name="invpayh_note" class="form-control">
+                </div>
+
+                <div class="ajax-detail"></div>
+                
+                <button type="submit" id="submitForm" class="btn btn-primary">submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+          <!-- content -->
+      
+          <!-- Modal extra -->
+          <div id="detailModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Payment Information</h4>
+                </div>
+                <div class="modal-body" id="detailModalContent">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
               </div>
+
             </div>
           </div>
-       
+          <!-- End Modal -->
 
+          <!-- Modal select unit -->
+          <div id="unitModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
 
-                <!-- content -->
-            
-                <!-- Modal extra -->
-                <div id="detailModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
-
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Payment Information</h4>
-                      </div>
-                      <div class="modal-body" id="detailModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-                <!-- End Modal -->
-
-                <!-- Modal select unit -->
-                <div id="unitModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
-
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      
-                      <div class="modal-body" id="unitModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-                <!-- End Modal -->
+              <!-- Modal content-->
+              <div class="modal-content">
                 
-
-                <!-- modal form -->
-                <div id="editModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog" style="width:80%">
-
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Edit Payment</h4>
-                      </div>
-                      <div class="modal-body">
-                        
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
-                  </div>
+                <div class="modal-body" id="unitModalContent">
                 </div>
-                <!-- end modal form -->
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
 
-                <!-- content -->
             </div>
-        </div>
-    </div>
+          </div>
+          <!-- End Modal -->
+          
+
+          <!-- modal form -->
+          <div id="editModal" class="modal fade" role="dialog">
+            <div class="modal-dialog" style="width:80%">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Edit Payment</h4>
+                </div>
+                <div class="modal-body">
+                  
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <!-- end modal form -->
+
+          <!-- content -->
+      </div>
+  </div>
+
 @endsection
 
 @section('footer-scripts')

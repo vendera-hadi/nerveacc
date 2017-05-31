@@ -102,8 +102,12 @@ class HomeController extends Controller
         $isi2[11] = (float)$fetch2[0]['des'];
         $data['bayar'] = json_encode($isi2);
 
+        $total_all = $fetch[0]['total'] + $fetch2[0]['total'];
+
         $data['hutang_vs'] = (float)$fetch[0]['total'];
         $data['bayar_vs'] = (float)$fetch2[0]['total'];
+        $data['hutang_persen'] = number_format($fetch[0]['total']/$total_all*100,2);
+        $data['bayar_persen'] = number_format($fetch2[0]['total']/$total_all*100,2);
 
         return view('home',$data);
     }

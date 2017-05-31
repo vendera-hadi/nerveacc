@@ -32,89 +32,87 @@
       </div>
     @endif
 
-	<div class="container spark-screen">
-		<div class="row">
-			<div class="col-md-11">
-          		<!-- content -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="box">
-                            <div class="box-header with-border">
-                              <h3 class="box-title">Tabel grup pengguna</h3>
-                            </div>
-                            <!-- /.box-header -->
-                            <div class="box-body">
-                                <button type="button" class="btn btn-primary pull-right" style="margin-bottom:10px" id="AddNew">Add new Role</button>
-                              <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                      <th>Nama Grup</th>
-                                      <th style="width: 40px">Action</th>
-                                    </tr>
-                                    @foreach($roles as $role)
-                                    <tr>
-                                      <td>{{ $role->name }}</td>
-                                      <td data-id="{{$role->id}}">
-                                        @if($role->id!=1)
-                                        <a href="javascript:void(0);" class="edit"><i class="fa fa-pencil"></i></a>
-                                        <a href="javascript:void(0);" class="delete"><i class="fa fa-times"></i></a>
-                                        @endif
-                                      </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                               </table>
-                            </div>
-                            <!-- /.box-body -->
-                            <div class="box-footer clearfix">
-                                {{ $roles->render() }} 
-                            </div>
-                        </div>
+<div class="row">
+	<div class="col-md-12">
+  		<!-- content -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header with-border">
+                      <h3 class="box-title">Tabel grup pengguna</h3>
                     </div>
-                
-                    <div class="col-md-6">
-                        <div class="box" id="editorBox" style="display:none">
-                            <div class="box-header with-border">
-                              <h3 class="box-title editor"></h3>
-                            </div>
-                                <form id="formRole" role="form" action="" method="post">
-                                  <div class="box-body">
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Role Name</label>
-                                      <input type="text" class="form-control" name="name" placeholder="Role Name" required>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                            <div class="checkbox">
-                                              <label>
-                                                <input type="checkbox" id="selectAll"> Select / Unselect All
-                                              </label>
-                                            </div>
-                                        </div>
-                                        @foreach($permissions as $permission)
-                                        <div class="col-sm-6">
-                                            <div class="checkbox">
-                                              <label>
-                                                <input type="checkbox" class="permission" name="permission[]" value="{{$permission->id}}"> {{$permission->name}}
-                                              </label>
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                  
-                                    <button type="submit" class="btn btn-primary" style="margin-top:25px">Submit</button>
-                                  
-                                </form>
-                            </div>
-                        </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <button type="button" class="btn btn-primary pull-right" style="margin-bottom:10px" id="AddNew">Add new Role</button>
+                      <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                              <th>Nama Grup</th>
+                              <th style="width: 40px">Action</th>
+                            </tr>
+                            @foreach($roles as $role)
+                            <tr>
+                              <td>{{ $role->name }}</td>
+                              <td data-id="{{$role->id}}">
+                                @if($role->id!=1)
+                                <a href="javascript:void(0);" class="edit"><i class="fa fa-pencil"></i></a>
+                                <a href="javascript:void(0);" class="delete"><i class="fa fa-times"></i></a>
+                                @endif
+                              </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                       </table>
+                    </div>
+                    <!-- /.box-body -->
+                    <div class="box-footer clearfix">
+                        {{ $roles->render() }} 
                     </div>
                 </div>
+            </div>
+        
+            <div class="col-md-6">
+                <div class="box" id="editorBox" style="display:none">
+                    <div class="box-header with-border">
+                      <h3 class="box-title editor"></h3>
+                    </div>
+                        <form id="formRole" role="form" action="" method="post">
+                          <div class="box-body">
+                            <div class="form-group">
+                              <label for="exampleInputEmail1">Role Name</label>
+                              <input type="text" class="form-control" name="name" placeholder="Role Name" required>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="checkbox">
+                                      <label>
+                                        <input type="checkbox" id="selectAll"> Select / Unselect All
+                                      </label>
+                                    </div>
+                                </div>
+                                @foreach($permissions as $permission)
+                                <div class="col-sm-6">
+                                    <div class="checkbox">
+                                      <label>
+                                        <input type="checkbox" class="permission" name="permission[]" value="{{$permission->id}}"> {{$permission->name}}
+                                      </label>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                          
+                            <button type="submit" class="btn btn-primary" style="margin-top:25px">Submit</button>
+                          
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-          		<!-- content -->
-        	</div>
-		</div>
+  		<!-- content -->
 	</div>
+</div>
 @endsection
 
 @section('footer-scripts')

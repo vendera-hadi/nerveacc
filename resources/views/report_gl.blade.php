@@ -35,9 +35,8 @@
 @stop
 
 @section('main-content')
-	<div class="container spark-screen">
 		<div class="row">
-			<div class="col-md-11">
+			<div class="col-md-12">
           		<!-- content -->
                 <div class="box" style="min-height:500px">
                     <div class="box-body">

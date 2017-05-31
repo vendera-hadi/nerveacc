@@ -37,167 +37,133 @@
 @stop
 
 @section('main-content')
-<div class="container spark-screen">
-        <div class="row">
-            <div class="col-md-11">
-
-          <!-- Tabs -->
-          <div class="nav-tabs-custom">
-            
-            <div class="tab-content">
-              
-              @if(Session::has('success'))
-              <div class="alert alert-success alert-dismissible">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                <h4><i class="icon fa fa-check"></i> Insert entry success</h4>
-              </div>
-              @endif
-              
-                <!-- add journal -->
-                <form method="POST" id="formJournal">
-                  <div class="row">
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Date</label>
-                            <div class="input-group date">
-                              <div class="input-group-addon">
-                                <i class="fa fa-calendar"></i>
-                              </div>
-                              <input type="text" class="form-control pull-right" name="ledg_date" id="datepicker" required>
-                            </div>
-                        </div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <div class="tab-content">
+        @if(Session::has('success'))
+        <div class="alert alert-success alert-dismissible">
+          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+          <h4><i class="icon fa fa-check"></i> Insert entry success</h4>
+        </div>
+        @endif
+        <form method="POST" id="formJournal">
+          <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Date</label>
+                    <div class="input-group date">
+                      <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                      </div>
+                      <input type="text" class="form-control pull-right" name="ledg_date" id="datepicker" required>
                     </div>
-                    <div class="col-sm-6">
-                      <div class="form-group">
-                        <label>Ref No</label>
-                        <input type="text" class="form-control" name="ledg_refno" required>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                      
-
-                      <div class="col-sm-6">
-                        
-
-                        <div class="form-group">
-                          <label>Journal Type</label>
-                          <select class="form-control" name="jour_type_id" required>
-                            <option value="">Choose Journal Type</option>
-                            @foreach($journal_types as $jourtype)
-                            <option value="{{$jourtype->id}}">{{$jourtype->jour_type_name}}</option>
-                            @endforeach
-                          </select>
-                        </div>
-                      </div>
-
-                  </div>
-
-
-
-                  <div class="AccountList" style="margin-top:30px">
-                      <div class="row">
-                        <div class="col-sm-6">
-                            <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
-                              <option value="">Choose Account</option>
-                              
-                              @foreach($accounts as $key => $coa)
-                                  <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                              @endforeach
-                            </select>
-                        </div>
-                        <div class="col-sm-2">
-                            <button type="button" id="addAccount" class="btn btn-default">Add Line</button>
-                        </div>
-                      </div>
-                  </div>
-                  <br><br>
-                  <div class="row">
-                      <div class="col-sm-12">
-                          <table id="tableJournal" width="100%" class="table table-bordered">
-                              <tr class="text-center">
-                                <td>Account Code</td>
-                                <td>Account Name</td>
-                                <td>Description</td>
-                                <td>Department</td>
-                                <td>Debit/Credit</td>
-                                <td>Value</td>
-                                <td></td>
-                              </tr>
-                              
-                              <tr id="rowEmpty">
-                                <td colspan="7"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
-                              </tr>
-                            </table>
-
-                            <table width="50%" class="table table-bordered">
-                              <tr class="text-center">
-                                <td>Status</td>
-                                <td>Total Debit</td>
-                                <td>Total Credit</td>
-                              </tr>
-                              <tr class="text-center">
-                                <td id="ledgerStatus" style="font-weight:bold;"></td>
-                                <td id="totalDebit" style="font-weight:bold; color:red">0</td>
-                                <td id="totalCredit" style="font-weight:bold; color:blue">0</td>
-                              </tr>
-                            </table>
-                      </div>
-                  </div>
-                  <br><br>
-                  <div class="row">
-                      <div class="col-sm-12">
-                          <button type="submit" id="submitJournal">Submit</button>
-                      </div>
-                  </div>
-
-                </form>
-                <!-- add journal -->
-              
-
-              </div>
-
-            </div>
-            <!-- /.tab-content -->
-          </div>
-          <!-- Tabs -->
-
-          <!-- Modal extra -->
-                <div id="detailModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
-
-                    <!-- Modal content-->
-                    <div class="modal-content" style="width:100%">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Journal Detail</h4>
-                      </div>
-                      <div class="modal-body" id="detailModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
-                  </div>
                 </div>
-                <!-- End Modal -->
+            </div>
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label>Ref No</label>
+                <input type="text" class="form-control" name="ledg_refno" required>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label>Journal Type</label>
+                <select class="form-control" name="jour_type_id" required>
+                  <option value="">Choose Journal Type</option>
+                  @foreach($journal_types as $jourtype)
+                  <option value="{{$jourtype->id}}">{{$jourtype->jour_type_name}}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <label>COA</label>
+              <div class="input-group input-group-md">
+                <select class="js-example-basic-single" id="selectAccount" style="width:100%">
+                  <option value="">Choose Account</option>
+                  @foreach($accounts as $key => $coa)
+                      <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                  @endforeach
+                </select>
+                <span class="input-group-btn">
+                  <button type="button" id="addAccount" class="btn btn-default">Add Line</button>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <table id="tableJournal" width="100%" class="table table-bordered">
+                <tr class="text-center">
+                  <td>Account Code</td>
+                  <td>Account Name</td>
+                  <td>Description</td>
+                  <td>Department</td>
+                  <td>Debit/Credit</td>
+                  <td>Value</td>
+                  <td></td>
+                </tr>
+                
+                <tr id="rowEmpty">
+                  <td colspan="7"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
+                </tr>
+              </table>
+              <table width="50%" class="table table-bordered">
+                <tr class="text-center">
+                  <td>Status</td>
+                  <td>Total Debit</td>
+                  <td>Total Credit</td>
+                </tr>
+                <tr class="text-center">
+                  <td id="ledgerStatus" style="font-weight:bold;"></td>
+                  <td id="totalDebit" style="font-weight:bold; color:red">0</td>
+                  <td id="totalCredit" style="font-weight:bold; color:blue">0</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <br><br>
+          <div class="row">
+            <div class="col-sm-12">
+              <button type="submit" id="submitJournal">Submit</button>
+            </div>
+          </div>
+        </form>
+        <!-- add journal -->
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal extra -->
+<div id="detailModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content" style="width:100%">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Journal Detail</h4>
+      </div>
+      <div class="modal-body" id="detailModalContent"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End Modal -->
 @endsection
 
 @section('footer-scripts')
 <script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
-<!-- select2 -->
-<script type="text/javascript" src="{{ asset('plugins/select2/select2.min.js') }}"></script>
-<!-- datepicker -->
+<script type="text/javascript" src="{{ asset('plugins/select2/select2.full.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
-<script type="text/javascript" src="{{ asset('plugins/daterangepicker/moment.min.js') }}"></script>
-<script type="text/javascript" src="{{ asset('plugins/daterangepicker/daterangepicker.js') }}"></script>
-
 <script type="text/javascript">
-$('#reservation').daterangepicker();
-$(document).ready(function() {
+$(function () {
   $(".js-example-basic-single").select2();
 });
 

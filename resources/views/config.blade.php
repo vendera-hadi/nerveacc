@@ -26,121 +26,119 @@
 @stop
 
 @section('main-content')
-<div class="container spark-screen">
-        <div class="row">
-            <div class="col-md-11">
-                <!-- content -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="box box-primary">
-                                <div class="box-header with-border">
-                                  <h3 class="box-title">Other Config Form</h3>
-                                </div>
-                                <!-- /.box-header -->
-                                <!-- form start -->
-                                
-                                <form action="{{route('config.update')}}" method="post" enctype="multipart/form-data">
-                                  <div class="box-body">
-                                    <div class="col-sm-12">
-
-                                        @if(Session::get('error'))
-                                            <div class="alert alert-danger">
-                                              <strong>Error!</strong> {{ Session::get('error') }}
-                                            </div>
-                                        @endif
-
-                                        @if(Session::get('success'))
-                                            <div class="alert alert-success">
-                                              <strong>Success</strong> {{ Session::get('success') }}
-                                            </div>
-                                        @endif
-
-                                        @if (count($errors) > 0)
-                                          <div class="alert alert-danger">
-                                            <ul>
-                                              @foreach($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                              @endforeach
-                                            </ul>
-                                          </div>
-                                        @endif
-                                    
-                                        <div class="form-group">
-                                          <label>Footer Invoice Text</label>
-                                          <textarea class="textarea" name="footer_invoice" class="form-control" style="width: 100%;" required>{{$footer}}</textarea>
-                                        </div>
-
-                                        <div class="form-group">
-                                          <label>Footer Invoice Label</label>
-                                          <textarea class="textarea" name="footer_label_inv" class='form-control' style="width: 100%;" required>{{$label}}</textarea>
-                                        </div>
-
-                                        <div class="form-group">
-                                          <label>Service Charge Alias</label>
-                                          <input type="text" name="service_charge_alias" class="form-control" value="{{$service_charge}}">
-                                        </div>
-                                              
-                                        <div class="form-group">
-                                          <label>Due Date Interval Invoice</label>
-                                          <input type="number" name="duedate_interval" class="form-control" value="{{$duedate}}">
-                                        </div>
-
-                                        @if(!empty($signature))
-                                        <div class="form-group">
-                                          <label>Current Signature</label><br>
-                                          <img src="{{asset($signature)}}" class="img-responsive" width="150">
-                                        </div>
-                                        @endif
-
-                                        <div class="form-group">
-                                          <label>Digital Signature</label>
-                                          <input type="file" name="digital_signature" class="form-control" accept="image/jpeg,image/jpg,image/png">
-                                        </div>
-
-                                        <div class="form-group">
-                                          <label>CC Email Address</label>
-                                          <input type="text" name="cc_email" class="form-control" value="{{$cc_email}}">
-                                        </div>
-
-                                        <div class="form-group">
-                                          <label>Send Invoice Email</label><br>
-                                          <input type="radio" name="send_inv_email" value="1" @if($sendEmail==1) checked @endif> &nbsp; Active &nbsp;&nbsp;
-                                          <input type="radio" name="send_inv_email" value="0" @if($sendEmail==0) checked @endif> &nbsp; Not Active
-                                        </div>
-
-                                        <div class="form-group">
-                                          <label>Active Invoice Signature</label><br>
-                                          <input type="radio" name="invoice_signature_flag" value="1" @if($signatureFlag==1) checked @endif> &nbsp; Active &nbsp;&nbsp;
-                                          <input type="radio" name="invoice_signature_flag" value="0" @if($signatureFlag==0) checked @endif> &nbsp; Not Active
-                                        </div>
-
-                                        <div class="form-group">
-                                          <label>Prefix Kuitansi (max 3 Character)</label>
-                                          <input type="text" name="prefix_kuitansi" class="form-control" value="{{$prefixKuitansi}}" maxlength="3">
-                                        </div>
-
-                                        <div class="form-group">
-                                          <label>Invoice Email Template</label>
-                                          <textarea class="textarea" name="inv_body_email" class="form-control" style="width: 100%;" required>{{$invBodyEmail}}</textarea>
-                                        </div>
-
-                                    </div>
-                                  </div>
-                                  <!-- /.box-body -->
-
-                                  <div class="box-footer">
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                  </div>
-                                </form>
-                                
-
-                              </div>
+<div class="row">
+    <div class="col-md-12">
+        <!-- content -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                          <h3 class="box-title">Other Config Form</h3>
                         </div>
-                    </div>
-                <!-- content -->
+                        <!-- /.box-header -->
+                        <!-- form start -->
+                        
+                        <form action="{{route('config.update')}}" method="post" enctype="multipart/form-data">
+                          <div class="box-body">
+                            <div class="col-sm-12">
+
+                                @if(Session::get('error'))
+                                    <div class="alert alert-danger">
+                                      <strong>Error!</strong> {{ Session::get('error') }}
+                                    </div>
+                                @endif
+
+                                @if(Session::get('success'))
+                                    <div class="alert alert-success">
+                                      <strong>Success</strong> {{ Session::get('success') }}
+                                    </div>
+                                @endif
+
+                                @if (count($errors) > 0)
+                                  <div class="alert alert-danger">
+                                    <ul>
+                                      @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                      @endforeach
+                                    </ul>
+                                  </div>
+                                @endif
+                            
+                                <div class="form-group">
+                                  <label>Footer Invoice Text</label>
+                                  <textarea class="textarea" name="footer_invoice" class="form-control" style="width: 100%;" required>{{$footer}}</textarea>
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Footer Invoice Label</label>
+                                  <textarea class="textarea" name="footer_label_inv" class='form-control' style="width: 100%;" required>{{$label}}</textarea>
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Service Charge Alias</label>
+                                  <input type="text" name="service_charge_alias" class="form-control" value="{{$service_charge}}">
+                                </div>
+                                      
+                                <div class="form-group">
+                                  <label>Due Date Interval Invoice</label>
+                                  <input type="number" name="duedate_interval" class="form-control" value="{{$duedate}}">
+                                </div>
+
+                                @if(!empty($signature))
+                                <div class="form-group">
+                                  <label>Current Signature</label><br>
+                                  <img src="{{asset($signature)}}" class="img-responsive" width="150">
+                                </div>
+                                @endif
+
+                                <div class="form-group">
+                                  <label>Digital Signature</label>
+                                  <input type="file" name="digital_signature" class="form-control" accept="image/jpeg,image/jpg,image/png">
+                                </div>
+
+                                <div class="form-group">
+                                  <label>CC Email Address</label>
+                                  <input type="text" name="cc_email" class="form-control" value="{{$cc_email}}">
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Send Invoice Email</label><br>
+                                  <input type="radio" name="send_inv_email" value="1" @if($sendEmail==1) checked @endif> &nbsp; Active &nbsp;&nbsp;
+                                  <input type="radio" name="send_inv_email" value="0" @if($sendEmail==0) checked @endif> &nbsp; Not Active
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Active Invoice Signature</label><br>
+                                  <input type="radio" name="invoice_signature_flag" value="1" @if($signatureFlag==1) checked @endif> &nbsp; Active &nbsp;&nbsp;
+                                  <input type="radio" name="invoice_signature_flag" value="0" @if($signatureFlag==0) checked @endif> &nbsp; Not Active
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Prefix Kuitansi (max 3 Character)</label>
+                                  <input type="text" name="prefix_kuitansi" class="form-control" value="{{$prefixKuitansi}}" maxlength="3">
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Invoice Email Template</label>
+                                  <textarea class="textarea" name="inv_body_email" class="form-control" style="width: 100%;" required>{{$invBodyEmail}}</textarea>
+                                </div>
+
+                            </div>
+                          </div>
+                          <!-- /.box-body -->
+
+                          <div class="box-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                          </div>
+                        </form>
+                        
+
+                      </div>
+                </div>
             </div>
-        </div>
+        <!-- content -->
     </div>
+</div>
 @endsection
 
 @section('footer-scripts')

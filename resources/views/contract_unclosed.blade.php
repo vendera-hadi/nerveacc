@@ -39,71 +39,67 @@
 @stop
 
 @section('main-content')
-    <div class="container spark-screen">
-        <div class="row">
-            <div class="col-md-11">
-                <!-- template tabel -->
-                <table id="dg" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
-                    <!-- kolom -->
-                    <thead>
-                        <tr>
-                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="tenan_name" width="120" sortable="true">Tenant</th>
-                            <th field="contr_code" width="120" sortable="true">Billing Info Code</th>
-                            <th field="contr_no" width="120" sortable="true">Billing Info No</th>
-                            <th field="contr_enddate" width="120" sortable="true">End Date</th>
-                            <th field="contr_status" width="120" sortable="true">Status</th>
-                            <th field="contr_terminate_date" width="120" sortable="true">Terminated Date</th>
-                            <th field="action">Action</th>
-                        </tr>
-                    </thead>
-                </table>
-                <!-- end table -->
+    <div class="row">
+        <div class="col-md-12">
+            <!-- template tabel -->
+            <table id="dg" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <!-- kolom -->
+                <thead>
+                    <tr>
+                        <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                        <th field="tenan_name" width="120" sortable="true">Tenant</th>
+                        <th field="contr_code" width="120" sortable="true">Billing Info Code</th>
+                        <th field="contr_no" width="120" sortable="true">Billing Info No</th>
+                        <th field="contr_enddate" width="120" sortable="true">End Date</th>
+                        <th field="contr_status" width="120" sortable="true">Status</th>
+                        <th field="contr_terminate_date" width="120" sortable="true">Terminated Date</th>
+                        <th field="action">Action</th>
+                    </tr>
+                </thead>
+            </table>
+            <!-- end table -->
 
-                <!-- Modal extra -->
-                <div id="detailModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
+            <!-- Modal extra -->
+            <div id="detailModal" class="modal fade" role="dialog">
+              <div class="modal-dialog">
 
-                    <!-- Modal content-->
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Billing Info Information</h4>
-                      </div>
-                      <div class="modal-body" id="detailModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Billing Info Information</h4>
                   </div>
-                </div>
-                <!-- End Modal -->
-
-
-                <div id="closeCtrModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog" style="width: 850px;">
-
-                    <!-- Modal content-->
-                    <div class="modal-content" style="width: 850px;">
-                      
-                      <div class="modal-body text-center" id="closeCtrModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
+                  <div class="modal-body" id="detailModalContent">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                   </div>
                 </div>
 
-            <!-- content -->
+              </div>
             </div>
-        </div>
-    </div>
+            <!-- End Modal -->
 
-    
+
+            <div id="closeCtrModal" class="modal fade" role="dialog">
+              <div class="modal-dialog" style="width: 850px;">
+
+                <!-- Modal content-->
+                <div class="modal-content" style="width: 850px;">
+                  
+                  <div class="modal-body text-center" id="closeCtrModalContent">
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+        <!-- content -->
+        </div>
+    </div>    
 @endsection
 
 @section('footer-scripts')

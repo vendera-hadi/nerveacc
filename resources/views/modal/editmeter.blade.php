@@ -5,7 +5,7 @@
   <ul class="nav nav-tabs">
     <li class="active"><a href="#tab_1a" data-toggle="tab">Listrik</a></li>
     <li><a href="#tab_2a" data-toggle="tab">Air</a></li>
-    <li class="dropdown">
+    <li class="dropdown bg-success">
       <a class="dropdown-toggle" data-toggle="dropdown" href="#">
         Download Template <span class="caret"></span>
       </a>
@@ -14,7 +14,7 @@
         <li role="presentation" class="divider"></li>
         <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ url('period_meter/downloadExcel',[$st->id,2]) }}">Air</a></li>
       </ul>
-      <li><a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-upload"></i> Upload</a></li>
+      <li class="bg-info"><a href="#" data-toggle="modal" data-target="#myModal"><i class="fa fa-upload"></i> Upload</a></li>
     </li>
   </ul>
   <div class="tab-content">

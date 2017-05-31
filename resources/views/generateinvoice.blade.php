@@ -25,48 +25,47 @@
 @stop
 
 @section('main-content')
-	<div class="container spark-screen">
-		<div class="row">
-			<div class="col-md-11">
-          		<!-- content -->
-                <div class="box" style="min-height:500px">
-                    <div class="box-body">
-                        <h4>Invoice Filter</h4>
-                        <form action="post" id="formGenerate">
-                        <div class ="row">
-                            <div class="col-sm-3">
-                                <select id="month" name="month" class="form-control" required>
-                                    <option value="">Choose Month</option>
-                                    @for($i=1;$i<=12;$i++)
-                                    <?php $time = DateTime::createFromFormat('!m', $i); ?>
-                                    <option value="{{$i}}">{{$time->format('F')}}</option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="col-sm-3">
-                                <select id="year" name="year" class="form-control" required>
-                                    <option value="">Choose Year</option>
-                                    @for($i=2016;$i<=date('Y');$i++)
-                                    <option value="{{$i}}">{{$i}}</option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="col-sm-3">
-                                <button class="btn btn-info">Submit</button>
-                            </div>
+	<div class="row">
+		<div class="col-md-12">
+      		<!-- content -->
+            <div class="box" style="min-height:500px">
+                <div class="box-body">
+                    <h4>Invoice Filter</h4>
+                    <form action="post" id="formGenerate">
+                    <div class ="row">
+                        <div class="col-sm-3">
+                            <select id="month" name="month" class="form-control" required>
+                                <option value="">Choose Month</option>
+                                @for($i=1;$i<=12;$i++)
+                                <?php $time = DateTime::createFromFormat('!m', $i); ?>
+                                <option value="{{$i}}">{{$time->format('F')}}</option>
+                                @endfor
+                            </select>
                         </div>
-                        </form>
+                        <div class="col-sm-3">
+                            <select id="year" name="year" class="form-control" required>
+                                <option value="">Choose Year</option>
+                                @for($i=2016;$i<=date('Y');$i++)
+                                <option value="{{$i}}">{{$i}}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <button class="btn btn-info">Submit</button>
+                        </div>
+                    </div>
+                    </form>
 
-                        <div class ="row" style="margin-top:80px">
-                            <div class="col-sm-12 text-center" id="generateResult">
-                            </div>
+                    <div class ="row" style="margin-top:80px">
+                        <div class="col-sm-12 text-center" id="generateResult">
                         </div>
                     </div>
                 </div>
+            </div>
 
-        	</div>
-		</div>
+    	</div>
 	</div>
+
 @endsection
 
 @section('footer-scripts')

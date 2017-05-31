@@ -42,233 +42,193 @@
 @stop
 
 @section('main-content')
-<div class="container spark-screen">
-        <div class="row">
-            <div class="col-md-11">
-
-          <!-- Tabs -->
-          <div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
-              <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
-              <li class="hidden"><a href="#tab_3">Edit Journal</a></li>
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pane active" id="tab_1">
-                
-                <form id="formFilter" action="" method="GET">
-                <div class="row">
-                <div class="col-sm-4">
-                    <!-- date range -->
-                
+<div class="row">
+  <div class="col-md-12">
+    <div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
+        <li class="hidden"><a href="#tab_3">Edit Journal</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="tab_1">
+          <form id="formFilter" action="" method="GET">
+            <div class="row">
+              <div class="col-sm-4">
                 <div class="form-group">
-                    <div class="input-group">
+                  <div class="input-group">
+                    <div class="input-group-addon">
+                      <i class="fa fa-calendar"></i>
+                    </div>
+                    <input type="text" name="filterdate" class="form-control pull-right" placeholder="Filter by date" id="reservation">
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <select name="dept" class="form-control">
+                  <option value="">All Department</option> 
+                  @foreach($departments as $dept)
+                  <option value="{{$dept->id}}" @if(Request::input('dept') == $dept->id){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-sm-3">
+                <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
+                  <option value="">Choose COA</option>
+                  
+                  @foreach($accounts as $key => $coa)
+                      <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                  @endforeach
+                </select>
+              </div>                
+              <div class="col-sm-2">
+                  <button type="submit" class="btn btn-success">Filter</button>
+              </div>
+            </div>
+            <div class="row" style="margin-bottom:15px">
+                <div class="col-sm-4">
+                  <input class="form-control" type="text" name="q" placeholder="Keyword">
+                </div>
+            </div> 
+          </form>
+          @if(Request::input('filterdate'))
+          <div class="row">
+            <div class="col-xs-12">
+              <h3>Search Journal by : {{Request::input('filterdate')}}</h3>
+            </div>
+          </div>
+          @endif
+          <table id="dg" title="Latest Journal Entry" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+            <thead>
+                <tr>
+                    <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                    <th field="coa_code" width="120" sortable="true">Acc No</th>
+                    <th field="coa_name" width="120" sortable="true">Acc Name</th>
+                    <th field="ledg_date" width="120" sortable="true">Date</th>
+                    <th field="ledg_refno" width="120" sortable="true">Invoice No</th>
+                    <th field="ledg_description" width="120" sortable="true">Description</th>
+                    <th field="debit" width="120" sortable="true">Debit</th>
+                    <th field="credit" width="120" sortable="true">Credit</th>
+                    <th field="jour_type_prefix" width="120" sortable="true">Jrnl Type</th>
+                    <th field="action">Action</th>
+                </tr>
+            </thead>
+          </table>
+        </div>
+        <!-- /.tab-pane -->
+        <div class="tab-pane" id="tab_2">
+          <!-- add journal -->
+          <form method="POST" id="formJournal">
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Date</label>
+                    <div class="input-group date">
                       <div class="input-group-addon">
                         <i class="fa fa-calendar"></i>
                       </div>
-                      <input type="text" name="filterdate" class="form-control pull-right" placeholder="Filter by date" id="reservation">
+                      <input type="text" class="form-control pull-right" name="ledg_date" id="datepicker" required>
                     </div>
-                    <!-- /.input group -->
-                  </div>
-                  <!-- /.form group -->
                 </div>
-
-                <div class="col-sm-3">
-                  <select name="dept" class="form-control">
-                    <option value="">All Department</option> 
-                    @foreach($departments as $dept)
-                    <option value="{{$dept->id}}" @if(Request::input('dept') == $dept->id){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
-                    @endforeach
-                  </select>
-                </div>
-
-                <div class="col-sm-3">
-                  <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
-                    <option value="">Choose COA</option>
-                    
-                    @foreach($accounts as $key => $coa)
-                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                    @endforeach
-                  </select>
-                </div>                
-
-                <div class="col-sm-2">
-                    <button type="submit" class="btn btn-success">Filter</button>
-                </div>
-
               </div>
-
-              <div class="row" style="margin-bottom:15px">
-
-                  <div class="col-sm-4">
-                    <input class="form-control" type="text" name="q" placeholder="Keyword">
-                  </div>
-              </div> 
-            </form>
-
-            @if(Request::input('filterdate'))
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label>Ref No</label>
+                  <input type="text" class="form-control" name="ledg_refno" required>
+                </div>
+              </div>
+            </div>
             <div class="row">
-              <div class="col-xs-12">
-                <h3>Searh Journal by : {{Request::input('filterdate')}}</h3>
-              </div>
-            </div>
-            @endif
-
-                  <!-- template tabel -->
-                <table id="dg" title="Latest Journal Entry" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
-                    <!-- kolom -->
-                    <thead>
-                        <tr>
-                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="coa_code" width="120" sortable="true">Acc No</th>
-                            <th field="coa_name" width="120" sortable="true">Acc Name</th>
-                            <th field="ledg_date" width="120" sortable="true">Date</th>
-                            <th field="ledg_refno" width="120" sortable="true">Invoice No</th>
-                            <th field="ledg_description" width="120" sortable="true">Description</th>
-                            <th field="debit" width="120" sortable="true">Debit</th>
-                            <th field="credit" width="120" sortable="true">Credit</th>
-                            <th field="jour_type_prefix" width="120" sortable="true">Jrnl Type</th>
-                            <th field="action">Action</th>
-                        </tr>
-                    </thead>
-                </table>
-                <!-- end table -->
-                
-                
-              </div>
-              <!-- /.tab-pane -->
-              <div class="tab-pane" id="tab_2">
-                <!-- add journal -->
-                <form method="POST" id="formJournal">
-                  <div class="row">
-                    <div class="col-sm-6">
-                        <div class="form-group">
-                            <label>Date</label>
-                            <div class="input-group date">
-                              <div class="input-group-addon">
-                                <i class="fa fa-calendar"></i>
-                              </div>
-                              <input type="text" class="form-control pull-right" name="ledg_date" id="datepicker" required>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                      <div class="form-group">
-                        <label>Ref No</label>
-                        <input type="text" class="form-control" name="ledg_refno" required>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                      
-
-                      <div class="col-sm-6">
-                        
-
-                        <div class="form-group">
-                          <label>Journal Type</label>
-                          <select class="form-control" name="jour_type_id" required>
-                            <option value="">Choose Journal Type</option>
-                            @foreach($journal_types as $jourtype)
-                            <option value="{{$jourtype->id}}">{{$jourtype->jour_type_name}}</option>
-                            @endforeach
-                          </select>
-                        </div>
-                      </div>
-
-                  </div>
-
-
-
-                  <div class="AccountList" style="margin-top:30px">
-                      <div class="row">
-                        <div class="col-sm-6">
-                            <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
-                              <option value="">Choose Account</option>
-                              
-                              @foreach($accounts as $key => $coa)
-                                  <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                              @endforeach
-                            </select>
-                        </div>
-                        <div class="col-sm-2">
-                            <button type="button" id="addAccount" class="btn btn-default">Add Line</button>
-                        </div>
-                      </div>
-                  </div>
-                  <br><br>
-                  <div class="row">
-                      <div class="col-sm-12">
-                          <table id="tableJournal" width="100%" class="table table-bordered">
-                              <tr class="text-center">
-                                <td>Account Code</td>
-                                <td>Account Name</td>
-                                <td>Description</td>
-                                <td>Department</td>
-                                <td>Debit/Credit</td>
-                                <td>Value</td>
-                                <td></td>
-                              </tr>
-                              
-                              <tr id="rowEmpty">
-                                <td colspan="7"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
-                              </tr>
-                            </table>
-
-                            <table width="50%" class="table table-bordered">
-                              <tr class="text-center">
-                                <td>Status</td>
-                                <td>Total Debit</td>
-                                <td>Total Credit</td>
-                              </tr>
-                              <tr class="text-center">
-                                <td id="ledgerStatus" style="font-weight:bold;"></td>
-                                <td id="totalDebit" style="font-weight:bold; color:red">0</td>
-                                <td id="totalCredit" style="font-weight:bold; color:blue">0</td>
-                              </tr>
-                            </table>
-                      </div>
-                  </div>
-                  <br><br>
-                  <div class="row">
-                      <div class="col-sm-12">
-                          <button type="submit" id="submitJournal">Submit</button>
-                      </div>
-                  </div>
-
-                </form>
-                <!-- add journal -->
-              </div>
-
-              <div class="tab-pane" id="tab_3">
-              </div>
-
-              </div>
-
-            </div>
-            <!-- /.tab-content -->
-          </div>
-          <!-- Tabs -->
-
-          <!-- Modal extra -->
-                <div id="detailModal" class="modal fade" role="dialog">
-                  <div class="modal-dialog">
-
-                    <!-- Modal content-->
-                    <div class="modal-content" style="width:100%">
-                      <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Journal Detail</h4>
-                      </div>
-                      <div class="modal-body" id="detailModalContent">
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-
-                  </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label>Journal Type</label>
+                  <select class="form-control" name="jour_type_id" required>
+                    <option value="">Choose Journal Type</option>
+                    @foreach($journal_types as $jourtype)
+                    <option value="{{$jourtype->id}}">{{$jourtype->jour_type_name}}</option>
+                    @endforeach
+                  </select>
                 </div>
-                <!-- End Modal -->
+              </div>
+            </div>
+            <div class="AccountList" style="margin-top:30px">
+              <div class="row">
+                <div class="col-sm-6">
+                    <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
+                      <option value="">Choose Account</option>
+                      
+                      @foreach($accounts as $key => $coa)
+                          <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                      @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" id="addAccount" class="btn btn-default">Add Line</button>
+                </div>
+              </div>
+            </div>
+            <br><br>
+            <div class="row">
+              <div class="col-sm-12">
+                <table id="tableJournal" width="100%" class="table table-bordered">
+                  <tr class="text-center">
+                    <td>Account Code</td>
+                    <td>Account Name</td>
+                    <td>Description</td>
+                    <td>Department</td>
+                    <td>Debit/Credit</td>
+                    <td>Value</td>
+                    <td></td>
+                  </tr>    
+                  <tr id="rowEmpty">
+                    <td colspan="7"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
+                  </tr>
+                </table>
+                <table width="50%" class="table table-bordered">
+                  <tr class="text-center">
+                    <td>Status</td>
+                    <td>Total Debit</td>
+                    <td>Total Credit</td>
+                  </tr>
+                  <tr class="text-center">
+                    <td id="ledgerStatus" style="font-weight:bold;"></td>
+                    <td id="totalDebit" style="font-weight:bold; color:red">0</td>
+                    <td id="totalCredit" style="font-weight:bold; color:blue">0</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            <br><br>
+            <div class="row">
+              <div class="col-sm-12">
+                  <button type="submit" id="submitJournal">Submit</button>
+              </div>
+            </div>
+          </form>
+        <!-- add journal -->
+        </div>
+        <div class="tab-pane" id="tab_3"></div>
+      </div>
+    </div>
+    <!-- /.tab-content -->
+  </div>
+</div>
+<!-- Modal extra -->
+<div id="detailModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content" style="width:100%">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Journal Detail</h4>
+      </div>
+      <div class="modal-body" id="detailModalContent"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End Modal -->
 @endsection
 
 @section('footer-scripts')

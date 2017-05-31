@@ -27,99 +27,81 @@
 @stop
 
 @section('main-content')
-	<div class="container spark-screen">
-		<div class="row">
-			<div class="col-md-11">
-          		<!-- content -->
-
-                <!-- template tabel -->
-          		<table id="dg" title="Master Unit" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
-                    <!-- kolom -->
-                    <thead>
-                        <tr>
-                            <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="unit_code" width="120" sortable="true">Unit Code</th>
-                            <th field="tenan_name" width="120" sortable="true">Owner</th>
-                            <!-- <th field="unit_name" width="120" sortable="true">Unit Name</th> -->
-                            <th field="unit_sqrt" width="120" sortable="true">Luas</th>
-                            <th field="unit_virtual_accn" width="120" sortable="true">Virtual Account</th>
-                            <th field="untype_name" width="120" sortable="true">Unit Type</th>
-                            <th field="floor_name" width="120" sortable="true">Unit Floor</th>
-                            <th field="unit_isactive" width="120" sortable="true">Unit Active</th>
-                            <th field="created_by" width="120" sortable="true">Created By</th>
-                        </tr>
-                    </thead>
-                </table>
-                <!-- end table -->
-                
-                <!-- icon2 atas table -->
-                <div id="toolbar">
-                    @if(Session::get('role')==1 || in_array(16,Session::get('permissions')))
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="createNew()">New</a>
-                    @endif
-                    @if(Session::get('role')==1 || in_array(17,Session::get('permissions')))
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUnit()">Edit</a>
-                    @endif
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="detail()">View Detail</a>
-                    @if(Session::get('role')==1 || in_array(18,Session::get('permissions')))
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
-                    @endif
+<div class="row">
+	<div class="col-md-12">
+        <table id="dg" title="Master Unit" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+            <thead>
+                <tr>
+                    <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                    <th field="unit_code" width="120" sortable="true">Unit Code</th>
+                    <th field="tenan_name" width="120" sortable="true">Owner</th>
+                    <!-- <th field="unit_name" width="120" sortable="true">Unit Name</th> -->
+                    <th field="unit_sqrt" width="120" sortable="true">Luas</th>
+                    <th field="unit_virtual_accn" width="120" sortable="true">Virtual Account</th>
+                    <th field="untype_name" width="120" sortable="true">Unit Type</th>
+                    <th field="floor_name" width="120" sortable="true">Unit Floor</th>
+                    <th field="unit_isactive" width="120" sortable="true">Unit Active</th>
+                    <th field="created_by" width="120" sortable="true">Created By</th>
+                </tr>
+            </thead>
+        </table>
+        <div id="toolbar">
+            @if(Session::get('role')==1 || in_array(16,Session::get('permissions')))
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="createNew()">New</a>
+            @endif
+            @if(Session::get('role')==1 || in_array(17,Session::get('permissions')))
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="editUnit()">Edit</a>
+            @endif
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="detail()">View Detail</a>
+            @if(Session::get('role')==1 || in_array(18,Session::get('permissions')))
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
+            @endif
+        </div>
+        <div id="dlg" class="easyui-dialog" style="width:60%" closed="true" buttons="#dlg-buttons">
+            <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
+                <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
+                <div style="margin-bottom:10px">
+                    <input name="unit_code" class="easyui-textbox" label="Unit Code:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
                 </div>
-                <!-- end icon -->
-            
-                <!-- hidden form buat create edit -->
-                <div id="dlg" class="easyui-dialog" style="width:60%"
-                        closed="true" buttons="#dlg-buttons">
-                    <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
-                        <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
-                        <div style="margin-bottom:10px">
-                            <input name="unit_code" class="easyui-textbox" label="Unit Code:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="unit_name" class="easyui-textbox" label="Unit Name:" style="width:100%" data-options="required:true,validType:'length[0,25]'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input name="unit_sqrt" class="easyui-textbox" label="Unit Square:" style="width:100%" data-options="required:true">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="unit_virtual_accn" style="width:100%" label="Unit Virtual Account:" data-options="valueField:'id',textField:'text',url:'{{route('unit.option2')}}'">
-                        </div> 
-                        <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="floor_id" style="width:100%" label="Unit Floor:" data-options="valueField:'id',textField:'text',url:'{{route('unit.fopt')}}'">
-                        </div> 
-                        <div style="margin-bottom:10px">
-                            <input id="cc" class="easyui-combobox" required="true" name="untype_id" style="width:100%" label="Unit Type:" data-options="valueField:'id',textField:'text',url:'{{route('unit.options')}}'">
-                        </div>
-                        <div style="margin-bottom:10px">
-                            <select id="cc" class="easyui-combobox" required="true" name="unit_isactive" label="Active:" style="width:300px;">
-                                <option value="true">yes</option>
-                                <option value="false">no</option>
-                            </select>
-                        </div>  
-                    </form>
+                <div style="margin-bottom:10px">
+                    <input name="unit_name" class="easyui-textbox" label="Unit Name:" style="width:100%" data-options="required:true,validType:'length[0,25]'">
                 </div>
-                <div id="dlg-buttons">
-                    <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
+                <div style="margin-bottom:10px">
+                    <input name="unit_sqrt" class="easyui-textbox" label="Unit Square:" style="width:100%" data-options="required:true">
                 </div>
-                <!-- end form -->
+                <div style="margin-bottom:10px">
+                    <input id="cc" class="easyui-combobox" required="true" name="unit_virtual_accn" style="width:100%" label="Unit Virtual Account:" data-options="valueField:'id',textField:'text',url:'{{route('unit.option2')}}'">
+                </div> 
+                <div style="margin-bottom:10px">
+                    <input id="cc" class="easyui-combobox" required="true" name="floor_id" style="width:100%" label="Unit Floor:" data-options="valueField:'id',textField:'text',url:'{{route('unit.fopt')}}'">
+                </div> 
+                <div style="margin-bottom:10px">
+                    <input id="cc" class="easyui-combobox" required="true" name="untype_id" style="width:100%" label="Unit Type:" data-options="valueField:'id',textField:'text',url:'{{route('unit.options')}}'">
+                </div>
+                <div style="margin-bottom:10px">
+                    <select id="cc" class="easyui-combobox" required="true" name="unit_isactive" label="Active:" style="width:300px;">
+                        <option value="true">yes</option>
+                        <option value="false">no</option>
+                    </select>
+                </div>  
+            </form>
+        </div>
+        <div id="dlg-buttons">
+            <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
+        </div>
+    </div>
+</div>
 
-          		<!-- content -->
-        	</div>
-		</div>
-	</div>
-
-    <!-- Modal extra -->
-    <div id="addUnitModal" class="modal fade" role="dialog">
-      <div class="modal-dialog" style="width:900px">
-
-        <!-- Modal content-->
+<!-- Modal extra -->
+<div id="addUnitModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width:900px">
         <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Add New Unit</h4>
-          </div>
-          <div class="modal-body" id="addUnitModalContent" style="padding: 20px 40px">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add New Unit</h4>
+            </div>
+            <div class="modal-body" id="addUnitModalContent" style="padding: 20px 40px">
                 <!-- isi form -->
                 <form method="POST" id="formAddUnit">
                     <div class="row">
@@ -292,25 +274,20 @@
                     </div>
                 </form>
                 <!-- end form -->
-          </div>
+            </div>
         </div>
-
-      </div>
     </div>
-
-    <!-- End Modal -->
-
-    <!-- Modal extra -->
-    <div id="editUnitModal" class="modal fade" role="dialog">
-      <div class="modal-dialog" style="width:900px">
-
-        <!-- Modal content-->
+</div>
+<!-- End Modal -->
+<!-- Modal extra -->
+<div id="editUnitModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width:900px">
         <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Edit Unit</h4>
-          </div>
-          <div class="modal-body" id="editUnitModalContent" style="padding: 20px 40px">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit Unit</h4>
+            </div>
+            <div class="modal-body" id="editUnitModalContent" style="padding: 20px 40px">
                 <!-- isi form -->
                 <form method="POST" id="formEditUnit">
                     <div class="row">
@@ -459,50 +436,40 @@
                     </div>
                 </form>
                 <!-- end form -->
-          </div>
+            </div>
         </div>
-
-      </div>
     </div>
+</div>
+<!-- End Modal -->
 
-    <!-- End Modal -->
-
-    <!-- Modal extra -->
-    <div id="detailModal" class="modal fade" role="dialog">
-      <div class="modal-dialog" style="width:900px">
-
+<!-- Modal extra -->
+<div id="detailModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width:900px">
         <!-- Modal content-->
         <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-            <h4 class="modal-title">Detail Unit</h4>
-          </div>
-          <div class="modal-body" id="detailUnitModalContent" style="padding: 20px 40px">  
-          </div>
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Detail Unit</h4>
+            </div>
+            <div class="modal-body" id="detailUnitModalContent" style="padding: 20px 40px"></div>
         </div>
-
-      </div>
     </div>
+</div>
+<!-- End Modal -->
 
-    <!-- End Modal -->
-
-    <!-- Modal select contract -->
-    <div id="tenanModal" class="modal fade" role="dialog">
-      <div class="modal-dialog">
-
+<!-- Modal select contract -->
+<div id="tenanModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
         <!-- Modal content-->
         <div class="modal-content">
-          
-          <div class="modal-body" id="tenanModalContent">
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          </div>
+            <div class="modal-body" id="tenanModalContent"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
         </div>
-
-      </div>
     </div>
-    <!-- End Modal -->
+</div>
+<!-- End Modal -->
 @endsection
 
 @section('footer-scripts')

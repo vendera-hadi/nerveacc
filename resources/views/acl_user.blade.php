@@ -32,133 +32,131 @@
       </div>
     @endif
 
-	<div class="container spark-screen">
-		<div class="row">
-			<div class="col-md-11">
-          		<!-- content -->
-          		<div class="row">
-                    <div class="col-md-6">
-                        <div class="box">
-                            <div class="box-header with-border">
-                              <h3 class="box-title">Tabel user</h3>
-                            </div>
-                            <!-- /.box-header -->
-                            <div class="box-body">
-                                <button type="button" class="btn btn-primary pull-right" style="margin-bottom:10px" id="AddNew">Add new User</button>
-                              <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                      <th>Nama User</th>
-                                      <th>Role</th>
-                                      <th style="width: 40px">Action</th>
-                                    </tr>
-                                    @foreach($users as $user)
-                                    <tr>
-                                      <td>{{ $user->name }}</td>
-                                      <td>{{ $user->role }}</td>
-                                      <td data-id="{{$user->id}}">
-                                        @if($user->role_id!=1)
-                                        <a href="javascript:void(0);" class="edit"><i class="fa fa-pencil"></i></a>
-                                        <a href="javascript:void(0);" class="delete"><i class="fa fa-times"></i></a>
-                                        @endif
-                                      </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                               </table>
-                            </div>
-                            <!-- /.box-body -->
-                            <div class="box-footer clearfix">
-                                {{ $users->render() }} 
-                            </div>
+<div class="row">
+	<div class="col-md-12">
+      		<!-- content -->
+      		<div class="row">
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header with-border">
+                          <h3 class="box-title">Tabel user</h3>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <button type="button" class="btn btn-primary pull-right" style="margin-bottom:10px" id="AddNew">Add new User</button>
+                          <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                  <th>Nama User</th>
+                                  <th>Role</th>
+                                  <th style="width: 40px">Action</th>
+                                </tr>
+                                @foreach($users as $user)
+                                <tr>
+                                  <td>{{ $user->name }}</td>
+                                  <td>{{ $user->role }}</td>
+                                  <td data-id="{{$user->id}}">
+                                    @if($user->role_id!=1)
+                                    <a href="javascript:void(0);" class="edit"><i class="fa fa-pencil"></i></a>
+                                    <a href="javascript:void(0);" class="delete"><i class="fa fa-times"></i></a>
+                                    @endif
+                                  </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                           </table>
+                        </div>
+                        <!-- /.box-body -->
+                        <div class="box-footer clearfix">
+                            {{ $users->render() }} 
                         </div>
                     </div>
-
-                    <div class="col-md-6">
-                    	<!-- box insert -->
-                        <div class="box" id="addBox" style="display:none">
-                            <div class="box-header with-border">
-                              <h3 class="box-title editor">Add new User</h3>
-                            </div>
-                                <form id="formInsert" role="form" action="{{route('users.insert')}}" method="post">
-                                  <div class="box-body">
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Name</label>
-                                      <input type="text" class="form-control" name="name" placeholder="Name" required>
-                                    </div>
-
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Email</label>
-                                      <input type="email" class="form-control" name="email" placeholder="Email" required>
-                                    </div>
-
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Password</label>
-                                      <input type="password" class="form-control" name="password" placeholder="Password" required>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Role</label>
-                                      <select class="form-control" name="role_id">
-                                      	@foreach($roles as $role)
-                                      	<option value="{{$role->id}}">{{$role->name}}</option>
-                                      	@endforeach
-                                      </select>
-                                    </div>
-                                  
-                                    <button type="submit" class="btn btn-primary" style="margin-top:25px">Submit</button>
-                                  
-                                </form>
-                            </div>
-                        </div>
-                        <!-- box insert -->
-
-                        <!-- box update -->
-                        <div class="box" id="editBox" style="display:none">
-                            <div class="box-header with-border">
-                              <h3 class="box-title editor">Edit User</h3>
-                            </div>
-                                <form id="formUpdate" role="form" action="{{route('users.update')}}" method="post">
-                                  <input type="hidden" name="user_id">
-                                  <div class="box-body">
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Name</label>
-                                      <input type="text" class="form-control" name="name" placeholder="Name" required>
-                                    </div>
-
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Email</label>
-                                      <input type="email" class="form-control" name="email" placeholder="Email" required>
-                                    </div>
-
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Password (isi kalau ingin diubah)</label>
-                                      <input type="password" class="form-control" name="password" placeholder="Password">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                      <label for="exampleInputEmail1">Role</label>
-                                      <select class="form-control" name="role_id">
-                                      	@foreach($roles as $role)
-                                      	<option value="{{$role->id}}">{{$role->name}}</option>
-                                      	@endforeach
-                                      </select>
-                                    </div>
-                                  
-                                    <button type="submit" class="btn btn-primary" style="margin-top:25px">Submit</button>
-                                  
-                                </form>
-                            </div>
-                        </div>
-                        <!-- box update -->
-                    </div>
-
-
                 </div>
-          		<!-- content -->
-        	</div>
-		</div>
-	</div>
+
+                <div class="col-md-6">
+                	<!-- box insert -->
+                    <div class="box" id="addBox" style="display:none">
+                        <div class="box-header with-border">
+                          <h3 class="box-title editor">Add new User</h3>
+                        </div>
+                            <form id="formInsert" role="form" action="{{route('users.insert')}}" method="post">
+                              <div class="box-body">
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">Name</label>
+                                  <input type="text" class="form-control" name="name" placeholder="Name" required>
+                                </div>
+
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">Email</label>
+                                  <input type="email" class="form-control" name="email" placeholder="Email" required>
+                                </div>
+
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">Password</label>
+                                  <input type="password" class="form-control" name="password" placeholder="Password" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">Role</label>
+                                  <select class="form-control" name="role_id">
+                                  	@foreach($roles as $role)
+                                  	<option value="{{$role->id}}">{{$role->name}}</option>
+                                  	@endforeach
+                                  </select>
+                                </div>
+                              
+                                <button type="submit" class="btn btn-primary" style="margin-top:25px">Submit</button>
+                              
+                            </form>
+                        </div>
+                    </div>
+                    <!-- box insert -->
+
+                    <!-- box update -->
+                    <div class="box" id="editBox" style="display:none">
+                        <div class="box-header with-border">
+                          <h3 class="box-title editor">Edit User</h3>
+                        </div>
+                            <form id="formUpdate" role="form" action="{{route('users.update')}}" method="post">
+                              <input type="hidden" name="user_id">
+                              <div class="box-body">
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">Name</label>
+                                  <input type="text" class="form-control" name="name" placeholder="Name" required>
+                                </div>
+
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">Email</label>
+                                  <input type="email" class="form-control" name="email" placeholder="Email" required>
+                                </div>
+
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">Password (isi kalau ingin diubah)</label>
+                                  <input type="password" class="form-control" name="password" placeholder="Password">
+                                </div>
+                                
+                                <div class="form-group">
+                                  <label for="exampleInputEmail1">Role</label>
+                                  <select class="form-control" name="role_id">
+                                  	@foreach($roles as $role)
+                                  	<option value="{{$role->id}}">{{$role->name}}</option>
+                                  	@endforeach
+                                  </select>
+                                </div>
+                              
+                                <button type="submit" class="btn btn-primary" style="margin-top:25px">Submit</button>
+                              
+                            </form>
+                        </div>
+                    </div>
+                    <!-- box update -->
+                </div>
+
+
+            </div>
+      		<!-- content -->
+    	</div>
+</div>
 @endsection
 
 @section('footer-scripts')
