@@ -106,9 +106,13 @@ class HomeController extends Controller
 
         $data['hutang_vs'] = (float)$fetch[0]['total'];
         $data['bayar_vs'] = (float)$fetch2[0]['total'];
-        $data['hutang_persen'] = number_format($fetch[0]['total']/$total_all*100,2);
-        $data['bayar_persen'] = number_format($fetch2[0]['total']/$total_all*100,2);
-
+        if($total_all == 0){
+            $data['hutang_persen'] = 'N/A';
+            $data['bayar_persen'] = 'N/A';
+        }else{
+            $data['hutang_persen'] = number_format($fetch[0]['total']/$total_all*100,2);
+            $data['bayar_persen'] = number_format($fetch2[0]['total']/$total_all*100,2);
+        }
         return view('home',$data);
     }
 
