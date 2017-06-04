@@ -296,12 +296,14 @@
           $.messager.alert('Warning','Payment type must be choose');
         }else{
           var allFormData = $('#formPayment').serialize();
-          
+          var i;
           $.post('{{route('payment.insert')}}',allFormData, function(result){
               $('#submitForm').removeAttr('disabled');
               alert(result.message);
               if(result.status == 1){
-                window.open("{{url('invoice/print_kwitansi?id=')}}"+result.paym_id,null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
+                for (i = 0; i < result.paym_id.length; i++) { 
+                  window.open("{{url('invoice/print_kwitansi?id=')}}"+result.paym_id[i],null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
+                }
                 location.reload();
               } 
           });

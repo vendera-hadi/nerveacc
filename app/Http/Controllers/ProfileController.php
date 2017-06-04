@@ -20,25 +20,30 @@ class ProfileController extends Controller
             'name' => 'required|max:255',
             'email' => 'required|max:255',
             'password' => 'required|max:255',
-        ]);    	
+        ]);
         $input = $request->except(['image']);
+        $updateData = $input;
 
         if ($request->hasFile('image')) {
             $extension = $request->image->extension();
-            if(strtolower($extension)!='jpg' && strtolower($extension)!='png' && strtolower($extension)!='jpeg'){ 
+            if(strtolower($extension)!='jpg' && strtolower($extension)!='png' && strtolower($extension)!='jpeg'){
                 $request->session()->flash('error', 'Image Format must be jpg or png');
                 return redirect()->back();
             }
-            $path = $request->image->move(public_path('upload'), Auth::user()->id.'.'.$extension);
-            $input['image'] = Auth::user()->id.'.'.$extension;
+            $image = "profile_pic_".Auth::user()->id.'.'.$extension;
+            $request->file('image')->move(
+                            base_path() . '/public/upload/', $image
+                        );
+            $updateData['image'] = $image;
         }
         if($request['password'] == 'xxx'){
-        	$input = $request->except(['password']);
+                unset($updateData['password']);
         }else{
-        	$input['password'] = bcrypt($request['password']);
+                $updateData['password'] = bcrypt($request['password']);
         }
+
         $id = Auth::user()->id;
-        User::find($id)->update($input);
+        User::find($id)->update($updateData);
         $request->session()->flash('success', 'Update profile success');
         return redirect()->back();
     }

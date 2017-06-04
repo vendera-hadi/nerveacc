@@ -422,7 +422,7 @@ function addInv(){
 function cancelInv(){
     var row = $('#dg').datagrid('getSelected');
     if(row.inv_post == 'no'){
-        $.messager.confirm('Confirm','Are you sure you want to post this Invoice ?',function(r){
+        $.messager.confirm('Confirm','Are you sure you want to cancel this Invoice ?',function(r){
             if (r){
                 $.post('{{route('invoice.cancel')}}',{id:row.id},function(result){
                     if(result.error){

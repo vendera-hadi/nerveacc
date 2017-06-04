@@ -838,7 +838,10 @@ class InvoiceController extends Controller
     public function cancel(Request $request){
         try{
             $id = $request->id;
-            TrInvoice::where('id',$id)->update(['inv_iscancel'=>1]);
+            // TrInvoice::where('id',$id)->update(['inv_iscancel'=>1]);
+            $invoice = TrInvoice::find($id);
+            TrContractInvoice::where('invtp_id',$invoice->invtp_id)->where('contr_id',$invoice->contr_id)->update(['continv_next_inv'=>null]);
+            TrInvoice::where('id',$id)->delete();
             return response()->json(['success' => 1, 'message' => 'Cancel Invoice Success']);
         }catch(\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Error Occured']);

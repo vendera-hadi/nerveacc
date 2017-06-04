@@ -241,15 +241,32 @@ class PaymentController extends Controller
 
         $cek_pay = false;
         $total = 0;
+        $payment_ids = [];
         if(!empty($data_payment) && count($data_payment['invpayd_amount']) > 0){
+            $lastPayment = TrInvoicePaymhdr::where(\DB::raw('EXTRACT(YEAR FROM created_at)'),'=',date('Y'))
+                                ->where(\DB::raw('EXTRACT(MONTH FROM created_at)'),'=',date('m'))
+                                ->orderBy('created_at','desc')->first();
+            $indexNumber = null;
+            if($lastPayment){
+                $index = explode('.',$lastPayment->no_kwitansi);
+                $index = (int) end($index);
+                $index+= 1;
+                $indexNumber = $index;
+                $index = str_pad($index, 3, "0", STR_PAD_LEFT);
+            }else{
+                $index = "001";
+                $indexNumber = 1;
+            }
+
+            // 1 payment 1 row aja
             foreach ($data_payment['invpayd_amount'] as $key => $value) {
                 if(!empty($value)){
                     $cek_pay = true;
 
                     $payVal = (int)$data_payment['totalpay'][$key];
-                    $total += $payVal;
+                    $total = $payVal;
                     // $total += (int) $value;
-                    $detail_payment[] = array(
+                    $detail_payment = array(
                         // 'invpayd_amount' => $value,
                         'invpayd_amount' => $payVal,
                         'inv_id' => $key
@@ -264,93 +281,76 @@ class PaymentController extends Controller
                         $invoice->inv_outstanding = (int)$tempAmount;
                         $invoice->save();
                     }
+
+                    // create paym header
+                    $action = new TrInvoicePaymhdr;
+                    $prefixKuitansi = @MsConfig::where('name','prefix_kuitansi')->first()->value;
+                    $action->no_kwitansi = $prefixKuitansi.'-'.date('Y-m').'.'.$index;
+                    $action->invpayh_date = $request->input('invpayh_date');
+                    $action->invpayh_checkno = $request->input('invpayh_checkno');
+                    $action->invpayh_giro = !empty($request->input('invpayh_giro')) ? $request->input('invpayh_giro') : null ;
+                    $action->invpayh_note = $request->input('invpayh_note');
+                    $action->invpayh_post = !empty($request->input('invpayh_post')) ? true : false;
+                    $action->paymtp_code = $request->input('paymtp_code');
+                    $action->cashbk_id = $request->input('cashbk_id');
+                    $action->contr_id = $request->input('contr_id');
+                    $action->invpayh_settlamt = 1;
+                    $action->invpayh_adjustamt = 1;
+                    $action->invpayh_amount = $total;
+                    $action->updated_by = $action->created_by = Auth::id();
+                    $action->status_void = false;
+
+                    // payment detail
+                    if($action->save()){
+                        $payment_id = $action->id;
+                        $payment_ids[] = $payment_id;
+
+                        // foreach ($detail_payment as $key => $value) {
+                            $action_detail = new TrInvoicePaymdtl;
+                            $invoice_data = $invoice->get()->first();
+                            
+                            if(!empty($invoice_data)){
+                                $invoice_data = $invoice_data->toArray();
+                                
+                                $inv_amount = $invoice_data['inv_amount'];
+
+                                $invoice_has_paid = TrInvoicePaymdtl::select('tr_invoice_paymhdr.*', 'tr_invoice_paymdtl.*')
+                                    ->join('tr_invoice_paymhdr','tr_invoice_paymdtl.invpayh_id','=','tr_invoice_paymhdr.id')
+                                    ->where('status_void', '=', false)
+                                    ->where('inv_id', '=', $detail_payment['inv_id'])
+                                    ->get()->first();
+
+                                if(!empty($invoice_has_paid)){
+                                    $invoice_has_paid = $invoice_has_paid->sum('invpayd_amount');
+                                }else{
+                                    $invoice_has_paid = 0;
+                                }
+                                
+                                $total_has_paid = $invoice_has_paid + $detail_payment['invpayd_amount'];
+                                $outstand = $inv_amount - $total_has_paid;
+
+                                if($outstand <= 0){
+                                    $outstand = 0;
+                                }
+
+                                $action_detail->invpayd_amount = $detail_payment['invpayd_amount'];
+                                $action_detail->inv_id = $detail_payment['inv_id'];
+                                $action_detail->invpayh_id = $payment_id;
+
+                                $action_detail->save();
+                            }
+                        // }
+                    }
+
+                    $indexNumber++;
+                    $index = str_pad($indexNumber, 3, "0", STR_PAD_LEFT);
                 }
             }
         }else{
             return ['status' => 0, 'message' => 'Please Check at least one of Invoice for payment'];
         }
 
-        try{
-            if($total <= 0){
-                return ['status' => 0, 'message' => 'You have not entered payment'];
-            }else{
-                $lastPayment = TrInvoicePaymhdr::where(\DB::raw('EXTRACT(YEAR FROM created_at)'),'=',date('Y'))
-                                ->where(\DB::raw('EXTRACT(MONTH FROM created_at)'),'=',date('m'))
-                                ->orderBy('created_at','desc')->first();
-                if($lastPayment){
-                    $index = explode('.',$lastPayment->no_kwitansi);
-                    $index = (int) end($index);
-                    $index+= 1;
-                    $index = str_pad($index, 3, "0", STR_PAD_LEFT);
-                }else{
-                    $index = "001";
-                }
-
-                $action = new TrInvoicePaymhdr;
-
-                $prefixKuitansi = @MsConfig::where('name','prefix_kuitansi')->first()->value;
-                $action->no_kwitansi = $prefixKuitansi.'-'.date('Y-m').'.'.$index;
-                $action->invpayh_date = $request->input('invpayh_date');
-                $action->invpayh_checkno = $request->input('invpayh_checkno');
-                $action->invpayh_giro = !empty($request->input('invpayh_giro')) ? $request->input('invpayh_giro') : null ;
-                $action->invpayh_note = $request->input('invpayh_note');
-                $action->invpayh_post = !empty($request->input('invpayh_post')) ? true : false;
-                $action->paymtp_code = $request->input('paymtp_code');
-                $action->cashbk_id = $request->input('cashbk_id');
-                $action->contr_id = $request->input('contr_id');
-                $action->invpayh_settlamt = 1;
-                $action->invpayh_adjustamt = 1;
-                $action->invpayh_amount = $total;
-                $action->updated_by = $action->created_by = Auth::id();
-                $action->status_void = false;
-
-                if($action->save()){
-                    $payment_id = $action->id;
-
-                    foreach ($detail_payment as $key => $value) {
-                        $action_detail = new TrInvoicePaymdtl;
-
-                        $invoice_data = $invoice->get()->first();
-                        
-                        if(!empty($invoice_data)){
-                            $invoice_data = $invoice_data->toArray();
-                            
-                            $inv_amount = $invoice_data['inv_amount'];
-
-                            $invoice_has_paid = TrInvoicePaymdtl::select('tr_invoice_paymhdr.*', 'tr_invoice_paymdtl.*')
-                                ->join('tr_invoice_paymhdr','tr_invoice_paymdtl.invpayh_id','=','tr_invoice_paymhdr.id')
-                                ->where('status_void', '=', false)
-                                ->where('inv_id', '=', $value['inv_id'])
-                                ->get()->first();
-
-                            if(!empty($invoice_has_paid)){
-                                $invoice_has_paid = $invoice_has_paid->sum('invpayd_amount');
-                            }else{
-                                $invoice_has_paid = 0;
-                            }
-                            
-                            $total_has_paid = $invoice_has_paid + $value['invpayd_amount'];
-                            $outstand = $inv_amount - $total_has_paid;
-
-                            if($outstand <= 0){
-                                $outstand = 0;
-                            }
-
-                            $action_detail->invpayd_amount = $value['invpayd_amount'];
-                            $action_detail->inv_id = $value['inv_id'];
-                            $action_detail->invpayh_id = $payment_id;
-
-                            $action_detail->save();
-                        }
-                    }
-                }else{
-                    return ['status' => 0, 'message' => 'Failed to submit payment'];
-                }
-            }
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
-        }
-        return ['status' => 1, 'message' => 'Insert Success', 'paym_id' => $payment_id];
+        return ['status' => 1, 'message' => 'Insert Success', 'paym_id' => $payment_ids];
     }
     
     public function posting(Request $request){
