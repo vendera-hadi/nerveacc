@@ -35,6 +35,9 @@
 
         <!-- Sidebar Menu -->
         <ul class="sidebar-menu">
+            <li @if(Request::url() == url('home')){{'class=active'}}@endif>
+              <a href="{{url('home')}}"><i class="fa fa-home"></i><span>DASHBOARD</span></a>
+            </li>
             <?php
               $masterUrls = [url('coa'), url('department'), url('invtype'), url('groupaccount'), url('company'), url('config'), url('roles'), url('users')];
               $masters = [1,5,6,7,11];
