@@ -194,11 +194,7 @@
                       @endif
                       @if(Session::get('role')==1 || in_array(59,Session::get('permissions')))
                       <li @if(Request::url() == route('invoice.index')) class="active" @endif><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
-                      @endif
-                      @if(Session::get('role')==1 || in_array(63,Session::get('permissions')))
-                      <li @if(Request::url() == route('aging.index')) class="active" @endif><a href="{{route('aging.index')}}"><i class="fa fa-circle-o"></i> Aging Invoices</a></li>
-                      @endif
-                      
+                      @endif                      
                       @if(Session::get('role')==1 || in_array(68,Session::get('permissions')))
                       <li @if(Request::url() == route('payment.index')) class="active" @endif><a href="{{route('payment.index')}}"><i class="fa fa-circle-o"></i> Payment Invoice</a></li>
                       @endif

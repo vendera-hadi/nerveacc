@@ -16,22 +16,8 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
-    <!-- select2 -->
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/select2.min.css') }}">
-    <style type="text/css">
-    .select2-container--default .select2-selection--single{
-      border-radius: 0px;
-      height: 36px;
-      width: 235px;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__arrow{
-        top: 3px;
-        right: -130px;
-    }
-    .select2-container--open .select2-dropdown--below{
-        width: 235px !important;
-    }
-    </style>
+
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -42,150 +28,180 @@
 @stop
 
 @section('main-content')
-
-	<div class="row">
-		<div class="col-md-12">
-      		<!-- content -->
-            <div class="box" style="min-height:500px">
-                <div class="box-body">
-                    <form action="post" id="filter">
-                    <div class ="row">
-                        <div class="col-sm-3">
-                            <select id="type" name="type" class="form-control">
-                                <option value="arbyinvoice">Invoice</option>
-                                <option value="arbyinvoicecancel">Invoice Cancel</option>
-                                <option value="araging">Aging Invoices</option>
-                                <option value="outinv">Outstanding By Unit</option>
-                                <option value="outcontr">Outstanding By Billing Info</option>
-                                <option value="payment">Payment History</option>
-                            </select>
-                        </div>
-                        <div class="col-sm-2 history" style="display: none;">
-                            <select class="form-control" name="jenis" id="ty">
-                                <option value="1">NOT PAID</option>
-                                <option value="2">PAID</option>
-                              </select>
-                        </div>
-                        <div class="col-sm-1 history" style="display: none;">
-                            <div class="form-group">
-                             <input type="text" name="ag30" class="form-control" value="30" />
-                            </div>
-                        </div>
-                        <div class="col-sm-1 history" style="display: none;">
-                            <div class="form-group">
-                             <input type="text" name="ag60" class="form-control" value="60" />
-                            </div>
-                        </div>
-                        <div class="col-sm-1 history" style="display: none;">
-                            <div class="form-group">
-                             <input type="text" name="ag90" class="form-control" value="90" />
-                            </div>
-                        </div>
-                        <div class="col-sm-1 history" style="display: none;">
-                            <div class="form-group">
-                             <input type="text" name="ag180" class="form-control" value="180" />
-                            </div>
-                        </div>
-                        
-                        <div class="col-sm-3 dates">
-                            <div class="form-group">
-                                <div class="input-group date">
-                                    <div class="input-group-addon">
-                                        <i class="fa fa-calendar"></i>
-                                    </div>
-                                    <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd">
+<div class="row">
+    <!-- left column -->
+    <div class="col-md-12">
+      <!-- general form elements -->
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">Filter Report</h3>
+        </div>
+        <!-- /.box-header -->
+        <!-- form start -->
+        <form role="form" action="post" id="filter">
+            <div class="box-body">
+                <div class="form-group">
+                    <select id="type" name="type" class="form-control">
+                        <option value="arbyinvoice">Invoice Issued Summary</option>
+                        <option value="arbyinvoicecancel">List Canceled Invoice</option>
+                        <option value="araging">Aged Receivable</option>
+                        <option value="daily">Daily Collection Sort By Account</option>
+                        <option value="payment">Payment History</option>
+                        <option value="outinv">Outstanding By Unit</option>
+                        <option value="outcontr">Outstanding By Billing Info</option>
+                    </select>
+                </div>
+                <div class="row dates">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-3 dates">
-                            <div class="form-group">
-                                <div class="input-group date">
-                                    <div class="input-group-addon">
-                                        <i class="fa fa-calendar"></i>
-                                    </div>
-                                    <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <button class="btn btn-info">Submit</button>
-                        </div>
-                    </div>
-
-                    <div class="row unit" style="display:none">
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                             <select class="form-control choose-unit" name="unit"></select>
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                             <select class="form-control" name="inv_type">
-                                @foreach($invtypes as $invtype)
-                                <option value="{{$invtype->id}}">{{$invtype->invtp_name}}</option>
-                                @endforeach
-                             </select>
+                                <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd">
                             </div>
                         </div>
                     </div>
-
-                    <div class="row payment" style="display:none">
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                             <select class="form-control choose-unit" name="unit2"></select>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd">
                             </div>
                         </div>
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                             <input type="text" name="inv_number" class="form-control" placeholder="No Invoice"/>
-                            </div>
+                    </div>
+                </div>
+                <div class="row unit" style="display:none">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                         <select class="form-control choose-unit" name="unit" style="width: 100%;"></select>
                         </div>
-                        <div class="col-sm-2">
-                            <div class="form-group">
-                             <select class="form-control" name="bank_id">
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                         <select class="form-control" name="inv_type">
+                            @foreach($invtypes as $invtype)
+                            <option value="{{$invtype->id}}">{{$invtype->invtp_name}}</option>
+                            @endforeach
+                         </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row payment" style="display:none">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <select class="form-control choose-unit" name="unit2" style="width: 100%;"></select>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" name="bank_id">
                                 <option value="">Choose Bank</option>
                                 @foreach($banks as $bank)
                                 <option value="{{$bank->id}}">{{$bank->cashbk_name}}</option>
                                 @endforeach
-                             </select>
-                            </div>
+                            </select>
                         </div>
-                        <div class="col-sm-2">
-                            <div class="form-group">
-                             <select class="form-control" name="payment_id">
-                                <option value="">Choose Payment Type</option>
-                                @foreach($payment_types as $paym)
-                                <option value="{{$paym->id}}">{{$paym->paymtp_name}}</option>
-                                @endforeach
-                             </select>
-                            </div>
-                        </div>
-                        <div class="col-sm-2">
-                            <div class="form-group">
-                             <select class="form-control" name="post_status">
+                        <div class="form-group">
+                            <select class="form-control" name="post_status">
                                 <option value="">Choose Post Status</option>
                                 <option value="1">POSTED</option>
                                 <option value="2">NOT POSTED</option>
                             </select>
-                            </div>
                         </div>
                     </div>
-
-                    </form>
-
-                    <div class ="row" style="margin-top:80px">
-                        <div class="col-lg-12 col-md-12 col-sm-12">
-                            <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Pdf</button>
-                            <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
-                            <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
-                            <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:500px"></iframe>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <input type="text" name="inv_number" class="form-control" placeholder="No Invoice"/>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" name="payment_id">
+                                <option value="">Choose Payment Type</option>
+                                @foreach($payment_types as $paym)
+                                <option value="{{$paym->id}}">{{$paym->paymtp_name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row history" style="display:none">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <select class="form-control choose-unit" name="unit3" style="width: 100%;"></select>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" name="jenist" id="tyt">
+                                <option value="1">SUMMARY</option>
+                                <option value="2">DETAIL</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="col-sm-3" style="padding-left: 0px;">
+                            <div class="form-group">
+                             <input type="text" name="ag30" class="form-control" value="30" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                             <input type="text" name="ag60" class="form-control" value="60" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                             <input type="text" name="ag90" class="form-control" value="90" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3" style="padding-right: 0px;">
+                            <div class="form-group">
+                             <input type="text" name="ag180" class="form-control" value="180" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" name="jenis" id="ty">
+                                <option value="1">NOT PAID</option>
+                                <option value="2">PAID</option>
+                                <option value="3">ALL</option>
+                            </select>
                         </div>
                     </div>
                 </div>
             </div>
+          <!-- /.box-body -->
 
-    	</div>
-	</div>
+          <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+      <!-- /.box -->
+    </div>
+</div>
+
+<div class="row">
+    <!-- left column -->
+    <div class="col-md-12">
+      <!-- general form elements -->
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">Result</h3>
+        </div>
+        <!-- /.box-header -->
+          <div class="box-body">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Pdf</button>
+                    <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
+                    <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
+                    <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:400px"></iframe>
+                </div>
+            </div>
+          </div>
+          <!-- /.box-body -->
+      </div>
+      <!-- /.box -->
+    </div>
+</div>
 @endsection
 
 @section('footer-scripts')
@@ -272,6 +288,7 @@
 
     $(".choose-unit").select2({
           placeholder: "Select an Unit",
+          allowClear: true,
           ajax: {
             url: "{{route('unit.select2')}}",
             dataType: 'json',
@@ -282,7 +299,6 @@
                 page: params.page
               };
             },
-            
             cache: true
           },
           escapeMarkup: function (markup) { return markup; }, // let our custom formatter work

@@ -61,6 +61,8 @@
             @if(Session::get('role')==1 || in_array(14,Session::get('permissions')))
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroyUser()">Remove</a>
             @endif
+            <a href="{{ url('coa/downloadCoaExcel') }}" class="easyui-linkbutton" iconCls="icon-save" plain="true">Excel</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-print" plain="true" id="print">Print</a>
         </div>
         <!-- end icon -->
     
@@ -126,25 +128,53 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript">
-        var entity = "Master COA"; // nama si tabel, ditampilin di dialog
-        var get_url = "{{route('coa.get')}}";
-        var insert_url = "{{route('coa.insert')}}";
-        var update_url = "{{route('coa.update')}}";
-        var delete_url = "{{route('coa.delete')}}";
+    var entity = "Master COA"; // nama si tabel, ditampilin di dialog
+    var get_url = "{{route('coa.get')}}";
+    var insert_url = "{{route('coa.insert')}}";
+    var update_url = "{{route('coa.update')}}";
+    var delete_url = "{{route('coa.delete')}}";
 
-        $(function(){
-            var dg = $('#dg').datagrid({
-                url: get_url,
-                pagination: true,
-                remoteFilter: true, //utk jalanin search filter
-                rownumbers: true,
-                singleSelect: true,
-                fitColumns: true,
-                pageSize:100,
-                pageList: [100,500,1000],
-            });
-            dg.datagrid('enableFilter');
+    $(function(){
+        var dg = $('#dg').datagrid({
+            url: get_url,
+            pagination: true,
+            remoteFilter: true, //utk jalanin search filter
+            rownumbers: true,
+            singleSelect: true,
+            fitColumns: true,
+            pageSize:100,
+            pageList: [100,500,1000],
         });
+        dg.datagrid('enableFilter');
+    });
+
+    function openWindow(url, title, w, h){
+        // Fixes dual-screen position                         Most browsers      Firefox
+        var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
+        var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+
+        var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
+        var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+
+        var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+        var top = ((height / 2) - (h / 2)) + dualScreenTop;
+        var newWindow = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+
+        // Puts focus on the newWindow
+        if (window.focus) {
+            newWindow.focus();
+        }
+    }
+
+    $('#print').click(function(){
+        var url = '{!! route('coa.printCoa') !!}';
+        var title = 'PRINT COA';
+        var w = 640;
+        var h = 660;
+        
+        openWindow(url, title, w, h);
+        return false;
+    });
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection

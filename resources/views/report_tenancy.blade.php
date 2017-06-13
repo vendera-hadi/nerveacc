@@ -27,22 +27,28 @@
 
 @section('main-content')
 <div class="row">
-	<div class="col-md-12">
-  		<!-- content -->
-        <div class="box" style="min-height:500px">
+    <!-- left column -->
+    <div class="col-md-12">
+      <!-- general form elements -->
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">Filter Report</h3>
+        </div>
+        <!-- /.box-header -->
+        <!-- form start -->
+        <form role="form" action="post" id="filter">
             <div class="box-body">
-                <form action="post" id="filter">
-                <div class ="row">
+                <div class="form-group">
+                    <select id="type" name="type" class="form-control">
+                        <option value="r_meter">Report Reading Meter</option>
+                        <option value="r_unit">Report Unit</option>
+                        <option value="r_tenant">Report Tenant</option>
+                    </select>
+                </div>
+                <div class="row history">
                     <div class="col-sm-6">
-                        <select id="type" name="type" class="form-control">
-                            <option value="r_meter">Report Reading Meter</option>
-                            <option value="r_unit">Report Unit</option>
-                            <option value="r_tenant">Report Tenant</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-2 history">
                         <div class="form-group">
-                          <select class="form-control" name="tahun" id="th">
+                            <select class="form-control" name="tahun" id="th">
                             <?php 
                                 for($i=date('Y'); $i>=2015; $i--){
                                     echo '<option value="'.$i.'">'.$i.'</option>';
@@ -51,31 +57,49 @@
                           </select>
                         </div>
                     </div>
-                    <div class="col-sm-2 history">
+                    <div class="col-sm-6">
                         <div class="form-group">
-                          <select class="form-control" name="jenis" id="ty">
-                            <option value="1">Electric</option>
-                            <option value="2">Water</option>
-                          </select>
+                            <select class="form-control" name="jenis" id="ty">
+                                <option value="1">Electric</option>
+                                <option value="2">Water</option>
+                            </select>
                         </div>
-                    </div>
-                    <div class="col-sm-1">
-                        <button class="btn btn-info">Submit</button>
-                    </div>
-                </div>
-                </form>
-
-                <div class ="row" style="margin-top:80px">
-                    <div class="col-lg-12 col-md-12 col-sm-12">
-                        <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
-                        <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
-                        <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:500px"></iframe>
                     </div>
                 </div>
             </div>
-        </div>
+          <!-- /.box-body -->
 
-	</div>
+          <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+      <!-- /.box -->
+    </div>
+</div>
+
+<div class="row">
+    <!-- left column -->
+    <div class="col-md-12">
+      <!-- general form elements -->
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">Result</h3>
+        </div>
+        <!-- /.box-header -->
+          <div class="box-body">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
+                        <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
+                        <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:400px"></iframe>
+                </div>
+            </div>
+          </div>
+          <!-- /.box-body -->
+      </div>
+      <!-- /.box -->
+    </div>
 </div>
 @endsection
 

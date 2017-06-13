@@ -7,6 +7,8 @@ use App\Http\Requests;
 use Auth;
 // load model
 use App\Models\MsMasterCoa;
+use App\Models\MsCompany;
+use Excel;
 
 class CoaController extends Controller
 {
@@ -140,5 +142,46 @@ class CoaController extends Controller
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
+    }
+
+     public function downloadCoaExcel()
+    {
+        $data_ori = MsMasterCoa::select('coa_year','coa_code','coa_name','coa_beginning','coa_debit','coa_credit','coa_ending')
+                ->get()->toArray();
+        $data = array();
+        for($i=0; $i<count($data_ori); $i++){
+            $data[$i]=array(
+                'Year'=>$data_ori[$i]['coa_year'],
+                'Chart Account Code'=>trim($data_ori[$i]['coa_code']),
+                'Chart Account Name'=>$data_ori[$i]['coa_name'],
+                'COA Beginning'=>number_format($data_ori[$i]['coa_beginning'],2),
+                'COA Debit'=>number_format($data_ori[$i]['coa_debit'],2),
+                'COA Credit'=>number_format($data_ori[$i]['coa_credit'],2),
+                'COA Ending'=>number_format($data_ori[$i]['coa_ending'],2));
+        }
+        $tp = 'xls';
+        $border = 'A1:G';
+        return Excel::create('report_coa', function($excel) use ($data) {
+            $excel->sheet('mySheet', function($sheet) use ($data)
+            {
+                $total = count($data)+1;
+                $sheet->setBorder($border.$total, 'thin');
+                $sheet->fromArray($data);
+            });
+        })->download($tp);
+    }
+
+    public function printCoa(Request $request){
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['title'] = "COA Report";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['template'] = 'report_coa_template';
+        $data['tahun'] = '';
+        $data['type'] = 'print'; 
+        
+        $fetch = MsMasterCoa::select('coa_year','coa_code','coa_name','coa_beginning','coa_debit','coa_credit','coa_ending');
+        $fetch = $fetch->get();
+        $data['coa'] = $fetch;
+        return view('layouts.report_template2', $data);    
     }
 }

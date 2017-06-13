@@ -83,6 +83,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('coa/insert', 'CoaController@insert')->name('coa.insert');
 	Route::post('coa/update', 'CoaController@update')->name('coa.update');
 	Route::post('coa/delete', 'CoaController@delete')->name('coa.delete');
+	Route::get('coa/downloadCoaExcel', 'CoaController@downloadCoaExcel');
+	Route::get('coa/printCoaExcel','CoaController@printCoa')->name('coa.printCoa');
 	// Rental period
 	Route::get('rentalperiod','RentalPeriodController@index');
 	Route::get('rentalperiod/optRenprd','RentalPeriodController@getOptRentalPeriod')->name('rentalperiod.select2');

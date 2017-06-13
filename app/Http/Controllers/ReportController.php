@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\TrInvoice;
 use App\Models\TrInvoiceDetail;
 use App\Models\TrInvoicePaymhdr;
+use App\Models\TrInvoicePaymdtl;
 use App\Models\MsCompany;
 use App\Models\TrContract;
 use App\Models\TrMeter;
@@ -21,6 +22,7 @@ use App\Models\MsPaymentType;
 use PDF;
 use DB;
 use Excel;
+use DateTime;
 
 class ReportController extends Controller
 {
@@ -219,17 +221,41 @@ class ReportController extends Controller
     	$pdf = @$request->pdf;
         $excel = @$request->excel;
         $print = @$request->print;
+        $tyt = @$request->jenist;
+        $unit_id = @$request->unit3;
 
         $data['tahun'] = 'Periode Sampai : '.date('M Y');
         $data['name'] = MsCompany::first()->comp_name;
-    	$data['title'] = "Aging Invoices";
+    	$data['title'] = "Aged Receivables Report By Customer Key";
     	$data['logo'] = MsCompany::first()->comp_image;
-    	$data['template'] = 'report_ar_aging';
+        $data['unit'] = MsUnit::where('id',$unit_id)->get();
+        $data['tyt'] = $tyt;
         $data['ty'] = $ty;
+        if($tyt == 1){
+            $data['template'] = 'report_ar_aging';
+        }else{
+            $data['template'] = 'report_ar_aging_detail';
+        }
+    	
+        if($ty == 1 && $tyt == 1){
+            $data['title_r'] = 'Summary Outstanding Invoice';
+        }else if($ty == 1 && $tyt == 2){
+            $data['title_r'] = 'Detail Outstanding Invoice';
+        }else if($ty == 2 && $tyt == 1){
+            $data['title_r'] = 'Summary Paid Invoice';
+        }else if($ty == 2 && $tyt == 2){
+            $data['title_r'] = 'Detail Paid Invoice';
+        }else if($ty == 3 && $tyt == 1){
+            $data['title_r'] = 'Summary All Invoice';
+        }else if($ty == 3 && $tyt == 2){
+            $data['title_r'] = 'Detail All Invoice';
+        }else{
+            $data['title_r'] = '';
+        }
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
-        $data['label'] = explode('~', '1 - '.$ag30.'~'.$ag30.' - '.$ag60.'~'.$ag60.' - '.$ag90.'~'.'> '.$ag180);
+        $data['label'] = explode('~', '1 - '.$ag30.'~'.$ag30.' - '.$ag60.'~'.$ag60.' - '.$ag90.'~'.'OVER '.$ag180);
         if($ty == 1){
-            $fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
+            $fetch = TrInvoice::select('tr_invoice.tenan_id','tr_contract.id as contr_id','ms_unit.unit_code','ms_tenant.tenan_name',
                     DB::raw("SUM(inv_outstanding) AS total"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >= -1 AND (current_date::date - inv_date::date) <=".$ag30." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag30." AND (current_date::date - inv_date::date)<=".$ag60." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
@@ -240,10 +266,10 @@ class ReportController extends Controller
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
                 ->where('tr_invoice.inv_post','=',TRUE)
                 ->where('tr_invoice.inv_outstanding','>',0)
-                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name')
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_contract.id')
                 ->orderBy('unit_code', 'asc');
         }else if ($ty == 2){
-            $fetch = TrInvoicePaymhdr::select('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name',
+            $fetch = TrInvoicePaymhdr::select('ms_tenant.id AS tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','contr_id',
                     DB::raw("SUM(invpayh_amount) AS total"),
                     DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) >= -1 AND (current_date::date - invpayh_date::date) <=".$ag30." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) > ".$ag30." AND (current_date::date - invpayh_date::date)<=".$ag60." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS ag60"),
@@ -252,13 +278,175 @@ class ReportController extends Controller
                 ->join('tr_contract','tr_contract.id',"=",'tr_invoice_paymhdr.contr_id')
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
                 ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
-                ->groupBy('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name')
+                ->where('invpayh_post','=',TRUE)
+                ->groupBy('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name','contr_id','ms_tenant.id')
                 ->orderBy('unit_code', 'asc');
+        }else{
+            if($tyt == 2){
+                $fetch = TrContract::select('tr_contract.id AS contr_id','ms_unit.unit_code','ms_tenant.tenan_name')
+                    ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
+                    ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                    ->where('contr_status','=','confirmed')
+                    ->where('contr_terminate_date','=',NULL)
+                    ->orderBy('unit_code', 'asc');
+            }else{
+                //sama kyk not paid
+               $fetch = TrInvoice::select('tr_invoice.tenan_id','tr_contract.id as contr_id','ms_unit.unit_code','ms_tenant.tenan_name',
+                    DB::raw("SUM(inv_outstanding) AS total"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >= -1 AND (current_date::date - inv_date::date) <=".$ag30." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag30." AND (current_date::date - inv_date::date)<=".$ag60." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >".$ag60." AND (current_date::date - inv_date::date)<=".$ag90." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag180." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
+                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->where('tr_invoice.inv_post','=',TRUE)
+                ->where('tr_invoice.inv_outstanding','>',0)
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_contract.id')
+                ->orderBy('unit_code', 'asc');
+            }
         }
-        //memory exhause/keperluan demo aja makanya dilimit
+
+        if($unit_id) $fetch = $fetch->where('ms_unit.id','=',$unit_id);
         $fetch = $fetch->get();
-        //$fetch = $fetch->get();
     	$data['invoices'] = $fetch;
+
+        if($tyt == 2){
+            $data['invoices'] = [];
+            if($ty == 1){
+                foreach ($fetch as $inv) {
+                    $tempInv = [
+                        'unit_code' => $inv->unit_code,
+                        'tenan_name' => $inv->tenan_name,
+                        'total' => $inv->total,
+                        'ag30' => $inv->ag30,
+                        'ag60' => $inv->ag60,
+                        'ag90' => $inv->ag90,
+                        'agl180' => $inv->agl180
+                    ];
+                    $tempInv['details'] = [];
+                    $result = TrInvoice::select('tr_invoice.*',
+                                DB::raw("to_char(inv_date, 'DD/MM/YYYY') AS tanggal"),
+                                DB::raw("to_char(inv_duedate, 'DD/MM/YYYY') AS tanggaldue"))
+                            ->where('tr_invoice.contr_id',$inv->contr_id)
+                            ->where('inv_outstanding','>',0)
+                            ->where('inv_post',TRUE)
+                        ->get();
+                    foreach ($result as $key => $value) {
+                        $datetime1 = new DateTime(date('Y-m-d'));
+                        $datetime2 = new DateTime($value->inv_date);
+                        $dif = $datetime1->diff($datetime2);
+                        $difference = $dif->d;
+
+                        $tempInv['details'][] = [
+                            'inv_number' => $value->inv_number,
+                            'tanggal' => $value->tanggal,
+                            'tanggaldue' => $value->tanggaldue,
+                            'inv_amount' => $value->inv_amount,
+                            'inv_outstanding' => $value->inv_outstanding,
+                            'ags30' => ($difference >= -1 && $difference <= $ag30 ? $value->inv_outstanding : 0),
+                            'ags60' => ($difference > $ag30 && $difference <= $ag60 ? $value->inv_outstanding : 0),
+                            'ags90' => ($difference > $ag60 && $difference <= $ag90 ? $value->inv_outstanding : 0),
+                            'ags180' => ($difference > $ag180 ? $value->inv_outstanding : 0)
+                            ];
+                    }
+                    $data['invoices'][] = $tempInv;
+                }
+            }else if($ty == 2){
+                foreach ($fetch as $inv) {
+                    $tempInv = [
+                        'unit_code' => $inv->unit_code,
+                        'tenan_name' => $inv->tenan_name,
+                        'total' => $inv->total,
+                        'ag30' => $inv->ag30,
+                        'ag60' => $inv->ag60,
+                        'ag90' => $inv->ag90,
+                        'agl180' => $inv->agl180
+                    ];
+                    $tempInv['details'] = [];
+                    $result = TrInvoicePaymdtl::select('tr_invoice_paymdtl.invpayd_amount','tr_invoice.inv_number',
+                                DB::raw("to_char(tr_invoice_paymhdr.invpayh_date, 'DD/MM/YYYY') AS tanggal"))
+                            ->join('tr_invoice_paymhdr','tr_invoice_paymhdr.id',"=",'tr_invoice_paymdtl.invpayh_id')
+                            ->join('tr_invoice','tr_invoice_paymdtl.inv_id',"=",'tr_invoice.id')
+                            ->where('tr_invoice.tenan_id',$inv->tenan_id)
+                            ->where('tr_invoice_paymhdr.contr_id',$inv->contr_id)
+                            ->where('invpayh_post',TRUE)
+                        ->get();
+                    foreach ($result as $key => $value) {
+                        $datetime1 = new DateTime(date('Y-m-d'));
+                        $datetime2 = new DateTime($value->invpayh_date);
+                        $dif = $datetime1->diff($datetime2);
+                        $difference = $dif->d;
+
+                        $tempInv['details'][] = [
+                            'inv_number' => $value->inv_number,
+                            'tanggal' => $value->tanggal,
+                            'inv_amount' => $value->invpayd_amount,
+                            'ags30' => ($difference >= -1 && $difference <= $ag30 ? $value->invpayd_amount : 0),
+                            'ags60' => ($difference > $ag30 && $difference <= $ag60 ? $value->invpayd_amount : 0),
+                            'ags90' => ($difference > $ag60 && $difference <= $ag90 ? $value->invpayd_amount : 0),
+                            'ags180' => ($difference > $ag180 ? $value->invpayd_amount : 0)
+                            ];
+                    }
+                    $data['invoices'][] = $tempInv;
+                }
+            }else{
+                foreach ($fetch as $inv) {
+                    $tempInv = [
+                        'unit_code' => $inv->unit_code,
+                        'tenan_name' => $inv->tenan_name
+                    ];
+                    $tempInv['details'] = [];
+                    $result = TrInvoice::select('tr_invoice.*',
+                                DB::raw("to_char(inv_date, 'DD/MM/YYYY') AS tanggal"))
+                            ->where('tr_invoice.contr_id',$inv->contr_id)
+                            ->where('inv_post',TRUE)
+                        ->get();
+                    foreach ($result as $key => $value) {
+                        $datetime1 = new DateTime(date('Y-m-d'));
+                        $datetime2 = new DateTime($value->inv_date);
+                        $dif = $datetime1->diff($datetime2);
+                        $difference = $dif->d;
+
+                        $tempInv['details'][] = [
+                            'inv_number' => $value->inv_number,
+                            'tanggal' => $value->tanggal,
+                            'inv_amount' => $value->inv_amount,
+                            'inv_tp' => 'INVOICE',
+                            'ags30' => ($difference >= -1 && $difference <= $ag30 ? $value->inv_amount : 0),
+                            'ags60' => ($difference > $ag30 && $difference <= $ag60 ? $value->inv_amount : 0),
+                            'ags90' => ($difference > $ag60 && $difference <= $ag90 ? $value->inv_amount : 0),
+                            'ags180' => ($difference > $ag180 ? $value->inv_amount : 0)
+                            ];
+                    }
+                    $result2 = TrInvoicePaymdtl::select('tr_invoice_paymdtl.invpayd_amount','tr_invoice.inv_number',
+                                DB::raw("to_char(tr_invoice_paymhdr.invpayh_date, 'DD/MM/YYYY') AS tanggal"))
+                            ->join('tr_invoice_paymhdr','tr_invoice_paymhdr.id',"=",'tr_invoice_paymdtl.invpayh_id')
+                            ->join('tr_invoice','tr_invoice_paymdtl.inv_id',"=",'tr_invoice.id')
+                            ->where('tr_invoice_paymhdr.contr_id',$inv->contr_id)
+                            ->where('invpayh_post',TRUE)
+                        ->get();
+                    foreach ($result2 as $key => $value) {
+                        $datetime1 = new DateTime(date('Y-m-d'));
+                        $datetime2 = new DateTime($value->invpayh_date);
+                        $dif = $datetime1->diff($datetime2);
+                        $difference = $dif->d;
+
+                        $tempInv['details'][] = [
+                            'inv_number' => $value->inv_number,
+                            'tanggal' => $value->tanggal,
+                            'inv_amount' => ($value->invpayd_amount * -1),
+                            'inv_tp' => 'PAYMENT',
+                            'ags30' => ($difference >= -1 && $difference <= $ag30 ? ($value->invpayd_amount * -1) : 0),
+                            'ags60' => ($difference > $ag30 && $difference <= $ag60 ? ($value->invpayd_amount * -1) : 0),
+                            'ags90' => ($difference > $ag60 && $difference <= $ag90 ? ($value->invpayd_amount * -1) : 0),
+                            'ags180' => ($difference > $ag180 ? ($value->invpayd_amount * -1) : 0)
+                            ];
+                    }
+                    $data['invoices'][] = $tempInv;
+                }
+            }
+        }
     	if($pdf){
             $data['type'] = 'pdf';
     		$pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
@@ -271,7 +459,7 @@ class ReportController extends Controller
                 $name1 = '1-'.$ag30.' Days';
                 $name2 = $ag30.'-'.$ag60.' Days';
                 $name3 = $ag60.'-'.$ag90.' Days';
-                $name4 = '> '.$ag180.' Days';
+                $name4 = 'OVER '.$ag180.' Days';
                 $data[$i]=array(
                     'Unit Code' =>$data_ori[$i]['unit_code'],
                     'Nama Tenant' =>$data_ori[$i]['tenan_name'],
@@ -597,7 +785,8 @@ class ReportController extends Controller
                 ->join('tr_period_meter','tr_meter.prdmet_id',"=",'tr_period_meter.id')
                 ->where('ms_cost_item.id',$cost)
                 ->whereYear('prd_billing_date','=',$year)
-                ->groupBy('ms_unit.unit_code');
+                ->groupBy('ms_unit.unit_code')
+                ->orderBy('ms_unit.unit_code','asc');
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
         if($pdf){
