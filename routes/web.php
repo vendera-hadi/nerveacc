@@ -343,6 +343,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/r_tenant','ReportController@ReportTenant')->name('report.r_tenant');
 
 	Route::get('report/glreport','ReportController@glview')->name('report.glview');
+	Route::get('report/ytd','ReportController@ytd')->name('report.ytd');
 	Route::get('report/doglreport','ReportController@glreport')->name('report.glget');
 	// payment
 	Route::get('payment','PaymentController@index')->name('payment.index');

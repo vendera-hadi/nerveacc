@@ -8,7 +8,8 @@
 <body class="hold-transition login-page">
     <div class="login-box shadow">
         <div class="login-logo">
-            <img src="{{ asset('/img/logo.png') }}" style="max-height: 150px;">
+            @php $logo = App\Models\MsCompany::first()->comp_image; @endphp
+            <img src="{{ asset('/upload/'.$logo) }}" style="max-height: 150px;">
             <br>
             <div style="size: 12pt;"><a href="{{ url('/home') }}">Standard Operational Procedure</a></div>
         </div><!-- /.login-logo -->

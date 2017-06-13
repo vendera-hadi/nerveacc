@@ -308,7 +308,7 @@
                             @endif
 
                             @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
-                            <li @if(Request::url() == route('report.glview')) class="active" @endif><a href="{{route('report.glview')}}"><i class="fa fa-circle-o"></i> YTD General Ledger</a></li>
+                            <li @if(Request::url() == route('report.ytd')) class="active" @endif><a href="{{route('report.ytd')}}"><i class="fa fa-circle-o"></i> YTD General Ledger</a></li>
                             @endif
 
                             <li>
