@@ -1007,4 +1007,62 @@ class ReportController extends Controller
             return view('layouts.report_template2', $data);
         }
     }
+
+    public function ytd(){
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['journal_types'] = MsJournalType::where('jour_type_isactive',1)->get();
+        return view('report_ytd',$data);
+    }
+
+    public function ytdreport(Request $request){
+        $monthfrom = @$request->monthfrom;
+        $yearfrom = @$request->yearfrom;
+        $monthto = @$request->monthto;
+        $yearto = @$request->yearto;
+
+        $from = date($yearfrom.'-'.$monthfrom.'-01');
+        $to = date($yearto.'-'.$monthto.'-t');
+
+        $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
+        if(!empty($monthfrom) && !empty($monthto) && !empty($yearfrom) && !empty($yearto)){
+            $data['tahun'] = 'Periode : '.date('M Y',strtotime($from)).' s/d '.date('M Y',strtotime($to));
+        }else{
+            $data['tahun'] = 'All Periode';
+        }
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['title'] = "General Ledger Report";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['template'] = 'report_ytd_gl_template';
+        
+        
+        // $data['ledger'] = $fetch;
+
+        $from = strtotime($from);
+        $to = strtotime($to);
+        $balances = [];
+        $ledger = [];
+        while($from < $to){
+            $fetch = TrLedger::join('ms_master_coa','ms_master_coa.coa_code','=','tr_ledger.coa_code')
+                            ->join('ms_journal_type','ms_journal_type.id','=','tr_ledger.jour_type_id')
+                            ->leftJoin('tr_invoice','tr_invoice.inv_number','=','tr_ledger.ledg_refno')
+                            ->leftJoin('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
+                            ->select('tr_ledger.coa_code','tr_ledger.closed_at','coa_name','ledg_date','ledg_description','ledg_debit','ledg_credit','jour_type_prefix','ledg_refno','tenan_id','tenan_name');
+            if(!empty($from) && !empty($to)) $fetch = $fetch->where(\DB::raw('ledg_date::text'),'like',date('Y-m',$from).'-%');
+            $fetch = $fetch->orderBy('ledg_date')->get();
+            $ledger[date('Y-m',$from)] = $fetch;
+
+            $log_gl = \DB::table('gl_balance_log')->where('month',(int)date('m',$from))->where('month',(int)date('Y',$from))->first();
+            $balances[date('Y-m',$from)] = !empty($log_gl->total) ? $log_gl->total : 0;
+            $from = strtotime("+1 month", $from);
+        }
+        $data['ledger'] = $ledger;
+        $data['balances'] = $balances;
+        return view('layouts.report_template2', $data);
+    }
+
 }

@@ -418,6 +418,13 @@ class JournalController extends Controller
                 return response()->json(['errorMsg' => 'All entries this month was already closed']);                
             }else{
                 TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->update(['closed_at' => date('Y-m-d')]);
+                // update saldo
+                $totalDebit = TrLedger::select(\DB::raw('SUM(ledg_debit) as total'))->whereBetween('ledg_date',[$startdate, $enddate])->first();
+                $totalCredit = TrLedger::select(\DB::raw('SUM(ledg_credit) as total'))->whereBetween('ledg_date',[$startdate, $enddate])->first();
+                if(empty($totalDebit->total)) $totalDebit->total = 0;
+                if(empty($totalCredit->total)) $totalCredit->total = 0; 
+                $balance = $totalCredit->total - $totalDebit->total;
+                \DB::table('gl_balance_log')->insert(['month'=>(int)$month, 'year'=>(int)$year, 'balance'=>(float)$balance]);
                 return response()->json(['success' => 'Closing Success']);
             }
         }else if($closingType == 'yearly'){
@@ -432,6 +439,17 @@ class JournalController extends Controller
                 return response()->json(['errorMsg' => 'All entries this year was already closed']);                
             }else{
                 TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->update(['closed_at' => date('Y-m-d')]);
+                for($i=1; $i<=12; $i++) {
+                    // update saldo
+                    $startdate = date('Y-m-d',strtotime($year."-".$i."-01"));
+                    $enddate = date('Y-m-t', strtotime($year."-".$i."-01"));
+                    $totalDebit = TrLedger::select(\DB::raw('SUM(ledg_debit) as total'))->whereBetween('ledg_date',[$startdate, $enddate])->first();
+                    $totalCredit = TrLedger::select(\DB::raw('SUM(ledg_credit) as total'))->whereBetween('ledg_date',[$startdate, $enddate])->first();
+                    if(empty($totalDebit->total)) $totalDebit->total = 0;
+                    if(empty($totalCredit->total)) $totalCredit->total = 0; 
+                    $balance = $totalCredit->total - $totalDebit->total;
+                    \DB::table('gl_balance_log')->insert(['month'=>(int)$i, 'year'=>(int)$year, 'balance'=>(float)$balance]);
+                }
                 return response()->json(['success' => 'Closing Success']);
             }
         }

@@ -157,7 +157,7 @@
 
             
             <?php
-              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index'),url('period_meter'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview')];
+              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('journal.index'), route('cash_bank.index'), route('payment.index'),url('period_meter'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd')];
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter')];
 
@@ -292,6 +292,14 @@
                       </li>
                       @endif
 
+                      @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                      <li @if(Request::url() == route('report.ytd')) class="active" @endif><a href="{{route('report.ytd')}}"><i class="fa fa-circle-o"></i> YTD General Ledger</a></li>
+                      @endif
+
+                      @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                      <li @if(Request::url() == route('genledger.index')) class="active" @endif><a href="{{route('genledger.index')}}"><i class="fa fa-circle-o"></i> General Ledger</a></li>
+                      @endif
+
                       <li>
                           <a href="#"><i class="fa fa-circle"></i> Report
                               <span class="pull-right-container">
@@ -299,16 +307,9 @@
                               </span>
                           </a>
                           <ul class="treeview-menu @if(in_array(Request::url(),$arUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$arUrls)) style="display:block" @endif>
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
-                            <li @if(Request::url() == route('genledger.index')) class="active" @endif><a href="{{route('genledger.index')}}"><i class="fa fa-circle-o"></i> General Ledger</a></li>
-                            @endif
-                            
+                          
                              @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                             <li @if(Request::url() == route('report.glview')) class="active" @endif><a href="{{route('report.glview')}}"><i class="fa fa-circle-o"></i> Report</a></li>
-                            @endif
-
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
-                            <li @if(Request::url() == route('report.ytd')) class="active" @endif><a href="{{route('report.ytd')}}"><i class="fa fa-circle-o"></i> YTD General Ledger</a></li>
                             @endif
 
                             <li>
@@ -325,7 +326,9 @@
                               </ul>
                             </li>
 
-                            <li>
+                          </ul>
+
+                          <li>
                               <a href="#"><i class="fa fa-circle"></i> Setup
                                   <span class="pull-right-container">
                                     <i class="fa fa-angle-left pull-right"></i>
@@ -341,8 +344,6 @@
                                 @endif
                               </ul>
                             </li>
-
-                          </ul>
                       </li>
 
                       

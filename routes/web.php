@@ -345,6 +345,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/glreport','ReportController@glview')->name('report.glview');
 	Route::get('report/ytd','ReportController@ytd')->name('report.ytd');
 	Route::get('report/doglreport','ReportController@glreport')->name('report.glget');
+	Route::get('report/doytdreport','ReportController@ytdreport')->name('report.ytdget');
 	// payment
 	Route::get('payment','PaymentController@index')->name('payment.index');
 	Route::post('payment/get','PaymentController@get')->name('payment.get');
