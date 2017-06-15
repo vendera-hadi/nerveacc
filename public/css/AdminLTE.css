@@ -255,10 +255,12 @@ a:focus {
   background-color: transparent;
   background-image: none;
   padding: 15px 15px;
-  font-family: fontAwesome;
+  /* font-family: fontAwesome; */  /* original */
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 .main-header .sidebar-toggle:before {
-  content: "\f0c9";
+  /* content: "\f0c9"; */ /* original */
+  content : "MENU";
 }
 .main-header .sidebar-toggle:hover {
   color: #fff;
