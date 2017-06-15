@@ -34,7 +34,7 @@
                     <td><?php echo date('d/m/y', $inv_date);?></td>
                     <td><?php echo date('d/m/y', $inv_duedate);?></td>
                     <td><?php echo 'Rp. '.number_format($value['inv_outstanding']);?></td>
-                    <td><input type="number" name="data_payment[totalpay][{{$inv_id}}]" value="{{floor($value['inv_outstanding'])}}" maxlength="{{floor($value['inv_outstanding'])}}" minlength="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
+                    <td><input type="text" name="data_payment[totalpay][{{$inv_id}}]" value="{{floor($value['inv_outstanding'])}}" maxlength="{{floor($value['inv_outstanding'])}}" minlength="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
                 </tr>
                 @endforeach
             @else

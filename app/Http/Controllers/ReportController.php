@@ -1035,7 +1035,7 @@ class ReportController extends Controller
             $data['tahun'] = 'All Periode';
         }
         $data['name'] = MsCompany::first()->comp_name;
-        $data['title'] = "General Ledger Report";
+        $data['title'] = "Year to Date General Ledger Report";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_ytd_gl_template';
         

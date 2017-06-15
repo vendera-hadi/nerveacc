@@ -30,14 +30,13 @@
 <div class="row">
 	<div class="col-md-12">
   		<!-- content -->
-
         <div class="row">
             <div class="col-sm-4">
                 <table width="100%">
                     <tr>
                         <td><label class="radio-inline"><input type="radio" name="type" value="owner">Owner</label></td>
                         <td><label class="radio-inline"><input type="radio" name="type" value="tenant">Tenant</label></td>
-                        <td><button type="button" class="btn btn-info" id="filterTenant">filter</button></td>
+                        <td><button type="button" class="btn btn-flat btn-info" id="filterTenant">filter</button></td>
                     </tr>
                 </table>
             </div>

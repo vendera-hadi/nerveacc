@@ -43,7 +43,7 @@
                         </div>
                         <!-- /.box-header -->
                         <div class="box-body">
-                            <button type="button" class="btn btn-primary pull-right" style="margin-bottom:10px" id="AddNew">Add new User</button>
+                            <button type="button" class="btn btn-flat btn-primary pull-right" style="margin-bottom:10px" id="AddNew">Add new User</button>
                           <table class="table table-bordered">
                             <tbody>
                                 <tr>

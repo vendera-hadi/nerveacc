@@ -39,68 +39,72 @@
         <!-- form start -->
         <form role="form" action="post" id="filter">
             <div class="box-body">
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <select name="dept" class="form-control">
-                            <option value="">All Department</option> 
-                            @foreach($departments as $dept)
-                            <option value="{{$dept->id}}" @if(Request::input('dept') == $dept->id){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group date">
-                            <div class="input-group-addon">
-                                <i class="fa fa-calendar"></i>
-                            </div>
-                            <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <select name="dept" class="form-control">
+                                <option value="">All Department</option> 
+                                @foreach($departments as $dept)
+                                <option value="{{$dept->id}}" @if(Request::input('dept') == $dept->id){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
+                                @endforeach
+                            </select>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <select name="coa" class="form-control choose-coa" id="selectAccount" style="width:100%">
-                          <option value="">From COA</option>                                     
-                          @foreach($accounts as $key => $coa)
-                              <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                          @endforeach
-                        </select>
-                    </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="form-group">
-                        <select class="form-control" name="jour_type_id">
-                          <option value="">All Journal Type</option>
-                          @foreach($journal_types as $jourtype)
-                          <option value="{{$jourtype->id}}" @if(Request::input('jour_type_id') == $jourtype->id){{'selected="selected"'}}@endif>{{$jourtype->jour_type_name}}</option>
-                          @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group date">
-                            <div class="input-group-addon">
-                                <i class="fa fa-calendar"></i>
+                        <div class="form-group">
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
                             </div>
-                            <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <select name="tocoa" class="form-control choose-coa" id="selectAccount2" style="width:100%">
-                            <option value="">To COA</option>                                     
+                        <div class="form-group">
+                            <select name="coa" class="form-control choose-coa" id="selectAccount" style="width:100%">
+                              <option value="">From COA</option>                                     
                               @foreach($accounts as $key => $coa)
-                            <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                                  <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
                               @endforeach
-                        </select>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <select class="form-control" name="jour_type_id">
+                              <option value="">All Journal Type</option>
+                              @foreach($journal_types as $jourtype)
+                              <option value="{{$jourtype->id}}" @if(Request::input('jour_type_id') == $jourtype->id){{'selected="selected"'}}@endif>{{$jourtype->jour_type_name}}</option>
+                              @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <select name="tocoa" class="form-control choose-coa" id="selectAccount2" style="width:100%">
+                                <option value="">To COA</option>                                     
+                                  @foreach($accounts as $key => $coa)
+                                <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                                  @endforeach
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="col-sm-12">
-                    <div class="form-group">
-                        <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name / Description / Ref No)">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name / Description / Ref No)">
+                        </div>
                     </div>
                 </div>    
             </div>
           <!-- /.box-body -->
 
           <div class="box-footer">
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-flat btn-primary">Submit</button>
           </div>
         </form>
       </div>

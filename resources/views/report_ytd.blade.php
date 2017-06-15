@@ -16,15 +16,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
-    <!-- select2 -->
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/select2.min.css') }}">
-    <style type="text/css">
-    .select2-container--default .select2-selection--single{
-      border-radius: 0px;
-      height: 36px;
-      width: 235px;
-    }
-    </style>
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -35,84 +27,106 @@
 @stop
 
 @section('main-content')
-		<div class="row">
-			<div class="col-md-12">
-          		<!-- content -->
-                <div class="box" style="min-height:500px">
-                    <div class="box-body">
-                        <form action="post" id="filter">
-                        <div class ="row">
-                            <div class="col-sm-2">
-                              <select name="monthfrom" class="form-control" required>
-                                <option value="">Start Month</option> 
-                                @for($i=1; $i<=12; $i++)
-                                <option value="{{$i}}" @if(Request::input('monthfrom') == $i){{'selected="selected"'}}@endif>{{date('M',strtotime(date('Y').'-'.$i.'-01'))}}</option>
-                                @endfor
-                              </select>
+<div class="row">
+    <!-- left column -->
+    <div class="col-md-12">
+      <!-- general form elements -->
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">Filter Report</h3>
+        </div>
+        <!-- /.box-header -->
+        <!-- form start -->
+        <form role="form" action="post" id="filter">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="col-sm-6" style="padding-left: 0px;">
+                            <div class="form-group">
+                                <select name="monthfrom" class="form-control" required>
+                                    <option value="">Start Month</option> 
+                                    @for($i=1; $i<=12; $i++)
+                                    <option value="{{$i}}" @if(Request::input('monthfrom') == $i){{'selected="selected"'}}@endif>{{date('M',strtotime(date('Y').'-'.$i.'-01'))}}</option>
+                                    @endfor
+                                </select>
                             </div>
-
-                            <div class="col-sm-2">
-                                <select name="yearfrom" class="form-control" required>
-                                <option value="">Start Month</option> 
-                                @for($i=2016; $i<=date('Y'); $i++)
-                                <option value="{{$i}}" @if(Request::input('yearfrom') == $i){{'selected="selected"'}}@endif>{{$i}}</option>
-                                @endfor
-                              </select>
-                            </div>
-
-                            <div class="col-sm-1">
-                                <center>to</center>
-                            </div>
-                            
-                            <div class="col-sm-2">
-                                <select name="monthto" class="form-control" required>
-                                <option value="">End Month</option> 
-                                @for($i=1; $i<=12; $i++)
-                                <option value="{{$i}}" @if(Request::input('monthto') == $i){{'selected="selected"'}}@endif>{{date('M',strtotime(date('Y').'-'.$i.'-01'))}}</option>
-                                @endfor
-                              </select>
-                            </div>
-                            
-                             <div class="col-sm-2">
-                                <select name="yearto" class="form-control" required>
-                                <option value="">Start Month</option> 
-                                @for($i=2016; $i<=date('Y'); $i++)
-                                <option value="{{$i}}" @if(Request::input('yearfrom') == $i){{'selected="selected"'}}@endif>{{$i}}</option>
-                                @endfor
-                              </select>
-                            </div>
-
-                            <div class="col-sm-2">
-                                <button class="btn btn-info">Submit</button>
-                            </div>
-                            
                         </div>
-
-                        </form>
-
-                        <div class ="row" style="margin-top:80px">
-                            <div class="col-lg-12 col-md-12 col-sm-12">
-                                <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Pdf</button>
-                                <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
-                                <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
-                                <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:500px"></iframe>
+                        <div class="col-sm-6" style="padding-right: 0px;">
+                            <div class="form-group">
+                                <select name="yearfrom" class="form-control" required>
+                                    <option value="">Start Month</option> 
+                                    @for($i=2016; $i<=date('Y'); $i++)
+                                    <option value="{{$i}}" @if(Request::input('yearfrom') == $i){{'selected="selected"'}}@endif>{{$i}}</option>
+                                    @endfor
+                                </select>
                             </div>
                         </div>
                     </div>
-                </div>
+                    <div class="col-sm-6">
+                        <div class="col-sm-6" style="padding-left: 0px;">
+                            <div class="form-group">
+                                <select name="monthto" class="form-control" required>
+                                    <option value="">End Month</option> 
+                                    @for($i=1; $i<=12; $i++)
+                                    <option value="{{$i}}" @if(Request::input('monthto') == $i){{'selected="selected"'}}@endif>{{date('M',strtotime(date('Y').'-'.$i.'-01'))}}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6" style="padding-right: 0px;">
+                            <div class="form-group">
+                                <select name="yearto" class="form-control" required>
+                                    <option value="">Start Month</option> 
+                                    @for($i=2016; $i<=date('Y'); $i++)
+                                    <option value="{{$i}}" @if(Request::input('yearfrom') == $i){{'selected="selected"'}}@endif>{{$i}}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>   
+            </div>
+          <!-- /.box-body -->
 
-        	</div>
-		</div>
-	</div>
+          <div class="box-footer">
+            <button type="submit" class="btn btn-flat btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+      <!-- /.box -->
+    </div>
+</div>
+
+<div class="row">
+    <!-- left column -->
+    <div class="col-md-12">
+      <!-- general form elements -->
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <h3 class="box-title">Result</h3>
+        </div>
+        <!-- /.box-header -->
+          <div class="box-body">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
+                        <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
+                        <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:400px"></iframe>
+                </div>
+            </div>
+          </div>
+          <!-- /.box-body -->
+      </div>
+      <!-- /.box -->
+    </div>
+</div>  	
 @endsection
 
 @section('footer-scripts')
 <script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
-<!-- datepicker -->
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
-<!-- select2 -->
 <script type="text/javascript" src="{{ asset('plugins/select2/select2.min.js') }}"></script>
 <script type="text/javascript">
     $('.datepicker').datepicker({

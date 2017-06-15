@@ -159,10 +159,10 @@ class CoaController extends Controller
                 'COA Credit'=>number_format($data_ori[$i]['coa_credit'],2),
                 'COA Ending'=>number_format($data_ori[$i]['coa_ending'],2));
         }
-        $tp = 'xls';
         $border = 'A1:G';
-        return Excel::create('report_coa', function($excel) use ($data) {
-            $excel->sheet('mySheet', function($sheet) use ($data)
+        $tp = 'xls';
+        return Excel::create('report_coa', function($excel) use ($data,$border) {
+            $excel->sheet('mySheet', function($sheet) use ($data,$border)
             {
                 $total = count($data)+1;
                 $sheet->setBorder($border.$total, 'thin');

@@ -26,11 +26,6 @@
         height: 400px;
     }
     .datepicker{z-index:1151 !important;}
-
-    .select2-container--default .select2-selection--single{
-      border-radius: 0px;
-      height: 36px;
-    }
     </style>
 @endsection
 
@@ -63,57 +58,61 @@
                   </div>
                 </div>
               </div>
-              <div class="col-sm-3">
-                <select name="dept" class="form-control">
-                  <option value="">All Department</option> 
-                  @foreach($departments as $dept)
-                  <option value="{{$dept->id}}" @if(Request::input('dept') == $dept->id){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="col-sm-3">
-                <select class="form-control" name="jour_type_id">
-                  <option value="">All Journal Type</option>
-                  @foreach($journal_types as $jourtype)
-                  <option value="{{$jourtype->id}}" @if(Request::input('jour_type_id') == $jourtype->id){{'selected="selected"'}}@endif>{{$jourtype->jour_type_name}}</option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="col-sm-2">
-                  <button type="submit" class="btn btn-success">Filter</button>
-              </div>
-            </div>
-            <div class="row" style="margin-bottom:15px">
-              <div class="col-sm-3">
-                <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
-                  <option value="">From COA Code</option>
-                  
-                  @foreach($accounts as $key => $coa)
-                      <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="col-sm-3">
-                <select class="form-control js-example-basic-single" id="selectAccount2" style="width:100%">
-                  <option value="">To COA Code</option>
-                  
-                  @foreach($accounts as $key => $coa)
-                      <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                  @endforeach
-                </select>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <select name="dept" class="form-control">
+                    <option value="">All Department</option> 
+                    @foreach($departments as $dept)
+                    <option value="{{$dept->id}}" @if(Request::input('dept') == $dept->id){{'selected="selected"'}}@endif>{{$dept->dept_name}}</option>
+                    @endforeach
+                  </select>
+                </div>
               </div>
               <div class="col-sm-4">
-                <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name / Description / Ref No)">
+                <div class="form-group">
+                  <select class="form-control" name="jour_type_id">
+                    <option value="">All Journal Type</option>
+                    @foreach($journal_types as $jourtype)
+                    <option value="{{$jourtype->id}}" @if(Request::input('jour_type_id') == $jourtype->id){{'selected="selected"'}}@endif>{{$jourtype->jour_type_name}}</option>
+                    @endforeach
+                  </select>
+                </div>
               </div>
-            </div> 
-          </form>
-          @if(Request::input('filterdate'))
-          <div class="row">
-            <div class="col-xs-12">
-              <h3>Searh Journal by : {{Request::input('filterdate')}}</h3>
             </div>
-          </div>
-          @endif
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <select class="form-control js-example-basic-single" id="selectAccount" style="width:100%">
+                    <option value="">From COA Code</option>
+                    @foreach($accounts as $key => $coa)
+                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <select class="form-control js-example-basic-single" id="selectAccount2" style="width:100%">
+                    <option value="">To COA Code</option>
+                    @foreach($accounts as $key => $coa)
+                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                    @endforeach
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <input class="form-control" type="text" name="q" placeholder="Keyword (Tenant Name / Description / Ref No)">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-12">
+              <button type="submit" class="btn btn-flat btn-success pull-left">Filter</button>
+              </div>
+            </div>
+          </form>
+          <br>
           <table id="dg" title="General Ledger Entries" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
             <thead>
               <tr>

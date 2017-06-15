@@ -45,48 +45,58 @@
         </div>
   		<!-- content -->
         <form id="search">
-        <div class="row" style="margin-bottom:20px">
-            <div class="col-sm-2">
-                <input type="text" class="form-control" name="q" placeholder="Search Invoice No or Billing Info or Tenant Name">
-            </div>
-            <div class="col-sm-2">
-                <select class="form-control" name="inv_type">
-                    <option value="">-- tipe invoice --</option>
-                    @foreach($inv_type as $itype)
-                    <option value="{{$itype->id}}" @if(Request::get('inv_type') == $itype->id){{'selected="selected"'}}@endif>{{$itype->invtp_name}}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-sm-2">
-                <select class="form-control" name="outstanding">
-                    <option value="">ALL</option>
-                    <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>NOT PAID</option>
-                    <option value="2" @if(Request::get('inv_type')==2){{'selected="selected"'}}@endif>PAID</option>
-                </select>
-            </div>
-            <div class="col-sm-2">
-                <div class="input-group date">
-                  <div class="input-group-addon">
-                    <i class="fa fa-calendar"></i>
-                  </div>
-                  <input type="text" id="startDate" name="date_from" placeholder="From" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="q" placeholder="Cari No Invoice atau Nama Tenant">
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <select class="form-control" name="inv_type">
+                            <option value="">-- tipe invoice --</option>
+                            @foreach($inv_type as $itype)
+                            <option value="{{$itype->id}}" @if(Request::get('inv_type') == $itype->id){{'selected="selected"'}}@endif>{{$itype->invtp_name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <select class="form-control" name="outstanding">
+                            <option value="">ALL</option>
+                            <option value="1" @if(Request::get('inv_type')==1){{'selected="selected"'}}@endif>NOT PAID</option>
+                            <option value="2" @if(Request::get('inv_type')==2){{'selected="selected"'}}@endif>PAID</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <div class="input-group date">
+                          <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </div>
+                          <input type="text" id="startDate" name="date_from" placeholder="From" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <div class="input-group date">
+                          <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </div>
+                          <input type="text" id="startDate" name="date_to" placeholder="To" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-1">
+                    <div class="form-group">
+                        <button class="btn btn-flat btn-info btn-block pull-left">Cari</button>
+                    </div>
                 </div>
             </div>
-            <div class="col-sm-2">
-                <div class="input-group date">
-                  <div class="input-group-addon">
-                    <i class="fa fa-calendar"></i>
-                  </div>
-                  <input type="text" id="startDate" name="date_to" placeholder="To" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                </div>
-            </div>
-            <div class="col-sm-2">
-                 <button class="btn btn-info">Cari</button>
-            </div>
-        </div>
         </form>
-
-        <!-- template tabel -->
   		<table id="dg" title="List Invoice" class="easyui-datagrid" style="width:100%;min-height:500px" toolbar="#toolbar">
             <!-- kolom -->
             <thead>
@@ -95,10 +105,10 @@
                     <th field="checkbox" width="25" sortable="true"></th>
                     <th field="inv_number" width="70" sortable="true">No.Invoice</th>
                     <!-- <th field="contr_no" width="100" sortable="true">No Kontrak</th> -->
-                    <th field="tenan_name" width="100" sortable="true">Nama Tenant</th>
+                    <th field="tenan_name" width="180" sortable="true">Nama Tenant</th>
                     <th field="unit" width="45" sortable="true">Unit</th>  
-                    <th field="inv_date" width="80" sortable="true">Tgl Invoice</th>
-                    <th field="inv_duedate" width="80" sortable="true">Jatuh Tempo</th>
+                    <th field="inv_date" width="60" sortable="true">Tgl Invoice</th>
+                    <th field="inv_duedate" width="60" sortable="true">Jatuh Tempo</th>
                     <th field="inv_amount" width="70" sortable="true" align="right">Amount</th>
                     <!-- <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th>  -->
                     <th field="invtp_name" width="90" sortable="true">Jenis Invoice</th>

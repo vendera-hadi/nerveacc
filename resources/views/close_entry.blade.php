@@ -36,63 +36,65 @@
 		            </div>
 					<form action="" method="post" id="formClosing">
 					    <div class="box-body">
-					        <div class="col-sm-6">
-			              		@if(Session::get('error'))
-							    	<div class="alert alert-danger">
-									  <strong>Error!</strong> {{ Session::get('error') }}
+					    	<div class="row">
+						        <div class="col-sm-6">
+				              		@if(Session::get('error'))
+								    	<div class="alert alert-danger">
+										  <strong>Error!</strong> {{ Session::get('error') }}
+										</div>
+								    @endif
+								    @if(Session::get('success'))
+								    	<div class="alert alert-success">
+										  <strong>Success</strong> {{ Session::get('success') }}
+										</div>
+								    @endif
+								    @if (count($errors) > 0)
+								      <div class="alert alert-danger">
+								        <ul>
+								          @foreach($errors->all() as $error)
+								            <li>{{ $error }}</li>
+								          @endforeach
+								        </ul>
+								      </div>
+								    @endif     
+					                <div class="form-group">
+										<label>Jenis Closing</label>
+										<select name="closing_type" class="form-control" id="closingType" required>
+											<option value="">Choose Type</option>
+											<option value="monthly">BULANAN</option>
+											<option value="yearly">TAHUNAN</option>
+										</select>
+					                </div>
+					                <div class="form-group" id="monthField">
+										<label>Bulan</label>
+										<select name="month" class="form-control" id="month">
+											<option value="01">JANUARI</option>
+											<option value="02">FEBRUARI</option>
+											<option value="03">MARET</option>
+											<option value="04">APRIL</option>
+											<option value="05">MEI</option>
+											<option value="06">JUNI</option>
+											<option value="07">JULI</option>
+											<option value="08">AGUSTUS</option>
+											<option value="09">SEPTEMBER</option>
+											<option value="10">OKTOBER</option>
+											<option value="11">NOVEMBER</option>
+											<option value="12">DESEMBER</option>
+										</select>
+					                </div>
+									<div class="form-group" id="yearField">
+										<label>Tahun</label>
+										<select name="year" class="form-control" id="year">
+											@for($i=2016;$i<=date('Y');$i++)
+											<option value="{{$i}}" @if($i == date('Y')){{'selected'}}@endif>{{$i}}</option>
+											@endfor
+										</select>
 									</div>
-							    @endif
-							    @if(Session::get('success'))
-							    	<div class="alert alert-success">
-									  <strong>Success</strong> {{ Session::get('success') }}
-									</div>
-							    @endif
-							    @if (count($errors) > 0)
-							      <div class="alert alert-danger">
-							        <ul>
-							          @foreach($errors->all() as $error)
-							            <li>{{ $error }}</li>
-							          @endforeach
-							        </ul>
-							      </div>
-							    @endif     
-				                <div class="form-group">
-									<label>Jenis Closing</label>
-									<select name="closing_type" class="form-control" id="closingType" required>
-										<option value="">Choose Type</option>
-										<option value="monthly">BULANAN</option>
-										<option value="yearly">TAHUNAN</option>
-									</select>
-				                </div>
-				                <div class="form-group" id="monthField">
-									<label>Bulan</label>
-									<select name="month" class="form-control" id="month">
-										<option value="01">JANUARI</option>
-										<option value="02">FEBRUARI</option>
-										<option value="03">MARET</option>
-										<option value="04">APRIL</option>
-										<option value="05">MEI</option>
-										<option value="06">JUNI</option>
-										<option value="07">JULI</option>
-										<option value="08">AGUSTUS</option>
-										<option value="09">SEPTEMBER</option>
-										<option value="10">OKTOBER</option>
-										<option value="11">NOVEMBER</option>
-										<option value="12">DESEMBER</option>
-									</select>
-				                </div>
-								<div class="form-group" id="yearField">
-									<label>Tahun</label>
-									<select name="year" class="form-control" id="year">
-										@for($i=2016;$i<=date('Y');$i++)
-										<option value="{{$i}}" @if($i == date('Y')){{'selected'}}@endif>{{$i}}</option>
-										@endfor
-									</select>
-								</div>
-					    	</div>
+						    	</div>
+						    </div>
 						</div>
 						<div class="box-footer">
-							<button type="submit" class="btn btn-primary" id="submit">Submit</button>
+							<button type="submit" class="btn btn-flat btn-primary" id="submit">Submit</button>
 						</div>
 					</form>
 				</div>

@@ -128,7 +128,7 @@
           <br><br>
           <div class="row">
             <div class="col-sm-12">
-              <button type="submit" id="submitJournal">Submit</button>
+              <button type="submit" class="btn btn-flat btn-primary" id="submitJournal">Submit</button>
             </div>
           </div>
         </form>
