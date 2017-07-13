@@ -371,6 +371,10 @@ Route::group(['middleware' => 'auth'], function () {
 
 	Route::get('profile','ProfileController@index');
 	Route::post('profile/update', 'ProfileController@update')->name('profile.update');
+
+	// layout
+	Route::get('layouts','LayoutController@index')->name('layout.index');
+	Route::post('layouts/get','LayoutController@get')->name('layout.get');
 });
 
 Route::get('logout','Auth\AuthController@logout');
