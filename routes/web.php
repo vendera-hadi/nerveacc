@@ -51,6 +51,8 @@ Route::group(['middleware' => 'auth'], function () {
 	// group account
 	Route::get('groupaccount','GroupAccountController@index');
 	Route::post('groupaccount/get', 'GroupAccountController@get')->name('groupaccount.get');
+	Route::get('groupaccount/getdetail', 'GroupAccountController@getDetail')->name('groupaccount.getdetail');
+	Route::post('groupaccount/updatedetail', 'GroupAccountController@updateDetail')->name('groupaccount.updatedetail');
 	Route::post('groupaccount/options', 'GroupAccountController@getOptions')->name('groupaccount.options');
 	Route::post('groupaccount/insert', 'GroupAccountController@insert')->name('groupaccount.insert');
 	Route::post('groupaccount/update', 'GroupAccountController@update')->name('groupaccount.update');

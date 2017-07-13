@@ -8,4 +8,9 @@ class MsGroupAccount extends Model
 {
    protected $table ='ms_group_account';
    protected $fillable =['grpaccn_name','created_by','updated_by'];
+
+   public function getDates()
+	{
+	    return [];
+	}
 }
