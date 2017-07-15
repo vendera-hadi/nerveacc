@@ -23,7 +23,7 @@ class CreateMsDetailFormatsTable extends Migration
             $table->string('formula', 255)->nullable();
             $table->string('linespace', 255)->nullable();
             $table->string('underline', 255)->nullable();
-            $table->integer('coloum');
+            $table->integer('column');
             $table->timestamps();
         });
     }
