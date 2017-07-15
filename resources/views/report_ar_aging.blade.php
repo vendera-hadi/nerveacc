@@ -1,4 +1,4 @@
-<h4><?php 
+<h4 style="font-size: 14px;"><?php 
 echo $title_r; 
 if(count($unit) > 0){ echo '<br>Unit '.$unit[0]->unit_code; } ?></h4>
 <table class="table table-striped" width="100%"> 
