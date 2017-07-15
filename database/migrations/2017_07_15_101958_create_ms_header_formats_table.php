@@ -15,8 +15,8 @@ class CreateMsHeaderFormatsTable extends Migration
     {
         Schema::create('ms_header_format', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('nama', 100);
-            $table->integer('type');
+            $table->string('name', 100);
+            $table->string('type');
             $table->integer('created_by');
             $table->timestamps();
         });
