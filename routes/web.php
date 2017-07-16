@@ -375,6 +375,10 @@ Route::group(['middleware' => 'auth'], function () {
 	// layout
 	Route::get('layouts','LayoutController@index')->name('layout.index');
 	Route::post('layouts/get','LayoutController@get')->name('layout.get');
+	Route::post('layouts/upsert','LayoutController@upsert')->name('layout.upsert');
+	Route::post('layouts/delete','LayoutController@destroy')->name('layout.delete');
+	Route::post('layouts/detail/get','LayoutController@getDetail')->name('layout.detail.get');
+	Route::post('layouts/detail/upsert','LayoutController@updateDetail')->name('layout.detail.upsert');
 });
 
 Route::get('logout','Auth\AuthController@logout');
