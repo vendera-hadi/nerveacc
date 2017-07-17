@@ -242,8 +242,18 @@
 	        }
         }
 
+        var bold_option, underline_option, hide_option;
         function parseResult(targetClass, data){
-
+            $.each(data, function(key, val) {
+                if(val.header == "0") bold_option = '<option value="1">Yes</option><option value="0" selected>No</option>';
+                else bold_option = '<option value="1">Yes</option><option value="0">No</option>';
+                if(val.underline == false) underline_option = '<option value="1">Yes</option><option value="0" selected>No</option>';
+                else underline_option = '<option value="1">Yes</option><option value="0">No</option>';
+                if(val.hide == false) hide_option = '<option value="1">Yes</option><option value="0" selected>No</option>';
+                else hide_option = '<option value="1">Yes</option><option value="0">No</option>';
+                
+                targetClass.find('tbody').append('<tr><td><input type="hidden" name="column[]" value="'+val.column+'"><input type="text" name="coa_code[]" class="form-control" placeholder="cth: 4, 401, @MODAL" value="'+val.coa_code+'" required></td><td><input type="text" name="desc[]" value="'+val.desc+'" class="form-control" required></td><td><select name="header[]" class="form-control">'+bold_option+'</select></td><td><input type="text" name="variable[]" value="'+val.variable+'" class="form-control" placeholder="cth : A1, B2, R99" required></td><td><input type="text" name="formula[]" value="'+val.formula+'" class="form-control" placeholder="cth: A1+A2+A3"></td><td><input type="number" name="linespace[]" value="'+val.linespace+'" class="form-control" value="0" placeholder="0" required></td><td><select name="underline[]" class="form-control">'+underline_option+'</select></td><td><select name="hide[]" class="form-control">'+hide_option+'</select></td><td><a class="removeDetail"><i class="fa fa-times"></i></a></td>');
+            });
         }
 
         function emptyColumn(tableClass){
@@ -302,7 +312,10 @@
 			$('#formDetail').submit(function(e){
 				e.preventDefault();
 				$.post('{{route("layout.detail.upsert")}}', $(this).serialize(), function(result){
-					if(result.success) $.messager.alert('Success',result.message);
+					if(result.success){ 
+                        $.messager.alert('Success',result.message);
+                        location.reload();
+                    }
             		if(result.errorMsg) $.messager.alert('Error',result.errorMsg);
             	}, 'json');	
 			});
