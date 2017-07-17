@@ -1065,4 +1065,212 @@ class ReportController extends Controller
         return view('layouts.report_template2', $data);
     }
 
+    public function ledger_view(){
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_code')->get();
+        return view('report_ledger',$data);
+    }
+
+    public function rledger(Request $request){
+        $from = @$request->from;
+        $to = @$request->to;
+        $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
+        // tambahan
+        $keyword = $request->input('q');
+        if(!empty($keyword)) $keyword = strtolower($keyword);
+        $coa = $request->input('coa');
+        $tocoa = $request->input('tocoa');
+
+        if(!empty($from) && !empty($to)){
+            $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        }else{
+            $data['tahun'] = 'All Periode';
+        }
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['title'] = "General Ledger Report";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['template'] = 'report_ledger_template';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
+        if(!empty($to)){ $year = date('Y',strtotime($to)); }else{ $year = date('Y'); }
+
+        $coa_code = MsMasterCoa::select('coa_code','coa_name','coa_beginning','coa_type')->where('coa_code','>=',$coa)->where('coa_code','<=',$tocoa)->where('coa_year','=',$year)->orderBy('coa_code','ASC')->get();
+        $last_date = date('Y-m-d',(strtotime('-1 day',strtotime($from))));
+        $first_date = $year.'-01-01';
+        $data['invoices'] = [];
+        $array_excel = [];
+        foreach ($coa_code as $inv) {
+            $mutasi = TrLedger::select(DB::raw("SUM(ledg_debit) AS total_debet"),DB::raw("SUM(ledg_credit) AS total_credit"))->where('coa_code',$inv->coa_code)->where('ledg_date','>=',$first_date)->where('ledg_date','<=',$last_date)->get();
+            $mutasi_history = TrLedger::select('ledg_date','ledg_description','ledg_refno','ledg_debit','ledg_credit','dept_name','jour_type_prefix')
+                            ->join('ms_department','tr_ledger.dept_id',"=",'ms_department.id')
+                            ->join('ms_journal_type','tr_ledger.jour_type_id',"=",'ms_journal_type.id')
+                            ->where('coa_code',$inv->coa_code)
+                            ->where('ledg_date','>=',$from)
+                            ->where('ledg_date','<=',$to)
+                            ->orderBy('ledg_date','ASC')->get();
+            $tempInv = ['coa'=>trim($inv->coa_code).' - '.$inv->coa_name];
+            $array_excel[] = ['Tanggal'=>trim($inv->coa_code),'Uraian'=>$inv->coa_name,'Ref No'=>'','DEBET'=>'','KREDIT'=>'','Saldo Akhir'=>'','Kel Department'=>'','Kel Journal'=>''];
+            $tempInv['details'] = [];
+            if(trim($inv->coa_type) == 'DEBET'){
+                $saldo_awal = $inv->coa_beginning + $mutasi[0]->total_debet - $mutasi[0]->total_credit;
+                $tempInv['details'][] = [
+                    'ledg_date' => '',
+                    'ledg_description' =>'Saldo Awal Per '.date('d M Y',strtotime($to)),
+                    'ledg_refno' => '',
+                    'ledg_debit' => $saldo_awal,
+                    'ledg_credit' => 0,
+                    'saldo_akhir' => $saldo_awal,
+                    'dept_name' => '',
+                    'jour_type_prefix'=> ''
+                ];
+                $array_excel[] = ['Tanggal'=>'','Uraian'=>'Saldo Awal Per '.date('d M Y',strtotime($to)),'Ref No'=>'','DEBET'=>$saldo_awal,'KREDIT'=>0,'Saldo Akhir'=>$saldo_awal,'Kel Department'=>'','Kel Journal'=>''];
+            }else{
+                $saldo_awal = $inv->coa_beginning - $mutasi[0]->total_debet + $mutasi[0]->total_credit;
+                $tempInv['details'][] = [
+                    'ledg_date' => '',
+                    'ledg_description' =>'Saldo Awal Per '.date('d M Y',strtotime($to)),
+                    'ledg_refno' => '',
+                    'ledg_debit' => 0,
+                    'ledg_credit' => $saldo_awal,
+                    'saldo_akhir' => $saldo_awal,
+                    'dept_name' => '',
+                    'jour_type_prefix'=> ''
+                ];
+                $array_excel[] = ['Tanggal'=>'','Uraian'=>'Saldo Awal Per '.date('d M Y',strtotime($to)),'Ref No'=>'','DEBET'=>0,'KREDIT'=>$saldo_awal,'Saldo Akhir'=>$saldo_awal,'Kel Department'=>'','Kel Journal'=>''];
+            }
+            $tot_mutasi = $saldo_awal;
+            foreach ($mutasi_history as $key => $value) {
+                if(trim($inv->coa_type) == 'DEBET'){
+                    $tot_mutasi =  $tot_mutasi  + (float)$value->ledg_debit - (float)$value->ledg_credit; 
+                }else{
+                    $tot_mutasi =  $tot_mutasi  + (float)$value->ledg_credit - (float)$value->ledg_debit; 
+                }
+                $tempInv['details'][] = [
+                    'ledg_date' => $value->ledg_date,
+                    'ledg_description' => $value->ledg_description,
+                    'ledg_refno' => $value->ledg_refno,
+                    'ledg_debit' => $value->ledg_debit,
+                    'ledg_credit' => $value->ledg_credit,
+                    'saldo_akhir' => (float)$tot_mutasi,
+                    'dept_name' => $value->dept_name,
+                    'jour_type_prefix' => $value->jour_type_prefix,
+
+                    ];
+                $array_excel[] = ['Tanggal'=>$value->ledg_date,'Uraian'=>$value->ledg_description,'Ref No'=>$value->ledg_refno,'DEBET'=>$value->ledg_debit,'KREDIT'=>$value->ledg_credit,'Saldo Akhir'=>(float)$tot_mutasi,'Kel Department'=>$value->dept_name,'Kel Journal'=>$value->jour_type_prefix];
+            }
+            $data['invoices'][] = $tempInv;
+        }
+
+        if($pdf){
+            $data['type'] = 'pdf';
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('GL_Report_'.$from.'_to_'.$to.'.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data = $array_excel;
+            $border = 'A1:H';
+            $tp = 'xls';
+            return Excel::create('General Ledger Report', function($excel) use ($data,$border) {
+                $excel->sheet('General Ledger Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
+            return view('layouts.report_template2', $data);
+        }
+    }
+
+    public function tb_view(){
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_code')->get();
+        return view('report_trial',$data);
+    }
+
+    public function dotrial(Request $request){
+        $from = @$request->from;
+        $to = @$request->to;
+        $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
+        // tambahan
+        $keyword = $request->input('q');
+        if(!empty($keyword)) $keyword = strtolower($keyword);
+        $coa = $request->input('coa');
+        $tocoa = $request->input('tocoa');
+
+        if(!empty($from) && !empty($to)){
+            $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to));
+        }else{
+            $data['tahun'] = 'All Periode';
+        }
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['title'] = "Working Trial Balance Report";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['template'] = 'report_trial_template';
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
+        if(!empty($to)){ $year = date('Y',strtotime($to)); }else{ $year = date('Y'); }
+
+        $coa_code = MsMasterCoa::select('coa_code','coa_name','coa_beginning','coa_type')->where('coa_code','>=',$coa)->where('coa_code','<=',$tocoa)->where('coa_year','=',$year)->orderBy('coa_code','ASC')->get();
+        $last_date = date('Y-m-d',(strtotime('-1 day',strtotime($from))));
+        $first_date = $year.'-01-01';
+        foreach ($coa_code as $inv) {
+            $mutasi = TrLedger::select(DB::raw("SUM(ledg_debit) AS total_debet"),DB::raw("SUM(ledg_credit) AS total_credit"))->where('coa_code',$inv->coa_code)->where('ledg_date','>=',$first_date)->where('ledg_date','<=',$last_date)->get();
+            $mutasi_history = TrLedger::select(DB::raw("SUM(ledg_debit) AS total_mutasi_debet"),DB::raw("SUM(ledg_credit) AS total_mutasi_credit"))->where('coa_code',$inv->coa_code)->where('ledg_date','>=',$from)->where('ledg_date','<=',$to)->get();
+            
+            if(trim($inv->coa_type) == 'DEBET'){
+                $saldo_awal = $inv->coa_beginning + $mutasi[0]->total_debet - $mutasi[0]->total_credit;
+                $saldo_akhir = $saldo_awal + $mutasi_history[0]->total_mutasi_debet - $mutasi_history[0]->total_mutasi_credit;
+                
+            }else{
+                $saldo_awal = $inv->coa_beginning - $mutasi[0]->total_debet + $mutasi[0]->total_credit;
+                $saldo_akhir = $saldo_awal - $mutasi_history[0]->total_mutasi_debet + $mutasi_history[0]->total_mutasi_credit;
+            }
+            $tempInv = [
+                        'coa_code'=>trim($inv->coa_code),
+                        'coa_name'=>$inv->coa_name,
+                        'saldo_awal'=>$saldo_awal,
+                        'debet'=>$mutasi_history[0]->total_mutasi_debet,
+                        'credit'=>$mutasi_history[0]->total_mutasi_credit,
+                        'saldo_akhir'=>$saldo_akhir
+                       ];
+            $data['invoices'][] = $tempInv;
+        }
+
+        if($pdf){
+            $data['type'] = 'pdf';
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('GL_Report_'.$from.'_to_'.$to.'.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $data['invoices'];
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $data[$i]=array(
+                    'Account Code' =>$data_ori[$i]['coa_code'],
+                    'Account Name' =>$data_ori[$i]['coa_name'],
+                    'Saldo Awal' =>$data_ori[$i]['saldo_awal'],
+                    'Debet'=>number_format($data_ori[$i]['debet'],2),
+                    'Kredit' =>number_format($data_ori[$i]['credit'],2),
+                    'Saldo Akhir' =>number_format($data_ori[$i]['saldo_akhir'],2)
+                    );
+            }
+            $border = 'A1:F';
+            $tp = 'xls';
+            return Excel::create('Trial Balance Report', function($excel) use ($data,$border) {
+                $excel->sheet('Trial Balance Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
+            return view('layouts.report_template2', $data);
+        }
+    }
+
 }

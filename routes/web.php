@@ -379,6 +379,11 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('layouts/delete','LayoutController@destroy')->name('layout.delete');
 	Route::post('layouts/detail/get','LayoutController@getDetail')->name('layout.detail.get');
 	Route::post('layouts/detail/upsert','LayoutController@updateDetail')->name('layout.detail.upsert');
+
+	Route::get('report/ledger','ReportController@ledger_view')->name('report.ledger_view');
+	Route::get('report/rledger','ReportController@rledger')->name('report.rledger');
+	Route::get('report/trial','ReportController@tb_view')->name('report.tb_view');
+	Route::get('report/dotrial','ReportController@dotrial')->name('report.dotrial');
 });
 
 Route::get('logout','Auth\AuthController@logout');

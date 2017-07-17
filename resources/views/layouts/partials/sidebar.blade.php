@@ -159,7 +159,8 @@
             
             <?php
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('payment.index'),url('period_meter')];
-              $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('coa.index'),url('department')];
+              $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view')];
+              $glSetupUrls = [route('coa.index'),url('department')];
               $bbUrls = [route('cash_bank.index')];
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter')];
@@ -292,14 +293,11 @@
                       </li>
                       @endif
 
-                      @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
-                      <li @if(Request::url() == route('report.ytd')) class="active" @endif><a href="{{route('report.ytd')}}"><i class="fa fa-circle-o"></i> YTD General Ledger</a></li>
-                      @endif
-
+                     
                       @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                       <li @if(Request::url() == route('genledger.index')) class="active" @endif><a href="{{route('genledger.index')}}"><i class="fa fa-circle-o"></i> General Ledger</a></li>
                       @endif
-
+                      
                       <li>
                           <a href="#"><i class="fa fa-circle"></i> Report
                               <span class="pull-right-container">
@@ -307,24 +305,22 @@
                               </span>
                           </a>
                           <ul class="treeview-menu @if(in_array(Request::url(),$glUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$glUrls)) style="display:block" @endif>
-                          
-                             @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
-                            <li @if(Request::url() == route('report.glview')) class="active" @endif><a href="{{route('report.glview')}}"><i class="fa fa-circle-o"></i> Report</a></li>
+                            
+                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            <li @if(Request::url() == route('report.glview')) class="active" @endif><a href="{{route('report.glview')}}"><i class="fa fa-circle-o"></i> GL List</a></li>
                             @endif
-
-                            <li>
-                              <a href="#"><i class="fa fa-circle"></i> Financial
-                                  <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                  </span>
-                              </a>
-                              <ul class="treeview-menu">
-                                <li><a href="#"><i class="fa fa-circle-o"></i> Working Trial Balance</a></li>
-                                <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
-                                <li><a href="#"><i class="fa fa-circle-o"></i> Income Statement</a></li>
-                                <li><a href="#"><i class="fa fa-circle-o"></i> Income Statement Dept</a></li>
-                              </ul>
-                            </li>
+                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            <li @if(Request::url() == route('report.ytd')) class="active" @endif><a href="{{route('report.ytd')}}"><i class="fa fa-circle-o"></i> YTD General Ledger</a></li>
+                            @endif
+                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            <li @if(Request::url() == route('report.ledger_view')) class="active" @endif><a href="{{route('report.ledger_view')}}"><i class="fa fa-circle-o"></i> Ledger</a></li>
+                            @endif
+                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            <li @if(Request::url() == route('report.tb_view')) class="active" @endif><a href="{{route('report.tb_view')}}"><i class="fa fa-circle-o"></i> Working Trial Balance</a></li>
+                            @endif
+                            <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
+                            <li><a href="#"><i class="fa fa-circle-o"></i> Income Statement</a></li>
+                            <li><a href="#"><i class="fa fa-circle-o"></i> Income Statement Dept</a></li>
 
                           </ul>
 
@@ -334,7 +330,7 @@
                                     <i class="fa fa-angle-left pull-right"></i>
                                   </span>
                               </a>
-                              <ul class="treeview-menu @if(in_array(Request::url(),$glUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$glUrls)) style="display:block" @endif>
+                              <ul class="treeview-menu @if(in_array(Request::url(),$glSetupUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$glSetupUrls)) style="display:block" @endif>
                                 @if(Session::get('role')==1 || in_array(11,Session::get('permissions')))
                                 <li @if(Request::url() == url('coa')) class="active" @endif><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
                                 @endif
