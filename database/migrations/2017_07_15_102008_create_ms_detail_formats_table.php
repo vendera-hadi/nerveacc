@@ -16,7 +16,7 @@ class CreateMsDetailFormatsTable extends Migration
         Schema::create('ms_detail_format', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('formathd_id');
-            $table->string('coa_code', 255);
+            $table->string('coa_code', 255)->nullable();
             $table->string('desc', 255)->nullable();
             $table->string('header', 255)->nullable();
             $table->string('variable', 255)->nullable();

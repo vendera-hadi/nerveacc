@@ -379,6 +379,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('layouts/delete','LayoutController@destroy')->name('layout.delete');
 	Route::post('layouts/detail/get','LayoutController@getDetail')->name('layout.detail.get');
 	Route::post('layouts/detail/upsert','LayoutController@updateDetail')->name('layout.detail.upsert');
+	Route::get('layouts/detail/preview','LayoutController@preview')->name('layout.detail.preview');
 
 	Route::get('report/ledger','ReportController@ledger_view')->name('report.ledger_view');
 	Route::get('report/rledger','ReportController@rledger')->name('report.rledger');

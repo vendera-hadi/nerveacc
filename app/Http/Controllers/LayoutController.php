@@ -134,6 +134,7 @@ class LayoutController extends Controller
 			$linespace = $request->linespace;
 			$underline = $request->underline;
 			$hide = $request->hide;
+			MsDetailFormat::where('formathd_id',$id)->delete();
 			\DB::beginTransaction();
 			foreach ($coa_code as $key => $coa) {
 				$detail = new MsDetailFormat;
@@ -155,6 +156,20 @@ class LayoutController extends Controller
 			\DB::rollBack();
             return response()->json(['errorMsg' => $e->getMessage()]);
         }	
+	}
+
+	public function preview(Request $request)
+	{
+		$id = $request->id;
+		$header = MsHeaderFormat::find($id);
+		$detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->get();
+		$detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->get();
+		$data = [
+				'header' => $header,
+				'detail1' => $detail1,
+				'detail2' => $detail2
+			];
+		return view('layout_preview',$data);
 	}
 
 }
