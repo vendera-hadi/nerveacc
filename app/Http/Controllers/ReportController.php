@@ -19,6 +19,8 @@ use App\Models\MsJournalType;
 use App\Models\MsDepartment;
 use App\Models\MsCashBank;
 use App\Models\MsPaymentType;
+use App\Models\MsHeaderFormat;
+use App\Models\MsDetailFormat;
 use PDF;
 use DB;
 use Excel;
@@ -1271,6 +1273,58 @@ class ReportController extends Controller
         }else{
             return view('layouts.report_template2', $data);
         }
+    }
+
+    // 2 lajur
+    public function neraca(){
+        $data['page'] = 'Neraca';
+        $data['formats'] = MsHeaderFormat::where('type',2)->get();
+        return view('report_neracapl',$data);
+    }
+
+    public function neracatpl(Request $request)
+    {
+        $id = $request->format;
+        $from = $request->from;
+        $to = $request->to;
+        $company = MsCompany::first();
+        $detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->get();
+        $detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->get();
+        $data = [
+                'company' => $company,
+                'datetxt' => date('d F Y',strtotime($from))." s/d ".date('d F Y',strtotime($to)),
+                'detail1' => $detail1,
+                'detail2' => $detail2,
+                'from' => $from,
+                'to' => $to,
+                'variables' => []
+            ];
+        return view('report_neraca', $data);
+    }
+
+    // 1 lajur
+    public function profitloss(){
+        $data['page'] = 'Laba Rugi';
+        $data['formats'] = MsHeaderFormat::where('type',1)->get();
+        return view('report_neracapl',$data);
+    }
+
+    public function profitlosstpl(Request $request)
+    {
+        $id = $request->format;
+        $from = $request->from;
+        $to = $request->to;
+        $company = MsCompany::first();
+        $detail = MsDetailFormat::where('formathd_id',$id)->where('column',1)->get();
+        $data = [
+                'company' => $company,
+                'datetxt' => date('d F Y',strtotime($from))." s/d ".date('d F Y',strtotime($to)),
+                'detail' => $detail,
+                'from' => $from,
+                'to' => $to,
+                'variables' => []
+            ];
+        return view('report_profitloss', $data);
     }
 
 }

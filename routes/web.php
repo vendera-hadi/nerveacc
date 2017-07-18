@@ -385,6 +385,11 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/rledger','ReportController@rledger')->name('report.rledger');
 	Route::get('report/trial','ReportController@tb_view')->name('report.tb_view');
 	Route::get('report/dotrial','ReportController@dotrial')->name('report.dotrial');
+
+	Route::get('report/neraca','ReportController@neraca')->name('report.neraca');
+	Route::get('report/neracatpl','ReportController@neracatpl')->name('report.neracatpl');
+	Route::get('report/profitloss','ReportController@profitloss')->name('report.profitloss');
+	Route::get('report/profitlosstpl','ReportController@profitlosstpl')->name('report.profitlosstpl');
 });
 
 Route::get('logout','Auth\AuthController@logout');

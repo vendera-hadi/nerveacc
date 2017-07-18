@@ -13,4 +13,9 @@ class MsGroupAccount extends Model
 	{
 	    return [];
 	}
+
+	public function detail()
+	{
+		return $this->hasMany('App\Models\MsGroupAccnDtl','grpaccn_id');
+	}
 }

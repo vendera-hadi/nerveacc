@@ -38,16 +38,18 @@
 				$desc = str_replace(' ','&nbsp;',$dt->desc);
 				if(!empty($dt->header)) $desc = '<b style="font-size:16px">'.$desc.'</b>';
 			@endphp
-			<tr>
-				<td>{!!$desc!!}</b></td>
-				<td style="text-align:right; @if(!empty($dt->underline)) border-bottom: 1px solid black @endif">@if(empty($dt->hide)) Rp. xxx @endif</td>
-			</tr>
-			@if(!empty($dt->linespace))
-			@for($i=0; $i<count($dt->linespace); $i++)
-			<tr>
-				<td colspan="2" style="height:20px"></td>
-			</tr>
-			@endfor
+			@if(empty($dt->hide))
+				<tr>
+					<td>{!!$desc!!}</b></td>
+					<td style="text-align:right; @if(!empty($dt->underline)) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code)) Rp. xxx @endif</td>
+				</tr>
+				@if(!empty($dt->linespace))
+				@for($i=0; $i<count($dt->linespace); $i++)
+				<tr>
+					<td colspan="2" style="height:20px"></td>
+				</tr>
+				@endfor
+				@endif
 			@endif
 		@endforeach
 	</table>
