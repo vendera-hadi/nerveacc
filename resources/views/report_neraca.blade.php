@@ -4,7 +4,7 @@
 		{{$company->comp_name}}<br>
 		{{$datetxt}}
 	</h4>
-
+</center>
 	<table style="margin-top:60px">
 		<tr>
 			<td style="padding-right:15px; padding-top:15px; border-top: 1px solid black; border-right: 1px solid black;">
@@ -27,7 +27,7 @@
 							<td>{!!$desc!!}</b></td>
 							<td style="text-align:right; @if(!empty($dt->underline)) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ 'Rp. '.number_format($calculate, 0, ',', '.') }}@endif</td>
 						</tr>
-						@if(!empty($dt->linespace))
+						@if($dt->linespace > 0)
 						@for($i=0; $i<count($dt->linespace); $i++)
 						<tr>
 							<td colspan="2" style="height:20px"></td>
@@ -54,12 +54,12 @@
 						$calculate = $dt->calculateAccount();
 						if(!empty($dt->variable)) $variables[$dt->variable] = $calculate;
 					@endphp
-					@if(empty($dt->hide))
+					@if($dt->hide == 0)
 						<tr>
 							<td>{!!$desc!!}</b></td>
 							<td style="text-align:right; @if(!empty($dt->underline)) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ 'Rp. '.number_format($calculate, 0, ',', '.') }}@endif</td>
 						</tr>
-						@if(!empty($dt->linespace))
+						@if($dt->linespace > 0)
 						@for($i=0; $i<count($dt->linespace); $i++)
 						<tr>
 							<td colspan="2" style="height:20px"></td>
@@ -72,4 +72,3 @@
 			</td>
 		</tr>
 	</table>
-</center>

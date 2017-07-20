@@ -159,8 +159,8 @@
             
             <?php
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('payment.index'),url('period_meter')];
-              $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view')];
-              $glSetupUrls = [route('coa.index'),url('department')];
+              $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view'),route('report.neraca'),route('report.profitloss')];
+              $glSetupUrls = [route('coa.index'),url('department'),url('layouts'),url('department'),url('groupaccount')];
               $bbUrls = [route('cash_bank.index')];
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter')];
@@ -171,7 +171,7 @@
               $cashbanks = [72];
               $invoices = [52,58,59];
             ?>
-            <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || in_array(Request::url(),$glUrls) || in_array(Request::url(),$bbUrls) || Request::url() == url('cost_item')){{'active'}}@endif">
+            <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || in_array(Request::url(),$glUrls) || in_array(Request::url(),$bbUrls) || Request::url() == url('cost_item') || in_array(Request::url(),$glSetupUrls)){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-book"></i> <span>FINANCE</span>
                 <span class="pull-right-container">
@@ -274,7 +274,7 @@
                           <i class="fa fa-angle-left pull-right"></i>
                         </span>
                     </a>
-                    <ul class="treeview-menu @if(in_array(Request::url(),$glUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$glUrls)) style="display:block" @endif>
+                    <ul class="treeview-menu @if(in_array(Request::url(),$glUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$glUrls) || in_array(Request::url(),$glSetupUrls)) style="display:block" @endif>
                       @if(Session::get('role')==1 || in_array(65,Session::get('permissions')) || in_array(78,Session::get('permissions')) )
                       <li>
                         <a href="#"><i class="fa fa-circle"></i> Periode Processing
@@ -318,8 +318,12 @@
                             @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                             <li @if(Request::url() == route('report.tb_view')) class="active" @endif><a href="{{route('report.tb_view')}}"><i class="fa fa-circle-o"></i> Working Trial Balance</a></li>
                             @endif
-                            <li><a href="#"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
-                            <li><a href="#"><i class="fa fa-circle-o"></i> Income Statement</a></li>
+                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            <li @if(Request::url() == route('report.neraca')) class="active" @endif><a href="{{route('report.neraca')}}"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
+                            @endif
+                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            <li @if(Request::url() == route('report.profitloss')) class="active" @endif><a href="{{route('report.profitloss')}}"><i class="fa fa-circle-o"></i> Income Statement</a></li>
+                            @endif
                             <li><a href="#"><i class="fa fa-circle-o"></i> Income Statement Dept</a></li>
 
                           </ul>
@@ -337,6 +341,12 @@
                                 <li><a href="#"><i class="fa fa-circle-o"></i> Budget</a></li>
                                 @if(Session::get('role')==1 || in_array(1,Session::get('permissions')))
                                 <li @if(Request::url() == url('department')) class="active" @endif><a href="{{url('department')}}"><i class="fa fa-circle-o"></i> Department</a></li>
+                                @endif
+                                @if(Session::get('role')==1 || in_array(11,Session::get('permissions')))
+                                <li @if(Request::url() == url('layouts')) class="active" @endif><a href="{{url('layouts')}}"><i class="fa fa-circle-o"></i> Report Layout</a></li>
+                                @endif
+                                @if(Session::get('role')==1 || in_array(11,Session::get('permissions')))
+                                <li @if(Request::url() == url('groupaccount')) class="active" @endif><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li>
                                 @endif
                               </ul>
                             </li>

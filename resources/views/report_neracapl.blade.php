@@ -7,7 +7,7 @@
 
 <!-- page title -->
 @section('contentheader_title')
-   {{$page}} Report
+    {{$page}} Report
 @endsection
 
 <!-- tambahan script atas -->
@@ -17,11 +17,10 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/select2.min.css') }}">
-
 @endsection
 
 @section('contentheader_breadcrumbs')
-	<ol class="breadcrumb">
+    <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">{{$page}} Report</li>
     </ol>
@@ -30,7 +29,7 @@
 @section('main-content')
 <div class="row">
     <!-- left column -->
-    <div class="col-md-11">
+    <div class="col-md-12">
       <!-- general form elements -->
       <div class="box box-primary">
         <div class="box-header with-border">
@@ -40,42 +39,40 @@
         <!-- form start -->
         <form role="form" action="post" id="filter">
             <div class="box-body">
-            	<div class="row">
-            		<div class="col-md-6">
-		                <div class="form-group">
-		                	<label>Report Template</label>
-		                    <select id="format" name="format" class="form-control">
-		                    	@foreach($formats as $format)
-		                    	<option value="{{$format->id}}">{{$format->name}}</option>
-		                    	@endforeach
-		                    </select>
-		                </div>
-	            	</div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <select id="format" name="format" class="form-control">
+                                @foreach($formats as $format)
+                                <option value="{{$format->id}}">{{$format->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="row dates">
-                    <div class="col-md-6">
+                <div class="row">
+                    <div class="col-sm-6">
                         <div class="form-group">
                             <div class="input-group date">
                                 <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
                                 </div>
-                                <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd" required>
+                                <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-sm-6">
                         <div class="form-group">
                             <div class="input-group date">
                                 <div class="input-group-addon">
                                     <i class="fa fa-calendar"></i>
                                 </div>
-                                <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd" required>
+                                <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d')}}">
                             </div>
-                        </div>
+                        </div>  
                     </div>
-                </div>
-                
+                </div>   
+            </div>
           <!-- /.box-body -->
 
           <div class="box-footer">
@@ -110,21 +107,19 @@
       </div>
       <!-- /.box -->
     </div>
-</div>
+</div>  
 @endsection
 
 @section('footer-scripts')
 <script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
-<!-- datepicker -->
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
-<!-- select2 -->
 <script type="text/javascript" src="{{ asset('plugins/select2/select2.min.js') }}"></script>
 <script type="text/javascript">
     $('.datepicker').datepicker({
-            autoclose: true
-        });
+        autoclose: true
+    });
 
     var current_url;
     $('#filter').submit(function(e){
@@ -141,7 +136,6 @@
         $('#excel').show();
         $('#print').show();
     });
-
     $('#pdf').click(function(){
         $('#frame').attr('src', current_url+'&pdf=1');
     });
@@ -178,6 +172,5 @@
         return false;
     });
 
-    
 </script>
 @endsection
