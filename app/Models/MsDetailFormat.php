@@ -30,7 +30,12 @@ class MsDetailFormat extends Model
     {
     	// jika berupa coa code
     	if(is_numeric($this->attributes['coa_code'])){
-    		$total = $this->getTotalFromLedger($this->attributes['coa_code']);
+    		if($this->attributes['coa_code'] == 30120){
+                // pengecualian buat laba rugi berjalan
+                $total = $this->labarugiBerjalan();
+            }else{
+                $total = $this->getTotalFromLedger($this->attributes['coa_code']);
+            }
     	}else if(substr($this->attributes['coa_code'], 0, 1) === '@'){ 
     		// kalau group account
     		$key = str_replace('@', '', $this->attributes['coa_code']);
@@ -58,12 +63,30 @@ class MsDetailFormat extends Model
 			$ledger = TrLedger::where('coa_code','like',$coacode."%")
 				->where('ledg_date','>=',$this->from)->where('ledg_date','<=',$this->to)
 				->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
-			if(strpos($coa->coa_type, 'DEBET') !== false) $total = $ledger->debit;
-			else $total = $ledger->credit;
+			if(strpos($coa->coa_type, 'DEBET') !== false) $total = $coa->coa_beginning + abs($ledger->debit - $ledger->credit);
+			else $total = $coa->coa_beginning + abs($ledger->credit - $ledger->debit);
 		}else{
 			$total = 0;
 		}
 		return $total;
+    }
+
+    private function labarugiBerjalan()
+    {
+        $coa = MsMasterCoa::where('coa_code','like',"30120%")->where('coa_year',date('Y'))->first();
+        // rekap pendapatan
+        $ledgerProfit = TrLedger::where(function($query){
+                        $query->where('coa_code','like',"4%")->orWhere('coa_code','like',"6%");
+                })->where('ledg_date','>=',$this->from)->where('ledg_date','<=',$this->to)
+                ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
+        $profit = abs($ledgerProfit->credit - $ledgerProfit->debit);
+        $ledgerLoss = TrLedger::where(function($query){
+                        $query->where('coa_code','like',"5%")->orWhere('coa_code','like',"7%");
+                })->where('ledg_date','>=',$this->from)->where('ledg_date','<=',$this->to)
+                ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
+        $loss = abs($ledgerLoss->debit - $ledgerLoss->credit);
+        $result = $coa->coa_beginning + $profit - $loss;
+        return $result;
     }
 
     private function parseFormula()

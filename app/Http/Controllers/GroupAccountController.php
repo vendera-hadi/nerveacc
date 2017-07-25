@@ -13,7 +13,7 @@ use Auth;
 class GroupAccountController extends Controller
 {
     public function index(){
-        $data['accounts'] = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['accounts'] = MsMasterCoa::where('coa_year',date('Y'))->orderBy('coa_type')->get();
 		return view('groupaccount',$data);
     }
 

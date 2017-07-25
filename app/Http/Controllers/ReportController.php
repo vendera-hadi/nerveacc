@@ -1219,6 +1219,7 @@ class ReportController extends Controller
         $coa_code = MsMasterCoa::select('coa_code','coa_name','coa_beginning','coa_type')->where('coa_code','>=',$coa)->where('coa_code','<=',$tocoa)->where('coa_year','=',$year)->orderBy('coa_code','ASC')->get();
         $last_date = date('Y-m-d',(strtotime('-1 day',strtotime($from))));
         $first_date = $year.'-01-01';
+        $data['invoices'] = [];
         foreach ($coa_code as $inv) {
             $mutasi = TrLedger::select(DB::raw("SUM(ledg_debit) AS total_debet"),DB::raw("SUM(ledg_credit) AS total_credit"))->where('coa_code',$inv->coa_code)->where('ledg_date','>=',$first_date)->where('ledg_date','<=',$last_date)->get();
             $mutasi_history = TrLedger::select(DB::raw("SUM(ledg_debit) AS total_mutasi_debet"),DB::raw("SUM(ledg_credit) AS total_mutasi_credit"))->where('coa_code',$inv->coa_code)->where('ledg_date','>=',$from)->where('ledg_date','<=',$to)->get();

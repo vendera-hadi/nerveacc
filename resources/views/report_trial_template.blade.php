@@ -22,7 +22,7 @@
                 $total_saldo_awal = $total_saldo_awal +  $invoice['saldo_awal'];
                 $total_debet = $total_debet +  $invoice['debet'];
                 $total_credit = $total_credit + $invoice['credit'];
-                $total_saldo_akhir = $total_saldo_akhir + $invoice['saldo_akhir'];
+                $total_saldo_akhir = $invoice['saldo_akhir'];
             ?>
         @endforeach
         <tr>

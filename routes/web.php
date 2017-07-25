@@ -356,6 +356,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('payment/insert','PaymentController@insert')->name('payment.insert');
 	Route::get('payment/void','PaymentController@void')->name('payment.void');
 
+	// bank book
+	Route::get('bankbook','BankbookController@index')->name('bankbook.index');
+	Route::post('bankbook/get','BankbookController@get')->name('bankbook.get');
+
 	// acl
 	Route::get('roles','AccountController@roles')->name('roles.index');
 	Route::post('roles/insert','AccountController@rolesInsert')->name('roles.insert');
