@@ -32,9 +32,9 @@ class MsDetailFormat extends Model
     	if(is_numeric($this->attributes['coa_code'])){
     		if($this->attributes['coa_code'] == 30120){
                 // pengecualian buat laba rugi berjalan
-                $total = $this->labarugiBerjalan();
+                $total = $this->labarugiBerjalanStartYeartoFrom() + $this->labarugiBerjalan();
             }else{
-                $total = $this->getTotalFromLedger($this->attributes['coa_code']);
+                $total = $this->getTotalFromLedgerStartYeartoFrom($this->attributes['coa_code']) + $this->getTotalFromLedger($this->attributes['coa_code']);
             }
     	}else if(substr($this->attributes['coa_code'], 0, 1) === '@'){ 
     		// kalau group account
@@ -43,7 +43,7 @@ class MsDetailFormat extends Model
     		if($group){
     			$total = 0;
     			foreach ($group->detail as $dt) {
-    				$total += $this->getTotalFromLedger($dt->coa_code);
+    				$total += $this->getTotalFromLedgerStartYeartoFrom($dt->coa_code) + $this->getTotalFromLedger($dt->coa_code);
     			}
     		}else{
     			$total = 0;
@@ -54,6 +54,21 @@ class MsDetailFormat extends Model
     		return 0;
     	}
     	return $total;
+    }
+
+    private function getTotalFromLedgerStartYeartoFrom($coacode)
+    {
+        $coa = MsMasterCoa::where('coa_code','like',$coacode."%")->where('coa_year',date('Y'))->first();
+        if($coa){
+            $ledger = TrLedger::where('coa_code','like',$coacode."%")
+                ->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=',date('Y-m-d', strtotime('yesterday', strtotime($this->from) )))
+                ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
+            if(strpos($coa->coa_type, 'DEBET') !== false) $total = $coa->coa_beginning + abs($ledger->debit - $ledger->credit);
+            else $total = $coa->coa_beginning + abs($ledger->credit - $ledger->debit);
+        }else{
+            $total = 0;
+        }
+        return $total;
     }
 
     private function getTotalFromLedger($coacode)
@@ -69,6 +84,26 @@ class MsDetailFormat extends Model
 			$total = 0;
 		}
 		return $total;
+    }
+
+    private function labarugiBerjalanStartYeartoFrom()
+    {
+        $coa = MsMasterCoa::where('coa_code','like',"30120%")->where('coa_year',date('Y'))->first();
+        // rekap pendapatan
+        $ledgerProfit = TrLedger::where(function($query){
+                        $query->where('coa_code','like',"4%")->orWhere('coa_code','like',"6%");
+                })
+                ->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=',date('Y-m-d', strtotime('yesterday', strtotime($this->from) )))
+                ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
+        $profit = abs($ledgerProfit->credit - $ledgerProfit->debit);
+        $ledgerLoss = TrLedger::where(function($query){
+                        $query->where('coa_code','like',"5%")->orWhere('coa_code','like',"7%");
+                })
+                ->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=',date('Y-m-d', strtotime('yesterday', strtotime($this->from) )))
+                ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
+        $loss = abs($ledgerLoss->debit - $ledgerLoss->credit);
+        $result = $coa->coa_beginning + $profit - $loss;
+        return $result;
     }
 
     private function labarugiBerjalan()
