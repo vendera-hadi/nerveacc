@@ -13,16 +13,28 @@ class CreateBankbookTable extends Migration
      */
     public function up()
     {
-        Schema::create('bankbook_header', function (Blueprint $table) {
+        Schema::create('tr_bank', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('voucher_no')->unique();
-            $table->string('note')->nullable();
-            $table->date('transaction_date');
+            $table->string('trbank_no')->unique();
+            $table->datetime('trbank_date');
+            $table->char('trbank_group',3)->nullable();
+            $table->decimal('trbank_in', 12, 2)->default(0);
+            $table->decimal('trbank_out', 12, 2)->default(0);
+            $table->datetime('trbank_girodate')->nullable();
+            $table->string('trbank_girono', 10)->nullable();
+            $table->decimal('trbank_charge', 8, 2)->default(0);
+            $table->string('trbank_note')->nullable();
+            $table->string('trbank_recipient');
+            $table->char('coa_code',20);
+            $table->boolean('trbank_rekon')->default(0);
+            $table->boolean('trbank_post')->default(0);
+            $table->datetime('posting_at')->nullable();
             $table->integer('paymtp_id');
-            $table->date('check_date')->nullable();
-            $table->decimal('amount',12,2);
-            $table->boolean('is_posted')->default(0);
+            $table->integer('cashbk_id');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -33,6 +45,6 @@ class CreateBankbookTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bankbook_header');
+        Schema::dropIfExists('tr_bank');
     }
 }

@@ -13,13 +13,14 @@ class CreateBankbookDetailTable extends Migration
      */
     public function up()
     {
-        Schema::create('bankbook_detail', function (Blueprint $table) {
+        Schema::create('tr_bankjv', function (Blueprint $table) {
             $table->increments('id');
-            $table->bigInteger('header_id');
-            $table->char('coa_code',10);
-            $table->decimal('debit', 14, 2);
-            $table->decimal('credit', 14, 2);
-            $table->string('description', 200);
+            $table->bigInteger('trbank_id');
+            $table->char('coa_code',20);
+            $table->decimal('debit', 14, 2)->default(0);
+            $table->decimal('credit', 14, 2)->default(0);
+            $table->string('note', 200);
+            $table->integer('dept_id');
             $table->timestamps();
         });
     }
@@ -31,6 +32,6 @@ class CreateBankbookDetailTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('bankbook_detail');
+        Schema::dropIfExists('tr_bankjv');
     }
 }

@@ -66,13 +66,16 @@
                   <tr>
                       <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                       <th field="checkbox" width="25"></th>
-                      <th field="voucher_no" sortable="true">No Voucher</th>
-                      <th field="note" width="50" sortable="true">Note</th>
-                      <th field="transaction_date" sortable="true">Date</th>
+                      <th field="trbank_no" sortable="true">No Voucher</th>
+                      <th field="trbank_note" width="50" sortable="true">Note</th>
+                      <th field="trbank_date" sortable="true">Date</th>
                       <th field="paymtp_name" width="50" sortable="true">Payment Type</th>
-                      <th field="check_date" width="50" sortable="true">Check/Giro Date</th>
-                      <th field="amount" sortable="true">Total</th>
-                      <th field="is_posted" width="50" sortable="true">Posting Status</th>
+                      <th field="cashbk_name" width="50" sortable="true">Cashbank</th>
+                      <th field="coa_code" width="50" sortable="true">COA Code</th>
+                      <th field="trbank_girodate" width="50" sortable="true">Check/Giro Date</th>
+                      <th field="trbank_in" sortable="true">Total In</th>
+                      <th field="trbank_out" sortable="true">Total Out</th>
+                      <th field="trbank_post" width="50" sortable="true">Posting Status</th>
                       <th field="action_button">Action</th>
                   </tr>
               </thead>
@@ -94,26 +97,76 @@
           <div id="contractStep1">
             <form method="POST" id="formPayment">
                 
-                <div class="form-group">
-                    <label>No Voucher</label>
-                    <input class="form-control" name="voucher_no" type="text" required>
+                <div class="row">
+                  <div class="col-sm-4">
+	                <div class="form-group">
+	                    <label>No Voucher</label>
+	                    <input class="form-control" name="trbank_no" type="text" required>
+	                </div>
+	               </div>
+
+	               <div class="col-sm-4">
+                      <div class="form-group">
+                          <label>Transaction Date</label>
+                          <div class="input-group date">
+                            <div class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" id="invpayhDate" name="trbank_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                          </div>
+                      </div>
+                   </div>
+
+                   <div class="col-sm-4">
+                   <div class="form-group">
+	                    <label>Recipient</label>
+	                    <input class="form-control" name="trbank_recipient" type="text" required>
+	                </div>
+	               </div>
+
                 </div>
 
-                <div class="form-group">
-                    <label>No Giro / Check</label>
-                    <input type="text" name="invpayh_checkno" class="form-control">
-                </div>
+                <div class="row">
+                  <div class="col-sm-4">
+	                <div class="form-group">
+	                	<label>Group</label>
+	                    <select class="form-control" name="group">
+	                    	<option value="in">Cash In</option>
+	                    	<option value="out">Cash Out</option>
+	                    </select>
+	                </div>
+	               </div>
+
+	               <div class="col-sm-4">
+                      <div class="form-group">
+                          <label>Cheque/Giro Date (optional)</label>
+                          <div class="input-group date">
+                            <div class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" id="invpayhGiro" name="trbank_girodate" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                          </div>
+                      </div>
+                   </div>
+
+                   <div class="col-sm-4">
+                   		<div class="form-group">
+		                    <label>No Giro / Check (optional)</label>
+		                    <input type="text" name="trbank_girono" class="form-control">
+		                </div>
+                   </div>
+	            </div>
                 
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
                         <label>Bank</label>
-                        <select class="form-control cashbkId choose-style" name="cashbk_coa" style="width:100%">
+                        <select class="form-control cashbkId choose-style" name="cashbk_id" style="width:100%" required>
                           <option value="">-</option>
                           <?php
                               foreach ($cashbank_data as $key => $value) {
                           ?>
-                          <option value="<?php echo $value['coa_code']?>"><?php echo $value['cashbk_name']?></option>
+                          <option value="<?php echo $value['id']?>"><?php echo $value['cashbk_name']?></option>
                           <?php
                               }
                           ?>
@@ -123,7 +176,7 @@
                   <div class="col-sm-6">
                     <div class="form-group">
                         <label>Payment Type</label>
-                        <select class="form-control paymtpCode choose-style" name="paymtp_id" style="width:100%">
+                        <select class="form-control paymtpCode choose-style" name="paymtp_id" style="width:100%" required>
                           <option value="">-</option>
                           <?php
                               foreach ($payment_type_data as $key => $value) {
@@ -135,55 +188,43 @@
                         </select>
                     </div>
                   </div>
-                </div>
-                <div class="row">
-                   <div class="col-sm-6">
-                      <div class="form-group">
-                          <label>Transaction Date</label>
-                          <div class="input-group date">
-                            <div class="input-group-addon">
-                              <i class="fa fa-calendar"></i>
-                            </div>
-                            <input type="text" id="invpayhDate" name="transaction_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                          </div>
-                      </div>
-                   </div>
-                   <div class="col-sm-6">
-                      <div class="form-group">
-                          <label>Cheque/Giro Date</label>
-                          <div class="input-group date">
-                            <div class="input-group-addon">
-                              <i class="fa fa-calendar"></i>
-                            </div>
-                            <input type="text" id="invpayhGiro" name="check_giro" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                          </div>
-                      </div>
-                   </div>
                 </div>    
 
                 <div class="form-group">
                     <label>Note</label>
-                    <input type="text" name="invpayh_note" class="form-control">
+                    <input type="text" name="trbank_note" class="form-control">
                 </div>
                 <br><br>
                 <hr>
-                <h3 class="text-center">Transactions</h3><br>
+                <h3 class="text-center">Transactions <span id="transtype">(Debit)</span></h3><br>
                 <div class="row">
-                	<div class="col-sm-4">
+                	<div class="col-sm-3">
 		              <div class="form-group">
 		                <label>Description</label>
 		                <input class="form-control" id="addDesc">
 		              </div>
 		            </div>
 
-                	<div class="col-sm-4">
+                	<div class="col-sm-3">
 		              <div class="form-group">
 		                <label>Amount</label>
 		                <input class="form-control" id="addAmount">
 		              </div>
 		            </div>
 
-		            <div class="col-sm-4">
+		            <div class="col-sm-3">
+		              <div class="form-group">
+		                <label>Department</label>
+		                <select name="dept_id" id="addDept" class="form-control">
+		                	<option value="">Choose Department</option> 
+		                	@foreach($departments as $dept)
+		                	<option value="{{$dept->id}}">{{$dept->dept_name}}</option>
+		                	@endforeach
+		                </select>
+		              </div>
+		            </div>
+
+		            <div class="col-sm-3">
 		              <label>COA</label>
 		              <div class="input-group input-group-md">
 		                <select class="js-example-basic-single" id="selectAccount" style="width:100%">
@@ -203,18 +244,25 @@
 		        <div class="row">
             <div class="col-sm-12">
               <table id="tableJournal" width="100%" class="table table-bordered">
+                <thead>
                 <tr>
                   <td>Account Code</td>
                   <td>Account Name</td>
+                  <td>Dept</td>
                   <td>Description</td>
                   <td>Amount</td>
                   <td></td>
                 </tr>
-                
+            	</thead>
+                <tbody>
                 <tr id="rowEmpty">
-                  <td colspan="5"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
+                  <td colspan="6"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
                 </tr>
+            	</tbody>
               </table>
+
+              <br><br>
+              <h4 class="pull-right">Total Amount : <b id="totalAmount">0</b></h4>
             </div>
           </div>
                 
@@ -263,16 +311,87 @@
         autoclose: true
     });
 
-    var coacode, coaname, desc, amount;
+    var coacode, coaname, desc, amount, deptid, deptname;
     $("#addAccount").click(function(){
       coacode = $('#selectAccount option:selected').val();
       if(coacode != ""){
-        $('#rowEmpty').hide();
+        $('#rowEmpty').remove();
         coaname = $('#selectAccount option:selected').data('name');
         desc = $('#addDesc').val();
         amount = $('#addAmount').val();
-        $('#tableJournal').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="hidden" name="description[]" value="'+desc+'">'+desc+'</td><td><input type="hidden" name="amount[]" value="'+amount+'" >'+amount+'</td><td><a href="#" class="removeRow"><i class="fa fa-times text-danger"></i></a></td></tr>');
+        deptid = $('#addDept').val();
+        deptname = $('#addDept option:selected').text();
+        $('#tableJournal').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="hidden" name="dept_id[]" value="'+deptid+'">'+deptname+'</td><td><input type="hidden" name="description[]" value="'+desc+'">'+desc+'</td><td><input type="hidden" class="amount" name="amount[]" value="'+amount+'" >'+amount+'</td><td><a href="#" class="removeRow"><i class="fa fa-times text-danger"></i></a></td></tr>');
+      	countTotal();
       }
- });
+ 	});
+
+ 	function countTotal()
+ 	{
+ 		var total = 0;
+ 		$('#tableJournal tbody tr').each(function(){
+ 			var amount = parseFloat($(this).find('.amount').val());
+ 			console.log(amount);
+ 			total += amount;
+ 		});
+ 		$('#totalAmount').text(total);
+ 	}
+
+ 	$('select[name=group]').change(function(){
+ 		if($(this).val() == 'out') $('#transtype').text('(Credit)');
+ 		else $('#transtype').text('(Debit)');
+ 	});
+
+ 	$('#formPayment').submit(function(e){
+        e.preventDefault();
+        $('#submitForm').attr('disabled','disabled');
+
+        if($('#tableJournal tbody tr .amount').length < 1){
+        	alert('Please input debit/credit transactions');
+        }else{
+          var allFormData = $('#formPayment').serialize();
+          var i;
+          $.post('{{route('bankbook.insert')}}',allFormData, function(result){
+              $('#submitForm').removeAttr('disabled');
+              if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+	            if(result.success){ 
+	              	$.messager.alert('Warning',result.message);
+	              	location.reload();
+	            }
+          });
+
+          return false;
+        }
+    });
+
+	$(document).delegate('.removeRow','click',function(){
+	      if(confirm('Are you sure want to remove this?')){
+	          $(this).parent().parent().remove();
+	          countTotal();
+	      }
+	 });
+
+	function postingInv(){
+        var ids = [];
+        $('input[name=check]:checked').each(function() {
+           ids.push($(this).val());
+        });
+        if(ids.length > 0){
+          $.messager.confirm('Confirm','Are you sure you want to post this '+ids.length+' Payment ?',function(r){
+              if (r){
+                  $('.loadingScreen').show();
+                  $.post('{{route('bankbook.posting')}}',{id:ids}, function(data){
+                      alert(data.message);
+                      $('.loadingScreen').hide();
+                      if(data.success == 1){
+                        location.reload();
+                      } else{
+                        return false;
+                      }
+                  });
+              }
+          });
+        }
+    }
 </script>
 @endsection
