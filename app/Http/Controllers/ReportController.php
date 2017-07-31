@@ -1289,8 +1289,9 @@ class ReportController extends Controller
         $from = $request->from;
         $to = $request->to;
         $company = MsCompany::first();
-        $detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->get();
-        $detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->get();
+        $detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
+        $detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->orderBy('order','ASC')->get();
+        $total = (count($detail1) > count($detail2) ? count($detail1) : count($detail2));
         $data = [
                 'company' => $company,
                 'datetxt' => date('d F Y',strtotime($from))." s/d ".date('d F Y',strtotime($to)),
@@ -1298,6 +1299,7 @@ class ReportController extends Controller
                 'detail2' => $detail2,
                 'from' => $from,
                 'to' => $to,
+                'total' =>$total,
                 'variables' => []
             ];
         return view('report_neraca', $data);
@@ -1316,7 +1318,7 @@ class ReportController extends Controller
         $from = $request->from;
         $to = $request->to;
         $company = MsCompany::first();
-        $detail = MsDetailFormat::where('formathd_id',$id)->where('column',1)->get();
+        $detail = MsDetailFormat::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
         $data = [
                 'company' => $company,
                 'datetxt' => date('d F Y',strtotime($from))." s/d ".date('d F Y',strtotime($to)),

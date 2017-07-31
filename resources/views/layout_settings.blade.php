@@ -62,7 +62,7 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-12" style="overflow:auto">
-                                <h3 style="text-align: center;" class="lajurTitle">Lajur 1</h3>
+                                <h3 style="text-align: center;" class="lajurTitle" id="title_atas">AKTIVA</h3>
                                 <table id="lajur1" class="table table-bordered" style="margin-top: 20px;">
                                     <thead>
                                         <tr>
@@ -74,6 +74,7 @@
                                           <th width="90px">Row Space</th>
                                           <th width="90px">Underline</th>
                                           <th width="90px">Hide</th>
+                                          <th width="90px">Order</th>
                                           <th>Action</th>
                                         </tr>
                                     </thead>
@@ -89,7 +90,7 @@
                                         <button id="addDetail2" class="btn btn-info" style="margin-top:15px">Add Row</button>
                                     </div>
                                 </div>
-                                <h3 style="text-align: center;" class="lajurTitle">Lajur 2</h3>
+                                <h3 style="text-align: center;" class="lajurTitle">PASIVA</h3>
                                 <table id="lajur2" class="table table-bordered" style="margin-top: 20px;">
                                     <thead>
                                         <tr>
@@ -101,6 +102,7 @@
                                           <th width="90px">Row Space</th>
                                           <th width="90px">Underline</th>
                                           <th width="90px">Hide</th>
+                                          <th width="90px">Order</th>
                                           <th>Action</th>
                                         </tr>
                                     </thead>
@@ -169,7 +171,7 @@
                 <h4 class="modal-title">Preview Format</h4>
             </div>
             <div class="modal-body" id="previewModalContent" style="padding: 20px 40px">
-                <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:400px; padding:20px"></iframe>
+                <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:600px; padding:20px"></iframe>
             </div>
         </div>
     </div>
@@ -201,7 +203,7 @@
             $('.nav-tabs a[href="#tab_2"]').tab('show');
             $('#lajur1 tbody,#lajur2 tbody').html('');
             lajur = row.typeid;
-            if(row.typeid == 1) $('#secondColumn').hide();
+            if(row.typeid == 1) $('#secondColumn,#title_atas').hide();
             else $('#secondColumn').show();
             $('input[name=id]').val(row.id);
                 $.post('{{route("layout.detail.get")}}', {id:row.id}, function(result){
@@ -250,12 +252,12 @@
             if(val.hide == false) hide_option = '<option value="1">Yes</option><option value="0" selected>No</option>';
             else hide_option = '<option value="1">Yes</option><option value="0">No</option>';
             
-            targetClass.find('tbody').append('<tr><td><input type="hidden" name="column[]" value="'+val.column+'"><input type="text" name="coa_code[]" class="form-control" placeholder="cth: 4, 401, @MODAL" value="'+val.coa_code+'"></td><td><input type="text" name="desc[]" value="'+val.desc+'" class="form-control" required></td><td><select name="header[]" class="form-control">'+bold_option+'</select></td><td><input type="text" name="variable[]" value="'+val.variable+'" class="form-control" placeholder="cth : A1, B2, R99"></td><td><input type="text" name="formula[]" value="'+val.formula+'" class="form-control" placeholder="cth: A1+A2+A3"></td><td><input type="number" name="linespace[]" value="'+val.linespace+'" class="form-control" value="0" placeholder="0" required></td><td><select name="underline[]" class="form-control">'+underline_option+'</select></td><td><select name="hide[]" class="form-control">'+hide_option+'</select></td><td><a class="removeDetail"><i class="fa fa-times"></i></a></td>');
+            targetClass.find('tbody').append('<tr><td><input type="hidden" name="column[]" value="'+val.column+'"><input type="text" name="coa_code[]" class="form-control" value="'+val.coa_code+'"></td><td><input type="text" name="desc[]" value="'+val.desc+'" class="form-control"></td><td><select name="header[]" class="form-control">'+bold_option+'</select></td><td><input type="text" name="variable[]" value="'+val.variable+'" class="form-control"></td><td><input type="text" name="formula[]" value="'+val.formula+'" class="form-control"></td><td><input type="text" name="linespace[]" value="'+val.linespace+'" class="form-control"></td><td><select name="underline[]" class="form-control">'+underline_option+'</select></td><td><select name="hide[]" class="form-control">'+hide_option+'</select></td><td><input type="text" name="order[]" value="'+val.order+'" class="form-control"></td><td><a class="removeDetail"><i class="fa fa-times"></i></a></td>');
         });
     }
 
     function emptyColumn(tableClass){
-        $(tableClass).find('tbody').html('<tr class="rowEmpty"><td colspan="9" class="text-center">Empty</td></tr>');
+        $(tableClass).find('tbody').html('<tr class="rowEmpty"><td colspan="10" class="text-center">Empty</td></tr>');
     }
 
     $(function(){
@@ -296,11 +298,13 @@
 
         $('#addDetail').click(function(e){
             $('#lajur1').find('.rowEmpty').remove();
-            $('#lajur1').find('tbody').append('<tr><td><input type="hidden" name="column[]" value="1"><input type="text" name="coa_code[]" class="form-control" placeholder="cth: 4, 401, @MODAL"></td><td><input type="text" name="desc[]" class="form-control" required></td><td><select name="header[]" class="form-control"><option value="1">Yes</option><option value="0">No</option></select></td><td><input type="text" name="variable[]" class="form-control" placeholder="cth : A1, B2, R99"></td><td><input type="text" name="formula[]" class="form-control" placeholder="cth: A1+A2+A3"></td><td><input type="number" name="linespace[]" class="form-control" value="0" placeholder="0" required></td><td><select name="underline[]" class="form-control"><option value="1">Yes</option><option value="0" selected>No</option></select></td><td><select name="hide[]" class="form-control"><option value="1">Yes</option><option value="0" selected>No</option></select></td><td><a class="removeDetail"><i class="fa fa-times"></i></a></td>');
+            $('#lajur1').find('tbody').append('<tr><td><input type="hidden" name="column[]" value="1"><input type="text" name="coa_code[]" class="form-control"></td><td><input type="text" name="desc[]" class="form-control"></td><td><select name="header[]" class="form-control"><option value="1">Yes</option><option value="0">No</option></select></td><td><input type="text" name="variable[]" class="form-control"></td><td><input type="text" name="formula[]" class="form-control"></td><td><input type="text" name="linespace[]" class="form-control" value="0"></td><td><select name="underline[]" class="form-control"><option value="1">Yes</option><option value="0" selected>No</option></select></td><td><select name="hide[]" class="form-control"><option value="1">Yes</option><option value="0" selected>No</option></select></td><td><input type="text" name="order[]" class="form-control" value="99"></td><td><a class="removeDetail"><i class="fa fa-times"></i></a></td>');
+            e.preventDefault();
         });
         $('#addDetail2').click(function(e){
             $('#lajur2').find('.rowEmpty').remove();
-            $('#lajur2').find('tbody').append('<tr><td><input type="hidden" name="column[]" value="2"><input type="text" name="coa_code[]" class="form-control" placeholder="cth: 4, 401, @MODAL"></td><td><input type="text" name="desc[]" class="form-control" required></td><td><select name="header[]" class="form-control"><option value="1">Yes</option><option value="0">No</option></select></td><td><input type="text" name="variable[]" class="form-control" placeholder="cth : A1, B2, R99"></td><td><input type="text" name="formula[]" class="form-control" placeholder="cth: A1+A2+A3"></td><td><input type="number" name="linespace[]" class="form-control" value="0" placeholder="0" required></td><td><select name="underline[]" class="form-control"><option value="1">Yes</option><option value="0" selected>No</option></select></td><td><select name="hide[]" class="form-control"><option value="1">Yes</option><option value="0" selected>No</option></select></td><td><a class="removeDetail"><i class="fa fa-times"></i></a></td>');
+            $('#lajur2').find('tbody').append('<tr><td><input type="hidden" name="column[]" value="2"><input type="text" name="coa_code[]" class="form-control"></td><td><input type="text" name="desc[]" class="form-control"></td><td><select name="header[]" class="form-control"><option value="1">Yes</option><option value="0">No</option></select></td><td><input type="text" name="variable[]" class="form-control"></td><td><input type="text" name="formula[]" class="form-control"></td><td><input type="text" name="linespace[]" class="form-control" value="0"></td><td><select name="underline[]" class="form-control"><option value="1">Yes</option><option value="0" selected>No</option></select></td><td><select name="hide[]" class="form-control"><option value="1">Yes</option><option value="0" selected>No</option></select></td><td><input type="text" name="order[]" class="form-control" value="99"></td><td><a class="removeDetail"><i class="fa fa-times"></i></a></td>');
+            e.preventDefault();
         });
         $(document).delegate('.removeDetail','click',function(){
             $(this).parents('tr').remove();

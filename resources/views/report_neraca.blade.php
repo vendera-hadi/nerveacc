@@ -1,74 +1,110 @@
-<center>
-	<h4 style="font-size: 16px;">
-		LAPORAN NERACA<br>
-		{{$company->comp_name}}<br>
-		{{$datetxt}}
-	</h4>
-</center>
-	<table style="margin-top:60px">
-		<tr>
-			<td style="padding-right:15px; padding-top:15px; border-top: 1px solid black; border-right: 1px solid black;">
-				<!-- kiri -->
-				<table width="400px">
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Preview</title>
+	<link href="{{ asset('/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('plugins/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('/css/AdminLTE.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('/css/skins/_all-skins.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('/css/my_style.css') }}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<center>
+					<h4>
+						BALANCE SHEET <br>
+						{{$company->comp_name}}<br>
+						{{$datetxt}}
+					</h4>
+				</center>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<table class="table table-stripped table-condensed">
+					<?php for($i=0; $i<$total; $i++){ ?>
 					<tr>
-						<td colspan="2"><center><h3>AKTIVA</h3></center></td>
+						<?php 
+							if(isset($detail1[$i])){
+								if(trim($detail1[$i]['hide']) == '0'){
+									$desc = str_replace(' ','&nbsp;',$detail1[$i]['desc']);
+									if(!empty($detail1[$i]['header'])) $desc = '<b>'.$desc.'</b>';
+									echo '<td>'.$desc.'</td>'; 
+								}else{
+									echo '<td>&nbsp;</td>';
+								}
+							}else{ 
+								echo '<td>&nbsp;</td>';
+							}
+						
+							if(isset($detail1[$i])){
+
+								$detail1[$i]->setDate($from, $to);
+								$detail1[$i]->setVariables($variables);
+								$calculate = $detail1[$i]->calculateAccount();
+								if(!empty($detail1[$i]['variable'])) $variables[$detail1[$i]['variable']] = $calculate;
+
+								if(trim($detail1[$i]['hide']) == '0'){
+									if(!empty($detail1[$i]['coa_code']) || !empty($detail1[$i]['formula'])){
+										if(trim($detail1[$i]['underline']) == '1'){
+											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.number_format($calculate, 0, ',', '.').'</td>'; 
+										}else{
+											echo '<td style="text-align:right">'.number_format($calculate, 0, ',', '.').'</td>';
+										}
+									}else{
+										echo '<td>&nbsp;</td>';
+									}
+								}else{
+										echo '<td>&nbsp;</td>';
+									}
+							}else{ 
+								echo '<td>&nbsp;</td>';
+							}
+							
+							if(isset($detail2[$i])){
+								if(trim($detail2[$i]['hide']) == '0'){
+									$desc = str_replace(' ','&nbsp;',$detail2[$i]['desc']); 
+									if(!empty($detail2[$i]['header'])) $desc = '<b>'.$desc.'</b>';
+									echo '<td>'.$desc.'</td>'; 
+								}else{
+									echo '<td>&nbsp;</td>';
+								}
+							}else{ 
+								echo '<td>&nbsp;</td>';
+							}
+						
+							if(isset($detail2[$i])){
+
+								$detail2[$i]->setDate($from, $to);
+								$detail2[$i]->setVariables($variables);
+								$calculate = $detail2[$i]->calculateAccount();
+								if(!empty($detail2[$i]['variable'])) $variables[$detail2[$i]['variable']] = $calculate;
+
+								if(trim($detail2[$i]['hide']) == '0'){
+									if(!empty($detail2[$i]['coa_code']) || !empty($detail2[$i]['formula'])){
+										if(trim($detail2[$i]['underline']) == '1'){
+											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.number_format($calculate, 0, ',', '.').'</td>'; 
+										}else{
+											echo '<td style="text-align:right">'.number_format($calculate, 0, ',', '.').'</td>';
+										}
+									}else{
+										echo '<td>&nbsp;</td>';
+									}
+								}else{
+										echo '<td>&nbsp;</td>';
+									}
+							}else{ 
+								echo '<td>&nbsp;</td>';
+							}
+							?>
 					</tr>
-					@foreach($detail1 as $dt)
-					@php
-						$desc = str_replace(' ','&nbsp;',$dt->desc);
-						$dt->setDate($from, $to);
-						if(!empty($dt->header)) $desc = '<b style="font-size:16px">'.$desc.'</b>';
-						$dt->setVariables($variables);
-						$calculate = $dt->calculateAccount();
-						if(!empty($dt->variable)) $variables[$dt->variable] = $calculate;
-					@endphp
-					@if(empty($dt->hide))
-						<tr>
-							<td>{!!$desc!!}</b></td>
-							<td style="text-align:right; @if(!empty($dt->underline)) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ 'Rp. '.number_format($calculate, 0, ',', '.') }}@endif</td>
-						</tr>
-						@if($dt->linespace > 0)
-						@for($i=0; $i<count($dt->linespace); $i++)
-						<tr>
-							<td colspan="2" style="height:20px"></td>
-						</tr>
-						@endfor
-						@endif
-					@endif
-					@endforeach
+					<?php } ?>
 				</table>
-				<!-- kiri -->
-			</td>
-			<td style="padding-left:15px; padding-top:15px; border-top: 1px solid black; ">
-				<!-- kanan -->
-				<table width="400px">
-					<tr>
-						<td colspan="2"><center><h3>PASIVA</h3></center></td>
-					</tr>
-					@foreach($detail2 as $dt)
-					@php
-						$desc = str_replace(' ','&nbsp;',$dt->desc);
-						$dt->setDate($from, $to);
-						if(!empty($dt->header)) $desc = '<b style="font-size:16px">'.$desc.'</b>';
-						$dt->setVariables($variables);
-						$calculate = $dt->calculateAccount();
-						if(!empty($dt->variable)) $variables[$dt->variable] = $calculate;
-					@endphp
-					@if($dt->hide == 0)
-						<tr>
-							<td>{!!$desc!!}</b></td>
-							<td style="text-align:right; @if(!empty($dt->underline)) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ 'Rp. '.number_format($calculate, 0, ',', '.') }}@endif</td>
-						</tr>
-						@if($dt->linespace > 0)
-						@for($i=0; $i<count($dt->linespace); $i++)
-						<tr>
-							<td colspan="2" style="height:20px"></td>
-						</tr>
-						@endfor
-						@endif
-					@endif
-					@endforeach
-				</table>
-			</td>
-		</tr>
-	</table>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

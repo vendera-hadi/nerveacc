@@ -99,6 +99,7 @@ class LayoutController extends Controller
 		try{
 			$id = $request->id;
 			$format = MsHeaderFormat::find($id)->delete();
+			$format2 = MsDetailFormat::where('formathd_id',$id)->delete();
 			return response()->json(['success' => 1, 'message' => 'Format deleted']);
 		}catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -109,8 +110,8 @@ class LayoutController extends Controller
 	{
 		try{
 			$id = $request->id;
-			$detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->get();
-			$detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->get();
+			$detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
+			$detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->orderBy('order','ASC')->get();
 			return response()->json([
 										'success' => 1, 
 										'data1' => $detail1->isEmpty() ? null : $detail1,
@@ -134,6 +135,7 @@ class LayoutController extends Controller
 			$linespace = $request->linespace;
 			$underline = $request->underline;
 			$hide = $request->hide;
+			$order = $request->order;
 			MsDetailFormat::where('formathd_id',$id)->delete();
 			\DB::beginTransaction();
 			foreach ($coa_code as $key => $coa) {
@@ -148,6 +150,7 @@ class LayoutController extends Controller
 				$detail->underline = $underline[$key];
 				$detail->hide = $hide[$key];
 				$detail->column = $column[$key];
+				$detail->order = $order[$key];
 				$detail->save();
 			}
 			\DB::commit();
@@ -162,12 +165,14 @@ class LayoutController extends Controller
 	{
 		$id = $request->id;
 		$header = MsHeaderFormat::find($id);
-		$detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->get();
-		$detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->get();
+		$detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
+		$detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->orderBy('order','ASC')->get();
+		$total = (count($detail1) > count($detail2) ? count($detail1) : count($detail2));
 		$data = [
 				'header' => $header,
 				'detail1' => $detail1,
-				'detail2' => $detail2
+				'detail2' => $detail2,
+				'total' =>$total
 			];
 		return view('layout_preview',$data);
 	}

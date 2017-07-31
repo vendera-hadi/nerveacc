@@ -10,7 +10,7 @@ use App\Models\MsGroupAccount;
 class MsDetailFormat extends Model
 {
     protected $table ='ms_detail_format';
-    protected $fillable =['formathd_id','coa_code','desc','header','variable','formula','linespace','underline','column'];
+    protected $fillable =['formathd_id','coa_code','desc','header','variable','formula','linespace','underline','column','order'];
 
     protected $from;
    	protected $to;
@@ -63,8 +63,8 @@ class MsDetailFormat extends Model
             $ledger = TrLedger::where('coa_code','like',$coacode."%")
                 ->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=',date('Y-m-d', strtotime('yesterday', strtotime($this->from) )))
                 ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
-            if(strpos($coa->coa_type, 'DEBET') !== false) $total = $coa->coa_beginning + abs($ledger->debit - $ledger->credit);
-            else $total = $coa->coa_beginning + abs($ledger->credit - $ledger->debit);
+            if(strpos($coa->coa_type, 'DEBET') !== false) $total = $coa->coa_beginning + $ledger->debit - $ledger->credit;
+            else $total = $coa->coa_beginning + $ledger->credit - $ledger->debit;
         }else{
             $total = 0;
         }
@@ -78,8 +78,8 @@ class MsDetailFormat extends Model
 			$ledger = TrLedger::where('coa_code','like',$coacode."%")
 				->where('ledg_date','>=',$this->from)->where('ledg_date','<=',$this->to)
 				->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
-			if(strpos($coa->coa_type, 'DEBET') !== false) $total = $coa->coa_beginning + abs($ledger->debit - $ledger->credit);
-			else $total = $coa->coa_beginning + abs($ledger->credit - $ledger->debit);
+			if(strpos($coa->coa_type, 'DEBET') !== false) $total = $coa->coa_beginning + $ledger->debit - $ledger->credit;
+			else $total = $coa->coa_beginning + $ledger->credit - $ledger->debit;
 		}else{
 			$total = 0;
 		}
@@ -95,13 +95,13 @@ class MsDetailFormat extends Model
                 })
                 ->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=',date('Y-m-d', strtotime('yesterday', strtotime($this->from) )))
                 ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
-        $profit = abs($ledgerProfit->credit - $ledgerProfit->debit);
+        $profit = $ledgerProfit->credit - $ledgerProfit->debit;
         $ledgerLoss = TrLedger::where(function($query){
                         $query->where('coa_code','like',"5%")->orWhere('coa_code','like',"7%");
                 })
                 ->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=',date('Y-m-d', strtotime('yesterday', strtotime($this->from) )))
                 ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
-        $loss = abs($ledgerLoss->debit - $ledgerLoss->credit);
+        $loss = $ledgerLoss->debit - $ledgerLoss->credit;
         $result = $coa->coa_beginning + $profit - $loss;
         return $result;
     }
