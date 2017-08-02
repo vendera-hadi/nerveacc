@@ -372,7 +372,7 @@
                       @if(Session::get('role')==1 || in_array(72,Session::get('permissions')))
                       <li @if(Request::url() == route('bankbook.index')) class="active" @endif><a href="{{route('bankbook.index')}}"><i class="fa fa-circle-o"></i> Bank Book</a></li>
                       @endif
-                      <li ><a href="#"><i class="fa fa-circle-o"></i> Reconcile Bank</a></li>
+                      <li ><a href="{{route('reconcile.index')}}"><i class="fa fa-circle-o"></i> Reconcile Bank</a></li>
                     </ul>
                   </li>
                 @endif

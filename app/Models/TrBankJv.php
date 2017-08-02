@@ -28,4 +28,9 @@ class TrBankJv extends Model
     {
     	return $query->where('debit','>',0);
     }
+
+    public function scopeCredit($query)
+    {
+    	return $query->where('credit','>',0);
+    }
 }

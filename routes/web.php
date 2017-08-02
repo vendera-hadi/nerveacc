@@ -370,6 +370,12 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('bankbook/deposit/{id}','BankbookController@editdeposit')->name('bankbook.edit.deposit');
 	Route::post('bankbook/deposit/{id}','BankbookController@updatedeposit')->name('bankbook.edit.dodeposit');
 	Route::get('bankbook/withdraw','BankbookController@withdraw')->name('bankbook.withdraw');
+	Route::post('bankbook/withdraw','BankbookController@dowithdraw')->name('bankbook.dowithdraw');
+	Route::get('bankbook/withdraw/{id}','BankbookController@editwithdraw')->name('bankbook.edit.withdraw');
+	Route::post('bankbook/withdraw/{id}','BankbookController@updatewithdraw')->name('bankbook.edit.dowithdraw');
+
+	Route::get('reconcile', 'BankbookController@reconcile')->name('reconcile.index');
+	Route::post('update-reconcile', 'BankbookController@reconcileUpdate')->name('reconcile.update');
 
 	// acl
 	Route::get('roles','AccountController@roles')->name('roles.index');

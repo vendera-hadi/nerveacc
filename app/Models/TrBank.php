@@ -18,4 +18,9 @@ class TrBank extends Model
     {
     	return $this->hasMany('App\Models\TrBankJv','trbank_id')->debit();
     }
+
+    public function wddetail()
+    {
+    	return $this->hasMany('App\Models\TrBankJv','trbank_id')->credit();
+    }
 }

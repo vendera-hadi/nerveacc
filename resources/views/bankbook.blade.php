@@ -284,7 +284,7 @@
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 
 <script type="text/javascript">
-    var entity = "Payment"; // nama si tabel, ditampilin di dialog
+    var entity = "Bankbook"; // nama si tabel, ditampilin di dialog
     var get_url = "{{route('bankbook.get')}}";
 
     $(function(){

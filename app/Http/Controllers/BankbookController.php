@@ -44,7 +44,7 @@ class BankbookController extends Controller
             $count = TrBank::count();
             $fetch = TrBank::select('tr_bank.*','ms_payment_type.paymtp_name','ms_cash_bank.cashbk_name')
                     ->join('ms_payment_type',   'ms_payment_type.id',"=",'tr_bank.paymtp_id')
-                    ->join('ms_cash_bank',   'ms_cash_bank.id',"=",'tr_bank.cashbk_id');
+                    ->leftJoin('ms_cash_bank',   'ms_cash_bank.id',"=",'tr_bank.cashbk_id');
 
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -100,6 +100,8 @@ class BankbookController extends Controller
                         $action_button .= ' | <a href="'.route('bankbook.edit.transfer',$value->id).'" ><i class="fa fa-pencil"></i></a>';    
                     }else if($value->trbank_group == 'BM '){
                         $action_button .= ' | <a href="'.route('bankbook.edit.deposit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
+                    }else if($value->trbank_group == 'BK '){
+                        $action_button .= ' | <a href="'.route('bankbook.edit.withdraw',$value->id).'" ><i class="fa fa-pencil"></i></a>';
                     }
                     $action_button .= ' | <a href="#" value="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
                 }
@@ -289,7 +291,7 @@ class BankbookController extends Controller
 
             \DB::beginTransaction();
             $header = TrBank::find($id);
-            $header->trbank_no = $request->trbank_no;
+            if($request->trbank_no != $header->trbank_no) $header->trbank_no = $request->trbank_no;
             $header->trbank_date = $request->trbank_date;
             $header->trbank_recipient = MsCashBank::find($request->to_coa_id)->cashbk_name;
             $header->cashbk_id = $request->to_coa_id;
@@ -363,6 +365,7 @@ class BankbookController extends Controller
             $desc = $request->description;
             $amount = $request->amount;
             $total = 0;
+            if(count(@$request->coa_code) < 1) return redirect()->back()->with(['error' => 'Please insert coa for receiver']);
             // lawanan
             foreach ($request->coa_code as $key => $coa) {
                 $detail = new TrBankJv;
@@ -397,8 +400,7 @@ class BankbookController extends Controller
         \DB::beginTransaction();
         try{
             $header = TrBank::find($id);
-            $header = TrBank::find($id);
-            $header->trbank_no = $request->trbank_no;
+            if($request->trbank_no != $header->trbank_no) $header->trbank_no = $request->trbank_no;
             $header->trbank_date = $request->trbank_date;
             $header->trbank_recipient = MsCashBank::find($request->cashbk_id)->cashbk_name;
             $header->cashbk_id = $request->cashbk_id;
@@ -413,6 +415,7 @@ class BankbookController extends Controller
             $desc = $request->description;
             $amount = $request->amount;
             $total = 0;
+            if(count(@$request->coa_code) < 1) return redirect()->back()->with(['error' => 'Please insert coa for debit']);
             // lawanan
             foreach ($request->coa_code as $key => $coa) {
                 $detail = new TrBankJv;
@@ -450,6 +453,158 @@ class BankbookController extends Controller
         $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
         $data['trbank'] = TrBank::find($id);
         return view('bankbook_deposit_edit',$data);
+    }
+
+    public function withdraw(Request $request){
+        $coaYear = date('Y');
+        $data['cashbank_data'] = MsCashBank::all()->toArray();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        return view('bankbook_withdraw',$data);
+    }
+
+    public function dowithdraw(Request $request)
+    {
+        \DB::beginTransaction();
+        try{
+            // dd($request->all());
+            $header = new TrBank;
+            $header->trbank_no = $request->trbank_no;
+            $header->trbank_date = $request->trbank_date;
+            $header->trbank_recipient = $request->trbank_recipient;
+            $header->trbank_group = 'BK';
+            if(!empty($header->trbank_girodate)) $header->trbank_girodate = $request->trbank_girodate;
+            $header->trbank_girono = '';
+            $header->cashbk_id = 0;
+            $header->coa_code = $request->from_coa;
+            $header->paymtp_id = 2;
+            $header->trbank_note = $request->trbank_note;
+            $header->created_by = \Auth::id();
+            $header->updated_by = \Auth::id();
+
+            $details = [];
+            $depts = $request->dept_id;
+            $desc = $request->description;
+            $amount = $request->amount;
+            $total = 0;
+            if(count(@$request->coa_code) < 1) return redirect()->back()->with(['error' => 'Please insert coa for receiver']);
+            // lawanan
+            foreach ($request->coa_code as $key => $coa) {
+                $detail = new TrBankJv;
+                $detail->coa_code = $coa;
+                $detail->credit = $amount[$key];
+                $total += $amount[$key];
+                $detail->note = $desc[$key];
+                $detail->dept_id = $depts[$key];
+                $details[] = $detail;
+            }
+            // cashbank
+            $detail = new TrBankJv;
+            $detail->coa_code = $header->coa_code;
+            $detail->debit = $total;
+            $detail->note = 'Kirim uang';
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            $header->trbank_out = $total;
+            $header->save();
+            $header->detail()->saveMany($details);
+
+            \DB::commit();
+            return redirect()->back()->with(['success' => 'Update Success']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
+    public function editwithdraw(Request $request, $id){
+        $coaYear = date('Y');
+        $data['cashbank_data'] = MsCashBank::all()->toArray();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['trbank'] = TrBank::find($id);
+        return view('bankbook_withdraw_edit',$data);
+    }
+
+    public function updatewithdraw(Request $request, $id){
+        \DB::beginTransaction();
+        try{
+            $header = TrBank::find($id);
+            if($request->trbank_no != $header->trbank_no) $header->trbank_no = $request->trbank_no;
+            $header->trbank_date = $request->trbank_date;
+            $header->trbank_recipient = $request->trbank_recipient;
+            $header->coa_code = $request->from_coa;
+            $header->trbank_note = $request->trbank_note;
+            $header->updated_by = \Auth::id();
+
+            $details = [];
+            $depts = $request->dept_id;
+            $desc = $request->description;
+            $amount = $request->amount;
+            $total = 0;
+            if(count(@$request->coa_code) < 1) return redirect()->back()->with(['error' => 'Please insert coa for receiver']);
+            // delete all details
+            TrBankJv::where('trbank_id',$id)->delete();
+            // lawanan
+            foreach ($request->coa_code as $key => $coa) {
+                $detail = new TrBankJv;
+                $detail->coa_code = $coa;
+                $detail->credit = $amount[$key];
+                $total += $amount[$key];
+                $detail->note = $desc[$key];
+                $detail->dept_id = $depts[$key];
+                $details[] = $detail;
+            }
+            // cashbank
+            $detail = new TrBankJv;
+            $detail->coa_code = $header->coa_code;
+            $detail->debit = $total;
+            $detail->note = 'Kirim uang';
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            $header->trbank_out = $total;
+            $header->save();
+            $header->detail()->saveMany($details);
+
+            \DB::commit();
+            return redirect()->back()->with(['success' => 'Update Success']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
+    public function reconcile(Request $request)
+    {
+        $coaYear = date('Y');
+        $data['cashbank_data'] = MsCashBank::all()->toArray();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $cashbankId = $request->cashbk_id;
+        $start = $request->start;
+        $end = $request->end;
+        $data['trbanks'] = [];
+        if($cashbankId && $start && $end){
+            $bank = MsCashBank::find($cashbankId);
+            $data['trbanks'] = TrBank::where('trbank_date','>=',$start." 00:00:00")->where('trbank_date','<=',$end.' 23:59:59')->where('coa_code', $bank->coa_code)->orderBy('trbank_date')->get();
+        }
+
+        return view('reconcile',$data);
+    }
+
+    public function reconcileUpdate(Request $request)
+    {
+        $ids = $request->id;
+        $rekon = $request->rekon;
+        if($ids){
+            foreach ($ids as $key => $id) {
+                $trbank = TrBank::find($id);
+                $trbank->trbank_rekon = (bool)$rekon[$key];
+                $trbank->save();
+            }
+        }
+        return redirect()->back()->with(['success' => 'Update Success']);
     }
 
 }
