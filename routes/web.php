@@ -361,6 +361,15 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('bankbook/get','BankbookController@get')->name('bankbook.get');
 	Route::post('bankbook/insert','BankbookController@insert')->name('bankbook.insert');
 	Route::post('bankbook/posting','BankbookController@posting')->name('bankbook.posting');
+	Route::get('bankbook/transfer','BankbookController@transfer')->name('bankbook.transfer');
+	Route::post('bankbook/transfer','BankbookController@dotransfer')->name('bankbook.dotransfer');
+	Route::get('bankbook/transfer/{id}','BankbookController@edittransfer')->name('bankbook.edit.transfer');
+	Route::post('bankbook/transfer/{id}','BankbookController@updatetransfer')->name('bankbook.edit.dotransfer');
+	Route::get('bankbook/deposit','BankbookController@deposit')->name('bankbook.deposit');
+	Route::post('bankbook/deposit','BankbookController@dodeposit')->name('bankbook.dodeposit');
+	Route::get('bankbook/deposit/{id}','BankbookController@editdeposit')->name('bankbook.edit.deposit');
+	Route::post('bankbook/deposit/{id}','BankbookController@updatedeposit')->name('bankbook.edit.dodeposit');
+	Route::get('bankbook/withdraw','BankbookController@withdraw')->name('bankbook.withdraw');
 
 	// acl
 	Route::get('roles','AccountController@roles')->name('roles.index');

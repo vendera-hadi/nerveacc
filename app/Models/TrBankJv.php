@@ -13,4 +13,19 @@ class TrBankJv extends Model
     {
     	return $this->belongsTo('App\Models\TrBank','trbank_id');
     }
+
+    public function coa()
+    {
+    	return $this->belongsTo('App\Models\MsMasterCoa','coa_code','coa_code');
+    }
+
+    public function dept()
+    {
+    	return $this->belongsTo('App\Models\MsDepartment','dept_id');
+    }
+
+    public function scopeDebit($query)
+    {
+    	return $query->where('debit','>',0);
+    }
 }

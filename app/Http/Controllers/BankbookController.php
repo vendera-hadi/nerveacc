@@ -79,7 +79,8 @@ class BankbookController extends Controller
                 $temp['id'] = $value->id;
                 $temp['trbank_no'] = $value->trbank_no;
                 $temp['trbank_note'] = $value->trbank_note;
-				$temp['coa_code'] = $value->coa_code;               
+				$temp['coa_code'] = $value->coa_code;
+                $temp['cashbk_name'] = $value->cashbk_name;               
                 $temp['paymtp_name'] = $value->paymtp_name;
                 $temp['trbank_date'] = date('d/m/Y',strtotime($value->trbank_date));
                 $temp['trbank_in'] = "Rp. ".number_format($value->trbank_in);
@@ -94,6 +95,11 @@ class BankbookController extends Controller
                 if($temp['trbank_post'] == 'no'){
                     if(\Session::get('role')==1 || in_array(70,\Session::get('permissions'))){
                         $action_button .= ' | <a href="#" data-id="'.$value->id.'" title="Posting" class="posting-confirm"><i class="fa fa-arrow-circle-o-up"></i></a>';
+                    }
+                    if($value->trbank_group == 'KM '){
+                        $action_button .= ' | <a href="'.route('bankbook.edit.transfer',$value->id).'" ><i class="fa fa-pencil"></i></a>';    
+                    }else if($value->trbank_group == 'BM '){
+                        $action_button .= ' | <a href="'.route('bankbook.edit.deposit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
                     }
                     $action_button .= ' | <a href="#" value="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
                 }
@@ -222,6 +228,228 @@ class BankbookController extends Controller
             \DB::rollback();
             return response()->json(['errorMsg' => $e->getMessage()]);
         }
+    }
+
+    public function transfer(Request $request){
+        $data['cashbank_data'] = MsCashBank::all()->toArray();
+        return view('bankbook_transfer',$data);
+    }
+
+    public function dotransfer(Request $request){
+        try{
+            if(MsCashBank::find($request->to_coa_id)->coa_code == $request->from_coa)
+                return redirect()->back()->with(['error' => 'Cant transfer to the same bank account']);
+
+            \DB::beginTransaction();
+            $header = new TrBank;
+            $header->trbank_no = $request->trbank_no;
+            $header->trbank_date = $request->trbank_date;
+            $header->trbank_recipient = MsCashBank::find($request->to_coa_id)->cashbk_name;
+            $header->trbank_group = 'KM';
+            if(!empty($header->trbank_girodate)) $header->trbank_girodate = $request->trbank_girodate;
+            $header->trbank_girono = '';
+            $header->cashbk_id = $request->to_coa_id;
+            $header->coa_code = MsCashBank::find($request->to_coa_id)->coa_code;
+            $header->paymtp_id = 2;
+            $header->trbank_note = $request->trbank_note;
+            $header->created_by = \Auth::id();
+            $header->updated_by = \Auth::id();
+
+            $details = [];
+            // cashbank
+            $detail = new TrBankJv;
+            $detail->coa_code = $header->coa_code;
+            $detail->credit = $request->amount;
+            $detail->note = 'Terima transfer';
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            $detail = new TrBankJv;
+            $detail->coa_code = $request->from_coa;
+            $detail->debit = $request->amount;
+            $detail->note = 'Transfer uang';
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            $header->trbank_in = $request->amount;
+            $header->save();
+            $header->detail()->saveMany($details);
+            \DB::commit();
+            return redirect()->back()->with(['success' => 'Transfer Success']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
+    public function updatetransfer(Request $request, $id){
+        try{
+            if(MsCashBank::find($request->to_coa_id)->coa_code == $request->from_coa)
+                return redirect()->back()->with(['error' => 'Cant transfer to the same bank account']);
+
+            \DB::beginTransaction();
+            $header = TrBank::find($id);
+            $header->trbank_no = $request->trbank_no;
+            $header->trbank_date = $request->trbank_date;
+            $header->trbank_recipient = MsCashBank::find($request->to_coa_id)->cashbk_name;
+            $header->cashbk_id = $request->to_coa_id;
+            $header->coa_code = MsCashBank::find($request->to_coa_id)->coa_code;
+            $header->trbank_note = $request->trbank_note;
+            $header->updated_by = \Auth::id();
+
+            // delete all details
+            TrBankJv::where('trbank_id',$id)->delete();
+            $details = [];
+            // cashbank
+            $detail = new TrBankJv;
+            $detail->coa_code = $header->coa_code;
+            $detail->credit = $request->amount;
+            $detail->note = 'Terima transfer';
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            $detail = new TrBankJv;
+            $detail->coa_code = $request->from_coa;
+            $detail->debit = $request->amount;
+            $detail->note = 'Transfer uang';
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            $header->trbank_in = $request->amount;
+            $header->save();
+            $header->detail()->saveMany($details);
+            \DB::commit();
+            return redirect()->back()->with(['success' => 'Update Success']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
+    public function edittransfer(Request $request, $id){
+        $data['cashbank_data'] = MsCashBank::all()->toArray();
+        $data['trbank'] = TrBank::find($id);
+        return view('bankbook_transfer_edit',$data);
+    }
+
+    public function deposit(Request $request){
+        $coaYear = date('Y');
+        $data['cashbank_data'] = MsCashBank::all()->toArray();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        return view('bankbook_deposit',$data);
+    }
+
+    public function dodeposit(Request $request)
+    {
+        \DB::beginTransaction();
+        try{
+            $header = new TrBank;
+            $header->trbank_no = $request->trbank_no;
+            $header->trbank_date = $request->trbank_date;
+            $header->trbank_recipient = MsCashBank::find($request->cashbk_id)->cashbk_name;
+            $header->trbank_group = 'BM';
+            if(!empty($header->trbank_girodate)) $header->trbank_girodate = $request->trbank_girodate;
+            $header->trbank_girono = '';
+            $header->cashbk_id = $request->cashbk_id;
+            $header->coa_code = MsCashBank::find($request->cashbk_id)->coa_code;
+            $header->paymtp_id = 2;
+            $header->trbank_note = $request->trbank_note;
+            $header->created_by = \Auth::id();
+            $header->updated_by = \Auth::id();
+
+            $details = [];
+            $depts = $request->dept_id;
+            $desc = $request->description;
+            $amount = $request->amount;
+            $total = 0;
+            // lawanan
+            foreach ($request->coa_code as $key => $coa) {
+                $detail = new TrBankJv;
+                $detail->coa_code = $coa;
+                $detail->debit = $amount[$key];
+                $total += $amount[$key];
+                $detail->note = $desc[$key];
+                $detail->dept_id = $depts[$key];
+                $details[] = $detail;
+            }
+            // cashbank
+            $detail = new TrBankJv;
+            $detail->coa_code = $header->coa_code;
+            $detail->credit = $total;
+            $detail->note = 'Terima setoran';
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            $header->trbank_in = $total;
+            $header->save();
+            $header->detail()->saveMany($details);
+
+            \DB::commit();
+            return redirect()->back()->with(['success' => 'Update Success']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
+    public function updatedeposit(Request $request, $id){
+        \DB::beginTransaction();
+        try{
+            $header = TrBank::find($id);
+            $header = TrBank::find($id);
+            $header->trbank_no = $request->trbank_no;
+            $header->trbank_date = $request->trbank_date;
+            $header->trbank_recipient = MsCashBank::find($request->cashbk_id)->cashbk_name;
+            $header->cashbk_id = $request->cashbk_id;
+            $header->coa_code = MsCashBank::find($request->cashbk_id)->coa_code;
+            $header->trbank_note = $request->trbank_note;
+            $header->updated_by = \Auth::id();
+
+            // delete all details
+            TrBankJv::where('trbank_id',$id)->delete();
+            $details = [];
+            $depts = $request->dept_id;
+            $desc = $request->description;
+            $amount = $request->amount;
+            $total = 0;
+            // lawanan
+            foreach ($request->coa_code as $key => $coa) {
+                $detail = new TrBankJv;
+                $detail->coa_code = $coa;
+                $detail->debit = $amount[$key];
+                $total += $amount[$key];
+                $detail->note = $desc[$key];
+                $detail->dept_id = $depts[$key];
+                $details[] = $detail;
+            }
+            // cashbank
+            $detail = new TrBankJv;
+            $detail->coa_code = $header->coa_code;
+            $detail->credit = $total;
+            $detail->note = 'Terima setoran';
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            $header->trbank_in = $total;
+            $header->save();
+            $header->detail()->saveMany($details);
+
+            \DB::commit();
+            return redirect()->back()->with(['success' => 'Update Success']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
+    public function editdeposit(Request $request, $id){
+        $coaYear = date('Y');
+        $data['cashbank_data'] = MsCashBank::all()->toArray();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['trbank'] = TrBank::find($id);
+        return view('bankbook_deposit_edit',$data);
     }
 
 }

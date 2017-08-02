@@ -13,4 +13,9 @@ class TrBank extends Model
     {
     	return $this->hasMany('App\Models\TrBankJv','trbank_id');
     }
+
+    public function tfdetail()
+    {
+    	return $this->hasMany('App\Models\TrBankJv','trbank_id')->debit();
+    }
 }

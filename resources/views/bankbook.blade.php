@@ -52,10 +52,9 @@
     <div class="nav-tabs-custom">
       <ul class="nav nav-tabs">
         <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
-        @if(Session::get('role')==1 || in_array(69,Session::get('permissions')))
-        <li><a href="#tab_2" data-toggle="tab">Add Transaction</a></li>
-        @endif
-        <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Transaction</a></li>
+        <li><a href="{{route('bankbook.transfer')}}">Transfer Uang</a></li>
+        <li><a href="{{route('bankbook.deposit')}}">Terima Uang</a></li>
+        <li><a href="{{route('bankbook.withdraw')}}">Kirim Uang</a></li>
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">
