@@ -103,7 +103,7 @@ class BankbookController extends Controller
                     }else if($value->trbank_group == 'BK '){
                         $action_button .= ' | <a href="'.route('bankbook.edit.withdraw',$value->id).'" ><i class="fa fa-pencil"></i></a>';
                     }
-                    $action_button .= ' | <a href="#" value="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
+                    $action_button .= ' | <a href="#" data-id="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
                 }
                 
                 $temp['action_button'] = $action_button;
@@ -228,6 +228,44 @@ class BankbookController extends Controller
             return response()->json(['success' => 1,'message' => 'Posting Success']);
         }catch(\Exception $e){
             \DB::rollback();
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+    }
+
+    public function detail(Request $request)
+    {
+        try{
+            $id = $request->id;
+            $trbank = TrBank::find($id);
+            $result = '';
+            $totaldebit = $totalcredit = 0;
+            foreach ($trbank->detail as $key => $val) {
+                $totalcredit += $val->credit;
+                $totaldebit += $val->debit;
+                $result .= '<tr>
+                        <td>'.$val->coa_code.'</td>
+                        <td>'.$val->coa->coa_name.'</td>
+                        <td>'.$val->note.'</td>
+                        <td>'.$val->dept->dept_name.'</td>
+                        <td>Rp. '.number_format($val->debit,2).'</td>
+                        <td>Rp. '.number_format($val->credit,2).'</td>
+                    </tr>';
+
+            }
+            $result .= '<tr><td colspan="4">Total</td><td><b>Rp. '.number_format($totaldebit,2).'</b></td><td><b>Rp. '.number_format($totalcredit,2).'</b></td></tr>';
+            return response()->json(['success' => 1,'data' => $result]);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        try{
+            $id = $request->id;
+            TrBank::destroy($id);
+            return response()->json(['success' => 1,'message' => 'Delete Success']);
+        }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }
     }

@@ -272,6 +272,36 @@
       </div>
     </div>
           <!-- content -->
+
+    <!-- Modal extra -->
+<div id="detailModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width:900px">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Bankbook detail</h4>
+            </div>
+            <div class="modal-body" id="detailModalContent" style="padding: 20px 40px">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Coa Code</th>
+                      <th>Coa Name</th>
+                      <th>Note</th>
+                      <th>Dept</th>
+                      <th>Debit</th>
+                      <th>Credit</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody">
+                  </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Modal -->
 @endsection
 
 @section('footer-scripts')
@@ -369,6 +399,28 @@
 	          countTotal();
 	      }
 	 });
+
+  // remove bankbook
+  $(document).delegate('.remove','click',function(){
+        if(confirm('Are you sure want to remove this?')){
+            var id = $(this).data('id');
+            $.post('{{route('bankbook.delete')}}', {id:id}, function(result){
+                if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+                if(result.success){ 
+                    $.messager.alert('Warning',result.message);
+                    location.reload();
+                }
+            });
+        }
+   });
+
+  $(document).delegate('.getDetail','click',function(){
+      var id = $(this).data('id');
+      $.post('{{route('bankbook.detail')}}', {id:id}, function(result){
+          if(result.success) $('#tbody').html(result.data);
+          else $('#tbody').html('<tr><td colspan="6">can not get detail</td></tr>');
+      });
+  });
 
 	function postingInv(){
         var ids = [];

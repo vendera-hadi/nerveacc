@@ -361,6 +361,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('bankbook/get','BankbookController@get')->name('bankbook.get');
 	Route::post('bankbook/insert','BankbookController@insert')->name('bankbook.insert');
 	Route::post('bankbook/posting','BankbookController@posting')->name('bankbook.posting');
+	Route::post('bankbook/delete','BankbookController@delete')->name('bankbook.delete');
+	Route::post('bankbook/detail','BankbookController@detail')->name('bankbook.detail');
 	Route::get('bankbook/transfer','BankbookController@transfer')->name('bankbook.transfer');
 	Route::post('bankbook/transfer','BankbookController@dotransfer')->name('bankbook.dotransfer');
 	Route::get('bankbook/transfer/{id}','BankbookController@edittransfer')->name('bankbook.edit.transfer');
@@ -376,6 +378,9 @@ Route::group(['middleware' => 'auth'], function () {
 
 	Route::get('reconcile', 'BankbookController@reconcile')->name('reconcile.index');
 	Route::post('update-reconcile', 'BankbookController@reconcileUpdate')->name('reconcile.update');
+
+	// account payable
+	Route::get('accpayable', 'PayableController@index')->name('payable.index');
 
 	// acl
 	Route::get('roles','AccountController@roles')->name('roles.index');
