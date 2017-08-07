@@ -161,7 +161,7 @@
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('payment.index'),url('period_meter')];
               $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view'),route('report.neraca'),route('report.profitloss')];
               $glSetupUrls = [route('coa.index'),url('department'),url('layouts'),url('department'),url('groupaccount')];
-              $bbUrls = [route('cash_bank.index'),route('bankbook.index')];
+              $bbUrls = [route('cash_bank.index'),route('bankbook.index'),route('reconcile.index')];
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter')];
 
@@ -372,7 +372,9 @@
                       @if(Session::get('role')==1 || in_array(72,Session::get('permissions')))
                       <li @if(Request::url() == route('bankbook.index')) class="active" @endif><a href="{{route('bankbook.index')}}"><i class="fa fa-circle-o"></i> Bank Book</a></li>
                       @endif
-                      <li ><a href="{{route('reconcile.index')}}"><i class="fa fa-circle-o"></i> Reconcile Bank</a></li>
+                      @if(Session::get('role')==1 || in_array(72,Session::get('permissions')))
+                      <li @if(Request::url() == route('reconcile.index')) class="active" @endif><a href="{{route('reconcile.index')}}"><i class="fa fa-circle-o"></i> Reconcile Book</a></li>
+                      @endif
                     </ul>
                   </li>
                 @endif

@@ -68,10 +68,7 @@
                       <th field="trbank_no" sortable="true">No Voucher</th>
                       <th field="trbank_note" width="50" sortable="true">Note</th>
                       <th field="trbank_date" sortable="true">Date</th>
-                      <th field="paymtp_name" width="50" sortable="true">Payment Type</th>
-                      <th field="cashbk_name" width="50" sortable="true">Cashbank</th>
-                      <th field="coa_code" width="50" sortable="true">COA Code</th>
-                      <th field="trbank_girodate" width="50" sortable="true">Check/Giro Date</th>
+                      <th field="cashbk_name" width="50" sortable="true">Nama Bank</th>
                       <th field="trbank_in" sortable="true">Total In</th>
                       <th field="trbank_out" sortable="true">Total Out</th>
                       <th field="trbank_post" width="50" sortable="true">Posting Status</th>
@@ -190,7 +187,7 @@
                 </div>    
 
                 <div class="form-group">
-                    <label>Note</label>
+                    <label>Description</label>
                     <input type="text" name="trbank_note" class="form-control">
                 </div>
                 <br><br>

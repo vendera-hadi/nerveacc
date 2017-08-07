@@ -17,7 +17,9 @@ class CreateTrApInvoiceDtl extends Migration
             $table->increments('id');
             $table->bigInteger('aphdr_id');
             $table->string('note');
+            $table->integer('qty');
             $table->decimal('amount', 10, 2);
+            $table->decimal('ppn_amount', 10, 2);
             $table->boolean('is_ppn')->default(false);
             $table->char('coa_code',10);
             $table->integer('dept_id');

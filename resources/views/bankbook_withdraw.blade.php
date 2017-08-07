@@ -94,7 +94,7 @@
                                 <select class="form-control choose-style" name="from_coa" style="width:100%" required>
                                       <option value="">-</option>
                                       @foreach ($cashbank_data as $key => $value)
-                                      <option value="<?php echo $value['coa_code']?>"><?php echo $value['cashbk_name']?></option>
+                                      <option value="<?php echo $value['id']?>"><?php echo $value['cashbk_name']?></option>
                                       @endforeach
                                 </select>
                             </div>
@@ -122,10 +122,10 @@
                     </div>
                 
                     <div class="row">
-                        <div class="col-sm-6">
+                        <div class="col-sm-12">
                             <div class="form-group">
-                                <label>Note</label>
-                                <textarea class="form-control" name="trbank_note"></textarea>
+                                <label>Description</label>
+                                <textarea class="form-control" name="trbank_note" rows="3"></textarea>
                             </div>
                         </div>
                    </div>

@@ -80,48 +80,45 @@
 
                 <!-- form -->
                 <form action="{{route('bankbook.dodeposit')}}" method="POST">
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                                <label>No Voucher</label>
-                                <input class="form-control" name="trbank_no" type="text" required>
-                            </div>
-                        </div>
-
-                       <div class="col-sm-3">
-                            <div class="form-group">
-                                <label>Receiver</label>
-                                <select class="form-control choose-style" name="cashbk_id" style="width:100%" required>
-                                      <option value="">-</option>
-                                      @foreach ($cashbank_data as $key => $value)
-                                      <option value="<?php echo $value['id']?>"><?php echo $value['cashbk_name']?></option>
-                                      @endforeach
-                                </select>
-                            </div>
-                       </div>
-
-                       <div class="col-sm-3">
-                            <div class="form-group">
-                              <label>Transaction Date</label>
-                              <div class="input-group date">
-                                <div class="input-group-addon">
-                                  <i class="fa fa-calendar"></i>
-                                </div>
-                                <input type="text" id="invpayhDate" name="trbank_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                              </div>
-                          </div>
-                       </div>
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label>No Voucher</label>
+                        <input class="form-control" name="trbank_no" type="text" required>
+                      </div>
                     </div>
-                
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Note</label>
-                                <textarea class="form-control" name="trbank_note"></textarea>
-                            </div>
-                        </div>
-                   </div>
 
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label>Transaction Date</label>
+                        <div class="input-group date">
+                          <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </div>
+                          <input type="text" id="invpayhDate" name="trbank_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <div class="form-group">
+                        <label>Receiver</label>
+                        <select class="form-control choose-style" name="cashbk_id" style="width:100%" required>
+                          <option value="">-</option>
+                          @foreach ($cashbank_data as $key => $value)
+                          <option value="<?php echo $value['id']?>"><?php echo $value['cashbk_name']?></option>
+                          @endforeach
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea class="form-control" name="trbank_note"></textarea>
+                        </div>
+                    </div> 
+                  </div>
                     <!-- buat jurnal -->
                     <hr>
                     <div class="row">

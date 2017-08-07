@@ -18,7 +18,7 @@ class CreateTrApInvoiceHdr extends Migration
             $table->integer('spl_id');
             $table->date('invoice_date');
             $table->date('invoice_duedate');
-            $table->string('invoice_no')->unique();
+            $table->string('invoice_no');
             $table->boolean('isdp')->default(false);
             $table->decimal('total', 12, 2)->default(0);
             $table->decimal('adjust', 10, 2)->default(0);

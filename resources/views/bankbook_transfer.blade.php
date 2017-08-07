@@ -81,14 +81,26 @@
                 <!-- form -->
                 <form action="{{route('bankbook.dotransfer')}}" method="POST">
                 <div class="row">
-                  <div class="col-sm-3">
+                  <div class="col-sm-6">
                     <div class="form-group">
                         <label>No Voucher</label>
                         <input class="form-control" name="trbank_no" type="text" required>
                     </div>
                    </div>
-
-                   <div class="col-sm-3">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Transaction Date</label>
+                        <div class="input-group date">
+                          <div class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </div>
+                          <input type="text" id="invpayhDate" name="trbank_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                        </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                   <div class="col-sm-6">
                         <div class="form-group">
                             <label>Transfer from</label>
                             <select class="form-control choose-style" name="from_coa" style="width:100%" required>
@@ -99,8 +111,7 @@
                             </select>
                         </div>
                    </div>
-
-                   <div class="col-sm-3">
+                   <div class="col-sm-6">
                         <div class="form-group">
                             <label>Transfer to</label>
                             <select class="form-control choose-style" name="to_coa_id" style="width:100%" required>
@@ -111,41 +122,24 @@
                             </select>
                         </div>
                    </div>
-
-                   <div class="col-sm-3">
+                </div>
+                <div class="row">
+                  <div class="col-sm-6">
                         <div class="form-group">
                             <label>Amount (Rp.)</label>
                             <input class="form-control" type="number" name="amount" value="0" required>
                         </div>
                    </div>
-
-                </div>
-                <div class="row">
-                    <div class="col-sm-4">
-                      <div class="form-group">
-                          <label>Transaction Date</label>
-                          <div class="input-group date">
-                            <div class="input-group-addon">
-                              <i class="fa fa-calendar"></i>
-                            </div>
-                            <input type="text" id="invpayhDate" name="trbank_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                          </div>
-                      </div>
-                    </div>
-
-                    <div class="col-sm-4">
+                   <div class="col-sm-6">
                       <div class="form-group">
                           <label>Note</label>
                           <textarea class="form-control" name="trbank_note"></textarea>
                       </div>
                     </div>
-
-                   </div>
                 </div>
-
                 <div class="row">
                     <div class="col-sm-12">
-                        <button class="btn btn-info pull-right">Submit</button>
+                        <button class="btn btn-flat btn-info pull-right">Submit</button>
                     </div>
                 </div>
                 </form>

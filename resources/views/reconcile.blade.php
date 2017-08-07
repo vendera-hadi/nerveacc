@@ -44,7 +44,6 @@
 
 @section('main-content')
 <div class="row">
-    <div class="col-md-12">
         <form action="" method="GET">
         <div class="col-sm-3">
             <div class="form-group">
@@ -83,10 +82,9 @@
         </div>
 
         <div class="col-sm-3">
-            <button class="btn btn-info" style="margin-top: 23px;">Search</button>
+            <button class="btn btn-flat btn-info btn-block" style="margin-top: 23px;">Search</button>
         </div>
         </form>
-    </div>
 </div>
 
 <div class="row">

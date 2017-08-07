@@ -43,8 +43,8 @@ class BankbookController extends Controller
             // olah data
             $count = TrBank::count();
             $fetch = TrBank::select('tr_bank.*','ms_payment_type.paymtp_name','ms_cash_bank.cashbk_name')
-                    ->join('ms_payment_type',   'ms_payment_type.id',"=",'tr_bank.paymtp_id')
-                    ->leftJoin('ms_cash_bank',   'ms_cash_bank.id',"=",'tr_bank.cashbk_id');
+                    ->join('ms_payment_type','ms_payment_type.id',"=",'tr_bank.paymtp_id')
+                    ->leftJoin('ms_cash_bank','ms_cash_bank.id',"=",'tr_bank.cashbk_id');
 
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -512,9 +512,10 @@ class BankbookController extends Controller
             $header->trbank_recipient = $request->trbank_recipient;
             $header->trbank_group = 'BK';
             if(!empty($header->trbank_girodate)) $header->trbank_girodate = $request->trbank_girodate;
-            $header->trbank_girono = '';
-            $header->cashbk_id = 0;
-            $header->coa_code = $request->from_coa;
+            $header->trbank_girono = '';     
+            $coa_bank = MsCashBank::where('id',$request->from_coa)->get();
+            $header->coa_code = $coa_bank[0]->coa_code;
+            $header->cashbk_id = $request->from_coa;
             $header->paymtp_id = 2;
             $header->trbank_note = $request->trbank_note;
             $header->created_by = \Auth::id();
@@ -572,7 +573,9 @@ class BankbookController extends Controller
             if($request->trbank_no != $header->trbank_no) $header->trbank_no = $request->trbank_no;
             $header->trbank_date = $request->trbank_date;
             $header->trbank_recipient = $request->trbank_recipient;
-            $header->coa_code = $request->from_coa;
+            $coa_bank = MsCashBank::where('id',$request->from_coa)->get();
+            $header->coa_code = $coa_bank[0]->coa_code;
+            $header->cashbk_id = $request->from_coa;
             $header->trbank_note = $request->trbank_note;
             $header->updated_by = \Auth::id();
 
