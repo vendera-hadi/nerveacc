@@ -81,26 +81,54 @@
                 <!-- form -->
                 <form action="" method="POST">
                 <div class="row">
-                  <div class="col-sm-3">
+                    <div class="col-sm-4">
+                    <div class="form-group">
+                        <label>Kurs</label>
+                        <input type="hidden" name="current_kurs_id" value="{{$trbank->kurs_id}}">
+                        <select name="kurs_id" class="form-control">
+                            @foreach($kurs as $val)
+                            <option value="{{$val->id}}" data-val="{{$val->value}}" @if($val->id == $trbank->kurs_id) selected @endif>{{$val->currency}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                   </div>
+
+                  <div class="col-sm-4">
                     <div class="form-group">
                         <label>No Voucher</label>
                         <input class="form-control" name="trbank_no" type="text" value="{{$trbank->trbank_no}}" required>
                     </div>
                    </div>
 
-                   <div class="col-sm-3">
+                   <div class="col-sm-4">
+                      <div class="form-group">
+                          <label>Transaction Date</label>
+                          <div class="input-group date">
+                            <div class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" id="invpayhDate" name="trbank_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d',strtotime($trbank->trbank_date))}}">
+                          </div>
+                      </div>
+                    </div>                 
+
+                </div>
+
+                <div class="row">
+
+                  <div class="col-sm-6">
                         <div class="form-group">
                             <label>Transfer from</label>
                             <select class="form-control choose-style" name="from_coa" style="width:100%" required>
                                   <option value="">-</option>
                                   @foreach ($cashbank_data as $key => $value)
-                                  <option value="<?php echo $value['coa_code']?>" @if( strpos(@$trbank->tfdetail->first()->coa_code, $value['coa_code']) !== false) selected @endif><?php echo $value['cashbk_name']?></option>
+                                  <option value="<?php echo $value['coa_code']?>" @if( strpos(@$trbank->wddetail->first()->coa_code, $value['coa_code']) !== false) selected @endif><?php echo $value['cashbk_name']?></option>
                                   @endforeach
                             </select>
                         </div>
                    </div>
 
-                   <div class="col-sm-3">
+                  <div class="col-sm-6">
                         <div class="form-group">
                             <label>Transfer to</label>
                             <select class="form-control choose-style" name="to_coa_id" style="width:100%" required>
@@ -112,28 +140,20 @@
                         </div>
                    </div>
 
-                   <div class="col-sm-3">
+                </div>
+
+                <div class="row">
+                    
+                    <div class="col-sm-6">
                         <div class="form-group">
                             <label>Amount (Rp.)</label>
-                            <input class="form-control" type="number" name="amount" value="{{(int)$trbank->trbank_in}}" required>
+                            @php $amount = $trbank->trbank_in / $trbank->currency_val; @endphp
+                            <input class="form-control" type="number" name="amount" value="{{(int)$amount}}" required>
                         </div>
-                   </div>
+                        <b>Total Amount : Rp. <span id="amountIDR">{{number_format($trbank->trbank_in)}}</span></b>
+                   </div> 
 
-                </div>
-                <div class="row">
-                    <div class="col-sm-4">
-                      <div class="form-group">
-                          <label>Transaction Date</label>
-                          <div class="input-group date">
-                            <div class="input-group-addon">
-                              <i class="fa fa-calendar"></i>
-                            </div>
-                            <input type="text" id="invpayhDate" name="trbank_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" value="{{date('Y-m-d',strtotime($trbank->trbank_date))}}">
-                          </div>
-                      </div>
-                    </div>
-
-                    <div class="col-sm-4">
+                    <div class="col-sm-6">
                       <div class="form-group">
                           <label>Note</label>
                           <textarea class="form-control" name="trbank_note">{{$trbank->trbank_note}}</textarea>
@@ -172,6 +192,16 @@ $(function(){
     $('.datepicker').datepicker({
         autoclose: true
     });
+
+    $('input[name=amount], select[name=kurs_id]').change(function(){
+        countKurs();
+    });
 });
+
+function countKurs(){
+    var value = $('input[name=amount]').val();
+    var currval = $('select[name=kurs_id] option:selected').data('val');
+    $('#amountIDR').text(value * currval);
+}
 </script>
 @endsection

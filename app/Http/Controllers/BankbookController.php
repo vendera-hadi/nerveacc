@@ -11,6 +11,7 @@ use App\Models\TrBank;
 use App\Models\TrBankJv;
 use App\Models\MsJournalType;
 use App\Models\TrLedger;
+use App\Models\Kurs;
 use Auth;
 use DB;
 
@@ -272,6 +273,7 @@ class BankbookController extends Controller
 
     public function transfer(Request $request){
         $data['cashbank_data'] = MsCashBank::all()->toArray();
+        $data['kurs'] = Kurs::orderBy('id')->get();
         return view('bankbook_transfer',$data);
     }
 
@@ -294,24 +296,26 @@ class BankbookController extends Controller
             $header->trbank_note = $request->trbank_note;
             $header->created_by = \Auth::id();
             $header->updated_by = \Auth::id();
+            $header->kurs_id = $request->kurs_id;
+            $header->currency_val = Kurs::find($request->kurs_id)->value;
 
             $details = [];
             // cashbank
             $detail = new TrBankJv;
             $detail->coa_code = $header->coa_code;
-            $detail->credit = $request->amount;
-            $detail->note = 'Terima transfer';
+            $detail->debit = $request->amount * $header->currency_val;
+            $detail->note = $request->trbank_note;
             $detail->dept_id = 3;
             $details[] = $detail;
 
             $detail = new TrBankJv;
             $detail->coa_code = $request->from_coa;
-            $detail->debit = $request->amount;
-            $detail->note = 'Transfer uang';
+            $detail->credit = $request->amount * $header->currency_val;
+            $detail->note = $request->trbank_note;
             $detail->dept_id = 3;
             $details[] = $detail;
 
-            $header->trbank_in = $request->amount;
+            $header->trbank_in = $request->amount * $header->currency_val;
             $header->save();
             $header->detail()->saveMany($details);
             \DB::commit();
@@ -337,25 +341,28 @@ class BankbookController extends Controller
             $header->trbank_note = $request->trbank_note;
             $header->updated_by = \Auth::id();
 
+            $header->kurs_id = $request->kurs_id;
+            if($request->current_kurs_id != $header->kurs_id) $header->currency_val = Kurs::find($request->kurs_id)->value;
+
             // delete all details
             TrBankJv::where('trbank_id',$id)->delete();
             $details = [];
             // cashbank
             $detail = new TrBankJv;
             $detail->coa_code = $header->coa_code;
-            $detail->credit = $request->amount;
+            $detail->debit = $request->amount * $header->currency_val;
             $detail->note = 'Terima transfer';
             $detail->dept_id = 3;
             $details[] = $detail;
 
             $detail = new TrBankJv;
             $detail->coa_code = $request->from_coa;
-            $detail->debit = $request->amount;
+            $detail->credit = $request->amount * $header->currency_val;
             $detail->note = 'Transfer uang';
             $detail->dept_id = 3;
             $details[] = $detail;
 
-            $header->trbank_in = $request->amount;
+            $header->trbank_in = $request->amount * $header->currency_val;
             $header->save();
             $header->detail()->saveMany($details);
             \DB::commit();
@@ -369,6 +376,7 @@ class BankbookController extends Controller
     public function edittransfer(Request $request, $id){
         $data['cashbank_data'] = MsCashBank::all()->toArray();
         $data['trbank'] = TrBank::find($id);
+        $data['kurs'] = Kurs::orderBy('id')->get();
         return view('bankbook_transfer_edit',$data);
     }
 

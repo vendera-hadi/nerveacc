@@ -20,6 +20,8 @@ class CreateBankbookTable extends Migration
             $table->char('trbank_group',3)->nullable();
             $table->decimal('trbank_in', 12, 2)->default(0);
             $table->decimal('trbank_out', 12, 2)->default(0);
+            $table->integer('kurs_id')->default(1);
+            $table->decimal('currency_val',10,2)->default(1);
             $table->datetime('trbank_girodate')->nullable();
             $table->string('trbank_girono', 10)->nullable();
             $table->decimal('trbank_charge', 8, 2)->default(0);

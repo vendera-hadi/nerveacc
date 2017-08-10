@@ -81,13 +81,23 @@
                 <!-- form -->
                 <form action="{{route('bankbook.dotransfer')}}" method="POST">
                 <div class="row">
-                  <div class="col-sm-6">
+                  <div class="col-sm-4">
+                    <div class="form-group">
+                        <label>Kurs</label>
+                        <select name="kurs_id" class="form-control">
+                            @foreach($kurs as $val)
+                            <option value="{{$val->id}}" data-val="{{$val->value}}">{{$val->currency}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                   </div>
+                  <div class="col-sm-4">
                     <div class="form-group">
                         <label>No Voucher</label>
                         <input class="form-control" name="trbank_no" type="text" required>
                     </div>
                    </div>
-                  <div class="col-sm-6">
+                  <div class="col-sm-4">
                     <div class="form-group">
                         <label>Transaction Date</label>
                         <div class="input-group date">
@@ -126,9 +136,10 @@
                 <div class="row">
                   <div class="col-sm-6">
                         <div class="form-group">
-                            <label>Amount (Rp.)</label>
+                            <label>Amount</label>
                             <input class="form-control" type="number" name="amount" value="0" required>
                         </div>
+                        <b>Total Amount : Rp. <span id="amountIDR">0</span></b>
                    </div>
                    <div class="col-sm-6">
                       <div class="form-group">
@@ -166,6 +177,16 @@ $(function(){
     $('.datepicker').datepicker({
         autoclose: true
     });
+
+    $('input[name=amount], select[name=kurs_id]').change(function(){
+        countKurs();
+    });
 });
+
+function countKurs(){
+    var value = $('input[name=amount]').val();
+    var currval = $('select[name=kurs_id] option:selected').data('val');
+    $('#amountIDR').text(value * currval);
+}
 </script>
 @endsection
