@@ -304,14 +304,14 @@ class BankbookController extends Controller
             $detail = new TrBankJv;
             $detail->coa_code = $header->coa_code;
             $detail->debit = $request->amount * $header->currency_val;
-            $detail->note = $request->trbank_note;
+            $detail->note = $request->trbank_no;
             $detail->dept_id = 3;
             $details[] = $detail;
 
             $detail = new TrBankJv;
             $detail->coa_code = $request->from_coa;
             $detail->credit = $request->amount * $header->currency_val;
-            $detail->note = $request->trbank_note;
+            $detail->note = $request->trbank_no;
             $detail->dept_id = 3;
             $details[] = $detail;
 
@@ -351,14 +351,14 @@ class BankbookController extends Controller
             $detail = new TrBankJv;
             $detail->coa_code = $header->coa_code;
             $detail->debit = $request->amount * $header->currency_val;
-            $detail->note = 'Terima transfer';
+            $detail->note = $request->trbank_no;
             $detail->dept_id = 3;
             $details[] = $detail;
 
             $detail = new TrBankJv;
             $detail->coa_code = $request->from_coa;
             $detail->credit = $request->amount * $header->currency_val;
-            $detail->note = 'Transfer uang';
+            $detail->note = $request->trbank_no;
             $detail->dept_id = 3;
             $details[] = $detail;
 
@@ -382,6 +382,7 @@ class BankbookController extends Controller
 
     public function deposit(Request $request){
         $coaYear = date('Y');
+        $data['kurs'] = Kurs::orderBy('id')->get();
         $data['cashbank_data'] = MsCashBank::all()->toArray();
         $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
         $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
@@ -405,32 +406,38 @@ class BankbookController extends Controller
             $header->trbank_note = $request->trbank_note;
             $header->created_by = \Auth::id();
             $header->updated_by = \Auth::id();
+            $header->kurs_id = $request->kurs_id;
+            $header->currency_val = Kurs::find($request->kurs_id)->value;
 
             $details = [];
             $depts = $request->dept_id;
             $desc = $request->description;
             $amount = $request->amount;
-            $total = 0;
+            $coatype = $request->coa_type;
+            $totaldebit = 0;
+            $totalcredit = 0;
             if(count(@$request->coa_code) < 1) return redirect()->back()->with(['error' => 'Please insert coa for receiver']);
             // lawanan
             foreach ($request->coa_code as $key => $coa) {
+                $type = strtolower($coatype[$key]);
                 $detail = new TrBankJv;
                 $detail->coa_code = $coa;
-                $detail->debit = $amount[$key];
-                $total += $amount[$key];
-                $detail->note = $desc[$key];
+                $detail->$type = $amount[$key];
+                if($type == 'credit') $totalcredit += $amount[$key];
+                else $totaldebit += $amount[$key];
+                $detail->note = $header->trbank_no;
                 $detail->dept_id = $depts[$key];
                 $details[] = $detail;
             }
             // cashbank
             $detail = new TrBankJv;
             $detail->coa_code = $header->coa_code;
-            $detail->credit = $total;
-            $detail->note = 'Terima setoran';
+            $detail->debit = $totalcredit - $totaldebit;
+            $detail->note = $header->trbank_no;
             $detail->dept_id = 3;
             $details[] = $detail;
 
-            $header->trbank_in = $total;
+            $header->trbank_in = $totalcredit - $totaldebit;
             $header->save();
             $header->detail()->saveMany($details);
 
@@ -460,27 +467,31 @@ class BankbookController extends Controller
             $depts = $request->dept_id;
             $desc = $request->description;
             $amount = $request->amount;
-            $total = 0;
+            $coatype = $request->coa_type;
+            $totaldebit = 0;
+            $totalcredit = 0;
             if(count(@$request->coa_code) < 1) return redirect()->back()->with(['error' => 'Please insert coa for debit']);
             // lawanan
             foreach ($request->coa_code as $key => $coa) {
+                $type = strtolower($coatype[$key]);
                 $detail = new TrBankJv;
                 $detail->coa_code = $coa;
-                $detail->debit = $amount[$key];
-                $total += $amount[$key];
-                $detail->note = $desc[$key];
+                $detail->$type = $amount[$key];
+                if($type == 'credit') $totalcredit += $amount[$key];
+                else $totaldebit += $amount[$key];
+                $detail->note = $header->trbank_no;
                 $detail->dept_id = $depts[$key];
                 $details[] = $detail;
             }
             // cashbank
             $detail = new TrBankJv;
             $detail->coa_code = $header->coa_code;
-            $detail->credit = $total;
-            $detail->note = 'Terima setoran';
+            $detail->debit = $totalcredit - $totaldebit;
+            $detail->note = $header->trbank_no;
             $detail->dept_id = 3;
             $details[] = $detail;
 
-            $header->trbank_in = $total;
+            $header->trbank_in = $totalcredit - $totaldebit;
             $header->save();
             $header->detail()->saveMany($details);
 
@@ -494,6 +505,7 @@ class BankbookController extends Controller
 
     public function editdeposit(Request $request, $id){
         $coaYear = date('Y');
+        $data['kurs'] = Kurs::orderBy('id')->get();
         $data['cashbank_data'] = MsCashBank::all()->toArray();
         $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
         $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();

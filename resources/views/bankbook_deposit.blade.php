@@ -81,14 +81,26 @@
                 <!-- form -->
                 <form action="{{route('bankbook.dodeposit')}}" method="POST">
                   <div class="row">
-                    <div class="col-sm-6">
+                    
+                    <div class="col-sm-4">
+                      <div class="form-group">
+                          <label>Kurs</label>
+                          <select name="kurs_id" class="form-control">
+                              @foreach($kurs as $val)
+                              <option value="{{$val->id}}" data-val="{{$val->value}}">{{$val->currency}}</option>
+                              @endforeach
+                          </select>
+                      </div>
+                     </div>
+
+                    <div class="col-sm-4">
                       <div class="form-group">
                         <label>No Voucher</label>
                         <input class="form-control" name="trbank_no" type="text" required>
                       </div>
                     </div>
 
-                    <div class="col-sm-6">
+                    <div class="col-sm-4">
                       <div class="form-group">
                         <label>Transaction Date</label>
                         <div class="input-group date">
@@ -122,19 +134,23 @@
                     <!-- buat jurnal -->
                     <hr>
                     <div class="row">
-                        <div class="col-sm-4">
-                            <div class="form-group">
-                                <label>Description</label>
-                                <input class="form-control" id="addDesc">
-                            </div>
-                        </div>
 
-                        <div class="col-sm-4">
+                         <div class="col-sm-4">
                           <div class="form-group">
                             <label>Amount</label>
                             <input class="form-control" id="addAmount">
                           </div>
-                        </div>
+                        </div>                        
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="form-control" id="coatype">
+                                  <option>DEBIT</option>
+                                  <option>CREDIT</option>
+                                </select>
+                            </div>
+                        </div>  
 
                         <div class="col-sm-4">
                           <div class="form-group">
@@ -169,11 +185,11 @@
                       <table id="tableJournal" width="100%" class="table table-bordered">
                         <thead>
                         <tr>
+                          <td>Type</td>
                           <td>Account Code</td>
                           <td>Account Name</td>
                           <td>Dept</td>
-                          <td>Description</td>
-                          <td>Amount</td>
+                          <td>Amount (IDR)</td>
                           <td></td>
                         </tr>
                         </thead>
@@ -225,17 +241,19 @@ $(function(){
     $(".js-example-basic-single").select2();
 });
 
-var coacode, coaname, desc, amount, deptid, deptname;
+var coacode, coaname, desc, amount, deptid, deptname, type, kursval;
 $("#addAccount").click(function(){
   coacode = $('#selectAccount option:selected').val();
   if(coacode != ""){
     $('#rowEmpty').remove();
     coaname = $('#selectAccount option:selected').data('name');
+    type = $('#coatype').val();
     desc = $('#addDesc').val();
-    amount = $('#addAmount').val();
+    kursval = $('select[name=kurs_id] option:selected').data('val');
+    amount = $('#addAmount').val() * kursval;
     deptid = $('#addDept').val();
     deptname = $('#addDept option:selected').text();
-    $('#tableJournal').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="hidden" name="dept_id[]" value="'+deptid+'">'+deptname+'</td><td><input type="hidden" name="description[]" value="'+desc+'">'+desc+'</td><td><input type="hidden" class="amount" name="amount[]" value="'+amount+'" >'+amount+'</td><td><a class="removeRow"><i class="fa fa-times text-danger"></i></a></td></tr>');
+    $('#tableJournal').append('<tr><td><input type="hidden" name="coa_type[]" value="'+type+'" class="type">'+type+'</td><td><input type="hidden" name="coa_code[]" value="'+coacode+'">'+coacode+'</td><td>'+coaname+'</td><td><input type="hidden" name="dept_id[]" value="'+deptid+'">'+deptname+'</td><td><input type="hidden" class="amount" name="amount[]" value="'+amount+'" >'+amount+'</td><td><a class="removeRow"><i class="fa fa-times text-danger"></i></a></td></tr>');
     countTotal();
   }
 });
@@ -246,8 +264,9 @@ function countTotal()
     if($('#tableJournal tbody tr').length > 0){
         $('#tableJournal tbody tr').each(function(){
             var amount = parseFloat($(this).find('.amount').val());
-            console.log(amount);
-            total += amount;
+            var type = $(this).find('.type').val();
+            if(type == 'CREDIT') total += amount;
+            else total -= amount;
         });
     }else{
         $('#tableJournal tbody').append('<tr id="rowEmpty"><td colspan="6"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td></tr>');
