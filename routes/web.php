@@ -384,6 +384,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('accpayable', 'PayableController@index')->name('payable.index');
 	Route::get('accpayable/withpo', 'PayableController@withpo')->name('payable.withpo');
 	Route::get('accpayable/withoutpo', 'PayableController@withoutpo')->name('payable.withoutpo');
+	Route::post('accpayable/withoutpo', 'PayableController@withoutpoInsert')->name('payable.withoutpo.insert');
 
 	// acl
 	Route::get('roles','AccountController@roles')->name('roles.index');
