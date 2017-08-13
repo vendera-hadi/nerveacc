@@ -132,7 +132,7 @@
                         <div class="col-sm-3">
                             <div class="form-group">
                               <label>Receiver</label>
-                              <input type="text" name="trbank_recipient" required="required" class="form-control" >
+                              <input type="text" name="trbank_recipient"  class="form-control" >
                           </div>
                        </div>
 

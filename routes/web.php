@@ -100,6 +100,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('supplier/insert', 'SupplierController@insert')->name('supplier.insert');
 	Route::post('supplier/update', 'SupplierController@update')->name('supplier.update');
 	Route::post('supplier/delete', 'SupplierController@delete')->name('supplier.delete');
+	Route::post('supplier/ajaxget', 'SupplierController@ajaxdtl')->name('supplier.ajaxget');
 	// master tenant
 	Route::get('tenant','TenantController@index');
 	Route::post('tenant/get', 'TenantController@get')->name('tenant.get');
@@ -381,6 +382,8 @@ Route::group(['middleware' => 'auth'], function () {
 
 	// account payable
 	Route::get('accpayable', 'PayableController@index')->name('payable.index');
+	Route::get('accpayable/withpo', 'PayableController@withpo')->name('payable.withpo');
+	Route::get('accpayable/withoutpo', 'PayableController@withoutpo')->name('payable.withoutpo');
 
 	// acl
 	Route::get('roles','AccountController@roles')->name('roles.index');

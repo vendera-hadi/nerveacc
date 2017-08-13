@@ -123,4 +123,16 @@ class SupplierController extends Controller
             return response()->json(['errorMsg' => $e->getMessage()]);
         } 
     }
+
+    public function ajaxdtl(Request $request)
+    {
+        try{
+            $id = $request->id;
+            $data = MsSupplier::find($id);
+            return response()->json(['success'=>true, 'data' => $data]);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }    
+    }
+
 }
