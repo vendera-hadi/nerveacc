@@ -81,6 +81,18 @@
                 <!-- form -->
                 <form action="" method="POST">
                     <div class="row">
+
+                    <div class="col-sm-3">
+                      <div class="form-group">
+                          <label>Kurs</label>
+                          <select name="kurs_id" class="form-control" disabled="">
+                              @foreach($kurs as $val)
+                              <option value="{{$val->id}}" data-val="{{$val->value}}" @if($trbank->kurs_id == $val->id) selected @endif>{{$val->currency}}</option>
+                              @endforeach
+                          </select>
+                      </div>
+                     </div>
+
                         <div class="col-sm-3">
                             <div class="form-group">
                                 <label>No Voucher</label>
@@ -90,11 +102,12 @@
 
                        <div class="col-sm-3">
                             <div class="form-group">
-                                <label>Pay from {{@$trbank->tfdetail->first()->coa_code}}</label>
+                                <label>Pay from</label>
+                                @php $selectedcoa = @$trbank->wddetail->first()->coa_code; @endphp
                                 <select class="form-control choose-style" name="from_coa" style="width:100%" required>
                                       <option value="">-</option>
                                       @foreach ($cashbank_data as $key => $value)
-                                      <option value="<?php echo $value['coa_code']?>" @if(strpos(@$trbank->tfdetail->first()->coa_code, $value['coa_code']) !== false) selected @endif><?php echo $value['cashbk_name']?></option>
+                                      <option value="<?php echo $value['id']?>" @if(strpos($selectedcoa, $value['coa_code']) !== false) selected @endif><?php echo $value['cashbk_name']?></option>
                                       @endforeach
                                 </select>
                             </div>
@@ -112,16 +125,16 @@
                           </div>
                        </div>
 
-                       <div class="col-sm-3">
+                    </div>
+                
+                    <div class="row">
+                        <div class="col-sm-3">
                             <div class="form-group">
                               <label>Receiver</label>
                               <input type="text" name="trbank_recipient" required="required" class="form-control" value="{{$trbank->trbank_recipient}}">
                           </div>
                        </div>
 
-                    </div>
-                
-                    <div class="row">
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Note</label>
@@ -134,18 +147,21 @@
                     <hr>
                     <div class="row">
                         <div class="col-sm-4">
-                            <div class="form-group">
-                                <label>Description</label>
-                                <input class="form-control" id="addDesc">
-                            </div>
-                        </div>
-
-                        <div class="col-sm-4">
                           <div class="form-group">
                             <label>Amount</label>
                             <input class="form-control" id="addAmount">
                           </div>
-                        </div>
+                        </div>                        
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="form-control" id="coatype">
+                                  <option>DEBIT</option>
+                                  <option>CREDIT</option>
+                                </select>
+                            </div>
+                        </div>  
 
                         <div class="col-sm-4">
                           <div class="form-group">
@@ -189,13 +205,13 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach($trbank->wddetail as $detail)
+                        @php $details = $trbank->detail->where('coa_code','!=', $trbank->coa_code); @endphp
+                        @foreach($details as $detail)
                         <tr>
-                          <input type="hidden" name="coa_code[]" value="{{$detail->coa_code}}">
-                          <td>{{$detail->coa_code}}</td><td>{{$detail->coa->coa_name}}</td>
+                          <td>@if($detail->debit > 0){!!'<input type="hidden" name="coa_type[]" value="DEBIT" class="type">DEBIT'!!}@else{!!'<input type="hidden" name="coa_type[]" value="CREDIT" class="type">CREDIT'!!}@endif</td>
+                          <td><input type="hidden" name="coa_code[]" value="{{$detail->coa_code}}">{{$detail->coa_code}}</td><td>{{$detail->coa->coa_name}}</td>
                           <td><input type="hidden" name="dept_id[]" value="{{$detail->dept_id}}">{{$detail->dept->dept_name}}</td>
-                          <td><input type="hidden" name="description[]" value="{{$detail->note}}">{{$detail->note}}</td>
-                          <td><input type="hidden" class="amount" name="amount[]" value="{{(int)$detail->credit}}" >{{(int)$detail->credit}}</td>
+                          <td><input type="hidden" class="amount" name="amount[]" value="@if($detail->debit > 0){{(int)$detail->debit}}@else{{(int)$detail->credit}}@endif" >@if($detail->debit > 0){{(int)$detail->debit}}@else{{(int)$detail->credit}}@endif</td>
                           <td><a class="removeRow"><i class="fa fa-times text-danger"></i></a></td>
                         </tr>
                         @endforeach
@@ -244,17 +260,19 @@ $(function(){
     countTotal();
 });
 
-var coacode, coaname, desc, amount, deptid, deptname;
+var coacode, coaname, desc, amount, deptid, deptname, type, kursval;
 $("#addAccount").click(function(){
   coacode = $('#selectAccount option:selected').val();
   if(coacode != ""){
     $('#rowEmpty').remove();
     coaname = $('#selectAccount option:selected').data('name');
+    type = $('#coatype').val();
     desc = $('#addDesc').val();
-    amount = $('#addAmount').val();
+    kursval = $('select[name=kurs_id] option:selected').data('val');
+    amount = $('#addAmount').val() * kursval;
     deptid = $('#addDept').val();
     deptname = $('#addDept option:selected').text();
-    $('#tableJournal').append('<tr><input type="hidden" name="coa_code[]" value="'+coacode+'"><td>'+coacode+'</td><td>'+coaname+'</td><td><input type="hidden" name="dept_id[]" value="'+deptid+'">'+deptname+'</td><td><input type="hidden" name="description[]" value="'+desc+'">'+desc+'</td><td><input type="hidden" class="amount" name="amount[]" value="'+amount+'" >'+amount+'</td><td><a class="removeRow"><i class="fa fa-times text-danger"></i></a></td></tr>');
+    $('#tableJournal').append('<tr><td><input type="hidden" name="coa_type[]" value="'+type+'" class="type">'+type+'</td><td><input type="hidden" name="coa_code[]" value="'+coacode+'">'+coacode+'</td><td>'+coaname+'</td><td><input type="hidden" name="dept_id[]" value="'+deptid+'">'+deptname+'</td><td><input type="hidden" class="amount" name="amount[]" value="'+amount+'" >'+amount+'</td><td><a class="removeRow"><i class="fa fa-times text-danger"></i></a></td></tr>');
     countTotal();
   }
 });
@@ -265,8 +283,9 @@ function countTotal()
     if($('#tableJournal tbody tr').length > 0){
         $('#tableJournal tbody tr').each(function(){
             var amount = parseFloat($(this).find('.amount').val());
-            console.log(amount);
-            total += amount;
+            var type = $(this).find('.type').val();
+            if(type == 'CREDIT') total -= amount;
+            else total += amount;
         });
     }else{
         $('#tableJournal tbody').append('<tr id="rowEmpty"><td colspan="6"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td></tr>');

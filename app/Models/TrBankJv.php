@@ -26,11 +26,11 @@ class TrBankJv extends Model
 
     public function scopeDebit($query)
     {
-    	return $query->where('debit','>',0);
+    	return $query->where('debit','>',0)->orderBy('id','desc');
     }
 
     public function scopeCredit($query)
     {
-    	return $query->where('credit','>',0);
+    	return $query->where('credit','>',0)->orderBy('id','desc');
     }
 }
