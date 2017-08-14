@@ -21,12 +21,13 @@ class CreateTrApInvoiceHdr extends Migration
             $table->string('invoice_no');
             $table->boolean('isdp')->default(false);
             $table->decimal('total', 12, 2)->default(0);
-            $table->decimal('adjust', 10, 2)->default(0);
-            $table->decimal('payment', 12, 2)->default(0);
-            $table->decimal('ppn', 5, 2)->default(0);
+            $table->decimal('adjust', 12, 2)->default(0);
+            $table->decimal('outstanding', 12, 2)->default(0);
+            $table->decimal('ppn', 12, 2)->default(0);
             $table->boolean('posting')->default(false);
             $table->string('note')->nullable();
-            $table->string('po_no')->nullable();
+            $table->string('po_id')->nullable();
+            $table->string('terms')->nullable();
             $table->date('apdate')->nullable();
             $table->date('posting_at')->nullable();
             $table->integer('created_by');

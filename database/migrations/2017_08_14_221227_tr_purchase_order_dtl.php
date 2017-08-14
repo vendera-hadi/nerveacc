@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTrApInvoiceDtl extends Migration
+class TrPurchaseOrderDtl extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateTrApInvoiceDtl extends Migration
      */
     public function up()
     {
-        Schema::create('tr_ap_invoice_dtl', function (Blueprint $table) {
+        Schema::create('tr_purchase_order_dtl', function (Blueprint $table) {
             $table->increments('id');
-            $table->bigInteger('aphdr_id');
+            $table->bigInteger('po_id');
             $table->string('note');
             $table->integer('qty');
             $table->decimal('amount', 10, 2);
@@ -25,7 +25,6 @@ class CreateTrApInvoiceDtl extends Migration
             $table->char('ppn_coa_code',10)->nullable();
             $table->integer('dept_id');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -36,6 +35,6 @@ class CreateTrApInvoiceDtl extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tr_ap_invoice_dtl');
+        Schema::dropIfExists('tr_purchase_order_dtl');
     }
 }

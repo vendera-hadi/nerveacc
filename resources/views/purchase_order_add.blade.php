@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('htmlheader_title')
-    Account Payable
+    Add Purchase Order
 @endsection
 
 @section('contentheader_title')
-   Account Payable
+   Add Purchase Order
 @endsection
 
 @section('htmlheader_scripts')
@@ -38,7 +38,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Account Payable without PO</li>
+        <li class="active">Add Purchase Order</li>
     </ol>
 @stop
 
@@ -51,16 +51,15 @@
     <!-- Tabs -->
     <div class="nav-tabs-custom">
       <ul class="nav nav-tabs">
-        <li><a href="{{route('payable.index')}}" data-toggle="tab">Lists</a></li>
-        <li class="active"><a href="#">AP without PO</a></li>
-        <li><a href="{{route('payable.withpo')}}">AP with PO</a></li>
+        <li><a href="{{route('po.index')}}">Lists</a></li>
+        <li class="active"><a href="#">Insert PO</a></li>
       </ul>
 
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">
             <!-- template tabel -->
 
-             @if(Session::get('error'))
+            @if(Session::get('error'))
                     <div class="alert alert-danger">
                       <strong>Error!</strong> {{ Session::get('error') }}
                     </div>
@@ -83,8 +82,28 @@
                 @endif
 
                 <!-- form -->
-                <form action="{{route('payable.withoutpo')}}" method="POST">
+                <form action="{{route('po.add')}}" method="POST">
                     <div class="row">
+
+                        <div class="col-sm-3">
+                          <div class="form-group">
+                              <label>PO Number</label>
+                              <input type="text" class="form-control" value="{{$new_po_number}}" disabled="">
+                              <input type="hidden" name="po_number" value="{{$new_po_number}}">
+                          </div>
+                         </div>
+
+                         <div class="col-sm-3">
+                          <div class="form-group">
+                              <label>PO Date</label>
+                              <div class="input-group date">
+                                <div class="input-group-addon">
+                                  <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" name="po_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                              </div>
+                          </div>
+                       </div>
                         
                         <div class="col-sm-3">
                           <div class="form-group">
@@ -100,45 +119,6 @@
 
                          <div class="col-sm-3">
                           <div class="form-group">
-                              <label>Phone</label>
-                              <input type="text" class="form-control" name="spl_phone" disabled="">
-                          </div>
-                         </div>
-
-                         <div class="col-sm-3">
-                          <div class="form-group">
-                              <label>Address</label>
-                              <textarea class="form-control" name="spl_address" disabled=""></textarea>
-                          </div>
-                         </div>
-
-                         <div class="col-sm-3">
-                             <label>Terms</label>
-                                <select class="form-control" name="terms">
-                                    @foreach($payment_terms as $term)
-                                    <option>{{$term->name}}</option>
-                                    @endforeach
-                                </select>
-                         </div>
-
-                    </div>
-                    
-
-                    <div class="row">
-                        <div class="col-sm-3">
-                          <div class="form-group">
-                              <label>Transaction Date</label>
-                              <div class="input-group date">
-                                <div class="input-group-addon">
-                                  <i class="fa fa-calendar"></i>
-                                </div>
-                                <input type="text" name="invoice_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                              </div>
-                          </div>
-                       </div>
-
-                       <div class="col-sm-3">
-                          <div class="form-group">
                               <label>Due Date</label>
                               <div class="input-group date">
                                 <div class="input-group-addon">
@@ -149,19 +129,24 @@
                           </div>
                        </div>
 
-                       <div class="col-sm-3">
-                        <div class="form-group">
-                            <label>Transaction No</label>
-                            <input class="form-control" name="invoice_no" type="text" required>
-                        </div>
-                       </div>
+                    </div>
 
-                       <div class="col-sm-3">
-                        <div class="form-group">
-                            <label>Note</label>
-                            <textarea class="form-control" name="hdnote"></textarea>
-                        </div>
-                       </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                             <label>Terms</label>
+                                <select class="form-control" name="terms">
+                                    @foreach($payment_terms as $term)
+                                    <option>{{$term->name}}</option>
+                                    @endforeach
+                                </select>
+                         </div>
+
+                         <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>Note</label>
+                                <textarea class="form-control" name="hdnote"></textarea>
+                            </div>
+                           </div>
 
                     </div>
                     <hr>
@@ -268,21 +253,6 @@ $(function(){
 
     $(".js-example-basic-single").select2();
 
-    $("select[name=spl_id]").change(function(){
-        if($(this).val() == ''){
-            $('input[name=spl_phone]').val('');
-            $('textarea[name=spl_address]').val('');
-        }else{
-            $.post("{{route('supplier.ajaxget')}}", {id: $(this).val()}, function(result){
-                if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-                if(result.success){ 
-                    $('input[name=spl_phone]').val(result.data.spl_phone);
-                    $('textarea[name=spl_address]').val(result.data.spl_address+", "+result.data.spl_city+", "+result.data.spl_postal_code);
-                }
-            });
-        }
-    });
-
     $(document).delegate('.amount', 'keypress', function(key) {
         if(key.charCode < 48 || key.charCode > 57) return false;
     });
@@ -344,6 +314,5 @@ function countTotal()
         $('#tableDetail tbody').append('<tr id="rowEmpty"><td colspan="6"><center>Data Kosong</center></td></tr>');
     }
 }
-
 </script>
 @endsection

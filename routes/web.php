@@ -382,9 +382,19 @@ Route::group(['middleware' => 'auth'], function () {
 
 	// account payable
 	Route::get('accpayable', 'PayableController@index')->name('payable.index');
+	Route::get('accpayable/get', 'PayableController@get')->name('payable.get');
 	Route::get('accpayable/withpo', 'PayableController@withpo')->name('payable.withpo');
 	Route::get('accpayable/withoutpo', 'PayableController@withoutpo')->name('payable.withoutpo');
 	Route::post('accpayable/withoutpo', 'PayableController@withoutpoInsert')->name('payable.withoutpo.insert');
+
+	// purchase order
+	Route::get('purchaseorder', 'PayableController@purchaseOrder')->name('po.index');
+	Route::get('purchaseorder/add', 'PayableController@addPurchaseOrder')->name('po.add');
+	Route::get('purchaseorder/edit/{id}', 'PayableController@editPurchaseOrder')->name('po.edit');
+	Route::post('purchaseorder/get', 'PayableController@getPurchaseOrder')->name('po.get');
+	Route::post('purchaseorder/add', 'PayableController@insertPurchaseOrder')->name('po.insert');
+	Route::post('purchaseorder/edit/{id}', 'PayableController@updatePurchaseOrder')->name('po.update');
+	Route::post('purchaseorder/delete', 'PayableController@deletePurchaseOrder')->name('po.delete');
 
 	// acl
 	Route::get('roles','AccountController@roles')->name('roles.index');

@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('htmlheader_title')
-    Account Payable
+    Add Purchase Order
 @endsection
 
 @section('contentheader_title')
-   Account Payable
+   Add Purchase Order
 @endsection
 
 @section('htmlheader_scripts')
@@ -38,7 +38,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Account Payable without PO</li>
+        <li class="active">Add Purchase Order</li>
     </ol>
 @stop
 
@@ -51,16 +51,15 @@
     <!-- Tabs -->
     <div class="nav-tabs-custom">
       <ul class="nav nav-tabs">
-        <li><a href="{{route('payable.index')}}" data-toggle="tab">Lists</a></li>
-        <li class="active"><a href="#">AP without PO</a></li>
-        <li><a href="{{route('payable.withpo')}}">AP with PO</a></li>
+        <li><a href="{{route('po.index')}}">Lists</a></li>
+        <li class="active"><a href="#">Insert PO</a></li>
       </ul>
 
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">
             <!-- template tabel -->
 
-             @if(Session::get('error'))
+            @if(Session::get('error'))
                     <div class="alert alert-danger">
                       <strong>Error!</strong> {{ Session::get('error') }}
                     </div>
@@ -83,8 +82,27 @@
                 @endif
 
                 <!-- form -->
-                <form action="{{route('payable.withoutpo')}}" method="POST">
+                <form action="" method="POST">
                     <div class="row">
+
+                        <div class="col-sm-3">
+                          <div class="form-group">
+                              <label>PO Number</label>
+                              <input type="text" class="form-control" value="{{$current->po_number}}" disabled="">
+                          </div>
+                         </div>
+
+                         <div class="col-sm-3">
+                          <div class="form-group">
+                              <label>PO Date</label>
+                              <div class="input-group date">
+                                <div class="input-group-addon">
+                                  <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" name="po_date" required="required" class="form-control pull-right datepicker" value="{{$current->po_date}}" data-date-format="yyyy-mm-dd">
+                              </div>
+                          </div>
+                       </div>
                         
                         <div class="col-sm-3">
                           <div class="form-group">
@@ -92,7 +110,7 @@
                               <select name="spl_id" class="form-control" required="">
                                   <option value="">-</option>
                                   @foreach($suppliers as $val)
-                                  <option value="{{$val->id}}">{{$val->spl_name}}</option>
+                                  <option value="{{$val->id}}" @if($current->spl_id == $val->id) selected @endif>{{$val->spl_name}}</option>
                                   @endforeach
                               </select>
                           </div>
@@ -100,68 +118,34 @@
 
                          <div class="col-sm-3">
                           <div class="form-group">
-                              <label>Phone</label>
-                              <input type="text" class="form-control" name="spl_phone" disabled="">
-                          </div>
-                         </div>
-
-                         <div class="col-sm-3">
-                          <div class="form-group">
-                              <label>Address</label>
-                              <textarea class="form-control" name="spl_address" disabled=""></textarea>
-                          </div>
-                         </div>
-
-                         <div class="col-sm-3">
-                             <label>Terms</label>
-                                <select class="form-control" name="terms">
-                                    @foreach($payment_terms as $term)
-                                    <option>{{$term->name}}</option>
-                                    @endforeach
-                                </select>
-                         </div>
-
-                    </div>
-                    
-
-                    <div class="row">
-                        <div class="col-sm-3">
-                          <div class="form-group">
-                              <label>Transaction Date</label>
-                              <div class="input-group date">
-                                <div class="input-group-addon">
-                                  <i class="fa fa-calendar"></i>
-                                </div>
-                                <input type="text" name="invoice_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
-                              </div>
-                          </div>
-                       </div>
-
-                       <div class="col-sm-3">
-                          <div class="form-group">
                               <label>Due Date</label>
                               <div class="input-group date">
                                 <div class="input-group-addon">
                                   <i class="fa fa-calendar"></i>
                                 </div>
-                                <input type="text" name="invoice_duedate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                <input type="text" name="invoice_duedate" value="{{$current->due_date}}" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
                               </div>
                           </div>
                        </div>
 
-                       <div class="col-sm-3">
-                        <div class="form-group">
-                            <label>Transaction No</label>
-                            <input class="form-control" name="invoice_no" type="text" required>
-                        </div>
-                       </div>
+                    </div>
 
-                       <div class="col-sm-3">
-                        <div class="form-group">
-                            <label>Note</label>
-                            <textarea class="form-control" name="hdnote"></textarea>
-                        </div>
-                       </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                             <label>Terms</label>
+                                <select class="form-control" name="terms">
+                                    @foreach($payment_terms as $term)
+                                    <option @if($current->terms == $term->name) selected @endif>{{$term->name}}</option>
+                                    @endforeach
+                                </select>
+                         </div>
+
+                         <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>Note</label>
+                                <textarea class="form-control" name="hdnote">{{$current->note}}</textarea>
+                            </div>
+                           </div>
 
                     </div>
                     <hr>
@@ -219,9 +203,38 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr id="rowEmpty">
-                              <td colspan="9"><center>Data Kosong</center></td>
+                            @foreach($current->detail as $detail)
+                            <tr>
+                              <td>
+                                <input type="hidden" name="note[]" class="form-control" value="{{$detail->note}}">{{$detail->note}}
+                              </td>
+                              <td>
+                                <input type="hidden" name="coa_code[]" class="form-control" value="{{$detail->coa_code}}">{{$detail->coa_code}}
+                              </td>
+                              <td>
+                                <input type="number" name="qty[]" value="{{$detail->qty}}" class="form-control qty">
+                              </td>
+                              <td>
+                                <input type="text" name="amount[]" class="form-control amount" value="{{(int)$detail->amount}}">
+                              </td>
+                              <td>
+                                <select class="form-control ppn" name="ppn_coa_code[]">
+                                  <option value="" data-val="0">No PPN</option>
+                                  @foreach($ppn_options as $ppn)
+                                  <option value="{{$ppn->coa_code}}" data-val="{{$ppn->amount}}" @if($detail->ppn_coa_code == $ppn->coa_code) selected @endif>{{$ppn->name}}</option>
+                                  @endforeach
+                                </select>
+                                <input type="hidden" name="ppn_amount[]" value="{{$detail->ppn_amount}}" class="ppnamount">
+                              </td>
+                              <td>
+                                <input type="hidden" name="dept_id[]" value="{{$detail->dept_id}}">{{$detail->dept->dept_name}}
+                              </td>
+                              <td class="subtotal">{{$detail->amount * $detail->qty}}</td>
+                              <td>
+                                <a class="removeRow"><i class="fa fa-times text-danger"></i></a>
+                              </td>
                             </tr>
+                            @endforeach
                             </tbody>
                           </table>
 
@@ -262,26 +275,12 @@
 
 <script type="text/javascript">
 $(function(){
+    countTotal();
     $('.datepicker').datepicker({
         autoclose: true
     });
 
     $(".js-example-basic-single").select2();
-
-    $("select[name=spl_id]").change(function(){
-        if($(this).val() == ''){
-            $('input[name=spl_phone]').val('');
-            $('textarea[name=spl_address]').val('');
-        }else{
-            $.post("{{route('supplier.ajaxget')}}", {id: $(this).val()}, function(result){
-                if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-                if(result.success){ 
-                    $('input[name=spl_phone]').val(result.data.spl_phone);
-                    $('textarea[name=spl_address]').val(result.data.spl_address+", "+result.data.spl_city+", "+result.data.spl_postal_code);
-                }
-            });
-        }
-    });
 
     $(document).delegate('.amount', 'keypress', function(key) {
         if(key.charCode < 48 || key.charCode > 57) return false;
@@ -344,6 +343,5 @@ function countTotal()
         $('#tableDetail tbody').append('<tr id="rowEmpty"><td colspan="6"><center>Data Kosong</center></td></tr>');
     }
 }
-
 </script>
 @endsection

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class MsPajak extends Migration
+class MsPaymentTerms extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class MsPajak extends Migration
      */
     public function up()
     {
-        Schema::create('ms_pajak', function (Blueprint $table) {
-        $table->increments('id');
-        $table->decimal('pajak_amount',5,2); 
-        $table->timestamps();
+        Schema::create('ms_payment_terms', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->timestamps();
         });
     }
 
@@ -27,6 +27,6 @@ class MsPajak extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ms_pajak');
+        Schema::dropIfExists('ms_payment_terms');
     }
 }

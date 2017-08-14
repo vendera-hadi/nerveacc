@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('htmlheader_title')
-    Account Payable
+    Purchase Order
 @endsection
 
 @section('contentheader_title')
-   Account Payable
+   Purchase Order
 @endsection
 
 @section('htmlheader_scripts')
@@ -38,7 +38,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Account Payable</li>
+        <li class="active">Purchase Order</li>
     </ol>
 @stop
 
@@ -51,42 +51,30 @@
     <!-- Tabs -->
     <div class="nav-tabs-custom">
       <ul class="nav nav-tabs">
-        <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
-        <li><a href="{{route('payable.withoutpo')}}">AP without PO</a></li>
-        <li><a href="{{route('payable.withpo')}}">AP with PO</a></li>
+        <li  class="active"><a href="#">Lists</a></li>
+        <li><a href="{{route('po.add')}}">Insert PO</a></li>
       </ul>
 
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">
             <!-- template tabel -->
-          <table id="dg" title="Payment" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+
+            <table id="dg" title="Payment" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
               <!-- kolom -->
               <thead>
                   <tr>
                       <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                      <th field="checkbox" width="25"></th>
-                      <th field="invoice_no" sortable="true">Invoice No</th>
-                      <th field="invoice_date" width="50" sortable="true">Invoice Date</th>
-                      <th field="invoice_duedate" sortable="true">Due Date</th>
-                      <th field="total" width="50" sortable="true">Amount</th>
-                      <th field="posting" sortable="true">Posted</th>
-                      <th field="po_no" sortable="true">PO No</th>
+                      <th field="po_number" sortable="true">PO Number</th>
+                      <th field="po_date" sortable="true">PO Date</th>
+                      <th field="due_date" sortable="true">Due Date</th>
+                      <th field="spl_name" sortable="true">Supplier Name</th>
                       <th field="action_button">Action</th>
                   </tr>
               </thead>
           </table>
           <!-- end table -->
-          
-          <!-- icon2 atas table -->
-          <div id="toolbar" class="datagrid-toolbar">
-              <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
-              @if(Session::get('role')==1 || in_array(70,Session::get('permissions')))
-              <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected</span></a>
-              @endif
+
           </div>
-          <!-- end icon -->
-          
-        </div>
         </div>
     </div>
           <!-- content -->
@@ -102,8 +90,8 @@
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 
 <script type="text/javascript">
-    var entity = "Account Payable"; // nama si tabel, ditampilin di dialog
-    var get_url = "{{route('payable.get')}}";
+    var entity = "Purchase Order"; // nama si tabel, ditampilin di dialog
+    var get_url = "{{route('po.get')}}";
 
     $(function(){
         var dg = $('#dg').datagrid({
@@ -122,10 +110,26 @@
         dg.datagrid('enableFilter');
 
         $(".js-example-basic-single").select2();
+
+        // remove po
+          $(document).delegate('.remove','click',function(){
+                if(confirm('Are you sure want to remove this?')){
+                    var id = $(this).data('id');
+                    $.post('{{route('po.delete')}}', {id:id}, function(result){
+                        if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+                        if(result.success){ 
+                            $.messager.alert('Warning',result.message);
+                            location.reload();
+                        }
+                    });
+                }
+           });
     });
 
     $('.datepicker').datepicker({
         autoclose: true
     });
+
+
 </script>
 @endsection
