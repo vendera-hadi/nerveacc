@@ -36,6 +36,18 @@ class PayableController extends Controller
 	}
 
 	public function withpo(){
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['suppliers'] = MsSupplier::all();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['payment_terms'] = DB::table('ms_payment_terms')->get();
+        $data['ppn_options'] = DB::table('ms_ppn')->get();
+
+        $temp = "INV-".date('my')."-".strtoupper(str_random(8));
+        do{
+            $check = TrApHeader::where('invoice_no',$temp)->first();
+        }while(!empty($check));
+        $data['inv_number'] = $temp;
 		return view('accpayable_withpo',$data);
 	}
 
@@ -100,6 +112,54 @@ class PayableController extends Controller
             return redirect()->back()->withErrors($e->getMessage());
         }
 	}
+
+    public function withpoInsert(Request $request)
+    {
+        \DB::beginTransaction();
+        try{
+            // dd($request->all());
+            $po = TrPOHeader::find($request->po_id);
+
+            $header = new TrApHeader;
+            $header->spl_id = $po->spl_id;
+            $header->invoice_date = $po->po_date;
+            $header->invoice_duedate = $po->due_date;
+            $header->invoice_no = $request->invoice_no;
+            $header->terms = $po->terms;
+            $header->note = $request->hdnote;
+            $header->apdate = date('Y-m-d');
+            $header->po_id = $request->po_id;
+            $header->created_by = \Auth::id();
+            $header->updated_by = \Auth::id();
+
+            
+            $total = $totalppn = 0;
+            foreach ($po->detail as $key => $dt) {
+                $detail = new TrApDetail;
+                $detail->note = $dt->note;
+                $detail->qty = $dt->qty;
+                $detail->amount = $dt->amount;
+                $detail->ppn_amount = $dt->ppn_amount;
+                $detail->is_ppn = $dt->is_ppn;
+                $detail->ppn_coa_code = $dt->ppn_coa_code;
+                $detail->coa_code = $dt->coa_code;
+                $detail->dept_id = $dt->dept_id;
+                $details[] = $detail;
+                $total += $dt->qty * $dt->amount;
+                $totalppn += $dt->ppn_amount;
+            }
+            $header->total = $total;
+            $header->outstanding = $header->total;
+            $header->ppn = $totalppn;
+            $header->save();
+            $header->detail()->saveMany($details);
+            \DB::commit();
+            return redirect()->back()->with(['success' => 'Insert Success']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
 
 	// purchase order
 	public function purchaseOrder()
@@ -174,6 +234,26 @@ class PayableController extends Controller
         }
 
 	}
+
+    public function getPOselect2(Request $request)
+    {
+        $key = $request->q;
+        $fetch = TrPOHeader::where(\DB::raw('LOWER(po_number)'),'like','%'.$key.'%')->get();
+
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->id, 'text'=>$value->po_number];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
+    }
+
+    public function getPOajax(Request $request)
+    {
+        $id = $request->id;
+        $result = TrPOHeader::with('detail')->where('id',$id)->first();
+        echo $result;
+    }
 
 	public function addPurchaseOrder()
 	{

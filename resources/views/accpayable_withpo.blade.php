@@ -52,8 +52,8 @@
     <div class="nav-tabs-custom">
       <ul class="nav nav-tabs">
         <li><a href="{{route('payable.index')}}" >Lists</a></li>
-        <li class="active"><a href="#">AP without PO</a></li>
-        <li><a href="{{route('payable.withpo')}}">AP with PO</a></li>
+        <li><a href="{{route('payable.withoutpo')}}">AP without PO</a></li>
+        <li class="active"><a href="#">AP with PO</a></li>
       </ul>
 
       <div class="tab-content">
@@ -83,13 +83,22 @@
                 @endif
 
                 <!-- form -->
-                <form action="{{route('payable.withoutpo')}}" method="POST">
+                <form action="{{route('payable.withpo')}}" method="POST">
                     <div class="row">
+                      <div class="col-sm-6">
+                          <label>Purchase Order</label>
+                            <select name="po_id" class="choose-po" id="select2PO" style="width:100%" required="">
+                            </select>
+                          
+                      </div>
+                    </div>
+
+                    <div class="row" style="margin-top: 30px">
                         
                         <div class="col-sm-3">
                           <div class="form-group">
                               <label>Supplier</label>
-                              <select name="spl_id" class="form-control" required="">
+                              <select name="spl_id" class="form-control" disabled required="">
                                   <option value="">-</option>
                                   @foreach($suppliers as $val)
                                   <option value="{{$val->id}}">{{$val->spl_name}}</option>
@@ -114,7 +123,7 @@
 
                          <div class="col-sm-3">
                              <label>Terms</label>
-                                <select class="form-control" name="terms">
+                                <select class="form-control" name="terms" disabled="">
                                     @foreach($payment_terms as $term)
                                     <option>{{$term->name}}</option>
                                     @endforeach
@@ -132,7 +141,7 @@
                                 <div class="input-group-addon">
                                   <i class="fa fa-calendar"></i>
                                 </div>
-                                <input type="text" name="invoice_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                <input type="text" name="invoice_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" disabled="">
                               </div>
                           </div>
                        </div>
@@ -144,7 +153,7 @@
                                 <div class="input-group-addon">
                                   <i class="fa fa-calendar"></i>
                                 </div>
-                                <input type="text" name="invoice_duedate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                                <input type="text" name="invoice_duedate" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd" disabled="">
                               </div>
                           </div>
                        </div>
@@ -152,7 +161,7 @@
                        <div class="col-sm-3">
                         <div class="form-group">
                             <label>Transaction No</label>
-                            <input class="form-control" name="invoice_no" type="text" required>
+                            <input class="form-control" name="invoice_no" type="text" value="{{$inv_number}}" required>
                         </div>
                        </div>
 
@@ -165,43 +174,7 @@
 
                     </div>
                     <hr>
-                    <div class="row">
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                                <label>Description</label>
-                                <textarea class="form-control" id="note"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                                <label>Department</label>
-                                <select name="dept_id" id="addDept" class="form-control">
-                                    <option value="">Choose Department</option> 
-                                    @foreach($departments as $dept)
-                                    <option value="{{$dept->id}}">{{$dept->dept_name}}</option>
-                                    @endforeach
-                                </select>
-                                
-                            </div>
-                        </div>
-
-                        <div class="col-sm-6">
-                          <label>COA</label>
-                          <div class="input-group input-group-md">
-                            <select class="js-example-basic-single" id="selectAccount" style="width:100%">
-                              <option value="">Choose Account</option>
-                              @foreach($accounts as $key => $coa)
-                                  <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
-                              @endforeach
-                            </select>
-                            <span class="input-group-btn">
-                              <button type="button" id="addAccount" class="btn btn-default">Add Line</button>
-                            </span>
-                          </div>
-                        </div>   
-
-                    </div>
+                    
 
                     <div class="row" style="margin-top:30px">
                         <div class="col-sm-12">
@@ -215,7 +188,6 @@
                               <td width="150">PPN</td>
                               <td>Dept</td>
                               <td>Total</td>
-                              <td></td>
                             </tr>
                             </thead>
                             <tbody>
@@ -267,6 +239,43 @@ $(function(){
     });
 
     $(".js-example-basic-single").select2();
+
+    $(".choose-po").select2({
+              ajax: {
+                url: "{{route('po.select2')}}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                  return {
+                    q: params.term, // search term
+                    page: params.page
+                  };
+                },
+                
+                cache: true
+              },
+              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+              // minimumInputLength: 1
+        }).on("select2:select", function(e) { 
+           $.post('{{route('po.ajax')}}', {id: $(this).val()}, function(result){
+              $("select[name=spl_id]").val(result.spl_id).trigger('change');
+              $("select[name=terms]").val(result.terms);
+              $("input[name=invoice_date]").val(result.po_date);
+              $("input[name=invoice_duedate]").val(result.due_date);
+
+              $('#rowEmpty').remove();
+              var total = 0, totalppn = 0;
+              $.each(result.detail, function (index, item) {
+                  var subtotal = item.qty * item.amount;
+                  total += item.qty * item.amount;
+                  totalppn += parseFloat(item.ppn_amount);
+                  $('#tableDetail tbody').append('<tr><td>'+item.note+'</td><td>'+item.coa_code+'</td><td>'+item.qty+'</td><td>'+item.amount+'</td><td>'+item.ppn_amount+'</td><td>'+item.dept_id+'</td><td class="subtotal">'+subtotal+'</td></tr>');
+              });
+              $('#subtotalAmount').text(total);
+              $('#ppnAmount').text(totalppn);
+              $('#totalAmount').text(total + totalppn);
+           }, 'json');
+        });
 
     $("select[name=spl_id]").change(function(){
         if($(this).val() == ''){

@@ -386,6 +386,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('accpayable/withpo', 'PayableController@withpo')->name('payable.withpo');
 	Route::get('accpayable/withoutpo', 'PayableController@withoutpo')->name('payable.withoutpo');
 	Route::post('accpayable/withoutpo', 'PayableController@withoutpoInsert')->name('payable.withoutpo.insert');
+	Route::post('accpayable/withpo', 'PayableController@withpoInsert')->name('payable.withpo.insert');
 
 	// purchase order
 	Route::get('purchaseorder', 'PayableController@purchaseOrder')->name('po.index');
@@ -395,6 +396,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('purchaseorder/add', 'PayableController@insertPurchaseOrder')->name('po.insert');
 	Route::post('purchaseorder/edit/{id}', 'PayableController@updatePurchaseOrder')->name('po.update');
 	Route::post('purchaseorder/delete', 'PayableController@deletePurchaseOrder')->name('po.delete');
+	Route::get('purchaseorder/select2','PayableController@getPOselect2')->name('po.select2');
+	Route::post('purchaseorder/ajaxdtl','PayableController@getPOajax')->name('po.ajax');
 
 	// acl
 	Route::get('roles','AccountController@roles')->name('roles.index');
