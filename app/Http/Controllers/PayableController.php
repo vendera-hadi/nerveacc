@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 // load model
 use App\Models\MsMasterCoa;
-use App\Models\MsCashBank;
+use App\Models\TrLedger;
 use App\Models\MsPaymentType;
 use App\Models\MsDepartment;
 use App\Models\MsJournalType;
@@ -28,6 +28,70 @@ class PayableController extends Controller
 	{
 		try{
             // params
+            $page = $request->page;
+            $perPage = $request->rows; 
+            $page-=1;
+            $offset = $page * $perPage;
+            // @ -> isset(var) ? var : null
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+
+            // olah data
+            $count = TrApHeader::count();
+            $fetch = TrApHeader::select('tr_ap_invoice_hdr.*', 'tr_purchase_order_hdr.po_number')
+                    ->leftJoin('tr_purchase_order_hdr','tr_purchase_order_hdr.id','=','tr_ap_invoice_hdr.po_id');
+
+             if(!empty($filters) && count($filters) > 0){
+                foreach($filters as $filter){
+                    $op = "like";
+                    // tentuin operator
+                    switch ($filter->op) {
+                        case 'contains':
+                            $op = 'like';
+                            break;
+                        case 'less':
+                            $op = '<=';
+                            break;
+                        case 'greater':
+                            $op = '>=';
+                            break;
+                        default:
+                            break;
+                    }
+                    // end special condition
+                    if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                    else $fetch = $fetch->where($filter->field, $op, $filter->value);
+                }
+            }
+
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+            
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'" data-posting="'.$value->posting.'">';
+                $temp['id'] = $value->id;
+                $temp['invoice_no'] = $value->invoice_no;
+                $temp['invoice_date'] = $value->invoice_date;
+                $temp['invoice_duedate'] = $value->invoice_duedate;
+                $temp['total'] = $value->total;
+                $temp['posting'] = $value->posting ? 'yes' : 'no';
+                $temp['po_no'] = !empty($value->po_number) ? $value->po_number : "-";
+                $action_button = "";
+                if($temp['posting'] == 'no'){
+                    // if(!empty($value->po_number))
+                    //     $action_button = '<a href="'.route('payable.withpo.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
+                    // else  
+                    //     $action_button = '<a href="'.route('payable.withoutpo.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
+                    $action_button .= '&nbsp;&nbsp; <a href="#" data-id="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
+                }
+                $temp['action_button'] = $action_button;
+                $result['rows'][] = $temp;
+            }
 
            	return response()->json($result);
         }catch(\Exception $e){
@@ -159,6 +223,124 @@ class PayableController extends Controller
             \DB::rollback();
             return redirect()->back()->withErrors($e->getMessage());
         }
+    }
+
+    public function delete(Request $request)
+    {
+        try{
+            $id = $request->id;
+            TrApHeader::destroy($id);
+            return response()->json(['success' => 1,'message' => 'Delete Success']);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+    }
+
+    public function posting(Request $request)
+    {
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+        \DB::beginTransaction();
+        try{
+            $coayear = date('Y');
+            $month = date('m');
+            $journaltype = 'JU';
+            foreach ($ids as $id) {
+                // cari last prefix, order by journal type
+                $jourType = MsJournalType::where('jour_type_prefix',$journaltype)->first();
+                if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "'.$journaltype.'" ']);
+                $lastJournal = TrLedger::where('jour_type_id',$jourType->id)->latest()->first();
+                if($lastJournal){
+                    $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
+                    $lastJournalNumber = (int) end($lastJournalNumber);
+                    $nextJournalNumber = $lastJournalNumber + 1;
+                }else{
+                    $nextJournalNumber = 1;
+                }
+
+                $header = TrApHeader::find($id);
+                // lawanan hutang (KREDIT)
+                $total = 0;
+                foreach ($header->detail as $detail) {
+                    $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                    $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+                    $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                    $journal = [
+                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                    'ledge_fisyear' => $coayear,
+                                    'ledg_number' => $journalNumber,
+                                    'ledg_date' => date('Y-m-d'),
+                                    'ledg_refno' => $header->invoice_no,
+                                    'ledg_debit' => $detail->amount,
+                                    'ledg_credit' => 0,
+                                    'ledg_description' => $header->invoice_no,
+                                    'coa_year' => $coayear,
+                                    'coa_code' => $detail->coa_code,
+                                    'created_by' => Auth::id(),
+                                    'updated_by' => Auth::id(),
+                                    'jour_type_id' => $jourType->id,
+                                    'dept_id' => $detail->dept_id
+                                ];
+                    TrLedger::create($journal);
+
+                    $total += $detail->amount;
+                    if(!empty($detail->ppn_coa_code)){
+                        $nextJournalNumber++;
+                        $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                        $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+                        $journal = [
+                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                    'ledge_fisyear' => $coayear,
+                                    'ledg_number' => $journalNumber,
+                                    'ledg_date' => date('Y-m-d'),
+                                    'ledg_refno' => $header->invoice_no,
+                                    'ledg_debit' => $detail->ppn_amount,
+                                    'ledg_credit' => 0,
+                                    'ledg_description' => $header->invoice_no,
+                                    'coa_year' => $coayear,
+                                    'coa_code' => $detail->ppn_coa_code,
+                                    'created_by' => Auth::id(),
+                                    'updated_by' => Auth::id(),
+                                    'jour_type_id' => $jourType->id,
+                                    'dept_id' => $detail->dept_id
+                                ];
+                        TrLedger::create($journal);
+                    }
+                    $nextJournalNumber++;
+                }
+                // endforeach
+                // Hutang (DEBET)
+                $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                $journal = [
+                        'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                        'ledge_fisyear' => $coayear,
+                        'ledg_number' => $journalNumber,
+                        'ledg_date' => date('Y-m-d'),
+                        'ledg_refno' => $header->invoice_no,
+                        'ledg_debit' => 0,
+                        'ledg_credit' => $total,
+                        'ledg_description' => $header->invoice_no,
+                        'coa_year' => $coayear,
+                        'coa_code' => $detail->coa_code,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                        'jour_type_id' => $jourType->id,
+                        'dept_id' => $detail->dept_id
+                    ];
+                TrLedger::create($journal);
+            }
+            $header->posting = true;
+            $header->posting_at = date('Y-m-d');
+            $header->save();
+            \DB::commit();
+            return response()->json(['success'=>1, 'message'=>'AP posted Successfully']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return response()->json(['error'=>1, 'message'=> $e->getMessage()]);
+        }
+
     }
 
 	// purchase order

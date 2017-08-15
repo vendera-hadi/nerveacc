@@ -26,7 +26,7 @@ class CreateTrApInvoiceHdr extends Migration
             $table->decimal('ppn', 12, 2)->default(0);
             $table->boolean('posting')->default(false);
             $table->string('note')->nullable();
-            $table->string('po_id')->nullable();
+            $table->integer('po_id')->nullable();
             $table->string('terms')->nullable();
             $table->date('apdate')->nullable();
             $table->date('posting_at')->nullable();

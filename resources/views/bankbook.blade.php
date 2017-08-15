@@ -352,6 +352,18 @@
       }
  	});
 
+    $('input[name=checkall]').change(function() {
+        if($(this).is(':checked')){ 
+            $('input[name=check]').each(function(){
+                $(this).prop('checked',true);
+            });
+        }else{
+            $('input[name=check]').each(function(){
+                $(this).prop('checked',false);
+            });
+        }
+     });
+
  	function countTotal()
  	{
  		var total = 0;

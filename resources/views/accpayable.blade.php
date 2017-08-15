@@ -81,7 +81,7 @@
           <div id="toolbar" class="datagrid-toolbar">
               <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
               @if(Session::get('role')==1 || in_array(70,Session::get('permissions')))
-              <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected</span></a>
+              <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingAll()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected</span></a>
               @endif
           </div>
           <!-- end icon -->
@@ -122,10 +122,69 @@
         dg.datagrid('enableFilter');
 
         $(".js-example-basic-single").select2();
+
+        // remove bankbook
+        $(document).delegate('.remove','click',function(){
+              if(confirm('Are you sure want to remove this?')){
+                  var id = $(this).data('id');
+                  $.post('{{route('payable.delete')}}', {id:id}, function(result){
+                      if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+                      if(result.success){ 
+                          $.messager.alert('Warning',result.message);
+                          location.reload();
+                      }
+                  });
+              }
+         });
+
+        $('input[name=checkall]').change(function() {
+            if($(this).is(':checked')){ 
+                $('input[name=check]').each(function(){
+                    $(this).prop('checked',true);
+                });
+            }else{
+                $('input[name=check]').each(function(){
+                    $(this).prop('checked',false);
+                });
+            }
+         });
+
     });
 
     $('.datepicker').datepicker({
         autoclose: true
     });
+
+    function postingAll(){
+        // var row = $('#dg').datagrid('getSelected');
+        var ids = [];
+        $('input[name=check]:checked').each(function() {
+           if($(this).data('posting') == "") ids.push($(this).val());
+        });
+        // if(row.inv_post == 'no'){
+        if(ids.length > 0){
+            $.messager.confirm('Confirm','Are you sure you want to post this '+ids.length+' unposted AP ?',function(r){
+                if (r){
+                    $('.loadingScreen').show();
+                    // posting invoice
+                    $.post('{{route('payable.posting')}}',{id:ids},function(result){
+                        console.log(result);
+                        $('.loadingScreen').hide();
+                        if(result.error){
+                            $.messager.alert('Warning',result.message);
+                        }
+                        if(result.success){
+                            $.messager.alert('Success',result.message);
+                            // $('#dg').datagrid('reload');
+                            location.reload();
+                        }
+                    },'json');
+                }
+            });
+        }
+        // }else{
+        //     $.messager.alert('Warning', 'You can\'t post invoice that already posted');
+        // }
+    }
 </script>
 @endsection
