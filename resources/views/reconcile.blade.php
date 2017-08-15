@@ -134,7 +134,7 @@
                             <td>{{'Rp.'.number_format($trbank->trbank_out,2)}}</td>
                             <td>
                                 <input type="hidden" name="id[]" value="{{$trbank->id}}">
-                                <select class="form-control" name="rekon[]">
+                                <select class="form-control select-rekon" name="rekon[]">
                                     <option value="1">Ya</option>
                                     <option value="0" @if(!$trbank->trbank_rekon) selected @endif>Belum</option>
                                 </select>
@@ -150,6 +150,8 @@
                 </table>
                 @if(count($trbanks) > 0)
                 <button class="btn btn-info pull-right" style="margin-top:20px">Save Reconcile Status</button>
+                <button type="button" class="btn btn-warning pull-right" style="margin-top:20px; margin-right: 10px" id="yesall">Pilih Ya Semua</button>
+                <button type="button" class="btn btn-warning pull-right" style="margin-top:20px; margin-right: 10px" id="noall">Pilih Belum Semua</button>
                 @endif
                 </form>
             </div>
@@ -188,6 +190,18 @@
         dg.datagrid('enableFilter');
 
         $(".js-example-basic-single").select2();
+
+        $('#yesall').click(function(){
+            $('.select-rekon').each(function(){
+                $(this).val("1");
+            });
+        });
+
+        $('#noall').click(function(){
+            $('.select-rekon').each(function(){
+                $(this).val("0");
+            });
+        })
     });
 
     $('.datepicker').datepicker({
