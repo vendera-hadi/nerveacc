@@ -438,6 +438,13 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/neracatpl','ReportController@neracatpl')->name('report.neracatpl');
 	Route::get('report/profitloss','ReportController@profitloss')->name('report.profitloss');
 	Route::get('report/profitlosstpl','ReportController@profitlosstpl')->name('report.profitlosstpl');
+
+	// kurs
+	Route::get('kurs', 'KursController@index');
+	Route::post('kurs/get', 'KursController@get')->name('kurs.get');
+	Route::post('kurs/insert', 'KursController@insert')->name('kurs.insert');
+	Route::post('kurs/update', 'KursController@update')->name('kurs.update');
+	Route::post('kurs/delete', 'KursController@delete')->name('kurs.delete');
 });
 
 Route::get('logout','Auth\AuthController@logout');
