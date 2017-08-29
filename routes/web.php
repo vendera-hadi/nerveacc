@@ -445,6 +445,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('kurs/insert', 'KursController@insert')->name('kurs.insert');
 	Route::post('kurs/update', 'KursController@update')->name('kurs.update');
 	Route::post('kurs/delete', 'KursController@delete')->name('kurs.delete');
+
+	// treasury
+	Route::get('treasury', 'TreasuryController@index');
+	Route::post('treasury/get', 'TreasuryController@get')->name('treasury.get');
 });
 
 Route::get('logout','Auth\AuthController@logout');
