@@ -449,6 +449,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// treasury
 	Route::get('treasury', 'TreasuryController@index');
 	Route::post('treasury/get', 'TreasuryController@get')->name('treasury.get');
+	Route::post('treasury/getdetail', 'TreasuryController@getDetail')->name('treasury.getdetail');
 });
 
 Route::get('logout','Auth\AuthController@logout');

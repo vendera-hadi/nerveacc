@@ -15,6 +15,8 @@ class CreateTrApPaymentHdr extends Migration
     {
         Schema::create('tr_ap_payment_hdr', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('payment_code')->unique();
+            $table->integer('spl_id');
             $table->date('payment_date');
             $table->double('amount',12,2);
             $table->string('check_no',15)->nullable();
