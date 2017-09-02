@@ -65,6 +65,29 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">
+
+          @if(Session::get('error'))
+              <div class="alert alert-danger">
+              <strong>Error!</strong> {{ Session::get('error') }}
+            </div>
+            @endif
+
+            @if(Session::get('success'))
+              <div class="alert alert-success">
+              <strong>Success</strong> {{ Session::get('success') }}
+            </div>
+            @endif
+
+            @if (count($errors) > 0)
+              <div class="alert alert-danger">
+                <ul>
+                  @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                  @endforeach
+                </ul>
+              </div>
+            @endif
+
             <!-- template tabel -->
           <table id="dg" title="AP Payment" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
               <!-- kolom -->
@@ -99,9 +122,83 @@
         <!-- /.tab-pane -->
         <div class="tab-pane" id="tab_2">
           <div id="contractStep1">
-            <form method="POST" id="formPayment">
-                
-                
+            <form method="POST" action="{{route('treasury.insert')}}" id="formPayment">
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Supplier</label>
+                        <select name="spl_id" id="supplier" class="form-control" required="">
+                            <option value="">-</option>
+                            @foreach($suppliers as $val)
+                            <option value="{{$val->id}}">{{$val->spl_name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                  </div>
+
+                  <div class="col-sm-6">
+                      <div class="form-group">
+                          <label>Payment Date</label>
+                          <div class="input-group date">
+                            <div class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" name="payment_date" required="required" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                          </div>
+                      </div>
+                   </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                      <div class="form-group">
+                          <label>No Cek/Giro</label>
+                          <input type="text" name="check_no" class="form-control">
+                      </div>
+                  </div>
+
+                  <div class="col-sm-6">
+                      <div class="form-group">
+                          <label>Cek/Giro Date</label>
+                          <div class="input-group date">
+                            <div class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" id="invpayhGiro" name="check_date" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                          </div>
+                      </div>
+                   </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Bank</label>
+                        <select class="form-control cashbkId choose-style" name="cashbk_id" style="width:100%">
+                          <option value="">-</option>
+                          @foreach ($cashbank_data as $key => $value)
+                          <option value="{{ $value->id }}">{{ $value->cashbk_name }}</option>
+                          @endforeach
+                        </select>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="form-group">
+                        <label>Payment Type</label>
+                        <select class="form-control paymtpCode choose-style" name="paymtp_id" required="" style="width:100%">
+                          <option value="">-</option>
+                          @foreach ($payment_type_data as $key => $value)
+                          <option value="{{ $value->id }}">{{ $value->paymtp_name }}</option>
+                          @endforeach
+                        </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="text" name="note" class="form-control">
+                </div>
 
                 <div class="ajax-detail"></div>
                 
@@ -173,6 +270,31 @@
         var id = $(this).data('id');
         $.post('{{route('treasury.getdetail')}}',{id:id}, function(data){
             $('#detailModalContent').html(data);
+        });
+    });
+
+    $('.datepicker').datepicker({
+        autoclose: true
+    });
+
+    $("#supplier").change(function(){
+        var url = "{{route('treasury.getapsupplier')}}";
+        var val = $(this).val();
+
+        url = url+"?id="+val;
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(result) {
+                $('.ajax-detail').html(result);
+
+                return false;
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert('failed during proccess.');
+                return false;
+            }
         });
     });
 </script>

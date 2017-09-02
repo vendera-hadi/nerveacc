@@ -5,13 +5,23 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\TrApPaymentHeader;
+use App\Models\TrApPaymentDetail;
+use App\Models\MsSupplier;
+use App\Models\MsCashBank;
+use App\Models\MsPaymentType;
+use App\Models\TrApHeader;
 use Auth;
 use DB;
+use Validator;
+use Carbon\Carbon;
 
 class TreasuryController extends Controller
 {
 	public function index(){
-		return view('ap_payment', array());
+        $data['suppliers'] = MsSupplier::all();
+        $data['cashbank_data'] = MsCashBank::all();
+        $data['payment_type_data'] = MsPaymentType::all();
+		return view('ap_payment', $data);
 	}
 
 	public function get(Request $request){
@@ -110,4 +120,93 @@ class TreasuryController extends Controller
         $header = TrApPaymentHeader::find($id);
         return view('modal.treasury', ['header' => $header]);
 	}
+
+    public function getAPofSupplier(Request $request){
+        $supplier_id = @$request->id;
+
+        $invoice_data = TrApHeader::select('tr_ap_invoice_hdr.*','tr_purchase_order_hdr.po_number')
+                            ->join('tr_purchase_order_hdr', 'tr_ap_invoice_hdr.po_id',"=",'tr_purchase_order_hdr.id')
+                            ->where('tr_ap_invoice_hdr.posting', 1)
+                            ->where('outstanding', '>', 0)
+                            ->where('tr_ap_invoice_hdr.spl_id', '=',$supplier_id)
+                            ->get();
+
+        if(!empty($invoice_data)){
+            $invoice_data = $invoice_data->toArray();
+        }
+
+        return view('get_apinvoice', array(
+            'invoice_data' => $invoice_data
+        ));
+    }
+
+    public function insert(Request $request)
+    {
+        $messages = [
+            'spl_id.required' => 'Supplier is required',
+            'payment_date.required' => 'Payment Date is required',
+            'paymtp_id.required' => 'Payment Type is required',
+            'payment_date.required' => 'Payment Date is required',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'spl_id' => 'required',
+            'cashbk_id' => 'required',
+            'paymtp_id' => 'required',
+            'payment_date' => 'required'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                        ->withErrors($validator)
+                        ->withInput();
+        }
+
+        $temp = "APPAY-".date('my')."-".strtoupper(str_random(6));
+        do{
+            $check = TrApPaymentHeader::where('payment_code',$temp)->first();
+        }while(!empty($check));
+
+        // dd($request->all());
+        \DB::beginTransaction();
+        try{
+            // insert ke tr ap payment header
+            $header = new TrApPaymentHeader;
+            $header->spl_id = $request->spl_id;
+            $header->payment_code = $temp;
+            $header->payment_date = $request->payment_date;
+            $header->check_no = $request->check_no;
+            if($request->check_date) $header->check_date = $request->check_date;
+            $header->note = $request->note;
+            $header->created_by = Auth::id();
+            $header->updated_by = $header->created_by;
+            $header->paymtp_id = $request->paymtp_id;
+            $header->cashbk_id = $request->cashbk_id;
+
+            $details = [];
+            $total = 0;
+            $payamounts = $request->pay;
+            foreach ($payamounts as $inv_id => $amount) {
+                $detail = new TrApPaymentDetail;
+                $detail->amount = $amount;
+                $detail->aphdr_id = $inv_id;
+                $details[] = $detail;
+                $total += $amount;
+
+                // kurangin outstanding ap inv header
+                $invheader = TrApHeader::find($inv_id);
+                $invheader->outstanding -= $amount;
+                $invheader->save();
+            }
+            $header->amount = $total;
+            $header->save();
+            $header->detail()->saveMany($details);
+            \DB::commit();
+            return redirect()->back()->with('success', 'Insert Success');
+        }catch(\Exception $e){
+            \DB::rollback();
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
 }
