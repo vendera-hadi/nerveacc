@@ -7,12 +7,15 @@ use App\Http\Requests;
 use Auth;
 // load model
 use App\Models\MsSupplier;
+use App\Models\MsMasterCoa;
 use App\Models\User;
 
 class SupplierController extends Controller
 {
 	public function index(){
-		return view('supplier');
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+		return view('supplier', $data);
     }
 
     public function get(Request $request){
@@ -65,6 +68,7 @@ class SupplierController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
+                $temp['coa_code'] = $value->coa_code;
                 $temp['spl_id'] = $value->spl_id;
                 $temp['spl_code'] = $value->spl_code;
                 $temp['spl_name'] = $value->spl_name;

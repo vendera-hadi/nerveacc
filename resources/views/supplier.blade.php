@@ -36,7 +36,7 @@
                     <thead>
                         <tr>
                             <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                            <th field="spl_id" width="50" sortable="true">Supplier ID</th>
+                            <th field="coa_code" width="50" sortable="true">COA Code</th>
                             <th field="spl_code" width="50" sortable="true">Supplier Code</th>
                             <th field="spl_name" width="50" sortable="true">Supplier Name</th>
                             <th field="spl_address" width="50" sortable="true">Supplier Address</th>
@@ -65,6 +65,13 @@
                         closed="true" buttons="#dlg-buttons">
                     <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                         <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
+                        <div style="margin-bottom:10px">
+                            <select id="cc" class="easyui-combobox" required="true" name="coa_code" label="COA Code:" style="width:100%;">
+                                @foreach($accounts as $coa)
+                                <option value="{{$coa->coa_code}}" >{{$coa->coa_code." ".$coa->coa_name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div style="margin-bottom:10px">
                             <input name="spl_code" class="easyui-textbox" label="Supplier Code:" style="width:100%" data-options="required:true,validType:'length[0,5]'">
                         </div>

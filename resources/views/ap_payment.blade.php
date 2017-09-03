@@ -322,5 +322,58 @@
             }
         });
     });
+
+    $('input[name=checkall]').change(function() {
+        if($(this).is(':checked')){ 
+            $('input[name=check]').each(function(){
+                $(this).prop('checked',true);
+            });
+        }else{
+            $('input[name=check]').each(function(){
+                $(this).prop('checked',false);
+            });
+        }
+     });
+
+    // posting
+    $(document).delegate('.posting-confirm','click',function(){
+      if(confirm("are you sure you want posting this payment?")){
+        var id = $(this).attr('data-id');
+
+        $.post('{{route('treasury.posting')}}',{id:id}, function(data){
+            alert(data.message);
+            if(data.success == 1){
+              location.reload();
+            } else{
+              return false;
+            }
+        });
+      }else{
+        return false;
+      }
+    });
+
+    function postingInv(){
+        var ids = [];
+        $('input[name=check]:checked').each(function() {
+           ids.push($(this).val());
+        });
+        if(ids.length > 0){
+          $.messager.confirm('Confirm','Are you sure you want to post this '+ids.length+' Payment ?',function(r){
+              if (r){
+                  $('.loadingScreen').show();
+                  $.post('{{route('treasury.posting')}}',{id:ids}, function(data){
+                      alert(data.message);
+                      $('.loadingScreen').hide();
+                      if(data.success == 1){
+                        location.reload();
+                      } else{
+                        return false;
+                      }
+                  });
+              }
+          });
+        }
+    }
 </script>
 @endsection
