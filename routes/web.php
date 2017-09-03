@@ -452,6 +452,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('treasury/getdetail', 'TreasuryController@getDetail')->name('treasury.getdetail');
 	Route::get('treasury/getapsupplier', 'TreasuryController@getAPofSupplier')->name('treasury.getapsupplier');
 	Route::post('treasury/insert', 'TreasuryController@insert')->name('treasury.insert');
+	Route::get('treasury/void','TreasuryController@void')->name('treasury.void');
 });
 
 Route::get('logout','Auth\AuthController@logout');

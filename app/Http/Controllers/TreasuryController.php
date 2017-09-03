@@ -99,7 +99,7 @@ class TreasuryController extends Controller
                         $action_button .= ' | <a href="#" data-id="'.$value->id.'" title="Posting Payment" class="posting-confirm"><i class="fa fa-arrow-circle-o-up"></i></a>';
                     // }
                     // if(\Session::get('role')==1 || in_array(71,\Session::get('permissions'))){
-                        $action_button .= ' | <a href="payment/void?id='.$value->id.'" title="Void" class="void-confirm"><i class="fa fa-ban"></i></a>';
+                        $action_button .= ' | <a href="treasury/void?id='.$value->id.'" title="Void" class="void-confirm"><i class="fa fa-ban"></i></a>';
                     // }
                 }
                 // $action_button .= ' | <a href="'.url('invoice/print_kwitansi?id='.$value->id).'" class="print-window" data-width="640" data-height="660"><i class="fa fa-file"></i></a>';
@@ -207,6 +207,37 @@ class TreasuryController extends Controller
             \DB::rollback();
             return redirect()->back()->withErrors($e->getMessage());
         }
+    }
+
+    public function void(Request $request)
+    {
+        \DB::beginTransaction();
+        try{
+            $id = $request->id;
+            // semua payment atas inv id dihapus
+            $header = TrApPaymentHeader::find($id);
+            $details = TrApPaymentDetail::where('appaym_id',$id);
+            // balikin outstanding
+            foreach ($details->get() as $dtl) {
+                $inv = TrApHeader::find($dtl->aphdr_id);
+                $inv->outstanding += $dtl->amount;
+                $inv->save();
+            }
+            $header->delete();
+            $details->delete();
+            \DB::commit();
+            $result = array(
+                    'status'=>1, 
+                    'message'=> 'Success void payment'
+                );
+        }catch(\Exception $e){
+            \DB::rollback();
+            $result = array(
+                    'status'=>0, 
+                    'message'=> 'Cannot void payment, try again later'
+                );
+        }
+        return response()->json($result);
     }
 
 }

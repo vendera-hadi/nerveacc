@@ -273,6 +273,31 @@
         });
     });
 
+    $(document).delegate('.void-confirm','click',function(){
+      if(confirm("are you sure you want void this payment?")){
+        var url = $(this).attr('href');
+        
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function(result) {
+              alert(result.message);
+              if(result.status == 1) location.reload();
+
+              return false;
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert('failed during proccess.');
+                return false;
+            }
+        });
+
+        return false;
+      }else{
+        return false;
+      }
+    });
+
     $('.datepicker').datepicker({
         autoclose: true
     });
