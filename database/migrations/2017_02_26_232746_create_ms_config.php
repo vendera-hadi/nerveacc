@@ -16,8 +16,8 @@ class CreateMsConfig extends Migration
         Schema::create('ms_config', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->string('desc');
-            $table->string('value');
+            $table->text('desc');
+            $table->text('value');
             $table->timestamps();
         });
     }

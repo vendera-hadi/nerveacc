@@ -452,6 +452,11 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('treasury/getdetail', 'TreasuryController@getDetail')->name('treasury.getdetail');
 	Route::get('treasury/getapsupplier', 'TreasuryController@getAPofSupplier')->name('treasury.getapsupplier');
 	Route::post('treasury/insert', 'TreasuryController@insert')->name('treasury.insert');
+
+	//Report AP
+	Route::get('report/apview','ReportController@apview')->name('report.apview');
+	Route::get('accpayable/optSupplier','PayableController@getOptSupplier')->name('supplier.select2');
+	Route::get('report/apaging','ReportController@apAging')->name('report.ap_aging');
 });
 
 Route::get('logout','Auth\AuthController@logout');

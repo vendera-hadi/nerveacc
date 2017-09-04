@@ -22,7 +22,7 @@ class CreateMsCostDetailsTable extends Migration
             $table->decimal('costd_burden', 10, 2);
             $table->decimal('costd_admin', 10, 2);
             $table->boolean('costd_ismeter')->default(0);
-            $table->integer('daya')->nullable();
+            $table->float('daya')->nullable();
         });
     }
 

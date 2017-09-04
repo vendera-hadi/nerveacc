@@ -26,6 +26,7 @@ class CreateTrApPaymentHdr extends Migration
             $table->integer('created_by');
             $table->integer('updated_by');
             $table->integer('paymtp_id')->nullable();
+            $table->boolean('posting')->default(0);
             $table->integer('posting_by')->nullable();
             $table->integer('cashbk_id')->nullable();
             $table->timestamps();

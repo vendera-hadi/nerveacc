@@ -21,6 +21,11 @@ use App\Models\MsCashBank;
 use App\Models\MsPaymentType;
 use App\Models\MsHeaderFormat;
 use App\Models\MsDetailFormat;
+use App\Models\MsSupplier;
+use App\Models\TrApHeader;
+use App\Models\TrApDetail;
+use App\Models\TrApPaymentHeader;
+use App\Models\TrApPaymentDetail;
 use PDF;
 use DB;
 use Excel;
@@ -1330,4 +1335,273 @@ class ReportController extends Controller
         return view('report_profitloss', $data);
     }
 
+    public function apview(){
+        $data['invtypes'] = MsInvoiceType::all();
+        $data['banks'] = MsCashBank::all();
+        $data['payment_types'] = MsPaymentType::all();
+        return view('report_ap',$data);
+    }
+
+    public function apAging(Request $request){
+        $ty = @$request->jenis;
+        $ag30 = @$request->ag30;
+        $ag60 = @$request->ag60;
+        $ag90 = @$request->ag90;
+        $ag180 = @$request->ag180;
+        $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
+        $tyt = @$request->jenist;
+        $sup_id = @$request->unit3;
+
+        $data['tahun'] = 'Periode Sampai : '.date('M Y');
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['title'] = "Aged Payable Report By Supplier Key";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['unit'] = MsSupplier::where('id',$sup_id)->get();
+        $data['tyt'] = $tyt;
+        $data['ty'] = $ty;
+        if($tyt == 1){
+            $data['template'] = 'report_ap_aging';
+        }else{
+            $data['template'] = 'report_ap_aging_detail';
+        }
+        
+        if($ty == 1 && $tyt == 1){
+            $data['title_r'] = 'Summary Outstanding Ap';
+        }else if($ty == 1 && $tyt == 2){
+            $data['title_r'] = 'Detail Outstanding Ap';
+        }else if($ty == 2 && $tyt == 1){
+            $data['title_r'] = 'Summary Paid Ap';
+        }else if($ty == 2 && $tyt == 2){
+            $data['title_r'] = 'Detail Paid Ap';
+        }else if($ty == 3 && $tyt == 1){
+            $data['title_r'] = 'Summary All Ap';
+        }else if($ty == 3 && $tyt == 2){
+            $data['title_r'] = 'Detail All Ap';
+        }else{
+            $data['title_r'] = '';
+        }
+        if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
+        $data['label'] = explode('~', '1 - '.$ag30.'~'.$ag30.' - '.$ag60.'~'.$ag60.' - '.$ag90.'~'.'OVER '.$ag180);
+        if($ty == 1){
+            $fetch = TrApHeader::select('tr_ap_invoice_hdr.spl_id','ms_supplier.spl_code','ms_supplier.spl_name',
+                    DB::raw("SUM(outstanding) AS total"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invoice_date::date) >= -1 AND (current_date::date - invoice_date::date) <=".$ag30." THEN outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invoice_date::date) > ".$ag30." AND (current_date::date - invoice_date::date)<=".$ag60." THEN outstanding ELSE 0 END)) AS ag60"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invoice_date::date) >".$ag60." AND (current_date::date - invoice_date::date)<=".$ag90." THEN outstanding ELSE 0 END)) AS ag90"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invoice_date::date) > ".$ag180." THEN outstanding ELSE 0 END)) AS agl180"))
+                ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
+                ->where('tr_ap_invoice_hdr.posting','=',TRUE)
+                ->where('outstanding','>',0)
+                ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name','tr_ap_invoice_hdr.spl_id')
+                ->orderBy('spl_code', 'asc');
+        }else if ($ty == 2){
+            $fetch = TrApPaymentHeader::select('tr_ap_payment_hdr.spl_id','ms_supplier.spl_code','ms_supplier.spl_name',
+                    DB::raw("SUM(tr_ap_payment_hdr.amount) AS total"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - payment_date::date) >= -1 AND (current_date::date - payment_date::date) <=".$ag30." THEN tr_ap_payment_hdr.amount ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - payment_date::date) > ".$ag30." AND (current_date::date - payment_date::date)<=".$ag60." THEN tr_ap_payment_hdr.amount ELSE 0 END)) AS ag60"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - payment_date::date) >".$ag60." AND (current_date::date - payment_date::date)<=".$ag90." THEN tr_ap_payment_hdr.amount ELSE 0 END)) AS ag90"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - payment_date::date) > ".$ag180." THEN tr_ap_payment_hdr.amount ELSE 0 END)) AS agl180"))
+                ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_payment_hdr.spl_id')
+                ->where('posting','=',TRUE)
+                ->groupBy('tr_ap_payment_hdr.spl_id','ms_supplier.spl_code','ms_supplier.spl_name')
+                ->orderBy('spl_code', 'asc');
+        }else{
+            if($tyt == 2){
+                $fetch = MsSupplier::select('*')
+                    ->orderBy('spl_code', 'asc');
+            }else{
+                //sama kyk not paid
+                $fetch = TrApHeader::select('tr_ap_invoice_hdr.spl_id','ms_supplier.spl_code','ms_supplier.spl_name',
+                    DB::raw("SUM(outstanding) AS total"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invoice_date::date) >= -1 AND (current_date::date - invoice_date::date) <=".$ag30." THEN outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invoice_date::date) > ".$ag30." AND (current_date::date - invoice_date::date)<=".$ag60." THEN outstanding ELSE 0 END)) AS ag60"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invoice_date::date) >".$ag60." AND (current_date::date - invoice_date::date)<=".$ag90." THEN outstanding ELSE 0 END)) AS ag90"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - invoice_date::date) > ".$ag180." THEN outstanding ELSE 0 END)) AS agl180"))
+                ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
+                ->where('tr_ap_invoice_hdr.posting','=',TRUE)
+                ->where('outstanding','>',0)
+                ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name','tr_ap_invoice_hdr.id')
+                ->orderBy('spl_code', 'asc');
+            }
+        }
+
+        if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
+        $fetch = $fetch->get();
+        $data['invoices'] = $fetch;
+
+        if($tyt == 2){
+            $data['invoices'] = [];
+            if($ty == 1){
+                foreach ($fetch as $inv) {
+                    $tempInv = [
+                        'spl_code' => $inv->spl_code,
+                        'spl_name' => $inv->spl_name,
+                        'total' => $inv->total,
+                        'ag30' => $inv->ag30,
+                        'ag60' => $inv->ag60,
+                        'ag90' => $inv->ag90,
+                        'agl180' => $inv->agl180
+                    ];
+                    $tempInv['details'] = [];
+                    $result = TrApHeader::select('tr_ap_invoice_hdr.*',
+                                DB::raw("to_char(invoice_date, 'DD/MM/YYYY') AS tanggal"),
+                                DB::raw("to_char(invoice_duedate, 'DD/MM/YYYY') AS tanggaldue"))
+                            ->where('tr_ap_invoice_hdr.spl_id',$inv->spl_id)
+                            ->where('outstanding','>',0)
+                            ->where('posting',TRUE)
+                        ->get();
+                    foreach ($result as $key => $value) {
+                        $datetime1 = new DateTime(date('Y-m-d'));
+                        $datetime2 = new DateTime($value->inv_date);
+                        $dif = $datetime1->diff($datetime2);
+                        $difference = $dif->d;
+
+                        $tempInv['details'][] = [
+                            'inv_number' => $value->invoice_no,
+                            'tanggal' => $value->tanggal,
+                            'tanggaldue' => $value->tanggaldue,
+                            'inv_amount' => $value->total,
+                            'inv_outstanding' => $value->outstanding,
+                            'ags30' => ($difference >= -1 && $difference <= $ag30 ? $value->outstanding : 0),
+                            'ags60' => ($difference > $ag30 && $difference <= $ag60 ? $value->outstanding : 0),
+                            'ags90' => ($difference > $ag60 && $difference <= $ag90 ? $value->outstanding : 0),
+                            'ags180' => ($difference > $ag180 ? $value->outstanding : 0)
+                            ];
+                    }
+                    $data['invoices'][] = $tempInv;
+                }
+            }else if($ty == 2){
+                foreach ($fetch as $inv) {
+                    $tempInv = [
+                        'spl_code' => $inv->spl_code,
+                        'spl_name' => $inv->spl_name,
+                        'total' => $inv->total,
+                        'ag30' => $inv->ag30,
+                        'ag60' => $inv->ag60,
+                        'ag90' => $inv->ag90,
+                        'agl180' => $inv->agl180
+                    ];
+                    $tempInv['details'] = [];
+                    $result = TrApPaymentDetail::select('tr_ap_payment_dtl.amount','tr_ap_invoice_hdr.invoice_no',
+                                DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"))
+                            ->join('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
+                            ->join('tr_ap_invoice_hdr','tr_ap_payment_dtl.aphdr_id',"=",'tr_invoice_paymhdr.id')
+                            ->where('tr_ap_invoice_hdr.spl_id',$inv->spl_id)
+                            ->where('tr_ap_payment_hdr.posting',TRUE)
+                        ->get();
+                    foreach ($result as $key => $value) {
+                        $datetime1 = new DateTime(date('Y-m-d'));
+                        $datetime2 = new DateTime($value->payment_date);
+                        $dif = $datetime1->diff($datetime2);
+                        $difference = $dif->d;
+
+                        $tempInv['details'][] = [
+                            'inv_number' => $value->invoice_no,
+                            'tanggal' => $value->tanggal,
+                            'inv_amount' => $value->amount,
+                            'ags30' => ($difference >= -1 && $difference <= $ag30 ? $value->amount : 0),
+                            'ags60' => ($difference > $ag30 && $difference <= $ag60 ? $value->amount : 0),
+                            'ags90' => ($difference > $ag60 && $difference <= $ag90 ? $value->amount : 0),
+                            'ags180' => ($difference > $ag180 ? $value->amount : 0)
+                            ];
+                    }
+                    $data['invoices'][] = $tempInv;
+                }
+            }else{
+                foreach ($fetch as $inv) {
+                    $tempInv = [
+                        'spl_code' => $inv->spl_code,
+                        'spl_name' => $inv->spl_name
+                    ];
+                    $tempInv['details'] = [];
+                    $result = TrApHeader::select('tr_ap_invoice_hdr.*',
+                                DB::raw("to_char(invoice_date, 'DD/MM/YYYY') AS tanggal"))
+                            ->where('tr_ap_invoice_hdr.spl_id',$inv->id)
+                            ->where('posting',TRUE)
+                        ->get();
+                    foreach ($result as $key => $value) {
+                        $datetime1 = new DateTime(date('Y-m-d'));
+                        $datetime2 = new DateTime($value->invoice_date);
+                        $dif = $datetime1->diff($datetime2);
+                        $difference = $dif->d;
+
+                        $tempInv['details'][] = [
+                            'inv_number' => $value->invoice_no,
+                            'tanggal' => $value->tanggal,
+                            'inv_amount' => $value->total,
+                            'inv_tp' => 'INVOICE AP',
+                            'ags30' => ($difference >= -1 && $difference <= $ag30 ? $value->total : 0),
+                            'ags60' => ($difference > $ag30 && $difference <= $ag60 ? $value->total : 0),
+                            'ags90' => ($difference > $ag60 && $difference <= $ag90 ? $value->total : 0),
+                            'ags180' => ($difference > $ag180 ? $value->total : 0)
+                            ];
+                    }
+                    
+                    $result2 = TrApPaymentDetail::select('tr_ap_payment_dtl.amount','tr_ap_invoice_hdr.invoice_no',
+                                DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"))
+                            ->join('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
+                            ->join('tr_ap_invoice_hdr','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
+                            ->where('tr_ap_invoice_hdr.spl_id',$inv->spl_id)
+                            ->where('tr_ap_payment_hdr.posting',TRUE)
+                        ->get();
+                    foreach ($result2 as $key => $value) {
+                        $datetime1 = new DateTime(date('Y-m-d'));
+                        $datetime2 = new DateTime($value->payment_date);
+                        $dif = $datetime1->diff($datetime2);
+                        $difference = $dif->d;
+
+                        $tempInv['details'][] = [
+                            'inv_number' => $value->invoice_no,
+                            'tanggal' => $value->tanggal,
+                            'inv_amount' => ($value->amount * -1),
+                            'inv_tp' => 'PAYMENT',
+                            'ags30' => ($difference >= -1 && $difference <= $ag30 ? ($value->amount * -1) : 0),
+                            'ags60' => ($difference > $ag30 && $difference <= $ag60 ? ($value->amount * -1) : 0),
+                            'ags90' => ($difference > $ag60 && $difference <= $ag90 ? ($value->amount * -1) : 0),
+                            'ags180' => ($difference > $ag180 ? ($value->amount * -1) : 0)
+                            ];
+                    }
+                    
+                    $data['invoices'][] = $tempInv;
+                }
+            }
+        }
+        if($pdf){
+            $data['type'] = 'pdf';
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('AR_Aging_periode.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                $name1 = '1-'.$ag30.' Days';
+                $name2 = $ag30.'-'.$ag60.' Days';
+                $name3 = $ag60.'-'.$ag90.' Days';
+                $name4 = 'OVER '.$ag180.' Days';
+                $data[$i]=array(
+                    'Supplier Code' =>$data_ori[$i]['spl_code'],
+                    'Nama Supplier' =>$data_ori[$i]['spl_name'],
+                    'Total' =>number_format($data_ori[$i]['total']),
+                    $name1 =>number_format($data_ori[$i]['ag30']),
+                    $name2 =>number_format($data_ori[$i]['ag60']),
+                    $name3 =>number_format($data_ori[$i]['ag90']),
+                    $name4 =>number_format($data_ori[$i]['agl180']));
+            }
+            $border = 'A1:G';
+            $tp = 'xls';
+            return Excel::create('Aging Ap Report', function($excel) use ($data,$border) {
+                $excel->sheet('Aging Ap Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
+            return view('layouts.report_template2', $data);
+        }
+    }
 }

@@ -569,4 +569,17 @@ class PayableController extends Controller
         }
     }
 
+    public function getOptSupplier(Request $request){
+        $key = $request->q;
+        $fetch = MsSupplier::select('id','spl_code','spl_name')->where(function($query) use($key){
+            $query->where(\DB::raw('LOWER(spl_code)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(spl_name)'),'like','%'.$key.'%');
+        })->where('spl_isactive', 'TRUE')->get();
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->id, 'text'=>$value->spl_name." (".$value->spl_code.")"];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
+    }
+
 }
