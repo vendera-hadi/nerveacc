@@ -10,6 +10,9 @@ use App\Models\MsSupplier;
 use App\Models\MsCashBank;
 use App\Models\MsPaymentType;
 use App\Models\TrApHeader;
+use App\Models\TrLedger;
+use App\Models\MsDepartment;
+use App\Models\MsJournalType;
 use Auth;
 use DB;
 use Validator;
@@ -99,7 +102,7 @@ class TreasuryController extends Controller
                         $action_button .= ' | <a href="#" data-id="'.$value->id.'" title="Posting Payment" class="posting-confirm"><i class="fa fa-arrow-circle-o-up"></i></a>';
                     // }
                     // if(\Session::get('role')==1 || in_array(71,\Session::get('permissions'))){
-                        $action_button .= ' | <a href="payment/void?id='.$value->id.'" title="Void" class="void-confirm"><i class="fa fa-ban"></i></a>';
+                        $action_button .= ' | <a href="treasury/void?id='.$value->id.'" title="Void" class="void-confirm"><i class="fa fa-ban"></i></a>';
                     // }
                 }
                 // $action_button .= ' | <a href="'.url('invoice/print_kwitansi?id='.$value->id).'" class="print-window" data-width="640" data-height="660"><i class="fa fa-file"></i></a>';
@@ -207,6 +210,123 @@ class TreasuryController extends Controller
             \DB::rollback();
             return redirect()->back()->withErrors($e->getMessage());
         }
+    }
+
+    public function void(Request $request)
+    {
+        \DB::beginTransaction();
+        try{
+            $id = $request->id;
+            // semua payment atas inv id dihapus
+            $header = TrApPaymentHeader::find($id);
+            $details = TrApPaymentDetail::where('appaym_id',$id);
+            // balikin outstanding
+            foreach ($details->get() as $dtl) {
+                $inv = TrApHeader::find($dtl->aphdr_id);
+                $inv->outstanding += $dtl->amount;
+                $inv->save();
+            }
+            $header->delete();
+            $details->delete();
+            \DB::commit();
+            $result = array(
+                    'status'=>1, 
+                    'message'=> 'Success void payment'
+                );
+        }catch(\Exception $e){
+            \DB::rollback();
+            $result = array(
+                    'status'=>0, 
+                    'message'=> 'Cannot void payment, try again later'
+                );
+        }
+        return response()->json($result);
+    }
+
+    public function posting(Request $request)
+    {
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+        
+        $coayear = date('Y');
+        $month = date('m');
+        $journal = [];
+
+        // cari last prefix, order by journal type
+        // using JU utk default
+        $jourType = MsJournalType::where('jour_type_prefix','JU')->first();
+        if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "JU" first before posting an invoice']);
+        $lastJournal = TrLedger::where('jour_type_id',$jourType->id)->latest()->first();
+        if($lastJournal){
+            $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
+            $lastJournalNumber = (int) end($lastJournalNumber);
+            $nextJournalNumber = $lastJournalNumber + 1;
+        }else{
+            $nextJournalNumber = 1;
+        }
+        
+        \DB::beginTransaction();
+        try{
+            // looping per payment id
+            foreach ($ids as $id) {
+                // Hutang (KREDIT)
+                $appaymentdtl = TrApPaymentDetail::where('appaym_id', $id)->get();
+                foreach ($appaymentdtl as $dtl) {
+                    $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                    $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+                    $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                    $header = TrApHeader::find($dtl->aphdr_id);
+                    $journal = [
+                            'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                            'ledge_fisyear' => $coayear,
+                            'ledg_number' => $journalNumber,
+                            'ledg_date' => date('Y-m-d'),
+                            'ledg_refno' => $header->invoice_no,
+                            'ledg_debit' => 0,
+                            'ledg_credit' => $dtl->amount,
+                            'ledg_description' => $dtl->header->payment_code,
+                            'coa_year' => $coayear,
+                            'coa_code' => $header->supplier->coa_code,
+                            'created_by' => Auth::id(),
+                            'updated_by' => Auth::id(),
+                            'jour_type_id' => $jourType->id,
+                            'dept_id' => 3
+                        ];
+                    TrLedger::create($journal);
+                    $nextJournalNumber++;
+                }
+
+                // Bank / Kas (DEBET)
+                $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                $journal = [
+                        'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                        'ledge_fisyear' => $coayear,
+                        'ledg_number' => $journalNumber,
+                        'ledg_date' => date('Y-m-d'),
+                        'ledg_refno' => $dtl->header->payment_code,
+                        'ledg_debit' => $dtl->header->amount,
+                        'ledg_credit' => 0,
+                        'ledg_description' => $dtl->header->payment_code,
+                        'coa_year' => $coayear,
+                        'coa_code' => $dtl->header->cashbank->coa_code,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                        'jour_type_id' => $jourType->id,
+                        'dept_id' => 3
+                    ];
+                TrLedger::create($journal);
+            }
+            // end foreach
+            \DB::commit();
+            return response()->json(['success'=>1, 'message'=>'AP Payment posted Successfully']);
+        }catch(\Exception $e){
+            \DB::rollback();
+            return response()->json(['error'=>1, 'message'=> $e->getMessage()]);
+        }
+        // end try
+
     }
 
 }

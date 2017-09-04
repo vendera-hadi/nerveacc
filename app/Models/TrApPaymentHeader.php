@@ -21,4 +21,9 @@ class TrApPaymentHeader extends Model
    	{
    		return $this->belongsTo('App\Models\MsSupplier','spl_id');	
    	}
+
+      public function cashbank()
+      {
+         return $this->belongsTo('App\Models\MsCashBank','cashbk_id');  
+      }
 }

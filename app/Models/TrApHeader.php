@@ -16,4 +16,9 @@ class TrApHeader extends Model
    	{
    		return $this->hasMany('App\Models\TrApDetail','aphdr_id');
    	}
+
+   	public function supplier()
+   	{
+   		return $this->belongsTo('App\Models\MsSupplier','spl_id');
+   	}
 }

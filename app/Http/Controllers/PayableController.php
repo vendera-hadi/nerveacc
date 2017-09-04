@@ -323,7 +323,7 @@ class PayableController extends Controller
                         'ledg_credit' => $total,
                         'ledg_description' => $header->invoice_no,
                         'coa_year' => $coayear,
-                        'coa_code' => $detail->coa_code,
+                        'coa_code' => $header->supplier->coa_code,
                         'created_by' => Auth::id(),
                         'updated_by' => Auth::id(),
                         'jour_type_id' => $jourType->id,
