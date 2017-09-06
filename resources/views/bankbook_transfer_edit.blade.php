@@ -87,7 +87,7 @@
                         <input type="hidden" name="current_kurs_id" value="{{$trbank->kurs_id}}">
                         <select name="kurs_id" class="form-control">
                             @foreach($kurs as $val)
-                            <option value="{{$val->id}}" data-val="{{$val->value}}" @if($val->id == $trbank->kurs_id) selected @endif>{{$val->currency}}</option>
+                            <option value="{{$val->id}}" data-val="{{$val->value}}" @if($val->id == $trbank->kurs_id) selected @endif>{{$val->currency." (".number_format($val->value,2).")"}}</option>
                             @endforeach
                         </select>
                     </div>

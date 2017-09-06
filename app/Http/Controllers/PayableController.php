@@ -78,7 +78,7 @@ class PayableController extends Controller
                 $temp['invoice_no'] = $value->invoice_no;
                 $temp['invoice_date'] = $value->invoice_date;
                 $temp['invoice_duedate'] = $value->invoice_duedate;
-                $temp['total'] = $value->total;
+                $temp['total'] = number_format($value->total,2);
                 $temp['posting'] = $value->posting ? 'yes' : 'no';
                 $temp['po_no'] = !empty($value->po_number) ? $value->po_number : "-";
                 $action_button = "";
@@ -164,7 +164,7 @@ class PayableController extends Controller
             	$total += $qty[$key] * $amount[$key];
             	$totalppn += $ppn_amount[$key];
             }
-            $header->total = $total;
+            $header->total = $total + $totalppn;
             $header->outstanding = $header->total;
             $header->ppn = $totalppn;
             $header->save();
@@ -183,6 +183,8 @@ class PayableController extends Controller
         try{
             // dd($request->all());
             $po = TrPOHeader::find($request->po_id);
+            $po->is_ap = 1;
+            $po->save();
 
             $header = new TrApHeader;
             $header->spl_id = $po->spl_id;
@@ -212,7 +214,7 @@ class PayableController extends Controller
                 $total += $dt->qty * $dt->amount;
                 $totalppn += $dt->ppn_amount;
             }
-            $header->total = $total;
+            $header->total = $total + $totalppn;
             $header->outstanding = $header->total;
             $header->ppn = $totalppn;
             $header->save();
@@ -244,7 +246,7 @@ class PayableController extends Controller
         try{
             $coayear = date('Y');
             $month = date('m');
-            $journaltype = 'JU';
+            $journaltype = 'AP';
             foreach ($ids as $id) {
                 // cari last prefix, order by journal type
                 $jourType = MsJournalType::where('jour_type_prefix',$journaltype)->first();
@@ -305,6 +307,7 @@ class PayableController extends Controller
                                     'dept_id' => $detail->dept_id
                                 ];
                         TrLedger::create($journal);
+                        $total += $detail->ppn_amount;
                     }
                     $nextJournalNumber++;
                 }
@@ -420,7 +423,7 @@ class PayableController extends Controller
     public function getPOselect2(Request $request)
     {
         $key = $request->q;
-        $fetch = TrPOHeader::where(\DB::raw('LOWER(po_number)'),'like','%'.$key.'%')->get();
+        $fetch = TrPOHeader::where(\DB::raw('LOWER(po_number)'),'like','%'.$key.'%')->where('is_ap',0)->get();
 
         $result['results'] = [];
         foreach ($fetch as $key => $value) {

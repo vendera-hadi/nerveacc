@@ -86,7 +86,7 @@
                         <label>Kurs</label>
                         <select name="kurs_id" class="form-control">
                             @foreach($kurs as $val)
-                            <option value="{{$val->id}}" data-val="{{$val->value}}">{{$val->currency}}</option>
+                            <option value="{{$val->id}}" data-val="{{$val->value}}">{{$val->currency." (".number_format($val->value,2).")"}}</option>
                             @endforeach
                         </select>
                     </div>

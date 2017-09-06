@@ -23,6 +23,7 @@ class TrPurchaseOrderHdr extends Migration
             $table->string('note');
             $table->integer('created_by');
             $table->integer('updated_by');
+            $table->boolean('is_ap')->default(0);
             $table->timestamps();
         });
     }

@@ -254,8 +254,8 @@ class TreasuryController extends Controller
 
         // cari last prefix, order by journal type
         // using JU utk default
-        $jourType = MsJournalType::where('jour_type_prefix','JU')->first();
-        if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "JU" first before posting an invoice']);
+        $jourType = MsJournalType::where('jour_type_prefix','AP')->first();
+        if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "AP" first before posting an invoice']);
         $lastJournal = TrLedger::where('jour_type_id',$jourType->id)->latest()->first();
         if($lastJournal){
             $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
@@ -294,6 +294,10 @@ class TreasuryController extends Controller
                         ];
                     TrLedger::create($journal);
                     $nextJournalNumber++;
+                    $dtl->header->posting = 1;
+                    $dtl->header->posting_at = date('Y-m-d H:i:s');
+                    $dtl->header->posting_by = Auth::id();
+                    $dtl->header->save();
                 }
 
                 // Bank / Kas (DEBET)

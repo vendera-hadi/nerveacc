@@ -256,7 +256,8 @@ $(function(){
               },
               escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
               // minimumInputLength: 1
-        }).on("select2:select", function(e) { 
+        }).on("select2:select", function(e) {
+             $('#tableDetail tbody').html('');
            $.post('{{route('po.ajax')}}', {id: $(this).val()}, function(result){
               $("select[name=spl_id]").val(result.spl_id).trigger('change');
               $("select[name=terms]").val(result.terms);
