@@ -160,18 +160,22 @@
             <?php
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('payment.index'),url('period_meter')];
               $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view'),route('report.neraca'),route('report.profitloss')];
-              $glSetupUrls = [route('coa.index'),url('department'),url('layouts'),url('department'),url('groupaccount')];
+              $glSetupUrls = [route('coa.index'),url('department'),url('layouts'),url('department'),url('groupaccount'),url('kurs')];
               $bbUrls = [route('cash_bank.index'),route('bankbook.index'),route('reconcile.index')];
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter')];
+
+              $apUrls = [url('accpayable'),url('purchaseorder'),url('treasury'),route('report.apview')];
+              $apSetupUrls = [url('supplier')];
 
               $accreceivables = [52,58,59,63,68,76,35,39,40,41,42,43,44];
               $billingInfos = [35,39,40,41,42,43];
               $generalledger = [64];
               $cashbanks = [72];
               $invoices = [52,58,59];
+              $ap = [100];
             ?>
-            <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || in_array(Request::url(),$glUrls) || in_array(Request::url(),$bbUrls) || Request::url() == url('cost_item') || in_array(Request::url(),$glSetupUrls)){{'active'}}@endif">
+            <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || in_array(Request::url(),$glUrls) || in_array(Request::url(),$bbUrls) || Request::url() == url('cost_item') || in_array(Request::url(),$glSetupUrls) || in_array(Request::url(),$apUrls) || in_array(Request::url(),$apSetupUrls)){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-book"></i> <span>FINANCE</span>
                 <span class="pull-right-container">
@@ -348,8 +352,11 @@
                                 @if(Session::get('role')==1 || in_array(11,Session::get('permissions')))
                                 <li @if(Request::url() == url('groupaccount')) class="active" @endif><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li>
                                 @endif
+                                @if(Session::get('role')==1 || in_array(11,Session::get('permissions')))
+                                <li @if(Request::url() == url('kurs')) class="active" @endif><a href="{{url('kurs')}}"><i class="fa fa-circle-o"></i> Kurs</a></li>
+                                @endif
                               </ul>
-                            </li>
+                          </li>
                       </li>
 
                       
@@ -379,7 +386,41 @@
                   </li>
                 @endif
 
-                <li ><a href="#"><i class="fa fa-circle-o"></i> Account Payable</a></li>
+                @if(Session::get('role')==1 || !empty(array_intersect($ap, Session::get('permissions'))) )
+                  <li>
+                    <a href="#"><i class="fa fa-circle"></i> Account Payable
+                        <span class="pull-right-container">
+                          <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu @if(in_array(Request::url(),$apUrls) || in_array(Request::url(),$apSetupUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$apUrls) || in_array(Request::url(),$apSetupUrls)) style="display:block" @endif>
+                      @if(Session::get('role')==1 || in_array(100,Session::get('permissions')))
+                      <li @if(Request::url() == url('accpayable')) class="active" @endif><a href="{{url('accpayable')}}"><i class="fa fa-circle-o"></i>AP List</a></li>
+                      @endif
+                      @if(Session::get('role')==1 || in_array(100,Session::get('permissions')))
+                      <li @if(Request::url() == url('purchaseorder')) class="active" @endif><a href="{{url('purchaseorder')}}"><i class="fa fa-circle-o"></i> PO List</a></li>
+                      @endif
+                      @if(Session::get('role')==1 || in_array(100,Session::get('permissions')))
+                      <li @if(Request::url() == url('treasury')) class="active" @endif><a href="{{url('treasury')}}"><i class="fa fa-circle-o"></i> AP Payment</a></li>
+                      @endif
+                       @if(Session::get('role')==1 || in_array(100,Session::get('permissions')))
+                      <li @if(Request::url() == route('report.apview')) class="active" @endif><a href="{{route('report.apview')}}"><i class="fa fa-circle-o"></i>Report</a></li>
+                      @endif
+                      <li>
+                          <a href="#"><i class="fa fa-circle"></i> Setup
+                              <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                              </span>
+                          </a>
+                          <ul class="treeview-menu @if(in_array(Request::url(),$apSetupUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$apSetupUrls)) style="display:block" @endif>
+                            @if(Session::get('role')==1 || in_array(100,Session::get('permissions')))
+                            <li @if(Request::url() == url('supplier')) class="active" @endif><a href="{{url('supplier')}}"><i class="fa fa-circle-o"></i> Supplier</a></li>
+                            @endif
+                          </ul>
+                      </li>
+                    </ul>
+                  </li>
+                @endif
               </ul>
             </li>
         </ul><!-- /.sidebar-menu -->
