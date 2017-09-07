@@ -447,6 +447,13 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('kurs/update', 'KursController@update')->name('kurs.update');
 	Route::post('kurs/delete', 'KursController@delete')->name('kurs.delete');
 
+	// kurs
+	Route::get('ppn', 'PPNController@index');
+	Route::post('ppn/get', 'PPNController@get')->name('ppn.get');
+	Route::post('ppn/insert', 'PPNController@insert')->name('ppn.insert');
+	Route::post('ppn/update', 'PPNController@update')->name('ppn.update');
+	Route::post('ppn/delete', 'PPNController@delete')->name('ppn.delete');
+
 	// treasury
 	Route::get('treasury', 'TreasuryController@index');
 	Route::post('treasury/get', 'TreasuryController@get')->name('treasury.get');
