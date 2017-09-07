@@ -64,11 +64,11 @@
               <thead>
                   <tr>
                       <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                      <th field="po_number" sortable="true">PO Number</th>
-                      <th field="po_date" sortable="true">PO Date</th>
-                      <th field="due_date" sortable="true">Due Date</th>
-                      <th field="spl_name" sortable="true">Supplier Name</th>
-                      <th field="action_button">Action</th>
+                      <th field="po_number" width="100" sortable="true">PO Number</th>
+                      <th field="po_date" width="100" sortable="true">PO Date</th>
+                      <th field="due_date" width="100" sortable="true">Due Date</th>
+                      <th field="spl_name" width="100" sortable="true">Supplier Name</th>
+                      <th field="action_button" width="30">Action</th>
                   </tr>
               </thead>
           </table>

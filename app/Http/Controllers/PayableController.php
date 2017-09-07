@@ -8,6 +8,8 @@ use App\Models\TrLedger;
 use App\Models\MsPaymentType;
 use App\Models\MsDepartment;
 use App\Models\MsJournalType;
+use App\Models\MsCompany;
+use App\Models\MsConfig;
 use App\Models\TrApDetail;
 use App\Models\TrApHeader;
 use App\Models\TrPODetail;
@@ -407,6 +409,7 @@ class PayableController extends Controller
                 $temp['due_date'] = $value->due_date;
                 $temp['spl_name'] = $value->spl_name;
                 $action_button = '<a href="'.route('po.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>'; 
+                $action_button .= '| <a href="'.route('po.pdf',$value->id).'" ><i class="fa fa-file"></i></a>';
                 $action_button .= '| <a href="#" data-id="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
                 $temp['action_button'] = $action_button;
 
@@ -583,6 +586,17 @@ class PayableController extends Controller
             array_push($result['results'], $temp);
         }
         return json_encode($result);
+    }
+
+    public function poPdf(Request $request, $id)
+    {   
+        $data['po'] = TrPOHeader::find($id);
+        $data['company'] = MsCompany::first()->toArray();
+        $data['signature'] = @MsConfig::where('name','digital_signature')->first()->value;
+        $data['signatureFlag'] = @MsConfig::where('name','invoice_signature_flag')->first()->value;
+        $data['footer'] = @MsConfig::where('name','footer_invoice')->first()->value;
+        $data['label'] = @MsConfig::where('name','footer_label_inv')->first()->value;
+        return view('layouts.report_po', $data);
     }
 
 }

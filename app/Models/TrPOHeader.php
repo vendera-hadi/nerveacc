@@ -13,4 +13,9 @@ class TrPOHeader extends Model
    	{
    		return $this->hasMany('App\Models\TrPODetail','po_id');
    	}
+
+   	public function supplier()
+   	{
+   		return $this->belongsTo('App\Models\MsSupplier','spl_id');
+   	}
 }

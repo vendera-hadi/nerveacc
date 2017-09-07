@@ -396,6 +396,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// purchase order
 	Route::get('purchaseorder', 'PayableController@purchaseOrder')->name('po.index');
 	Route::get('purchaseorder/add', 'PayableController@addPurchaseOrder')->name('po.add');
+	Route::get('purchaseorder/pdf/{id}', 'PayableController@poPdf')->name('po.pdf');
 	Route::get('purchaseorder/edit/{id}', 'PayableController@editPurchaseOrder')->name('po.edit');
 	Route::post('purchaseorder/get', 'PayableController@getPurchaseOrder')->name('po.get');
 	Route::post('purchaseorder/add', 'PayableController@insertPurchaseOrder')->name('po.insert');
