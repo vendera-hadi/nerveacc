@@ -16,6 +16,7 @@
 				<center>
 					<h4>
 						BALANCE SHEET <br>
+						<b>{{Request::get('title')}}</b><br>
 						{{$company->comp_name}}<br>
 						{{$datetxt}}
 					</h4>

@@ -40,13 +40,18 @@
         <form role="form" action="post" id="filter">
             <div class="box-body">
                 <div class="row">
-                    <div class="col-sm-12">
+                    <div class="col-sm-6">
                         <div class="form-group">
                             <select id="format" name="format" class="form-control">
                                 @foreach($formats as $format)
                                 <option value="{{$format->id}}">{{$format->name}}</option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <input type="text" name="title" placeholder="Report title" class="form-control">
                         </div>
                     </div>
                 </div>
