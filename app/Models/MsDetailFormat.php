@@ -133,7 +133,7 @@ class MsDetailFormat extends Model
 	    	$temp = '';
 	    	foreach ($chars as $char) {
 	    		if($char == '+' || $char == '-'){
-	    			$operators[] = '+';
+	    			$operators[] = $char;
 	    			$vars[] = $temp;
 	    			$temp = '';
 	    		}else{

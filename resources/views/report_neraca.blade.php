@@ -30,9 +30,9 @@
 					<tr>
 						<?php 
 							if(isset($detail1[$i])){
-								if(trim($detail1[$i]['hide']) == '0'){
-									$desc = str_replace(' ','&nbsp;',$detail1[$i]['desc']);
-									if(!empty($detail1[$i]['header'])) $desc = '<b>'.$desc.'</b>';
+								if(!$detail1[$i]->hide){
+									$desc = str_replace(' ','&nbsp;',$detail1[$i]->desc);
+									if(!empty($detail1[$i]->header)) $desc = '<b>'.$desc.'</b>';
 									echo '<td>'.$desc.'</td>'; 
 								}else{
 									echo '<td>&nbsp;</td>';
@@ -46,14 +46,14 @@
 								$detail1[$i]->setDate($from, $to);
 								$detail1[$i]->setVariables($variables);
 								$calculate = $detail1[$i]->calculateAccount();
-								if(!empty($detail1[$i]['variable'])) $variables[$detail1[$i]['variable']] = $calculate;
+								if(!empty($detail1[$i]->variable)) $variables[$detail1[$i]->variable] = $calculate;
 
-								if(trim($detail1[$i]['hide']) == '0'){
-									if(!empty($detail1[$i]['coa_code']) || !empty($detail1[$i]['formula'])){
-										if(trim($detail1[$i]['underline']) == '1'){
-											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.number_format($calculate, 0, ',', '.').'</td>'; 
+								if(!$detail1[$i]->hide){
+									if(!empty($detail1[$i]->coa_code) || !empty($detail1[$i]->formula)){
+										if(trim($detail1[$i]->underline) == '1'){
+											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.format_report_numeric($calculate).'</td>'; 
 										}else{
-											echo '<td style="text-align:right">'.number_format($calculate, 0, ',', '.').'</td>';
+											echo '<td style="text-align:right">'.format_report_numeric($calculate).'</td>';
 										}
 									}else{
 										echo '<td>&nbsp;</td>';
@@ -66,9 +66,9 @@
 							}
 							
 							if(isset($detail2[$i])){
-								if(trim($detail2[$i]['hide']) == '0'){
-									$desc = str_replace(' ','&nbsp;',$detail2[$i]['desc']); 
-									if(!empty($detail2[$i]['header'])) $desc = '<b>'.$desc.'</b>';
+								if(!$detail2[$i]->hide){
+									$desc = str_replace(' ','&nbsp;',$detail2[$i]->desc); 
+									if(!empty($detail2[$i]->header)) $desc = '<b>'.$desc.'</b>';
 									echo '<td>'.$desc.'</td>'; 
 								}else{
 									echo '<td>&nbsp;</td>';
@@ -82,14 +82,14 @@
 								$detail2[$i]->setDate($from, $to);
 								$detail2[$i]->setVariables($variables);
 								$calculate = $detail2[$i]->calculateAccount();
-								if(!empty($detail2[$i]['variable'])) $variables[$detail2[$i]['variable']] = $calculate;
+								if(!empty($detail2[$i]->variable)) $variables[$detail2[$i]->variable] = $calculate;
 
-								if(trim($detail2[$i]['hide']) == '0'){
-									if(!empty($detail2[$i]['coa_code']) || !empty($detail2[$i]['formula'])){
-										if(trim($detail2[$i]['underline']) == '1'){
-											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.number_format($calculate, 0, ',', '.').'</td>'; 
+								if(!$detail2[$i]->hide){
+									if(!empty($detail2[$i]->coa_code) || !empty($detail2[$i]->formula)){
+										if(trim($detail2[$i]->underline) == '1'){
+											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.format_report_numeric($calculate).'</td>'; 
 										}else{
-											echo '<td style="text-align:right">'.number_format($calculate, 0, ',', '.').'</td>';
+											echo '<td style="text-align:right">'.format_report_numeric($calculate).'</td>';
 										}
 									}else{
 										echo '<td>&nbsp;</td>';

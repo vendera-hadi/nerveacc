@@ -38,7 +38,7 @@
                     @if($dt->hide == 0)
                         <tr>
                             <td>{!!$desc!!}</b></td>
-                            <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ number_format($calculate, 0, ',', '.') }}@endif</td>
+                            <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($calculate) }}@endif</td>
                         </tr>
                         @if($dt->linespace > 0)
                         @for($i=0; $i<count($dt->linespace); $i++)
