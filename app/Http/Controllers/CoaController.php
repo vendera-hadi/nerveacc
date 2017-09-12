@@ -87,6 +87,10 @@ class CoaController extends Controller
     public function insert(Request $request){
 		try{
             $input = $request->all();
+            $input['coa_beginning'] = 0;
+            $input['coa_debit'] = 0;
+            $input['coa_credit'] = 0;
+            $input['coa_ending'] = 0;
 		    return MsMasterCoa::create($input);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);

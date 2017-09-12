@@ -72,7 +72,11 @@
             <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
                 <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                 <div style="margin-bottom:10px">
-                    <input name="coa_year" class="easyui-textbox" label="COA Year:" style="width:100%" data-options="required:true,validType:'length[0,4]'">
+                    <select class="easyui-combobox" name="coa_year" label="COA Year:" style="width:300px;">
+                        @for($i=2016; $i<=date('Y'); $i++)
+                        <option value="{{$i}}">{{$i}}</option>
+                        @endfor
+                    </select>
                 </div>
                 <div style="margin-bottom:10px">
                     <input name="coa_code" class="easyui-textbox" label="COA Code:" style="width:100%" data-options="required:true,validType:'length[0,5]'">
@@ -96,19 +100,10 @@
                     </select>
                 </div>
                 <div style="margin-bottom:10px">
-                    <input name="coa_type" class="easyui-textbox" label="COA Type:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
-                </div>
-                <div style="margin-bottom:10px">
-                    <input name="coa_beginning" class="easyui-textbox" label="COA Beginning:" style="width:100%" data-options="required:true,validType:'length[0,10]'" value="0">
-                </div>
-                <div style="margin-bottom:10px">
-                    <input name="coa_debit" class="easyui-textbox" label="COA Debit:" style="width:100%" data-options="required:true">
-                </div>
-                <div style="margin-bottom:10px">
-                    <input name="coa_credit" class="easyui-textbox" label="COA Credit:" style="width:100%" data-options="required:true">
-                </div>
-                <div style="margin-bottom:10px">
-                    <input name="coa_ending" class="easyui-textbox" label="COA Ending:" style="width:100%" data-options="required:true">
+                    <select class="easyui-combobox" name="coa_type" label="COA Type:" style="width:300px;">
+                        <option value="DEBET" selected>DEBET</option>
+                        <option value="KREDIT">KREDIT</option>
+                    </select>
                 </div>
             </form>
         </div>
