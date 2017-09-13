@@ -111,7 +111,9 @@ class CoaController extends Controller
     public function delete(Request $request){
         try{
         	$id = $request->id;
-        	MsMasterCoa::destroy($id);
+            $coa = MsMasterCoa::find($id);
+        	if(!empty($coa->coa_lock)) return response()->json(['errorMsg' => 'You can\'t delete this COA. COA is locked']);
+            MsMasterCoa::destroy($id);
         	return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
