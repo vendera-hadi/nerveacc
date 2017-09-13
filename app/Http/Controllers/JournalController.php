@@ -450,11 +450,72 @@ class JournalController extends Controller
                     $balance = $totalCredit->total - $totalDebit->total;
                     \DB::table('gl_balance_log')->insert(['month'=>(int)$i, 'year'=>(int)$year, 'balance'=>(float)$balance]);
                 }
+
+                // catat saldo akhir, insert ke next coa beginning
+                $this->calculateAndCloneCoaNextYear($year);
                 return response()->json(['success' => 'Closing Success']);
             }
         }
 
         // return response()->json();
+    }
+
+    public function calculateAndCloneCoaNextYear($year)
+    {
+        $allcoa = MsMasterCoa::where('coa_year', $year)->get();
+        foreach ($allcoa as $coa) {
+            if($coa->coa_code == 30120) $result = $this->labarugiBerjalan($coa->coa_code, $year);
+            else $result = $this->getTotalFromLedger($coa->coa_code, $year);
+            // echo "COA code = ".$coa->coa_code.", Debit : ".$result['debit'].", Credit : ".$result['credit'].", Total : ".$result['total']."<br><br>";
+            $coa->coa_debit = $result['debit'];
+            $coa->coa_credit = $result['credit'];
+            $coa->coa_ending = $result['total'];
+            $coa->save();
+
+            $newCoa = $coa->replicate();
+            $newCoa->coa_year = $year + 1;
+            $newCoa->coa_beginning = $result['total'];
+            $newCoa->coa_debit = 0;
+            $newCoa->coa_credit = 0;
+            $newCoa->coa_ending = 0;
+            $newCoa->save();
+        }
+    }
+
+    private function getTotalFromLedger($coacode, $year)
+    {
+        // get semua ledger ditotal dr awal sampai akhir tahun
+        $coa = MsMasterCoa::where('coa_code','like',$coacode."%")->where('coa_year', $year)->first();
+        $total = $debit = $credit = 0;
+        if($coa){
+            $ledger = TrLedger::where('coa_code','like',$coacode."%")
+                ->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=',date('Y-12-31'))
+                ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
+            if(strpos($coa->coa_type, 'DEBET') !== false) $total = $coa->coa_beginning + $ledger->debit - $ledger->credit;
+            else $total = $coa->coa_beginning + $ledger->credit - $ledger->debit;
+            $debit = $ledger->debit ?: 0;
+            $credit = $ledger->credit ?: 0;
+        }
+        return ['total' => $total, 'debit' => $debit, 'credit' => $credit];
+    }
+
+    private function labarugiBerjalan($coacode, $year)
+    {
+        $coa = MsMasterCoa::where('coa_code','like',$coacode."%")->where('coa_year',$year)->first();
+        // rekap pendapatan (debet)
+        $ledgerProfit = TrLedger::where(function($query){
+                        $query->where('coa_code','like',"4%")->orWhere('coa_code','like',"6%");
+                })->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=',date('Y-12-31'))
+                ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
+        $profit = abs($ledgerProfit->credit - $ledgerProfit->debit);
+        //  rekap loss (credit)
+        $ledgerLoss = TrLedger::where(function($query){
+                        $query->where('coa_code','like',"5%")->orWhere('coa_code','like',"7%");
+                })->where('ledg_date','>=',date('Y-01-01'))->where('ledg_date','<=', date('Y-12-31'))
+                ->select(\DB::raw('SUM(ledg_debit) as debit'), \DB::raw('SUM(ledg_credit) as credit'))->first();
+        $loss = abs($ledgerLoss->debit - $ledgerLoss->credit);
+        $total = $coa->coa_beginning + $profit - $loss;
+        return ['total' => $total, 'debit' => $profit, 'credit' => $loss];
     }
 
 }
