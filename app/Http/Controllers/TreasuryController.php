@@ -128,7 +128,7 @@ class TreasuryController extends Controller
         $supplier_id = @$request->id;
 
         $invoice_data = TrApHeader::select('tr_ap_invoice_hdr.*','tr_purchase_order_hdr.po_number')
-                            ->join('tr_purchase_order_hdr', 'tr_ap_invoice_hdr.po_id',"=",'tr_purchase_order_hdr.id')
+                            ->leftJoin('tr_purchase_order_hdr', 'tr_ap_invoice_hdr.po_id',"=",'tr_purchase_order_hdr.id')
                             ->where('tr_ap_invoice_hdr.posting', 1)
                             ->where('outstanding', '>', 0)
                             ->where('tr_ap_invoice_hdr.spl_id', '=',$supplier_id)

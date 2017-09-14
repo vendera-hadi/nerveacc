@@ -276,7 +276,7 @@ class PayableController extends Controller
                                     'ledg_date' => date('Y-m-d'),
                                     'ledg_refno' => $header->invoice_no,
                                     'ledg_debit' => 0,
-                                    'ledg_credit' => $detail->amount,
+                                    'ledg_credit' => $detail->qty * $detail->amount,
                                     'ledg_description' => $header->invoice_no,
                                     'coa_year' => $coayear,
                                     'coa_code' => $detail->coa_code,
@@ -287,7 +287,7 @@ class PayableController extends Controller
                                 ];
                     TrLedger::create($journal);
 
-                    $total += $detail->amount;
+                    $total += $detail->qty * $detail->amount;
                     if(!empty($detail->ppn_coa_code)){
                         $nextJournalNumber++;
                         $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
