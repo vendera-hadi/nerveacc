@@ -165,7 +165,7 @@
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter')];
 
-              $apUrls = [url('accpayable'),url('purchaseorder'),url('treasury'),route('report.apview')];
+              $apUrls = [url('accpayable'),url('purchaseorder'),url('treasury'),route('report.apview'),route('payable.withpo'),route('payable.withoutpo'),route('po.add')];
               $apSetupUrls = [url('supplier')];
 
               $accreceivables = [52,58,59,63,68,76,35,39,40,41,42,43,44];
@@ -395,10 +395,10 @@
                     </a>
                     <ul class="treeview-menu @if(in_array(Request::url(),$apUrls) || in_array(Request::url(),$apSetupUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$apUrls) || in_array(Request::url(),$apSetupUrls)) style="display:block" @endif>
                       @if(Session::get('role')==1 || in_array(100,Session::get('permissions')))
-                      <li @if(Request::url() == url('accpayable')) class="active" @endif><a href="{{url('accpayable')}}"><i class="fa fa-circle-o"></i>AP List</a></li>
+                      <li @if(Request::url() == url('accpayable') || Request::url() == route('payable.withpo') || Request::url() == route('payable.withoutpo')) class="active" @endif><a href="{{url('accpayable')}}"><i class="fa fa-circle-o"></i>AP List</a></li>
                       @endif
                       @if(Session::get('role')==1 || in_array(100,Session::get('permissions')))
-                      <li @if(Request::url() == url('purchaseorder')) class="active" @endif><a href="{{url('purchaseorder')}}"><i class="fa fa-circle-o"></i> PO List</a></li>
+                      <li @if(Request::url() == url('purchaseorder') || Request::url() == route('po.add')) class="active" @endif><a href="{{url('purchaseorder')}}"><i class="fa fa-circle-o"></i> PO List</a></li>
                       @endif
                       @if(Session::get('role')==1 || in_array(100,Session::get('permissions')))
                       <li @if(Request::url() == url('treasury')) class="active" @endif><a href="{{url('treasury')}}"><i class="fa fa-circle-o"></i> AP Payment</a></li>

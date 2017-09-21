@@ -212,7 +212,7 @@
                               <td>Account</td>
                               <td width="70">Qty</td>
                               <td width="200">Amount (IDR)</td>
-                              <td width="150">PPN</td>
+                              <td width="150">Pajak</td>
                               <td>Dept</td>
                               <td>Total</td>
                               <td></td>
@@ -228,7 +228,7 @@
                           <br><br>
                           <h4 class="pull-right">
                           Subtotal : <b id="subtotalAmount">0</b><br>
-                          Tax (PPN) : <b id="ppnAmount">0</b><br>
+                          Tax : <b id="ppnAmount">0</b><br>
                           Total Amount : <b id="totalAmount">0</b>
                           </h4>
                         </div>

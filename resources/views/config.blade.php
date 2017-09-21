@@ -123,6 +123,25 @@
                                   <textarea class="textarea" name="inv_body_email" class="form-control" style="width: 100%;" required>{{$invBodyEmail}}</textarea>
                                 </div>
 
+                                <div class="form-group">
+                                  <label>Footer PO Text</label>
+                                  <textarea class="textarea" name="footer_po" class="form-control" style="width: 100%;" required>{{$footer_po}}</textarea>
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Footer PO Label</label>
+                                  <textarea class="textarea" name="footer_label_po" class='form-control' style="width: 100%;" required>{{$label_po}}</textarea>
+                                </div>
+
+                                <div class="form-group">
+                                  <label>PO Signature Name</label>
+                                  <input type="text" name="footer_signature_name" class="form-control" value="{{$footer_signature_name}}">
+                                </div>
+
+                                <div class="form-group">
+                                  <label>PO Signature Position</label>
+                                  <input type="text" name="footer_signature_position" class="form-control" value="{{$footer_signature_position}}">
+                                </div>
                             </div>
                           </div>
                           <!-- /.box-body -->

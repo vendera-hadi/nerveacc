@@ -592,10 +592,10 @@ class PayableController extends Controller
     {   
         $data['po'] = TrPOHeader::find($id);
         $data['company'] = MsCompany::first()->toArray();
-        $data['signature'] = @MsConfig::where('name','digital_signature')->first()->value;
-        $data['signatureFlag'] = @MsConfig::where('name','invoice_signature_flag')->first()->value;
-        $data['footer'] = @MsConfig::where('name','footer_invoice')->first()->value;
-        $data['label'] = @MsConfig::where('name','footer_label_inv')->first()->value;
+        $data['signature'] = @MsConfig::where('name','footer_signature_name')->first()->value;
+        $data['position'] = @MsConfig::where('name','footer_signature_position')->first()->value;
+        $data['footer'] = @MsConfig::where('name','footer_po')->first()->value;
+        $data['label'] = @MsConfig::where('name','footer_label_po')->first()->value;
         return view('layouts.report_po', $data);
     }
 

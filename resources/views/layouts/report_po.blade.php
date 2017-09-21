@@ -143,17 +143,10 @@
                     {!!$label!!}
                 </td>
                 <td width="23%" style="text-align: center; vertical-align: top;">
-                    Jakarta, <?php echo date('d M Y'); ?><br><br>
-                    @if(!empty($signature) && !empty($signatureFlag))
-                    <img src="{{asset($signature)}}" width="150">
-                    <br><br>
-                    <b><u>{{$company_sign}}</u></b><br>
-                    {{$company_position}}
-                    @else
+                    Jakarta, <?php echo date('d M Y'); ?>
                     <br><br><br><br><br>
-                    <b><u>{{$company_sign}}</u></b><br>
-                    {{$company_position}}
-                    @endif
+                    <b><u>{!!$signature!!}</u></b><br>
+                    {!!$position!!}
                     
                 </td>
             </tr>
