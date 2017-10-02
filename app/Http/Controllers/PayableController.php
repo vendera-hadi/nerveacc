@@ -148,8 +148,9 @@ class PayableController extends Controller
             $notes = $request->note;
             $qty = $request->qty;
             $amount = $request->amount;
-            $ppn_amount = $request->ppn_amount;
-            $ppn_flag = $request->is_ppn;
+            $coatype = $request->coa_type;
+            // $ppn_amount = $request->ppn_amount;
+            // $ppn_flag = $request->is_ppn;
             $dept = $request->dept_id;
             $total = $totalppn = 0;
             foreach ($coa_code as $key => $coa) {
@@ -157,14 +158,16 @@ class PayableController extends Controller
             	$detail->note = $notes[$key];
             	$detail->qty = $qty[$key];
             	$detail->amount = (float)$amount[$key];
-            	$detail->ppn_amount = (float)$ppn_amount[$key];
-            	$detail->is_ppn = !empty($ppn_amount[$key]) ? true : false;
-            	$detail->ppn_coa_code = !empty($ppn_coa[$key]) ? $ppn_coa[$key] : null;
+            	// $detail->ppn_amount = (float)$ppn_amount[$key];
+                $detail->ppn_amount = 0;
+            	// $detail->is_ppn = !empty($ppn_amount[$key]) ? true : false;
+            	// $detail->ppn_coa_code = !empty($ppn_coa[$key]) ? $ppn_coa[$key] : null;
             	$detail->coa_code = $coa;
             	$detail->dept_id = $dept[$key];
+                $detail->coa_type = $coatype[$key];
             	$details[] = $detail;
             	$total += $qty[$key] * $amount[$key];
-            	$totalppn += $ppn_amount[$key];
+            	// $totalppn += $ppn_amount[$key];
             }
             $header->total = $total + $totalppn;
             $header->outstanding = $header->total;
@@ -263,7 +266,7 @@ class PayableController extends Controller
                 }
 
                 $header = TrApHeader::find($id);
-                // lawanan hutang (KREDIT)
+                // lawanan hutang (DEBET)
                 $total = 0;
                 foreach ($header->detail as $detail) {
                     $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
@@ -275,8 +278,8 @@ class PayableController extends Controller
                                     'ledg_number' => $journalNumber,
                                     'ledg_date' => date('Y-m-d'),
                                     'ledg_refno' => $header->invoice_no,
-                                    'ledg_debit' => $detail->qty * $detail->amount,
-                                    'ledg_credit' => 0,
+                                    // 'ledg_debit' => $detail->qty * $detail->amount,
+                                    // 'ledg_credit' => 0,
                                     'ledg_description' => $header->invoice_no,
                                     'coa_year' => $coayear,
                                     'coa_code' => $detail->coa_code,
@@ -285,36 +288,44 @@ class PayableController extends Controller
                                     'jour_type_id' => $jourType->id,
                                     'dept_id' => $detail->dept_id
                                 ];
-                    TrLedger::create($journal);
-
-                    $total += $detail->qty * $detail->amount;
-                    if(!empty($detail->ppn_coa_code)){
-                        $nextJournalNumber++;
-                        $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
-                        $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
-                        $journal = [
-                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
-                                    'ledge_fisyear' => $coayear,
-                                    'ledg_number' => $journalNumber,
-                                    'ledg_date' => date('Y-m-d'),
-                                    'ledg_refno' => $header->invoice_no,
-                                    'ledg_debit' => $detail->ppn_amount,
-                                    'ledg_credit' => 0,
-                                    'ledg_description' => $header->invoice_no,
-                                    'coa_year' => $coayear,
-                                    'coa_code' => $detail->ppn_coa_code,
-                                    'created_by' => Auth::id(),
-                                    'updated_by' => Auth::id(),
-                                    'jour_type_id' => $jourType->id,
-                                    'dept_id' => $detail->dept_id
-                                ];
-                        TrLedger::create($journal);
-                        $total += $detail->ppn_amount;
+                    if($detail->coa_type == 'DEBET'){
+                        $journal['ledg_debit'] = $detail->qty * $detail->amount;
+                        $journal['ledg_credit'] = 0;
+                        $total += $detail->qty * $detail->amount;
+                    }else{
+                        $journal['ledg_credit'] = $detail->qty * $detail->amount;
+                        $journal['ledg_debit'] = 0;
+                        $total -= $detail->qty * $detail->amount;
                     }
+                    TrLedger::create($journal);
+             
+                    // if(!empty($detail->ppn_coa_code)){
+                    //     $nextJournalNumber++;
+                    //     $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                    //     $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+                    //     $journal = [
+                    //                 'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                    //                 'ledge_fisyear' => $coayear,
+                    //                 'ledg_number' => $journalNumber,
+                    //                 'ledg_date' => date('Y-m-d'),
+                    //                 'ledg_refno' => $header->invoice_no,
+                    //                 'ledg_debit' => $detail->ppn_amount,
+                    //                 'ledg_credit' => 0,
+                    //                 'ledg_description' => $header->invoice_no,
+                    //                 'coa_year' => $coayear,
+                    //                 'coa_code' => $detail->ppn_coa_code,
+                    //                 'created_by' => Auth::id(),
+                    //                 'updated_by' => Auth::id(),
+                    //                 'jour_type_id' => $jourType->id,
+                    //                 'dept_id' => $detail->dept_id
+                    //             ];
+                    //     TrLedger::create($journal);
+                    //     $total += $detail->ppn_amount;
+                    // }
                     $nextJournalNumber++;
                 }
                 // endforeach
-                // Hutang (DEBET)
+                // Hutang (KREDIT)
                 $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
                 $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
                 $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
@@ -489,12 +500,13 @@ class PayableController extends Controller
             $header->updated_by = \Auth::id();
 
             $coa_code = $request->coa_code;
+            $coatype = $request->coa_type;
             $ppn_coa = $request->ppn_coa_code;
             $notes = $request->note;
             $qty = $request->qty;
             $amount = $request->amount;
-            $ppn_amount = $request->ppn_amount;
-            $ppn_flag = $request->is_ppn;
+            // $ppn_amount = $request->ppn_amount;
+            // $ppn_flag = $request->is_ppn;
             $dept = $request->dept_id;
             $total = $totalppn = 0;
             foreach ($coa_code as $key => $coa) {
@@ -502,11 +514,13 @@ class PayableController extends Controller
             	$detail->note = $notes[$key];
             	$detail->qty = $qty[$key];
             	$detail->amount = (float)$amount[$key];
-            	$detail->ppn_amount = (float)$ppn_amount[$key];
-            	$detail->is_ppn = !empty($ppn_amount[$key]) ? true : false;
-            	$detail->ppn_coa_code = !empty($ppn_coa[$key]) ? $ppn_coa[$key] : null;
+            	$detail->ppn_amount = 0;
+                // $detail->ppn_amount = (float)$ppn_amount[$key];
+            	// $detail->is_ppn = !empty($ppn_amount[$key]) ? true : false;
+            	// $detail->ppn_coa_code = !empty($ppn_coa[$key]) ? $ppn_coa[$key] : null;
             	$detail->coa_code = $coa;
             	$detail->dept_id = $dept[$key];
+                $detail->coa_type = $coatype[$key];
             	$details[] = $detail;
             }
             $header->save();
@@ -538,8 +552,9 @@ class PayableController extends Controller
             $notes = $request->note;
             $qty = $request->qty;
             $amount = $request->amount;
-            $ppn_amount = $request->ppn_amount;
-            $ppn_flag = $request->is_ppn;
+            $coatype = $request->coa_type;
+            // $ppn_amount = $request->ppn_amount;
+            // $ppn_flag = $request->is_ppn;
             $dept = $request->dept_id;
             $total = $totalppn = 0;
             foreach ($coa_code as $key => $coa) {
@@ -547,11 +562,13 @@ class PayableController extends Controller
             	$detail->note = $notes[$key];
             	$detail->qty = $qty[$key];
             	$detail->amount = (float)$amount[$key];
-            	$detail->ppn_amount = (float)$ppn_amount[$key];
-            	$detail->is_ppn = !empty($ppn_amount[$key]) ? true : false;
-            	$detail->ppn_coa_code = !empty($ppn_coa[$key]) ? $ppn_coa[$key] : null;
+            	$detail->ppn_amount = 0;
+                // $detail->ppn_amount = (float)$ppn_amount[$key];
+            	// $detail->is_ppn = !empty($ppn_amount[$key]) ? true : false;
+            	// $detail->ppn_coa_code = !empty($ppn_coa[$key]) ? $ppn_coa[$key] : null;
             	$detail->coa_code = $coa;
             	$detail->dept_id = $dept[$key];
+                $detail->coa_type = $coatype[$key];
             	$details[] = $detail;
             }
             $header->save();

@@ -52,8 +52,8 @@
     <div class="nav-tabs-custom">
       <ul class="nav nav-tabs">
         <li class="active"><a href="#tab_1" data-toggle="tab">Lists</a></li>
-        <li><a href="{{route('payable.withoutpo')}}">AP without PO</a></li>
-        <li><a href="{{route('payable.withpo')}}">AP with PO</a></li>
+        <li><a href="{{route('payable.withoutpo')}}">Non PO</a></li>
+        <li><a href="{{route('payable.withpo')}}">With PO</a></li>
       </ul>
 
       <div class="tab-content">

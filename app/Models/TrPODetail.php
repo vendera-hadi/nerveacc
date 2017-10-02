@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TrPODetail extends Model
 {
 	protected $table ='tr_purchase_order_dtl';
-   	protected $fillable =['po_id','note','amount','is_ppn','coa_code','dept_id','ppn_amount','ppn_coa_code','qty'];
+   	protected $fillable =['po_id','note','amount','is_ppn','coa_code','dept_id','ppn_amount','ppn_coa_code','qty','coa_type'];
 
    	public function dept()
    	{

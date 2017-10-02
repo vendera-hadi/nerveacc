@@ -52,8 +52,8 @@
     <div class="nav-tabs-custom">
       <ul class="nav nav-tabs">
         <li><a href="{{route('payable.index')}}" >Lists</a></li>
-        <li><a href="{{route('payable.withoutpo')}}">AP without PO</a></li>
-        <li class="active"><a href="#">AP with PO</a></li>
+        <li><a href="{{route('payable.withoutpo')}}">Non PO</a></li>
+        <li class="active"><a href="#">With PO</a></li>
       </ul>
 
       <div class="tab-content">
@@ -185,7 +185,8 @@
                               <td>Account</td>
                               <td width="70">Qty</td>
                               <td width="200">Amount (IDR)</td>
-                              <td width="150">Pajak</td>
+                              <td width="150">Account Type</td>
+                              <!-- <td width="150">Pajak</td> -->
                               <td>Dept</td>
                               <td>Total</td>
                             </tr>
@@ -199,9 +200,9 @@
 
                           <br><br>
                           <h4 class="pull-right">
-                          Subtotal : <b id="subtotalAmount">0</b><br>
-                          Tax : <b id="ppnAmount">0</b><br>
-                          Total Amount : <b id="totalAmount">0</b>
+                          Total : <b id="subtotalAmount">0</b><br>
+                          <!-- Tax : <b id="ppnAmount">0</b><br>
+                          Total Amount : <b id="totalAmount">0</b> -->
                           </h4>
                         </div>
                     </div>
@@ -268,13 +269,14 @@ $(function(){
               var total = 0, totalppn = 0;
               $.each(result.detail, function (index, item) {
                   var subtotal = item.qty * item.amount;
-                  total += item.qty * item.amount;
+                  if(item.coa_type == "DEBET") total += item.qty * item.amount;
+                  else total -= item.qty * item.amount;
                   totalppn += parseFloat(item.ppn_amount);
-                  $('#tableDetail tbody').append('<tr><td>'+item.note+'</td><td>'+item.coa_code+'</td><td>'+item.qty+'</td><td>'+item.amount+'</td><td>'+item.ppn_amount+'</td><td>'+item.dept_id+'</td><td class="subtotal">'+subtotal+'</td></tr>');
+                  $('#tableDetail tbody').append('<tr><td>'+item.note+'</td><td>'+item.coa_code+'</td><td>'+item.qty+'</td><td>'+item.amount+'</td><td>'+item.coa_type+'</td><td>'+item.dept_id+'</td><td class="subtotal">'+subtotal+'</td></tr>');
               });
               $('#subtotalAmount').text(total);
-              $('#ppnAmount').text(totalppn);
-              $('#totalAmount').text(total + totalppn);
+              // $('#ppnAmount').text(totalppn);
+              // $('#totalAmount').text(total + totalppn);
            }, 'json');
         });
 

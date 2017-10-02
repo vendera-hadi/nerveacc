@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('htmlheader_title')
-    Add Purchase Order
+    Edit Purchase Order
 @endsection
 
 @section('contentheader_title')
-   Add Purchase Order
+   Edit Purchase Order
 @endsection
 
 @section('htmlheader_scripts')
@@ -38,7 +38,7 @@
 @section('contentheader_breadcrumbs')
     <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">Add Purchase Order</li>
+        <li class="active">Edit Purchase Order</li>
     </ol>
 @stop
 
@@ -150,14 +150,24 @@
                     </div>
                     <hr>
                     <div class="row">
-                        <div class="col-sm-3">
+                        <div class="col-sm-4">
                             <div class="form-group">
                                 <label>Description</label>
                                 <textarea class="form-control" id="note"></textarea>
                             </div>
                         </div>
 
-                        <div class="col-sm-3">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="form-control" id="coatype">
+                                  <option>DEBET</option>
+                                  <option>KREDIT</option>
+                                </select>
+                            </div>
+                        </div>  
+
+                        <div class="col-sm-4">
                             <div class="form-group">
                                 <label>Department</label>
                                 <select name="dept_id" id="addDept" class="form-control">
@@ -170,7 +180,7 @@
                             </div>
                         </div>
 
-                        <div class="col-sm-6">
+                        <div class="col-sm-12">
                           <label>COA</label>
                           <div class="input-group input-group-md">
                             <select class="js-example-basic-single" id="selectAccount" style="width:100%">
@@ -183,7 +193,7 @@
                               <button type="button" id="addAccount" class="btn btn-default">Add Line</button>
                             </span>
                           </div>
-                        </div>   
+                        </div>    
 
                     </div>
 
@@ -196,7 +206,8 @@
                               <td>Account</td>
                               <td width="70">Qty</td>
                               <td width="200">Amount (IDR)</td>
-                              <td width="150">PPN</td>
+                              <td width="150">Account Type</td>
+                              <!-- <td width="150">PPN</td> -->
                               <td>Dept</td>
                               <td>Total</td>
                               <td></td>
@@ -218,13 +229,8 @@
                                 <input type="text" name="amount[]" class="form-control amount" value="{{(int)$detail->amount}}">
                               </td>
                               <td>
-                                <select class="form-control ppn" name="ppn_coa_code[]">
-                                  <option value="" data-val="0">No PPN</option>
-                                  @foreach($ppn_options as $ppn)
-                                  <option value="{{$ppn->coa_code}}" data-val="{{$ppn->amount}}" @if($detail->ppn_coa_code == $ppn->coa_code) selected @endif>{{$ppn->name}}</option>
-                                  @endforeach
-                                </select>
-                                <input type="hidden" name="ppn_amount[]" value="{{$detail->ppn_amount}}" class="ppnamount">
+                                {{$detail->coa_type}} 
+                                <input type="hidden" name="coa_type[]" value="{{$detail->coa_type}}" class="type">
                               </td>
                               <td>
                                 <input type="hidden" name="dept_id[]" value="{{$detail->dept_id}}">{{$detail->dept->dept_name}}
@@ -240,9 +246,9 @@
 
                           <br><br>
                           <h4 class="pull-right">
-                          Subtotal : <b id="subtotalAmount">0</b><br>
-                          Tax (PPN) : <b id="ppnAmount">0</b><br>
-                          Total Amount : <b id="totalAmount">0</b>
+                          Total : <b id="subtotalAmount">0</b><br>
+                          <!-- Tax (PPN) : <b id="ppnAmount">0</b><br>
+                          Total Amount : <b id="totalAmount">0</b> -->
                           </h4>
                         </div>
                     </div>
@@ -297,19 +303,19 @@ $(function(){
           }
      });
 
-    var coacode, desc, priceeach, dept, qty, useppn, useppnval, ppnamount, subtotal;
+    var coacode, desc, priceeach, dept, qty, useppn, useppnval, ppnamount, subtotal, acctype;
     var ppncoa = '<select class="form-control ppn" name="ppn_coa_code[]"><option value="" data-val="0">No PPN</option>@foreach($ppn_options as $ppn) <option value="{{$ppn->coa_code}}" data-val="{{$ppn->amount}}">{{$ppn->name}}</option> @endforeach</select>';
     $("#addAccount").click(function(){
         coacode = $('#selectAccount option:selected').val();
         desc = $('#note').val();
         dept = $('#addDept').val();
         deptname = $('#addDept option:selected').text();
-        
+        acctype = $('#coatype').val();
         
         if(coacode != "" && desc != "" && dept != ""){
             $('#rowEmpty').remove();
 
-            $('#tableDetail tbody').append('<tr><td><input type="hidden" name="note[]" class="form-control" value="'+desc+'">'+desc+'</td><td><input type="hidden" name="coa_code[]" class="form-control" value="'+coacode+'">'+coacode+'</td><td><input type="number" name="qty[]" value="1" class="form-control qty"></td><td><input type="text" name="amount[]" class="form-control amount" value="1"></td><td>'+ppncoa+'<input type="hidden" name="ppn_amount[]" value="0" class="ppnamount"></td><td><input type="hidden" name="dept_id[]" value="'+dept+'">'+deptname+'</td><td class="subtotal">1</td><td><a class="removeRow"><i class="fa fa-times text-danger"></i></a></td></tr>');
+            $('#tableDetail tbody').append('<tr><td><input type="hidden" name="note[]" class="form-control" value="'+desc+'">'+desc+'</td><td><input type="hidden" name="coa_code[]" class="form-control" value="'+coacode+'">'+coacode+'</td><td><input type="number" name="qty[]" value="1" class="form-control qty"></td><td><input type="text" name="amount[]" class="form-control amount" value="1"></td><td>'+acctype+'<input type="hidden" name="coa_type[]" value="'+acctype+'" class="type"></td><td><input type="hidden" name="dept_id[]" value="'+dept+'">'+deptname+'</td><td class="subtotal">1</td><td><a class="removeRow"><i class="fa fa-times text-danger"></i></a></td></tr>');
             countTotal();
         }else{
             alert('Please fill COA, description, price each and department');
@@ -320,8 +326,12 @@ $(function(){
 function countSubtotal(parent){
     var qty = parent.find('.qty').val();
     var each = parent.find('.amount').val();
+    var coatype = parent.find('.type').val();
     parent.find('.subtotal').text(qty * each);
-    countTotal();
+    if(countTotal() < 0){
+      // alert('Total kurang dari 0, harap atur ulang qty');
+      parent.find('.qty').val(1).trigger('change');
+    }
 }
 
 function countTotal()
@@ -331,17 +341,20 @@ function countTotal()
         $('#tableDetail tbody tr').each(function(){
             var amount = parseFloat($(this).find('.amount').val());
             var qty = parseFloat($(this).find('.qty').val());
-            var tax = parseFloat($(this).find('.ppn option:selected').data('val'));
-            $(this).find('.ppnamount').val(tax * amount * qty);
-            subtotal += amount * qty;
-            totaltax += tax * amount * qty;
+            var coatype = $(this).find('.type').val();
+            // var tax = parseFloat($(this).find('.ppn option:selected').data('val'));
+            // $(this).find('.ppnamount').val(tax * amount * qty);
+            if(coatype == 'KREDIT') subtotal += -1 * amount * qty;
+            else subtotal += amount * qty;
+            // totaltax += tax * amount * qty;
         });
         $('#subtotalAmount').text(subtotal);
-        $('#ppnAmount').text(totaltax);
-        $('#totalAmount').text(subtotal + totaltax);
+        // $('#ppnAmount').text(totaltax);
+        // $('#totalAmount').text(subtotal + totaltax);
     }else{
         $('#tableDetail tbody').append('<tr id="rowEmpty"><td colspan="6"><center>Data Kosong</center></td></tr>');
     }
+    return subtotal;
 }
 </script>
 @endsection
