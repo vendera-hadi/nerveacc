@@ -30,6 +30,7 @@ class CompanyController extends Controller
         $data['invBodyEmail'] = @MsConfig::where('name','inv_body_email')->first()->value;
         $data['footer_po'] = @MsConfig::where('name','footer_po')->first()->value;
         $data['label_po'] = @MsConfig::where('name','footer_label_po')->first()->value;
+        $data['po_prefix'] = @MsConfig::where('name','po_prefix')->first()->value;
         $data['footer_signature_name'] = @MsConfig::where('name','footer_signature_name')->first()->value;
         $data['footer_signature_position'] = @MsConfig::where('name','footer_signature_position')->first()->value;
         return view('config',$data);

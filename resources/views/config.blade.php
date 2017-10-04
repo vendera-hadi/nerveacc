@@ -142,6 +142,12 @@
                                   <label>PO Signature Position</label>
                                   <input type="text" name="footer_signature_position" class="form-control" value="{{$footer_signature_position}}">
                                 </div>
+
+                                <div class="form-group">
+                                  <label>PO Prefix</label>
+                                  <input type="text" name="po_prefix" class="form-control" value="{{$po_prefix}}">
+                                </div>
+
                             </div>
                           </div>
                           <!-- /.box-body -->

@@ -462,11 +462,20 @@ class PayableController extends Controller
 		$data['departments'] = MsDepartment::where('dept_isactive',1)->get();
 		$data['payment_terms'] = DB::table('ms_payment_terms')->get();
 		$data['ppn_options'] = DB::table('ms_ppn')->get();
-
-		$temp = "PO-".date('my')."-".strtoupper(str_random(8));
-		do{
-			$check = TrPOHeader::where('po_number',$temp)->first();
-		}while(!empty($check));
+        
+        $prefix = @MsConfig::where('name','po_prefix')->first()->value;
+		$temp = $prefix."-".date('ymd')."-";
+        $check = TrPOHeader::where('po_number','like',$temp."%")->orderBy('po_number','desc')->first();
+        if(!$check){
+            $temp .= '001';
+        }else{
+            $split = explode('-', $check->po_number);
+            $nextNumber = $split[2] + 1;
+            $temp .= str_pad($nextNumber, 3, 0, STR_PAD_LEFT);
+        }
+		// do{
+		// 	$check = TrPOHeader::where('po_number',$temp)->first();
+		// }while(!empty($check));
 		$data['new_po_number'] = $temp;
 		return view('purchase_order_add',$data);
 	}
@@ -488,10 +497,15 @@ class PayableController extends Controller
 	{
 		\DB::beginTransaction();
         try{
-            // dd($request->all());
             $header = new TrPOHeader;
             $header->spl_id = $request->spl_id;
-            $header->po_number = $request->po_number;
+            if($request->number_mode == "auto"){ 
+                $header->po_number = $request->po_number;
+            }else{
+                $check = TrPOHeader::where('po_number',$request->po_number_manual)->first();
+                if($check) return redirect()->back()->with(['error' => 'PO Number is already exist']);
+                $header->po_number = $request->po_number_manual;
+            }
             $header->po_date = $request->po_date;
             $header->due_date = $request->invoice_duedate;
             $header->terms = $request->terms;

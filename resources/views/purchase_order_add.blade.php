@@ -88,8 +88,13 @@
                         <div class="col-sm-3">
                           <div class="form-group">
                               <label>PO Number</label>
-                              <input type="text" class="form-control" value="{{$new_po_number}}" disabled="">
+
+                              <input type="text" class="form-control" id="po_number_txt" value="{{$new_po_number}}" disabled="">
                               <input type="hidden" name="po_number" value="{{$new_po_number}}">
+                              <input type="text" class="form-control" name="po_number_manual" style="display: none;">
+                              <br>
+                              <input type="radio" name="number_mode" id="number_mode_auto" value="auto" checked="">&nbsp;&nbsp;Auto&nbsp;&nbsp;&nbsp;
+                              <input type="radio" name="number_mode" id="number_mode_manual" value="manual">&nbsp;&nbsp;Manual
                           </div>
                          </div>
 
@@ -296,6 +301,16 @@ $(function(){
         }else{
             alert('Please fill COA, description, price each and department');
         }
+    });
+
+    $('input[name=number_mode]').change(function(){
+        if($(this).val() == 'manual'){
+          $('input[name=po_number_manual]').show();
+          $('#po_number_txt').hide();
+        }else{
+          $('input[name=po_number_manual]').hide();
+          $('#po_number_txt').show();
+        } 
     });
 });
 
