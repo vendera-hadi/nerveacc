@@ -252,6 +252,12 @@ class PayableController extends Controller
             $coayear = date('Y');
             $month = date('m');
             $journaltype = 'AP';
+
+            // cek backdate dr closing bulanan/tahunan
+            $lastclose = TrLedger::whereNotNull('closing_at')->orderBy('closing_at','desc')->first();
+            $limitMinPostingDate = null;
+            if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closing_at));
+
             foreach ($ids as $id) {
                 // cari last prefix, order by journal type
                 $jourType = MsJournalType::where('jour_type_prefix',$journaltype)->first();
@@ -266,6 +272,11 @@ class PayableController extends Controller
                 }
 
                 $header = TrApHeader::find($id);
+                if(!empty($limitMinPostingDate) && $header->invoice_date < $limitMinPostingDate){
+                    \DB::rollback();
+                    return response()->json(['error'=>1, 'message'=> "You can't posting if one of these invoice date is before last close date"]);
+                }
+
                 // lawanan hutang (DEBET)
                 $total = 0;
                 foreach ($header->detail as $detail) {

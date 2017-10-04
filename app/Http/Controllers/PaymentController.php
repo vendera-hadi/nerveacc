@@ -376,9 +376,20 @@ class PaymentController extends Controller
         $successPosting = 0;
         $successIds = [];
         $piutangIds = [];
+
+        // cek backdate dr closing bulanan/tahunan
+        $lastclose = TrLedger::whereNotNull('closing_at')->orderBy('closing_at','desc')->first();
+        $limitMinPostingDate = null;
+        if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closing_at));
+
         foreach ($ids as $id) {
         	// get payment header
         	$paymentHd = TrInvoicePaymhdr::with('Cashbank')->find($id);
+            // validasi backdate posting
+            if(!empty($limitMinPostingDate) && $paymentHd->invpayh_date < $limitMinPostingDate){
+                return response()->json(['error'=>1, 'message'=> "You can't posting if one of these payment date is before last close date"]);
+            }
+
             if(!isset($paymentHd->Cashbank->coa_code)) return response()->json(['error'=>1, 'message'=> 'Cashbank Name: '.$paymentHd->Cashbank->cashbk_name.' need to be set with COA code']);
             // create journal DEBET utk piutang
             $coaDebet = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$paymentHd->Cashbank->coa_code)->first();

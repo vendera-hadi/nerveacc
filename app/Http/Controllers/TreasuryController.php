@@ -264,6 +264,11 @@ class TreasuryController extends Controller
         }else{
             $nextJournalNumber = 1;
         }
+
+        // cek backdate dr closing bulanan/tahunan
+        $lastclose = TrLedger::whereNotNull('closing_at')->orderBy('closing_at','desc')->first();
+        $limitMinPostingDate = null;
+        if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closing_at));
         
         \DB::beginTransaction();
         try{
@@ -276,6 +281,10 @@ class TreasuryController extends Controller
                     $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
                     $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
                     $header = TrApHeader::find($dtl->aphdr_id);
+                    if(!empty($limitMinPostingDate) && $header->invoice_date < $limitMinPostingDate){
+                        \DB::rollback();
+                        return response()->json(['error'=>1, 'message'=> "You can't posting if one of these invoice date is before last close date"]);
+                    }
                     $journal = [
                             'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
                             'ledge_fisyear' => $coayear,

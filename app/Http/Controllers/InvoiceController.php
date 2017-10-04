@@ -618,6 +618,11 @@ class InvoiceController extends Controller
         }
         $successPosting = 0;
         $successIds = [];
+
+        // cek backdate dr closing bulanan/tahunan
+        $lastclose = TrLedger::whereNotNull('closing_at')->orderBy('closing_at','desc')->first();
+        $limitMinPostingDate = null;
+        if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closing_at));
         
         foreach ($ids as $id) {
             // coa ambil dari grouping cost detail
@@ -646,6 +651,10 @@ class InvoiceController extends Controller
 
             // get coa code dari invoice type
             $invoiceHd = TrInvoice::with('MsTenant')->find($id);
+            // validasi backdate posting
+            if(!empty($limitMinPostingDate) && $invoiceHd->inv_date < $limitMinPostingDate){
+                return response()->json(['error'=>1, 'message'=> "You can't posting if one of these invoice date is before last close date"]);
+            }
             // if(!isset($invoiceHd->InvoiceType->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$invoiceHd->InvoiceType->invtp_name.' need to be set with COA code']);
             // create journal DEBET utk piutang
             foreach($debetCoaAmount as $key => $value){
