@@ -465,6 +465,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/apview','ReportController@apview')->name('report.apview');
 	Route::get('accpayable/optSupplier','PayableController@getOptSupplier')->name('supplier.select2');
 	Route::get('report/apaging','ReportController@apAging')->name('report.ap_aging');
+
+	Route::get('backup', 'BackupRestoreController@index');
+	Route::post('backup/download', 'BackupRestoreController@dump')->name('backup.download');
+	Route::post('backup/restore', 'BackupRestoreController@restore')->name('backup.restore');
 });
 
 Route::get('logout','Auth\AuthController@logout');

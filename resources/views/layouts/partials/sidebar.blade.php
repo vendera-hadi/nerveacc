@@ -95,6 +95,7 @@
                 <li @if(Request::url() == url('invtype')) class="active" @endif><a href="{{url('invtype')}}"><i class="fa fa-circle-o"></i> Invoice Type</a></li>
                 @endif
 
+                <li @if(Request::url() == url('backup')) class="active" @endif><a href="{{url('backup')}}"><i class="fa fa-circle-o"></i> Backup Restore Data</a></li>
                                    
                 <!-- <li @if(Request::url() == url('groupaccount')) class="active" @endif><a href="{{url('groupaccount')}}"><i class="fa fa-circle-o"></i> Group Account</a></li> -->
                 
