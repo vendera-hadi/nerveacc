@@ -85,7 +85,7 @@ class CostDetailController extends Controller
 
     public function getOptions(){
         try{
-            $all = MsCostItem::all()->where('cost_isactive',TRUE);
+            $all = MsCostItem::where('cost_isactive',TRUE)->get();
             $result = [];
             if(count($all) > 0){
                 foreach ($all as $value) {

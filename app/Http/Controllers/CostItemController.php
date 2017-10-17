@@ -87,6 +87,7 @@ class CostItemController extends Controller
             $input['cost_id'] = md5(date('Y-m-d H:i:s'));
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
+            MsCostItem::create($input);
             return response()->json(['success'=>true]);        
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);

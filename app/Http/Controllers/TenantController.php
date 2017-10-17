@@ -265,7 +265,7 @@ class TenantController extends Controller
                         ->where('ms_tenant.id',$id)->first();
         $units = MsUnitOwner::select('ms_unit_owner.unit_id','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_sqrt','ms_virtual_account.viracc_no')
                             ->join('ms_unit','ms_unit_owner.unit_id','=','ms_unit.id')
-                            ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
+                            ->leftJoin('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
                             ->where('tenan_id',$id)->get();
         return view('modal.tenantdetail', ['id'=>$id,'fetch' => $fetch, 'units'=>$units]);
     }

@@ -239,6 +239,7 @@
         }
 
         function saveUser2(){
+            console.log('save');
             $('#fm2').form('submit',{
                 url: url,
                 onSubmit: function(){
@@ -246,6 +247,7 @@
                 },
                 success: function(result){
                     var result = eval('('+result+')');
+                    console.log(result);
                     if (result.errorMsg){
                         $.messager.show({
                             title: 'Error',
