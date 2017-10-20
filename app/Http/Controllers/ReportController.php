@@ -1307,6 +1307,7 @@ class ReportController extends Controller
                 'total' =>$total,
                 'variables' => []
             ];
+        //dd($detail1);
         return view('report_neraca', $data);
     }
 

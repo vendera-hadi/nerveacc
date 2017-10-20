@@ -162,7 +162,7 @@
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('payment.index'),url('period_meter')];
               $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view'),route('report.neraca'),route('report.profitloss')];
               $glSetupUrls = [route('coa.index'),url('department'),url('layouts'),url('department'),url('groupaccount'),url('kurs')];
-              $bbUrls = [route('cash_bank.index'),route('bankbook.index'),route('reconcile.index')];
+              $bbUrls = [route('cash_bank.index'),route('bankbook.index'),route('bankbook.transfer'),route('bankbook.deposit'),route('bankbook.withdraw'),route('reconcile.index')];
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
               $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter')];
 
@@ -378,7 +378,7 @@
                       <li @if(Request::url() == route('cash_bank.index')) class="active" @endif><a href="{{route('cash_bank.index')}}"><i class="fa fa-circle-o"></i> Cash Bank List</a></li>
                       @endif
                       @if(Session::get('role')==1 || in_array(72,Session::get('permissions')))
-                      <li @if(Request::url() == route('bankbook.index')) class="active" @endif><a href="{{route('bankbook.index')}}"><i class="fa fa-circle-o"></i> Bank Book</a></li>
+                      <li @if(Request::url() == route('bankbook.index') || Request::url() == route('bankbook.transfer') || Request::url() == route('bankbook.deposit') || Request::url() == route('bankbook.withdraw')) class="active" @endif><a href="{{route('bankbook.index')}}"><i class="fa fa-circle-o"></i> Bank Book</a></li>
                       @endif
                       @if(Session::get('role')==1 || in_array(72,Session::get('permissions')))
                       <li @if(Request::url() == route('reconcile.index')) class="active" @endif><a href="{{route('reconcile.index')}}"><i class="fa fa-circle-o"></i> Reconcile Book</a></li>

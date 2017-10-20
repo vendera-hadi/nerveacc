@@ -30,7 +30,7 @@
 					<tr>
 						<?php 
 							if(isset($detail1[$i])){
-								if(!$detail1[$i]->hide){
+								if($detail1[$i]->hide != '0'){
 									$desc = str_replace(' ','&nbsp;',$detail1[$i]->desc);
 									if(!empty($detail1[$i]->header)) $desc = '<b>'.$desc.'</b>';
 									echo '<td>'.$desc.'</td>'; 
@@ -48,7 +48,7 @@
 								$calculate = $detail1[$i]->calculateAccount();
 								if(!empty($detail1[$i]->variable)) $variables[$detail1[$i]->variable] = $calculate;
 
-								if(!$detail1[$i]->hide){
+								if($detail1[$i]->hide != '0'){
 									if(!empty($detail1[$i]->coa_code) || !empty($detail1[$i]->formula)){
 										if(trim($detail1[$i]->underline) == '1'){
 											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.format_report_numeric($calculate).'</td>'; 
@@ -66,7 +66,7 @@
 							}
 							
 							if(isset($detail2[$i])){
-								if(!$detail2[$i]->hide){
+								if($detail2[$i]->hide != '0'){
 									$desc = str_replace(' ','&nbsp;',$detail2[$i]->desc); 
 									if(!empty($detail2[$i]->header)) $desc = '<b>'.$desc.'</b>';
 									echo '<td>'.$desc.'</td>'; 
@@ -84,7 +84,7 @@
 								$calculate = $detail2[$i]->calculateAccount();
 								if(!empty($detail2[$i]->variable)) $variables[$detail2[$i]->variable] = $calculate;
 
-								if(!$detail2[$i]->hide){
+								if($detail2[$i]->hide != '0'){
 									if(!empty($detail2[$i]->coa_code) || !empty($detail2[$i]->formula)){
 										if(trim($detail2[$i]->underline) == '1'){
 											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.format_report_numeric($calculate).'</td>'; 
