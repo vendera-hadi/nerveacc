@@ -30,7 +30,7 @@ class MsDetailFormat extends Model
     {
     	// jika berupa coa code
     	if(is_numeric($this->attributes['coa_code'])){
-    		if($this->attributes['coa_code'] == 30120){
+    		if($this->attributes['coa_code'] == 30110){
                 // pengecualian buat laba rugi berjalan
                 $total = $this->labarugiBerjalanStartYeartoFrom() + $this->labarugiBerjalan();
             }else{
