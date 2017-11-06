@@ -250,12 +250,12 @@ class PeriodMeterController extends Controller
                     $meter_used = ($meter_end[$key] - $meter_start[$key]);
                     if($cost_id[$key] == '1'){
                         //CEK MIN 40 JAM PEMAKAIAN LISTRIK
-                        $min = 40 * ($daya[$key]/1000) * $meter_rate[$key];
+                        $min = 40 * $daya[$key];
                         $elec_cost = $meter_used *  $meter_rate[$key];
-                        if($elec_cost > $min){
+                        if($meter_used > $min){
                             $meter_cost = $elec_cost;
                         }else{
-                            $meter_cost = $min;
+                            $meter_cost = $min * $meter_rate[$key];
                         }
                         $bpju = (0.03 * $meter_cost);
                         $subtotal = ($meter_cost + $bpju);
