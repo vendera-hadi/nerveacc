@@ -447,6 +447,68 @@ class PeriodMeterController extends Controller
         return back();
     } 
 
+/*
+    //ORIGINAL
+    public function importExcel(Request $request)
+    {
+        if(Input::hasFile('import_file')){
+            $path = Input::file('import_file')->getRealPath();
+            $data = Excel::load($path, function($reader) {
+
+            })->get();
+            $prd = $request->input('prd');
+            $meter = MsCostDetail::select('id','cost_id','daya','costd_name','costd_rate','costd_burden','costd_admin')->where('costd_ismeter',TRUE)->get();
+            $array_meter=[];
+            $array_rate =[];
+            foreach ($meter as $row) {
+                $array_meter[$row->costd_name]= $row->id;
+                $array_rate[$row->daya]= $row->costd_rate.'~'.$row->costd_burden.'~'.$row->costd_admin;
+            }
+
+            $unit = MsUnit::select('id','unit_code')->get();
+            $array_unit=[];
+            foreach ($unit as $row) {
+                $array_unit[$row->unit_code]= $row->id;
+            }
+
+            if(!empty($data) && $data->count()){
+                foreach ($data as $key => $value) {
+                    if(!empty(@$value->unit)){
+                        $meter_used = ($value->end - $value->start);
+                        $formula = explode('~', $array_rate[$value->daya]);
+
+                        if (strpos($value->cost, 'ELECTRICITY') !== false) {
+                            //CEK MIN 40 JAM PEMAKAIAN LISTRIK
+                            $min = 40 * ($value->daya/1000) * $formula[0];
+                            $elec_cost = $meter_used * $formula[0];
+                            if($elec_cost > $min){
+                                $meter_cost = $elec_cost;
+                            }else{
+                                $meter_cost = $min;
+                            }
+                            $bpju = (0.03 * $meter_cost);
+                            $total = $meter_cost + $bpju;
+                        }else{
+                            $bpju = 0;
+                            $formula = explode('~', $array_rate[0]);
+                            $meter_cost = $meter_used * $formula[0];
+                            $total =  $meter_cost + $formula[1] + $formula[2];
+                        }
+                        
+                        DB::table('tr_meter')
+                        ->where('prdmet_id', $prd)
+                        ->where('costd_id', $array_meter[$value->cost])
+                        ->where('unit_id', $array_unit[$value->unit])
+                        ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>$bpju,'total'=>$total]);
+                    }
+                }
+                Session::flash('msg', 'Upload Success.');
+                return back();
+            }
+        }
+        return back();
+    } 
+*/
     public function importExcel(Request $request)
     {
         if(Input::hasFile('import_file')){
