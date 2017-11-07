@@ -477,15 +477,17 @@ class PeriodMeterController extends Controller
 
                         if (strpos($value->cost, 'ELECTRICITY') !== false) {
                             //CEK MIN 40 JAM PEMAKAIAN LISTRIK
-                            $min = 40 * ($value->daya/1000) * $formula[0];
+                            $min = 40 * $value->daya;
                             $elec_cost = $meter_used * $formula[0];
-                            if($elec_cost > $min){
+                            if($meter_used > $min){
                                 $meter_cost = $elec_cost;
                             }else{
-                                $meter_cost = $min;
+                                $meter_cost = $min * $formula[0];
                             }
                             $bpju = (0.03 * $meter_cost);
-                            $total = $meter_cost + $bpju;
+                            $subtotal = $meter_cost + $bpju;
+                            $biaya_admin = 10/100 * $subtotal;
+                            $total = $subtotal + $biaya_admin;
                         }else{
                             $bpju = 0;
                             $formula = explode('~', $array_rate[0]);
@@ -497,7 +499,7 @@ class PeriodMeterController extends Controller
                         ->where('prdmet_id', $prd)
                         ->where('costd_id', $array_meter[$value->cost])
                         ->where('unit_id', $array_unit[$value->unit])
-                        ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>$bpju,'total'=>$total]);
+                        ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'meter_admin'=>$biaya_admin,'other_cost'=>$bpju,'total'=>$total]);
                     }
                 }
                 Session::flash('msg', 'Upload Success.');
