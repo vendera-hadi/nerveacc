@@ -9,6 +9,7 @@ use Auth;
 use App\Models\MsCashBank;
 use App\Models\MsCompany;
 use App\Models\MsConfig;
+use App\Models\MsMasterCoa;
 use Form;
 
 class CompanyController extends Controller
@@ -33,6 +34,9 @@ class CompanyController extends Controller
         $data['po_prefix'] = @MsConfig::where('name','po_prefix')->first()->value;
         $data['footer_signature_name'] = @MsConfig::where('name','footer_signature_name')->first()->value;
         $data['footer_signature_position'] = @MsConfig::where('name','footer_signature_position')->first()->value;
+        $data['coa_laba_rugi'] = @MsConfig::where('name','coa_laba_rugi')->first()->value;
+
+        $data['accounts'] = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',0)->orderBy('coa_type')->get();
         return view('config',$data);
     }
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\TrLedger;
 use App\Models\MsMasterCoa;
 use App\Models\MsGroupAccount;
+use App\Models\MsConfig;
 
 class MsDetailFormat extends Model
 {
@@ -30,7 +31,8 @@ class MsDetailFormat extends Model
     {
     	// jika berupa coa code
     	if(is_numeric($this->attributes['coa_code'])){
-    		if($this->attributes['coa_code'] == 30120){
+            $coa_laba_rugi = @MsConfig::where('name','coa_laba_rugi')->first()->value;
+    		if($this->attributes['coa_code'] == $coa_laba_rugi){
                 // pengecualian buat laba rugi berjalan
                 $total = $this->labarugiBerjalanStartYeartoFrom() + $this->labarugiBerjalan();
             }else{
@@ -88,7 +90,8 @@ class MsDetailFormat extends Model
 
     private function labarugiBerjalanStartYeartoFrom()
     {
-        $coa = MsMasterCoa::where('coa_code','like',"30120%")->where('coa_year',date('Y'))->first();
+        $coa_laba_rugi = @MsConfig::where('name','coa_laba_rugi')->first()->value;
+        $coa = MsMasterCoa::where('coa_code','like',"$coa_laba_rugi%")->where('coa_year',date('Y'))->first();
         // rekap pendapatan
         $ledgerProfit = TrLedger::where(function($query){
                         $query->where('coa_code','like',"4%")->orWhere('coa_code','like',"6%");
@@ -108,7 +111,8 @@ class MsDetailFormat extends Model
 
     private function labarugiBerjalan()
     {
-        $coa = MsMasterCoa::where('coa_code','like',"30120%")->where('coa_year',date('Y'))->first();
+        $coa_laba_rugi = @MsConfig::where('name','coa_laba_rugi')->first()->value;
+        $coa = MsMasterCoa::where('coa_code','like',"$coa_laba_rugi%")->where('coa_year',date('Y'))->first();
         // rekap pendapatan
         $ledgerProfit = TrLedger::where(function($query){
                         $query->where('coa_code','like',"4%")->orWhere('coa_code','like',"6%");
