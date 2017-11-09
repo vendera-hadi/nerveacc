@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\TrLedger;
+use App\Models\TrBankJv;
 use App\Models\TrInvoice;
 use App\Models\MsCashBank;
 use App\Models\MsPaymentType;
@@ -15,6 +16,7 @@ use App\Models\TrInvpaymJournal;
 use App\Models\MsMasterCoa;
 use App\Models\MsJournalType;
 use App\Models\MsConfig;
+use App\Models\TrBank;
 use Auth;
 use DB;
 use Validator;
@@ -340,6 +342,9 @@ class PaymentController extends Controller
                                 $action_detail->save();
                             }
                         // }
+
+                        // insert ke trbank ?? masi beresiko kalau diposting jd ttp masuk tp dibikin posted
+                        $this->saveToTrBank($action, $invoice);
                     }
 
                     $indexNumber++;
@@ -351,6 +356,56 @@ class PaymentController extends Controller
         }
 
         return ['status' => 1, 'message' => 'Insert Success', 'paym_id' => $payment_ids];
+    }
+
+    private function saveToTrBank($action, $invoice)
+    {
+        if($action->paymtp_code == 2){
+            $header = new TrBank;
+            $header->trbank_no = "BM".date('YmdHis').$action->no_kwitansi;
+            $header->trbank_date = $action->invpayh_date;
+            $header->trbank_recipient = MsCashBank::find($action->cashbk_id)->cashbk_name;
+            $header->trbank_group = 'BM';
+            if(!empty($header->trbank_girodate)) $header->trbank_girodate = $action->invpayh_date;
+            $header->trbank_girono = $action->invpayh_giro;
+            $header->cashbk_id = $action->cashbk_id;
+            $header->coa_code = MsCashBank::find($action->cashbk_id)->coa_code;
+            $header->paymtp_id = 2;
+            $header->trbank_note = $action->invpayh_note;
+            $header->created_by = \Auth::id();
+            $header->updated_by = \Auth::id();
+            $header->kurs_id = 1;
+            $header->currency_val = $action->invpayh_amount;
+            $header->trbank_post = true;
+            $header->posting_at = date('Y-m-d H:i:s');
+
+            // payment DEBIT
+            $detail = new TrBankJv;
+            $detail->coa_code = $header->coa_code;
+            $detail->debit = $action->invpayh_amount;
+            $detail->credit = 0;
+            $detail->note = $invoice->MsTenant->tenan_name." - ".$invoice->inv_number;
+            $detail->dept_id = 3;
+            $details[] = $detail;
+
+            // lawanan piutang KREDIT
+            $debitLedger = TrLedger::where('ledg_refno',$invoice->inv_number)->where('ledg_credit',0)->get();
+            $paymentPercentage = $action->invpayh_amount / $invoice->inv_amount;
+            if($debitLedger){
+                 foreach($debitLedger as $dbt){
+                    $detail = new TrBankJv;
+                    $detail->coa_code = $dbt->coa_code;
+                    $detail->debit = 0;
+                    $detail->credit = $paymentPercentage * $dbt->ledg_debit;
+                    $detail->note = $dbt->ledg_description;
+                    $detail->dept_id = $dbt->dept_id;
+                    $details[] = $detail;
+                }
+            }
+
+            $header->save();
+            $header->detail()->saveMany($details);
+        }
     }
     
     public function posting(Request $request){
@@ -441,9 +496,11 @@ class PaymentController extends Controller
                 $paymentDtl = TrInvoicePaymdtl::join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
                 								->join('ms_invoice_type','tr_invoice.invtp_id','=','ms_invoice_type.id')
                 								->where('invpayh_id',$id)->get();
+                // echo "paymDtl :<br>";
                 // setiap pembayaran inv, cek where outstanding nya yg 0 aja yg di post
                 foreach($paymentDtl as $dtl){
                     // if(empty(@$paymentDtl->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$paymentDtl->invtp_name.' need to be set with COA code']);
+                    $paymentPercentage = $dtl->invpayd_amount / $dtl->inv_amount;
                     
                     //ambil salah satu dr ledger cek lawanan nya suda ada belum 
                     $checkDebitLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('ledg_credit',0)->first();
@@ -451,41 +508,43 @@ class PaymentController extends Controller
                     // blum ada lawanan & outstanding suda 0, insert
                     if(empty($checkCreditLedger) && $dtl->inv_outstanding <= 0){
                         $debitLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('ledg_credit',0)->get();
-                        if(!in_array($dtl->inv_number, $piutangIds)){
-                            foreach($debitLedger as $dbt){
-                                // clone dr debit
-                                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
-                                $journal[] = [
-                                                'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
-                                                'ledge_fisyear' => $dbt->ledge_fisyear,
-                                                'ledg_number' => $dbt->ledg_number,
-                                                'ledg_date' => date('Y-m-d'),
-                                                'ledg_refno' => $dbt->ledg_refno,
-                                                'ledg_debit' => 0,
-                                                'ledg_credit' => $dbt->ledg_debit,
-                                                'ledg_description' => $dbt->ledg_description,
-                                                'coa_year' => $dbt->coa_year,
-                                                'coa_code' => $dbt->coa_code,
-                                                'created_by' => Auth::id(),
-                                                'updated_by' => Auth::id(),
-                                                'jour_type_id' => $dbt->jour_type_id,
-                                                'dept_id' => $dbt->dept_id
-                                            ];
+                        // echo "Masuk :<br>";
+                        // echo $debitLedger."<br><br>";
+                        foreach($debitLedger as $dbt){
+                            // clone dr debit
+                            $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                            $journal[] = [
+                                            'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
+                                            'ledge_fisyear' => $dbt->ledge_fisyear,
+                                            'ledg_number' => $dbt->ledg_number,
+                                            'ledg_date' => date('Y-m-d'),
+                                            'ledg_refno' => $dbt->ledg_refno,
+                                            'ledg_debit' => 0,
+                                            'ledg_credit' => $paymentPercentage * $dbt->ledg_debit,
+                                            'ledg_description' => $dbt->ledg_description,
+                                            'coa_year' => $dbt->coa_year,
+                                            'coa_code' => $dbt->coa_code,
+                                            'created_by' => Auth::id(),
+                                            'updated_by' => Auth::id(),
+                                            'jour_type_id' => $dbt->jour_type_id,
+                                            'dept_id' => $dbt->dept_id
+                                        ];
 
-                                $payJournal[] = [
-                                        'ipayjour_date' => date('Y-m-d'),
-                                        'ipayjour_voucher' => $journalNumber,
-                                        'ipayjour_note' => $dbt->ledg_refno." - ".$dbt->ledg_description,
-                                        'coa_code' => $dbt->coa_code,
-                                        'ipayjour_debit' => 0,
-                                        'ipayjour_credit' => $dbt->ledg_debit,
-                                        'invpayh_id' => $id
-                                    ];
-                                
-                            }
-                            $piutangIds[] = $dtl->inv_number;
-                            $successIds[] = $id;
+                            $payJournal[] = [
+                                    'ipayjour_date' => date('Y-m-d'),
+                                    'ipayjour_voucher' => $journalNumber,
+                                    'ipayjour_note' => $dbt->ledg_refno." - ".$dbt->ledg_description,
+                                    'coa_code' => $dbt->coa_code,
+                                    'ipayjour_debit' => 0,
+                                    'ipayjour_credit' => $paymentPercentage * $dbt->ledg_debit,
+                                    'invpayh_id' => $id
+                                ];
+                            
                         }
+                            
+                        $successIds[] = $id;
+                        $piutangIds[] = $dtl->inv_number;
+                        // }
                     }
                	
                 }
@@ -500,25 +559,26 @@ class PaymentController extends Controller
         $unsuccessPosting = count($ids) - $successPosting;
         $message = $successPosting.' Invoice Terposting';
         if($unsuccessPosting  > 0) $message .= ', Invoice Belum Lunas / Terposting masih tersisa '.$unsuccessPosting;
-        // echo $message; die();
         // var_dump($journal);
+        // echo $message; die();
         // var_dump($payJournal);
         
         // INSERT DATABASE
+        DB::beginTransaction();
         try{
-            DB::transaction(function () use($successIds, $payJournal, $journal){
-                // insert journal
-                TrLedger::insert($journal);
-                // insert invoice payment journal
-                TrInvpaymJournal::insert($payJournal);
-                // update posting to yes
-                if(count($successIds) > 0){
-                    foreach ($successIds as $id) {
-                        TrInvoicePaymhdr::where('id', $id)->update(['invpayh_post'=>1, 'posting_at'=>date('Y-m-d'), 'posting_by'=>Auth::id()]);
-                    }
+            // insert journal
+            TrLedger::insert($journal);
+            // insert invoice payment journal
+            TrInvpaymJournal::insert($payJournal);
+            // update posting to yes
+            if(count($successIds) > 0){
+                foreach ($successIds as $id) {
+                    TrInvoicePaymhdr::where('id', $id)->update(['invpayh_post'=>1, 'posting_at'=>date('Y-m-d'), 'posting_by'=>Auth::id()]);
                 }
-            });
+            }
+            DB::commit();
         }catch(\Exception $e){
+            DB::rollback();
             return response()->json(['error'=>1, 'message'=> 'Error occured when posting invoice payment']);
         } 
 
