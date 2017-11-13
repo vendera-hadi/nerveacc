@@ -88,16 +88,16 @@
                             <input name="spl_postal_code" class="easyui-textbox" label="Supplier Postal Code:" style="width:100%" data-options="required:true,validType:'length[0,5]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="spl_phone" class="easyui-textbox" label="Supplier Phone:" style="width:100%" data-options="validType:'length[0,20]'">
+                            <input name="spl_phone" class="easyui-textbox" label="Supplier Phone:" style="width:100%" data-options="validType:'length[0,100]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="spl_fax" class="easyui-textbox" label="Supplier Fax:" style="width:100%" data-options="validType:'length[0,20]'">
+                            <input name="spl_fax" class="easyui-textbox" label="Supplier Fax:" style="width:100%" data-options="validType:'length[0,100]'">
                         </div>
                         <div style="margin-bottom:10px">
                             <input name="spl_cperson" class="easyui-textbox" label="Supplier Contact Person:" style="width:100%" data-options="required:true,validType:'length[0,35]'">
                         </div>
                         <div style="margin-bottom:10px">
-                            <input name="spl_npwp" class="easyui-textbox" label="Supplier NPWP:" style="width:100%" data-options="required:true,validType:'length[0,15]'">
+                            <input name="spl_npwp" class="easyui-textbox" label="Supplier NPWP:" style="width:100%" data-options="required:true,validType:'length[0,20]'">
                         </div>
                         <div style="margin-bottom:10px">
                             <select id="cc" class="easyui-combobox" required="true" name="spl_isactive" label="Active:" style="width:300px;">

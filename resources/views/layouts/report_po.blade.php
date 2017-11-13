@@ -95,7 +95,11 @@
                 @php $total = $totalppn = 0; @endphp
                 @foreach($po->detail as $value)
                 @php
-                  $total += $value->amount * $value->qty;
+                  if($value->coa_type == 'DEBET'){
+                    $total += $value->amount * $value->qty;
+                  }else{
+                    $total -= $value->amount * $value->qty;
+                  }
                   $totalppn += $value->ppn_amount;
                 @endphp
                 <tr style="text-align: center;">

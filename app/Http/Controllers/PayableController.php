@@ -166,7 +166,11 @@ class PayableController extends Controller
             	$detail->dept_id = $dept[$key];
                 $detail->coa_type = $coatype[$key];
             	$details[] = $detail;
-            	$total += $qty[$key] * $amount[$key];
+                if($detail->coa_type == 'DEBET'){
+            	   $total += $qty[$key] * $amount[$key];
+                }else{
+                    $total -= $qty[$key] * $amount[$key];
+                }
             	// $totalppn += $ppn_amount[$key];
             }
             $header->total = $total + $totalppn;
@@ -215,8 +219,13 @@ class PayableController extends Controller
                 $detail->ppn_coa_code = $dt->ppn_coa_code;
                 $detail->coa_code = $dt->coa_code;
                 $detail->dept_id = $dt->dept_id;
+                $detail->coa_type = $dt->coa_type;
                 $details[] = $detail;
-                $total += $dt->qty * $dt->amount;
+                if($dt->coa_type == 'DEBET'){
+                    $total += $dt->qty * $dt->amount;
+                }else{
+                    $total -= $dt->qty * $dt->amount;
+                }
                 $totalppn += $dt->ppn_amount;
             }
             $header->total = $total + $totalppn;
@@ -254,9 +263,9 @@ class PayableController extends Controller
             $journaltype = 'AP';
 
             // cek backdate dr closing bulanan/tahunan
-            $lastclose = TrLedger::whereNotNull('closing_at')->orderBy('closing_at','desc')->first();
+            $lastclose = TrLedger::whereNotNull('closed_at')->orderBy('closed_at','desc')->first();
             $limitMinPostingDate = null;
-            if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closing_at));
+            if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closed_at));
 
             foreach ($ids as $id) {
                 // cari last prefix, order by journal type
@@ -477,7 +486,7 @@ class PayableController extends Controller
         $prefix = @MsConfig::where('name','po_prefix')->first()->value;
 		$temp = $prefix."-".date('ymd')."-";
         $check = TrPOHeader::where('po_number','like',$temp."%")->orderBy('po_number','desc')->first();
-        if(!$check){
+        if(!$check || count($check) == 0){
             $temp .= '001';
         }else{
             $split = explode('-', $check->po_number);

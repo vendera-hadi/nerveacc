@@ -266,9 +266,9 @@ class TreasuryController extends Controller
         }
 
         // cek backdate dr closing bulanan/tahunan
-        $lastclose = TrLedger::whereNotNull('closing_at')->orderBy('closing_at','desc')->first();
+        $lastclose = TrLedger::whereNotNull('closed_at')->orderBy('closed_at','desc')->first();
         $limitMinPostingDate = null;
-        if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closing_at));
+        if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closed_at));
         
         \DB::beginTransaction();
         try{
