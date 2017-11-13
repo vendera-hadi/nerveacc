@@ -37,7 +37,8 @@
                     <th field="tenan_name" width="120" sortable="true">Owner</th>
                     <!-- <th field="unit_name" width="120" sortable="true">Unit Name</th> -->
                     <th field="unit_sqrt" width="120" sortable="true">Luas</th>
-                    <th field="unit_virtual_accn" width="120" sortable="true">Virtual Account</th>
+                    <th field="va_utilities" width="120" sortable="true">VA Utilities</th>
+                    <th field="va_maintenance" width="120" sortable="true">VA Maintenance</th>
                     <th field="untype_name" width="120" sortable="true">Unit Type</th>
                     <th field="floor_name" width="120" sortable="true">Unit Floor</th>
                     <th field="unit_isactive" width="120" sortable="true">Unit Active</th>
@@ -123,8 +124,14 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label>Virtual Account</label>
-                                <input type="text" class="form-control" name="virtual_account" placeholder="Virtual Account">
+                                <label>Virtual Account Utilities</label>
+                                <input type="text" class="form-control" name="va_utilities" placeholder="Virtual Account">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Virtual Account Maintenance</label>
+                                <input type="text" class="form-control" name="va_maintenance" placeholder="Virtual Account">
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -247,12 +254,12 @@
                                     &nbsp;&nbsp;<input type="checkbox" name="tenan_isppn" value="1" >
                                 </div>
                             </div>
-                            <div class="col-sm-6">
+                            <!-- <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>PKP</label>
                                     &nbsp;&nbsp;<input type="checkbox" name="tenan_ispkp" value="1" > 
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="col-sm-6">
@@ -310,8 +317,14 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label>Virtual Account</label>
-                                <input type="text" class="form-control virtual_account" name="virtual_account" placeholder="Virtual Account">
+                                <label>Virtual Account Utilities</label>
+                                <input type="text" class="form-control va-utilities" name="va_utilities" placeholder="Virtual Account">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Virtual Account Maintenance</label>
+                                <input type="text" class="form-control va-maintenance" name="va_maintenance" placeholder="Virtual Account">
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -411,12 +424,12 @@
                                 &nbsp;&nbsp;<input type="checkbox" name="tenan_isppn" class="tenan_isppn" value="1" >
                             </div>
                         </div>
-                        <div class="col-sm-6">
+                        <!-- div class="col-sm-6">
                             <div class="form-group">
                                 <label>PKP</label>
                                 &nbsp;&nbsp;<input type="checkbox" name="tenan_ispkp" class="tenan_ispkp" value="1" > 
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Own Unit Since</label>
@@ -527,7 +540,8 @@
                     $('.unit_id').val(row.id);
                     $('.unit_code').val(result.unit_code);
                     $('.unit_sqrt').val(result.unit_sqrt);
-                    $('.virtual_account').val(result.virtual_account);
+                    $('.va-utilities').val(result.va_utilities);
+                    $('.va-maintenance').val(result.va_maintenance);
                     $('.floor_id').val(result.floor_id);
                     $('.untype_id').val(result.untype_id);
                     $('.meter_listrik').val(result.meter_listrik);

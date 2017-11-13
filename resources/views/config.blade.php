@@ -16,6 +16,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/icon.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/jquery-easyui/themes/color.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/select2.min.css') }}">
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -148,6 +149,16 @@
                                   <input type="text" name="po_prefix" class="form-control" value="{{$po_prefix}}">
                                 </div>
 
+                                <div class="form-group">
+                                  <label>COA Code Laba Rugi Berjalan (wajib isi)</label>
+                                  <select class="js-example-basic-single" name="coa_laba_rugi" id="selectAccount" style="width:100%">
+                                    <option value="">Choose Account</option>
+                                    @foreach($accounts as $key => $coa)
+                                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                                    @endforeach
+                                  </select>
+                                </div>
+
                             </div>
                           </div>
                           <!-- /.box-body -->
@@ -168,6 +179,8 @@
 
 @section('footer-scripts')
 <script type="text/javascript" src="{{asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js')}}"></script>
+<!-- select2 -->
+<script type="text/javascript" src="{{ asset('plugins/select2/select2.min.js') }}"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $(".numeric").keydown(function (e) {
@@ -187,6 +200,7 @@ $(document).ready(function() {
     });
 
     $(".textarea").wysihtml5();
+     $(".js-example-basic-single").select2();
 });
 </script>
 @endsection

@@ -87,6 +87,8 @@ class UnitController extends Controller
                 $temp['floor_id'] = $value->floor_id;
                 $temp['untype_id'] = $value->untype_id;
                 $temp['tenan_name'] = $value->tenan_name;
+                $temp['va_utilities'] = $value->va_utilities;
+                $temp['va_maintenance'] = $value->va_maintenance;
                 $temp['unit_isactive'] = !empty($value->unit_isactive) ? 'yes' : 'no';
                 try{
                     $temp['created_by'] = User::findOrFail($value->created_by)->name;
@@ -157,6 +159,8 @@ class UnitController extends Controller
                         'unit_sqrt' => @$request->unit_sqrt,
                         'unit_virtual_accn' => 0,
                         'virtual_account' => @$request->virtual_account,
+                        'va_maintenance' => @$request->va_maintenance,
+                        'va_utilities' => @$request->va_utilities,
                         'meter_air' => @$request->meter_air,
                         'meter_listrik' => @$request->meter_listrik,
                         'floor_id' => @$request->floor_id,
@@ -220,6 +224,8 @@ class UnitController extends Controller
                     'unit_name' => @$request->unit_code,
                     'unit_sqrt' => @$request->unit_sqrt,
                     'virtual_account' => @$request->virtual_account,
+                    'va_maintenance' => @$request->va_maintenance,
+                    'va_utilities' => @$request->va_utilities,
                     'meter_air' => @$request->meter_air,
                     'meter_listrik' => @$request->meter_listrik,
                     'floor_id' => @$request->floor_id,

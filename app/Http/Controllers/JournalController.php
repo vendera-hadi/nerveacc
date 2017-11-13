@@ -8,6 +8,7 @@ use App\Models\MsMasterCoa;
 use App\Models\MsDepartment;
 use App\Models\MsJournalType;
 use App\Models\TrLedger;
+use App\Models\MsConfig;
 use DB;
 
 class JournalController extends Controller
@@ -462,9 +463,10 @@ class JournalController extends Controller
 
     public function calculateAndCloneCoaNextYear($year)
     {
+        $coa_laba_rugi = @MsConfig::where('name','coa_laba_rugi')->first()->value;
         $allcoa = MsMasterCoa::where('coa_year', $year)->get();
         foreach ($allcoa as $coa) {
-            if($coa->coa_code == 30120) $result = $this->labarugiBerjalan($coa->coa_code, $year);
+            if($coa->coa_code == $coa_laba_rugi) $result = $this->labarugiBerjalan($coa->coa_code, $year);
             else $result = $this->getTotalFromLedger($coa->coa_code, $year);
             // echo "COA code = ".$coa->coa_code.", Debit : ".$result['debit'].", Credit : ".$result['credit'].", Total : ".$result['total']."<br><br>";
             $coa->coa_debit = $result['debit'];

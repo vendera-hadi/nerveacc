@@ -76,6 +76,8 @@ table tr td{font-size:9pt;}
     $invoice_due_date = date('d/m/Y', strtotime($inv['inv_duedate']));
     $tenan_name = $inv['ms_tenant']['tenan_taxname'];
     $tenan_address = $inv['ms_tenant']['tenan_tax_address'];
+    $invoice_type_prefix = $inv['invoice_type']['invtp_prefix'];
+    $virtual_account = ($invoice_type_prefix == 'MN ') ? $inv['va_maintenance'] : $inv['va_utilities']; 
     ?>
     <div class="page">
         <div class="subpage">
@@ -128,7 +130,7 @@ table tr td{font-size:9pt;}
                         <table width="100%">
                             <tr>
                                 <td width="50%"><i>Virtual Account</i></td>
-                                <td>: {{$inv['virtual_account']}}</td>
+                                <td>: {{$virtual_account}}</td>
                             </tr>
                         </table>
                     </td>
