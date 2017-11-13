@@ -265,7 +265,7 @@ class TreasuryController extends Controller
             $nextJournalNumber = 1;
         }
 
-        // cek backdate dr closing bulanan/tahunan
+        // cek backdate dr closed_at bulanan/tahunan
         $lastclose = TrLedger::whereNotNull('closed_at')->orderBy('closed_at','desc')->first();
         $limitMinPostingDate = null;
         if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closed_at));
