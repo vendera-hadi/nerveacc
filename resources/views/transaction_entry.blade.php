@@ -20,7 +20,7 @@
     <!-- datepicker -->
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/daterangepicker/daterangepicker-bs3.css') }}">
-    
+
     <style>
     .datagrid-wrap{
         height: 400px;
@@ -106,7 +106,7 @@
                   <td>Value</td>
                   <td></td>
                 </tr>
-                
+
                 <tr id="rowEmpty">
                   <td colspan="7"><center>Data Kosong. Pilih account dan Add Line terlebih dulu</center></td>
                 </tr>
@@ -187,7 +187,7 @@ var get_url = "{!!route('journal.get', ['date'=> Request::get('filterdate'), 'de
             page: params.page
           };
         },
-        
+
         cache: true
       },
       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
@@ -276,7 +276,7 @@ var formData;
         formData = $(this).serialize();
         $.post('{{route('journal.insert')}}', formData, function(result){
             if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-            if(result.status){ 
+            if(result.status){
               $.messager.alert('Warning',result.message);
               location.reload();
             }
@@ -286,13 +286,13 @@ var formData;
     }
  });
 
- $(document).delegate('.numeric', 'keypress', function(e){
-    var charCode = (e.which) ? e.which : event.keyCode;
-    if ((charCode < 48 || charCode > 57))
-        return false;
+ // $(document).delegate('.numeric', 'keypress', function(e){
+ //    var charCode = (e.which) ? e.which : event.keyCode;
+ //    if ((charCode < 48 || charCode > 57))
+ //        return false;
 
-    return true;
- });
+ //    return true;
+ // });
 
  $(document).delegate('.removeLedger','click',function(){
       if(confirm('Are you sure want to remove this ledger?')){
