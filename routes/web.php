@@ -11,9 +11,9 @@
 |
 */
 Route::group(['middleware' => 'auth'], function () {
-	
+
 	Route::get('/', function () {
-	    return redirect('contract/unclosed'); 
+	    return redirect('contract/unclosed');
 	});
 
 	// currency
@@ -272,12 +272,12 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('cat_asset/delete', 'CategoryAssetController@delete')->name('cat_asset.delete');
 
 	//fixed assets
-	Route::get('fixed_asset','AssetsController@index');
-	Route::post('fixed_asset/get', 'AssetsController@get')->name('fixed_asset.get');
-	Route::post('fixed_asset/category_option', 'AssetsController@category_option')->name('fixed_asset.category_option');
-	Route::post('fixed_asset/insert', 'AssetsController@insert')->name('fixed_asset.insert');
-	Route::post('fixed_asset/update', 'AssetsController@update')->name('fixed_asset.update');
-	Route::post('fixed_asset/delete', 'AssetsController@delete')->name('fixed_asset.delete');
+	// Route::get('fixed_asset','AssetsController@index');
+	// Route::post('fixed_asset/get', 'AssetsController@get')->name('fixed_asset.get');
+	// Route::post('fixed_asset/category_option', 'AssetsController@category_option')->name('fixed_asset.category_option');
+	// Route::post('fixed_asset/insert', 'AssetsController@insert')->name('fixed_asset.insert');
+	// Route::post('fixed_asset/update', 'AssetsController@update')->name('fixed_asset.update');
+	// Route::post('fixed_asset/delete', 'AssetsController@delete')->name('fixed_asset.delete');
 
 	//period meter
 	Route::get('period_meter','PeriodMeterController@index');
@@ -330,7 +330,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('aging/get','AgingController@get')->name('aging.get');
 	Route::post('aging/getdetail','AgingController@getdetail')->name('aging.getdetail');
 	Route::get('aging/downloadAgingExcel', 'AgingController@downloadAgingExcel');
-	
+
 	Route::post('payment/posting','PaymentController@posting')->name('payment.posting');
 	// report
 	Route::get('report/arview','ReportController@arview')->name('report.arview');
@@ -412,7 +412,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('roles/detail','AccountController@rolesDetail')->name('roles.detail');
 	Route::post('roles/delete','AccountController@rolesDelete')->name('roles.delete');
 
-	Route::get('users','AccountController@users')->name('users.index');	
+	Route::get('users','AccountController@users')->name('users.index');
 	Route::post('users/insert','AccountController@usersInsert')->name('users.insert');
 	Route::post('users/update','AccountController@usersUpdate')->name('users.update');
 	Route::post('users/detail','AccountController@usersDetail')->name('users.detail');
@@ -469,6 +469,25 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('backup', 'BackupRestoreController@index');
 	Route::post('backup/download', 'BackupRestoreController@dump')->name('backup.download');
 	Route::post('backup/restore', 'BackupRestoreController@restore')->name('backup.restore');
+
+	// fixed asset
+	Route::get('assets', 'FixedAssetController@index')->name('fixed_asset.index');
+	Route::post('assets/add', 'FixedAssetController@add')->name('fixed_asset.modal.add');
+	Route::post('assets/edit', 'FixedAssetController@edit')->name('fixed_asset.modal.edit');
+	Route::post('assets/insert', 'FixedAssetController@insert')->name('fixed_asset.insert');
+	Route::post('assets/update', 'FixedAssetController@insert')->name('fixed_asset.update');
+	Route::post('assets/delete', 'FixedAssetController@delete')->name('fixed_asset.delete');
+
+	Route::get('asset-type', 'FixedAssetController@indexTypes')->name('fixed_asset.type.index');
+	Route::post('asset-type/add', 'FixedAssetController@addTypes')->name('fixed_asset.type.modal.add');
+	Route::post('asset-type/edit', 'FixedAssetController@editTypes')->name('fixed_asset.type.modal.edit');
+	Route::post('asset-type/insert', 'FixedAssetController@insertTypes')->name('fixed_asset.type.insert');
+	Route::post('asset-type/update', 'FixedAssetController@updateTypes')->name('fixed_asset.type.update');
+	Route::post('asset-type/delete', 'FixedAssetController@deleteTypes')->name('fixed_asset.type.delete');
+	Route::post('assets/get', 'FixedAssetController@get')->name('fixed_asset.get');
+	Route::post('asset-type/get', 'FixedAssetController@getTypes')->name('fixed_asset.type.get');
+	Route::get('fixed-asset-report', 'FixedAssetController@report')->name('fixed_asset.report');
+
 });
 
 Route::get('logout','Auth\AuthController@logout');
