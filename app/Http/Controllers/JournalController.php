@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Models\MsMasterCoa;
+use App\Models\MsAsset;
 use App\Models\MsDepartment;
 use App\Models\MsJournalType;
 use App\Models\TrLedger;
 use App\Models\MsConfig;
-use DB;
+use Carbon\Carbon;
+use DB, Auth;
 
 class JournalController extends Controller
 {
@@ -34,7 +36,7 @@ class JournalController extends Controller
         $debit = [];
         $credit = [];
         foreach ($type as $key => $val) {
-            if($val == 'debit'){ 
+            if($val == 'debit'){
                 $debit[] = $typeVal[$key];
                 $credit[] = 0;
             }else{
@@ -47,7 +49,7 @@ class JournalController extends Controller
         $department = $request->input('dept_code');
         $journalType = MsJournalType::find($request->jour_type_id);
         $journalPrefix = $journalType->jour_type_prefix;
-        
+
         // cari last prefix, order by journal type
 
         $lastJournal = TrLedger::where('jour_type_id',$request->jour_type_id)->latest()->first();
@@ -106,7 +108,7 @@ class JournalController extends Controller
             }
 
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -130,7 +132,7 @@ class JournalController extends Controller
             if(!empty($deptParam)) $fetch = $fetch->where('dept_id',$deptParam);
             // if(!empty($jourTypeParam)) $fetch = $fetch->where('jour_type_id',$jourTypeParam);
             if(!empty($coa)) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
-            if(!empty($keyword)){ 
+            if(!empty($keyword)){
                 $fetch = $fetch->where(function($query) use($keyword){
                         $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%');
                     });
@@ -157,7 +159,7 @@ class JournalController extends Controller
                 $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> ';
                 if(empty($value->closed_at)){
                     if(\Session::get('role')==1 || in_array(66,\Session::get('permissions'))){
-                        $temp['action'] .= ' <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> '; 
+                        $temp['action'] .= ' <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> ';
                     }
                     if(\Session::get('role')==1 || in_array(67,\Session::get('permissions'))){
                         $temp['action'] .=  '<a href="#" data-id="'.$value->ledg_refno.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
@@ -168,7 +170,7 @@ class JournalController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function delete(Request $request){
@@ -178,8 +180,8 @@ class JournalController extends Controller
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
-    } 
+        }
+    }
 
     public function getdetail(Request $request){
         try{
@@ -204,7 +206,7 @@ class JournalController extends Controller
         $fetch = MsMasterCoa::select('coa_code','coa_name','coa_type')->where(function($query) use($key){
             $query->where(\DB::raw('LOWER(coa_code)'),'like','%'.$key.'%')->orWhere(\DB::raw('LOWER(coa_name)'),'like','%'.$key.'%');
         })->where('coa_year',$coaYear)->get();
-        
+
         $result['results'] = [];
         foreach ($fetch as $key => $value) {
             $temp = ['id'=>$value->id, 'text'=>$value->coa_code." ".$value->coa_name];
@@ -233,7 +235,7 @@ class JournalController extends Controller
             return view('editjournal', $data);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        }        
+        }
     }
 
     public function update(Request $request){
@@ -249,7 +251,7 @@ class JournalController extends Controller
             $debit = [];
             $credit = [];
             foreach ($type as $key => $val) {
-                if($val == 'debit'){ 
+                if($val == 'debit'){
                     $debit[] = $typeVal[$key];
                     $credit[] = 0;
                 }else{
@@ -290,7 +292,7 @@ class JournalController extends Controller
             return ['status' => 1, 'message' => 'Update Journal Success'];
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        }  
+        }
     }
 
     public function generalLedger(){
@@ -319,7 +321,7 @@ class JournalController extends Controller
             }
 
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -348,7 +350,7 @@ class JournalController extends Controller
             else if(!empty($coa) && !empty($tocoa) && $coa > $tocoa) $fetch = $fetch->whereBetween('tr_ledger.coa_code',[$tocoa,$coa]);
             else if(!empty($coa) && !empty($tocoa) && $coa < $tocoa) $fetch = $fetch->whereBetween('tr_ledger.coa_code',[$coa,$tocoa]);
 
-            if(!empty($keyword)){ 
+            if(!empty($keyword)){
                 $fetch = $fetch->where(function($query) use($keyword){
                         $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(ledg_refno)"),'like','%'.$keyword.'%');
                     });
@@ -376,7 +378,7 @@ class JournalController extends Controller
                 $temp['action'] = '<a href="#" data-toggle="modal" data-target="#detailModal" data-id="'.$value->ledg_refno.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a> ';
                 if(empty($value->closed_at)){
                     if(\Session::get('role')==1 || in_array(66,\Session::get('permissions'))){
-                        $temp['action'] .= ' <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> '; 
+                        $temp['action'] .= ' <a href="#" data-id="'.$value->ledg_refno.'" class="edit"><i class="fa fa-pencil" aria-hidden="true"></i></a> ';
                     }
                     if(\Session::get('role')==1 || in_array(67,\Session::get('permissions'))){
                         $temp['action'] .=  '<a href="#" data-id="'.$value->ledg_refno.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
@@ -387,7 +389,7 @@ class JournalController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function trEntry(){
@@ -414,18 +416,20 @@ class JournalController extends Controller
             $checkNotClosed = TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->count();
 
             if($checkNotClosed == 0 && $checkClosed == 0){
-                return response()->json(['errorMsg' => 'There is no entries at this month']);                
+                return response()->json(['errorMsg' => 'There is no entries at this month']);
             }else if($checkNotClosed == 0 && $checkClosed > 0){
-                return response()->json(['errorMsg' => 'All entries this month was already closed']);                
+                return response()->json(['errorMsg' => 'All entries this month was already closed']);
             }else{
                 TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->update(['closed_at' => date('Y-m-d')]);
                 // update saldo
                 $totalDebit = TrLedger::select(\DB::raw('SUM(ledg_debit) as total'))->whereBetween('ledg_date',[$startdate, $enddate])->first();
                 $totalCredit = TrLedger::select(\DB::raw('SUM(ledg_credit) as total'))->whereBetween('ledg_date',[$startdate, $enddate])->first();
                 if(empty($totalDebit->total)) $totalDebit->total = 0;
-                if(empty($totalCredit->total)) $totalCredit->total = 0; 
+                if(empty($totalCredit->total)) $totalCredit->total = 0;
                 $balance = $totalCredit->total - $totalDebit->total;
                 \DB::table('gl_balance_log')->insert(['month'=>(int)$month, 'year'=>(int)$year, 'balance'=>(float)$balance]);
+                // jalanin posting penyusutan jg
+                $this->postingPenyusutan($month,$year);
                 return response()->json(['success' => 'Closing Success']);
             }
         }else if($closingType == 'yearly'){
@@ -435,9 +439,9 @@ class JournalController extends Controller
             $checkNotClosed = TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->count();
 
             if($checkNotClosed == 0 && $checkClosed == 0){
-                return response()->json(['errorMsg' => 'There is no entries at this year']);                
+                return response()->json(['errorMsg' => 'There is no entries at this year']);
             }else if($checkNotClosed == 0 && $checkClosed > 0){
-                return response()->json(['errorMsg' => 'All entries this year was already closed']);                
+                return response()->json(['errorMsg' => 'All entries this year was already closed']);
             }else{
                 TrLedger::whereBetween('ledg_date',[$startdate, $enddate])->whereNull('closed_at')->update(['closed_at' => date('Y-m-d')]);
                 for($i=1; $i<=12; $i++) {
@@ -447,7 +451,7 @@ class JournalController extends Controller
                     $totalDebit = TrLedger::select(\DB::raw('SUM(ledg_debit) as total'))->whereBetween('ledg_date',[$startdate, $enddate])->first();
                     $totalCredit = TrLedger::select(\DB::raw('SUM(ledg_credit) as total'))->whereBetween('ledg_date',[$startdate, $enddate])->first();
                     if(empty($totalDebit->total)) $totalDebit->total = 0;
-                    if(empty($totalCredit->total)) $totalCredit->total = 0; 
+                    if(empty($totalCredit->total)) $totalCredit->total = 0;
                     $balance = $totalCredit->total - $totalDebit->total;
                     \DB::table('gl_balance_log')->insert(['month'=>(int)$i, 'year'=>(int)$year, 'balance'=>(float)$balance]);
                 }
@@ -481,6 +485,90 @@ class JournalController extends Controller
             $newCoa->coa_credit = 0;
             $newCoa->coa_ending = 0;
             $newCoa->save();
+        }
+    }
+
+    private function postingPenyusutan($month,$year)
+    {
+        // list semua harta
+        $harta = MsAsset::all();
+        $lastJournal = TrLedger::where('jour_type_id',1)->where('ledg_number','like','%'.$year.$month.'%')->latest()->first();
+        if($lastJournal){
+            $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
+            $lastJournalNumber = (int) end($lastJournalNumber);
+            $nextJournalNumber = $lastJournalNumber + 1;
+        }else{
+            $nextJournalNumber = 1;
+        }
+        foreach ($harta as $key => $hrt) {
+            // $nilaiSisaTahunan = $hrt->nilaiSisaTahunan($year, date('Y-m-t',strtotime($year."-".$month."-01")));
+            $startTime = Carbon::parse($hrt->date);
+            $finishTime = Carbon::parse(date('Y-m-t',strtotime($year."-".$month."-01")));
+            $jedaTahunan = $finishTime->diffInYears($startTime);
+            $jedaBulanan = $finishTime->diffInMonths($startTime);
+            $bulanLebih = $jedaBulanan % ($jedaTahunan * 12);
+
+            if($bulanLebih > 0){
+                $tempyear = $year + 1;
+                $value = $hrt->depreciationPerMonth($tempyear, date('Y-m-t',strtotime($tempyear."-".$month."-01")));
+            }else{
+                $value = $hrt->depreciationPerMonth($year, date('Y-m-t',strtotime($year."-".$month."-01")));
+            }
+
+            if($value > 0){
+                $nextJournalNumber = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                $journalNumber = "JU ".$year.$month." ".$nextJournalNumber;
+                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                // Debet
+                $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $year,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => date('Y-m-d'),
+                                'ledg_refno' => $hrt->id,
+                                'ledg_debit' => $value,
+                                'ledg_credit' => 0,
+                                'ledg_description' => 'Penyusutan Harta : '.$hrt->name,
+                                'coa_year' => $year,
+                                'coa_code' => $hrt->assetType->debit_coa_code,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => 1,
+                                'dept_id' => 3 //hardcode utk finance
+                            ];
+                $nextJournalNumber += 1;
+                $nextJournalNumber = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                $journalNumber = "JU ".$year.$month." ".$nextJournalNumber;
+                $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $year,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => date('Y-m-d'),
+                                'ledg_refno' => $hrt->id,
+                                'ledg_debit' => 0,
+                                'ledg_credit' => $value,
+                                'ledg_description' => 'Akumulasi Penyusutan Harta : '.$hrt->name,
+                                'coa_year' => $year,
+                                'coa_code' => $hrt->assetType->debit_coa_code,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => 1,
+                                'dept_id' => 3 //hardcode utk finance
+                            ];
+                $nextJournalNumber += 1;
+            }
+            // end if
+        }
+        // end foreach
+        if(count($journal) > 0){
+            try {
+                DB::transaction(function () use($journal){
+                    // insert journal
+                    TrLedger::insert($journal);
+                });
+            } catch (\Exception $e) {
+
+            }
         }
     }
 

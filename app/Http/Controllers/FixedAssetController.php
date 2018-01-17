@@ -77,9 +77,9 @@ class FixedAssetController extends Controller
                 $temp['kelompok_harta'] = $value->assetType->kelompok_harta;
                 $temp['masa_manfaat'] = $value->assetType->masa_manfaat." tahun";
 
-                $temp['nilai_sisa'] = "IDR ".$value->nilaiSisaTahunan(date('Y'));
-                $temp['per_month'] = "IDR ".$value->depreciationPerMonth(date('Y'));
-                $temp['per_year'] = "IDR ".$value->depreciationPerYear(date('Y'));
+                $temp['nilai_sisa'] = "IDR ".number_format($value->nilaiSisaTahunan(date('Y')), 0);
+                $temp['per_month'] = "IDR ".number_format($value->depreciationPerMonth(date('Y')), 0);
+                $temp['per_year'] = "IDR ".number_format($value->depreciationPerYear(date('Y')), 0);
 
                 $result['rows'][] = $temp;
             }

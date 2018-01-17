@@ -16,17 +16,18 @@ class MsAsset extends Model
       return $this->belongsTo('App\Models\MsAssetType','ms_asset_type_id');
    }
 
-   public function depreciationPerMonth($year)
+   public function depreciationPerMonth($year, $customFinishTime = null)
    {
       switch($this->attributes['depreciation_type']) {
         case 'GARIS LURUS':
           $persentase = $this->assetType->garis_lurus;
           $price = $this->attributes['price'];
-          return number_format($persentase * $price / 12, 0);
+          return $persentase * $price / 12;
           break;
         case 'SALDO MENURUN':
           $startTime = Carbon::parse($this->attributes['date']);
-          $finishTime = Carbon::now();
+          if(!empty($customFinishTime)) $finishTime = Carbon::parse($customFinishTime);
+          else $finishTime = Carbon::now();
           $yearGap = $finishTime->diffInYears($startTime);
           $persentase = $this->assetType->saldo_menurun;
           $price = $this->attributes['price'];
@@ -35,27 +36,28 @@ class MsAsset extends Model
             $depreciation = $temp * $persentase;
             $temp = $temp - $depreciation;
           }
-          return number_format($depreciation / 12, 0);
+          return $depreciation / 12;
           break;
         case 'CUSTOM':
           $persentase = $this->assetType->custom_rule;
           $price = $this->attributes['price'];
-          return number_format($persentase * $price / 12, 0);
+          return $persentase * $price / 12;
           break;
       }
    }
 
-   public function depreciationPerYear($year)
+   public function depreciationPerYear($year, $customFinishTime = null)
    {
       switch($this->attributes['depreciation_type']) {
         case 'GARIS LURUS':
           $persentase = $this->assetType->garis_lurus;
           $price = $this->attributes['price'];
-          return number_format($persentase * $price, 0);
+          return $persentase * $price;
           break;
         case 'SALDO MENURUN':
           $startTime = Carbon::parse($this->attributes['date']);
-          $finishTime = Carbon::now();
+          if(!empty($customFinishTime)) $finishTime = Carbon::parse($customFinishTime);
+          else $finishTime = Carbon::now();
           $yearGap = $finishTime->diffInYears($startTime);
           $persentase = $this->assetType->saldo_menurun;
           $price = $this->attributes['price'];
@@ -64,20 +66,21 @@ class MsAsset extends Model
             $depreciation = $temp * $persentase;
             $temp = $temp - $depreciation;
           }
-          return number_format($depreciation, 0);
+          return $depreciation;
           break;
         case 'CUSTOM':
           $persentase = $this->assetType->custom_rule;
           $price = $this->attributes['price'];
-          return number_format($persentase * $price, 0);
+          return $persentase * $price;
           break;
       }
    }
 
-   public function nilaiSisaTahunan($year)
+   public function nilaiSisaTahunan($year, $customFinishTime = null)
    {
       $startTime = Carbon::parse($this->attributes['date']);
-      $finishTime = Carbon::now();
+      if(!empty($customFinishTime)) $finishTime = Carbon::parse($customFinishTime);
+      else $finishTime = Carbon::now();
       $yearGap = $finishTime->diffInYears($startTime);
       switch($this->attributes['depreciation_type']) {
         case 'GARIS LURUS':
@@ -86,11 +89,9 @@ class MsAsset extends Model
           $depreciation = $yearGap * $persentase * $price;
           $nilai_sisa = $price - $depreciation;
           if($nilai_sisa < 0) $nilai_sisa = 0;
-          return number_format($nilai_sisa, 0);
+          return $nilai_sisa;
           break;
         case 'SALDO MENURUN':
-          $startTime = Carbon::parse($this->attributes['date']);
-          $finishTime = Carbon::now();
           $yearGap = $finishTime->diffInYears($startTime);
           $persentase = $this->assetType->saldo_menurun;
           $price = $this->attributes['price'];
@@ -100,14 +101,14 @@ class MsAsset extends Model
             $temp = $temp - $depreciation;
           }
           if($temp < 0) $temp = 0;
-          return number_format($temp, 0);
+          return $temp;
         case 'CUSTOM':
           $persentase = $this->assetType->custom_rule;
           $price = $this->attributes['price'];
           $depreciation = $yearGap * $persentase * $price;
           $nilai_sisa = $price - $depreciation;
           if($nilai_sisa < 0) $nilai_sisa = 0;
-          return number_format($nilai_sisa, 0);
+          return $nilai_sisa;
           break;
       }
    }
