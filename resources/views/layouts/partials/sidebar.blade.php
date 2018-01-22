@@ -209,6 +209,7 @@
                           @if(Session::get('role')==1 || in_array(59,Session::get('permissions')))
                           <li @if(Request::url() == route('invoice.index')) class="active" @endif><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
                           @endif
+                          <li @if(Request::url() == route('invoice.reminder')) class="active" @endif><a href="{{route('invoice.reminder')}}"><i class="fa fa-circle-o"></i> Reminder</a></li>
                         </ul>
                       </li>
                       @endif
