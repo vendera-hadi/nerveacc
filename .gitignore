@@ -15,3 +15,7 @@ scss
 /public/plugins/font-awesome/.gitignore
 /public/plugins/font-awesome/.npmignore
 /public/plugins/font-awesome/bower.json
+
+jlmacc-error\.log
+
+jlmacc-access\.log
