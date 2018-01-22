@@ -19,3 +19,5 @@ scss
 jlmacc-error\.log
 
 jlmacc-access\.log
+
+public/upload/

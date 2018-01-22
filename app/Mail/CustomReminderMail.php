@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use PDF;
 
 class CustomReminderMail extends Mailable
 {
@@ -19,6 +20,7 @@ class CustomReminderMail extends Mailable
     public function __construct($data)
     {
         $this->data = $data;
+        $this->pdf = PDF::loadView('print_reminder2', $data)->setPaper('a4')->output();
     }
 
     /**
@@ -28,6 +30,9 @@ class CustomReminderMail extends Mailable
      */
     public function build()
     {
-        return $this->view('print_reminder2', $this->data)->subject($this->data['title'].' dari '.$this->data['company']['comp_name']);
+        return $this->view('print_reminder2', $this->data)->subject($this->data['title'].' dari '.$this->data['company']['comp_name'])
+                    ->attachData($this->pdf, 'name.pdf', [
+                        'mime' => 'application/pdf',
+                    ]);
     }
 }

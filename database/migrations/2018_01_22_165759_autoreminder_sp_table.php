@@ -21,6 +21,7 @@ class AutoreminderSpTable extends Migration
             $table->integer('year');
             $table->boolean('sp1')->default(false);
             $table->boolean('sp2')->default(false);
+            $table->boolean('sent')->default(false);
             $table->timestamps();
         });
     }

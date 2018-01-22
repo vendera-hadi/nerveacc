@@ -72,7 +72,7 @@ table tr td{font-size:9pt;}
 <body>
     <div class="page">
         <div class="subpage">
-            <div style="width: 100%"><img src="{{asset($company_logo)}}" style="width:110px;"/></div>
+            <div style="width: 100%"><img src="file://{{public_path($company_logo)}}" style="width:110px;"/></div>
 
             <table style="width:100%;">
                 <tr>
@@ -108,7 +108,7 @@ table tr td{font-size:9pt;}
                 <tr>
                     <td>
                         {!!$content!!}
-
+                        <br><br><br>
                         Invoice yang harus dibayarkan:<br>
                         <ol>
                             @foreach($invoice_data as $val)
@@ -157,8 +157,5 @@ table tr td{font-size:9pt;}
             </table>
         </div>
     </div>
-    <script type="text/javascript">
-         alert('The email has been sent to tenant');
-    </script>
 </body>
 </html>
