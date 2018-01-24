@@ -26,6 +26,7 @@ use App\Models\TrInvoiceJournal;
 use App\Models\TrInvoicePaymhdr;
 use App\Models\TrInvoicePaymdtl;
 use App\Models\Autoreminder;
+use App\Models\MsEmailTemplate;
 use DB;
 use PDF;
 
@@ -1311,7 +1312,27 @@ class InvoiceController extends Controller
             $list[$key]->invoices = $temp->get();
         }
         $data['list'] = $list;
+
+        $data['sp1'] = MsEmailTemplate::where('name','SP1')->first();
+        $data['sp2'] = MsEmailTemplate::where('name','SP2')->first();
+
         return view('reminder_list',$data);
+    }
+
+    public function updateReminder(Request $request)
+    {
+        $sp1 = MsEmailTemplate::where('name','SP1')->first();
+        $sp1->title = $request->sp1_title;
+        $sp1->content = $request->sp1_content;
+        $sp1->save();
+
+        $sp2 = MsEmailTemplate::where('name','SP2')->first();
+        $sp2->title = $request->sp2_title;
+        $sp2->content = $request->sp2_content;
+        $sp2->save();
+
+        $request->session()->flash('success', 'Update email template success');
+        return redirect()->back();
     }
 
     public function reminderPrintout(Request $request){

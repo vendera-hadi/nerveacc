@@ -24,6 +24,11 @@
 @stop
 
 @section('main-content')
+ @if(Session::get('success'))
+    <div class="alert alert-success">
+      <strong>Success</strong> {{ Session::get('success') }}
+    </div>
+@endif
 <div class="row">
         <form action="" method="GET">
         <div class="col-sm-3">
@@ -66,62 +71,99 @@
 <div class="row">
     <div class="row">
     <div class="col-sm-12">
-        <div class="box box-primary">
-            <div class="box-body">
-                @if(Session::get('error'))
-                    <div class="alert alert-danger">
-                      <strong>Error!</strong> {{ Session::get('error') }}
+
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#tab_1" data-toggle="tab">Need to be Reminded List</a></li>
+                <li><a href="#tab_2" data-toggle="tab">Email Template</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab_1">
+
+                    <div class="box box-primary">
+                        <div class="box-body">
+                            @if(Session::get('error'))
+                                <div class="alert alert-danger">
+                                  <strong>Error!</strong> {{ Session::get('error') }}
+                                </div>
+                            @endif
+
+                            @if (count($errors) > 0)
+                              <div class="alert alert-danger">
+                                <ul>
+                                  @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                  @endforeach
+                                </ul>
+                              </div>
+                            @endif
+
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Tenant Name</th>
+                                        <th>Unpaid Invoice</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($list as $inv)
+                                    <tr>
+                                        <td>{{$inv->tenan_name}}</td>
+                                        <td>
+                                            {{$inv->totalinv}} invoice(s)<br>
+                                            @if(!empty($inv->invoices))
+                                            @foreach($inv->invoices as $invoice)
+                                                {{$invoice->inv_number}} : IDR {{number_format($invoice->inv_outstanding,0)}} <br>
+                                            @endforeach
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <button type="button" class="sendReminderCustom" data-id="{{$inv->tenan_id}}"><i class="fa fa-envelope"></i> Message Khusus
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+
+                            {{$list->links()}}
+                        </div>
                     </div>
-                @endif
 
-                @if(Session::get('success'))
-                    <div class="alert alert-success">
-                      <strong>Success</strong> {{ Session::get('success') }}
-                    </div>
-                @endif
+                </div>
+                <!-- tab 1 -->
 
-                @if (count($errors) > 0)
-                  <div class="alert alert-danger">
-                    <ul>
-                      @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                      @endforeach
-                    </ul>
-                  </div>
-                @endif
+                <div class="tab-pane" id="tab_2">
+                    <h3>Template</h3>
+                    <form action="{{route('invoice.reminder.updatetemplate')}}" method="post">
+                        <div class="form-group">
+                          <label>SP1 title</label>
+                          <input type="text" name="sp1_title" class="form-control" value="{{$sp1->title}}">
+                        </div>
 
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Tenant Name</th>
-                            <th>Unpaid Invoice</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($list as $inv)
-                        <tr>
-                            <td>{{$inv->tenan_name}}</td>
-                            <td>
-                                {{$inv->totalinv}} invoice(s)<br>
-                                @if(!empty($inv->invoices))
-                                @foreach($inv->invoices as $invoice)
-                                    {{$invoice->inv_number}} : IDR {{number_format($invoice->inv_outstanding,0)}} <br>
-                                @endforeach
-                                @endif
-                            </td>
-                            <td>
-                                <button type="button" class="sendReminderCustom" data-id="{{$inv->tenan_id}}"><i class="fa fa-envelope"></i> Message Khusus
-                                </button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        <div class="form-group">
+                          <label>SP1 Content</label>
+                          <textarea class="textarea" name="sp1_content" class='form-control' style="width: 100%;" required>{{$sp1->content}}</textarea>
+                        </div>
 
-                {{$list->links()}}
+                        <div class="form-group">
+                          <label>SP2 title</label>
+                          <input type="text" name="sp2_title" class="form-control" value="{{$sp2->title}}">
+                        </div>
+
+                        <div class="form-group">
+                          <label>SP2 Content</label>
+                          <textarea class="textarea" name="sp2_content" class='form-control' style="width: 100%;" required>{{$sp2->content}}</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-flat btn-primary">Submit</button>
+                    </form>
+                </div>
             </div>
         </div>
+
+    </div>
     </div>
 </div>
 
