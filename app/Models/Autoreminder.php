@@ -8,4 +8,8 @@ class Autoreminder extends Model
 {
   protected $table ='autoreminder_sp';
 
+  public function invoice()
+  {
+      return $this->hasMany('App\Models\TrInvoice','contr_id','contract_id');
+  }
 }

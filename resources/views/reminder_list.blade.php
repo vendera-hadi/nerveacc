@@ -111,9 +111,7 @@
                                 @endif
                             </td>
                             <td>
-                                <button type="button" class="sendReminder" data-id="{{$inv->tenan_id}}"><i class="fa fa-envelope"></i> 1
-                                </button>
-                                <button type="button" class="sendReminderCustom" data-id="{{$inv->tenan_id}}"><i class="fa fa-envelope"></i> Custom
+                                <button type="button" class="sendReminderCustom" data-id="{{$inv->tenan_id}}"><i class="fa fa-envelope"></i> Message Khusus
                                 </button>
                             </td>
                         </tr>
@@ -150,7 +148,7 @@
             </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-flat btn-primary">Submit</button>
+        <button type="submit" id="submitMessage" class="btn btn-flat btn-primary">Submit</button>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
       </div>
       </form>
@@ -188,9 +186,11 @@ $('.sendReminderCustom').click(function(){
 
 $("#customReminderForm").submit(function(e){
     e.preventDefault();
+    $('#submitMessage').attr('disabled','disabled').text('Sedang Mengirim Pesan ...');
     $.post('/invoice/customreminder', $(this).serialize(), function(data){
         alert('Email has been sent successfully');
         $('#reminderCustomModal').modal('hide');
+        $('#submitMessage').removeAttr('disabled').text('Submit');
         var w = window.open('about:blank');
         w.document.open();
         w.document.write(data);

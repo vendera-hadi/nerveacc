@@ -25,6 +25,7 @@ use App\Models\MsUnit;
 use App\Models\TrInvoiceJournal;
 use App\Models\TrInvoicePaymhdr;
 use App\Models\TrInvoicePaymdtl;
+use App\Models\Autoreminder;
 use DB;
 use PDF;
 
@@ -1336,10 +1337,12 @@ class InvoiceController extends Controller
         $company = MsCompany::with('MsCashbank')->first()->toArray();
         $signature = @MsConfig::where('name','digital_signature')->first()->value;
         $signatureFlag = @MsConfig::where('name','invoice_signature_flag')->first()->value;
+        $emailPengelola = @MsConfig::where('name','email_pengelola')->first()->value;
         $invoice_data = TrInvoice::where('tenan_id', $id)->orderBy('created_at','desc')->get();
 
         $set_data = array(
             'id' => $id,
+            'email' => $emailPengelola,
             'invoice_data' => $invoice_data,
             'title' => $request->title,
             'content' => $request->content,
@@ -1347,14 +1350,41 @@ class InvoiceController extends Controller
             'signature' => $signature,
             'signatureFlag' => $signatureFlag
         );
-        // \Mail::to($invoice_data[0]->MsTenant->tenan_email)->send(new \App\Mail\CustomReminderMail($set_data));
+        // trigger mail
+        \Mail::to($invoice_data[0]->MsTenant->tenan_email)->send(new \App\Mail\CustomReminderMail($set_data));
         return view('print_reminder2', $set_data);
     }
 
     public function test()
     {
-        $inv = TrInvoice::findOrFail(12342);
-        \Mail::to($inv->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($inv));
+        $currentMonth = date('m');
+        $currentYear = date('Y');
+        // list tenant yg masi ngutang
+        $list = TrInvoice::select('tenan_id','tenan_name','contr_id',\DB::raw('COUNT(tr_invoice.id) as totalinv'))
+                ->join('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
+                ->where('inv_outstanding', '>', 0)
+                ->where('inv_duedate', '<=', DB::raw('NOW()'))
+                ->groupBy('tenan_id','tenan_name','contr_id')
+                ->orderBy('tenan_name')->get();
+        if($list->count() > 0){
+            // check periode by bulan dan tahun ini
+            $logs = Autoreminder::whereIn('tenan_id',$list->pluck('tenan_id'))->where('month',$currentMonth)->where('year',$currentYear)->get();
+            $willbeinserted = collect($list->pluck('tenan_id'))->diff($logs->pluck('tenan_id'));
+            // yg blum ada di list difilter, nanti by tenant di loop insert
+            $insert_list = $list->whereIn('tenan_id',$willbeinserted);
+            foreach ($insert_list as $tenant) {
+                // insert to autoreminder
+                $log = new Autoreminder;
+                $log->tenan_id = $tenant->tenan_id;
+                $log->contract_id = $tenant->contr_id;
+                $log->month = $currentMonth;
+                $log->year = $currentYear;
+                $log->save();
+            }
+        }
+
+        // $inv = TrInvoice::findOrFail(12342);
+        // \Mail::to($inv->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($inv));
     }
 
 }

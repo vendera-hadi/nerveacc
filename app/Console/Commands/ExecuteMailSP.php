@@ -45,13 +45,36 @@ class ExecuteMailSP extends Command
     public function handle()
     {
         // get latest 10 email to be sent
-        $list = Autoreminder::where('sent',false)->limit(10)->get();
+        $list = Autoreminder::where('sent',false)->limit(1)->get();
         if($list->count() > 0){
             foreach ($list as $val) {
-//                 $result = $this->sendMail($val->tenan_id);
-// if($result) $this->info("SENT");
-// else $this->info("NOT SENT");
-                die();
+                // cek keterlambatan
+                $highest_interval = 0;
+                $outstanding_inv = $val->invoice->where('inv_outstanding','>',0);
+                foreach($outstanding_inv as $inv){
+                    $today = new \DateTime(date('Y-m-d'));
+                    $duedate  = new \DateTime($inv->inv_duedate);
+                    $interval = $duedate->diff($today)->days;
+                    if(empty($highest_interval)){
+                        $highest_interval = $interval;
+                    }else{
+                       if($interval > $highest_interval) $highest_interval = $interval;
+                    }
+                }
+                // highest interval > 30 = SP1, > 60 = SP2
+                if($highest_interval > 30) $type = 'SP1';
+                if($highest_interval > 60) $type = 'SP2';
+                // send mail
+                $result = $this->sendMail($val->tenan_id, $type);
+                if($result){
+                    if($type == 'SP1') $val->sp1 = true;
+                    if($type == 'SP2') $val->sp2 = true;
+                    $val->sent = true;
+                    $val->save();
+                    $this->info("SENT");
+                }else{
+                    $this->info("NOT SENT");
+                }
             }
         }else{
             $this->info("NOTHING TO BE SENT");
@@ -70,7 +93,7 @@ class ExecuteMailSP extends Command
 
             $set_data = array(
                 'id' => $id,
-                'email' => $email_pengelola,
+                'email' => $emailPengelola,
                 'invoice_data' => $invoice_data,
                 'title' => $emailTemplate->title,
                 'content' => $emailTemplate->content,
