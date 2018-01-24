@@ -159,12 +159,12 @@
 
 
             <?php
-              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('payment.index'),url('period_meter')];
+              $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('payment.index'),url('period_meter'), route('invoice.reminder')];
               $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view'),route('report.neraca'),route('report.profitloss')];
               $glSetupUrls = [route('coa.index'),url('department'),url('layouts'),url('department'),url('groupaccount'),url('kurs')];
               $bbUrls = [route('cash_bank.index'),route('bankbook.index'),route('bankbook.transfer'),route('bankbook.deposit'),route('bankbook.withdraw'),route('reconcile.index')];
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
-              $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter')];
+              $invUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'),url('period_meter'), route('invoice.reminder')];
 
               $apUrls = [url('accpayable'),url('purchaseorder'),url('treasury'),route('report.apview'),route('payable.withpo'),route('payable.withoutpo'),route('po.add')];
               $apSetupUrls = [url('supplier')];
@@ -209,7 +209,9 @@
                           @if(Session::get('role')==1 || in_array(59,Session::get('permissions')))
                           <li @if(Request::url() == route('invoice.index')) class="active" @endif><a href="{{route('invoice.index')}}"><i class="fa fa-circle-o"></i> Invoices</a></li>
                           @endif
+                          @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                           <li @if(Request::url() == route('invoice.reminder')) class="active" @endif><a href="{{route('invoice.reminder')}}"><i class="fa fa-circle-o"></i> Reminder</a></li>
+                          @endif
                         </ul>
                       </li>
                       @endif

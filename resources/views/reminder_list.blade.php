@@ -119,8 +119,10 @@
                                             @endif
                                         </td>
                                         <td>
+                                            @if(Session::get('role')==1 || in_array(79,Session::get('permissions')))
                                             <button type="button" class="sendReminderCustom" data-id="{{$inv->tenan_id}}"><i class="fa fa-envelope"></i> Message Khusus
                                             </button>
+                                            @endif
                                         </td>
                                     </tr>
                                     @endforeach
@@ -135,6 +137,7 @@
                 <!-- tab 1 -->
 
                 <div class="tab-pane" id="tab_2">
+                    @if(Session::get('role')==1 || in_array(78,Session::get('permissions')))
                     <h3>Template</h3>
                     <form action="{{route('invoice.reminder.updatetemplate')}}" method="post">
                         <div class="form-group">
@@ -159,6 +162,9 @@
 
                         <button type="submit" class="btn btn-flat btn-primary">Submit</button>
                     </form>
+                    @else
+                    <h3>This feature is not allowed</h3>
+                    @endif
                 </div>
             </div>
         </div>
