@@ -28,12 +28,99 @@
 
             <div class="col-sm-6">
                 <div class="form-group">
+                    <label>COA Aktiva</label>
+                    <div class="input-group input-group-md">
+                        <select class="js-example-basic-single" name="aktiva_coa_code" style="width:100%">
+                          <option value="">Choose Account</option>
+                          @foreach($accounts as $key => $coa)
+                              <option value="{{str_replace(" ","", $coa->coa_code)}}" data-name="{{$coa->coa_name}}" >{{$coa->coa_code." ".$coa->coa_name}}</option>
+                          @endforeach
+                        </select>
+                      </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
                     <label>Tipe Depresiasi</label>
                     <select class="form-control" name="depreciation_type" placeholder="Tipe Depresiasi" required>
                         <option @if(@$detail && $detail->depreciation_type == 'GARIS LURUS') selected @endif>GARIS LURUS</option>
                         <option @if(@$detail && $detail->depreciation_type == 'SALDO MENURUN') selected @endif>SALDO MENURUN</option>
                         <option @if(@$detail && $detail->depreciation_type == 'CUSTOM') selected @endif>CUSTOM</option>
                     </select>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Group Aktiva (Create & Edit Group <a href="{{url('groupaccount')}}">disini</a>)</label>
+                    <select class="form-control" name="group_account_id" placeholder="Group Account ID">
+                        <option value="">No group account</option>
+                        @foreach($group_accounts as $acc)
+                        <option value="{{$acc->id}}" @if(@$detail && $detail->group_account_id == $acc->id) selected @endif>{{$acc->grpaccn_name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Supplier</label>
+                    <select class="form-control" name="supplier_id" placeholder="Supplier">
+                        <option value="">No supplier</option>
+                        @foreach($suppliers as $supplier)
+                        <option value="{{$supplier->id}}" @if(@$detail && $detail->supplier_id == $supplier->id) selected @endif>{{$supplier->spl_name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>PO no.</label>
+                    <input type="text" class="form-control" name="po_no" placeholder="Nomor PO (jika ada)" value="{{ @$detail ? $detail->po_no : ''}}" required>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Kode Induk</label>
+                    <input type="text" class="form-control" name="kode_induk" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->kode_induk : ''}}" required>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Cabang</label>
+                    <input type="text" class="form-control" name="cabang" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->cabang : ''}}" required>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Lokasi</label>
+                    <input type="text" class="form-control" name="lokasi" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->lokasi : ''}}" required>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Area</label>
+                    <input type="text" class="form-control" name="area" placeholder="Area (jika ada)" value="{{ @$detail ? $detail->area : ''}}" required>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Departemen</label>
+                    <input type="text" class="form-control" name="departemen" placeholder="Departemen (jika ada)" value="{{ @$detail ? $detail->departemen : ''}}" required>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>User / Pengguna</label>
+                    <input type="text" class="form-control" name="user" placeholder="User / Pengguna (jika ada)" value="{{ @$detail ? $detail->user : ''}}" required>
                 </div>
             </div>
 
@@ -64,4 +151,13 @@
   $('.datepicker').datepicker({
             autoclose: true
         });
+
+    $(function(){
+        $(".js-example-basic-single").select2();
+
+        @if(@$detail)
+        $("select[name=aktiva_coa_code]").val("{{str_replace(" ","", @$detail->aktiva_coa_code)}}").trigger("change");
+        @endif
+
+    });
 </script>

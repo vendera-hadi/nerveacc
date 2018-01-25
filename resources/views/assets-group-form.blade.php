@@ -78,3 +78,4 @@ $(function(){
     @endif
 
 });
+</script>

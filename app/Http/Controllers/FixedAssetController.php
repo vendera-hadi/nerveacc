@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\MsMasterCoa;
 use App\Models\MsAsset;
 use App\Models\MsAssetType;
+use App\Models\MsSupplier;
+use App\Models\MsGroupAccount;
 
 use Auth;
 use DB;
@@ -152,16 +154,24 @@ class FixedAssetController extends Controller
 
     public function add(Request $request)
     {
+        $coaYear = date('Y');
         $data['title'] = 'Add';
         $data['kelompok_harta'] = MsAssetType::all();
+        $data['suppliers'] = MsSupplier::all();
+        $data['group_accounts'] = MsGroupAccount::all();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
         $data['action'] = route('fixed_asset.insert');
         return view('assets-form',$data);
     }
 
     public function edit(Request $request)
     {
+        $coaYear = date('Y');
         $data['title'] = 'Edit';
         $data['kelompok_harta'] = MsAssetType::all();
+        $data['suppliers'] = MsSupplier::all();
+        $data['group_accounts'] = MsGroupAccount::all();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
         $data['detail'] = MsAsset::find($request->id);
         $data['action'] = route('fixed_asset.update', ['id' => $request->id]);
         return view('assets-form',$data);

@@ -8,7 +8,7 @@ use Carbon\Carbon;
 class MsAsset extends Model
 {
    protected $table ='ms_assets';
-   protected $fillable =['name','ms_asset_type_id','depreciation_type','date','price'];
+   protected $fillable =['name','ms_asset_type_id','depreciation_type','date','price','group_account_id','aktiva_coa_code','supplier_id','po_no','kode_induk','cabang','lokasi','area','departemen','user','kondisi','keterangan'];
    public $timestamps  = false;
 
    public function assetType()
