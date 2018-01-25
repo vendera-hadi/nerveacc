@@ -8,12 +8,46 @@ use Carbon\Carbon;
 class MsAsset extends Model
 {
    protected $table ='ms_assets';
-   protected $fillable =['name','ms_asset_type_id','depreciation_type','date','price','group_account_id','aktiva_coa_code','supplier_id','po_no','kode_induk','cabang','lokasi','area','departemen','user','kondisi','keterangan'];
+   protected $fillable =['name','ms_asset_type_id','depreciation_type','date','price','group_account_id','aktiva_coa_code','supplier_id','po_no','kode_induk','cabang','lokasi','area','departemen','user','kondisi','keterangan','image'];
    public $timestamps  = false;
 
    public function assetType()
    {
       return $this->belongsTo('App\Models\MsAssetType','ms_asset_type_id');
+   }
+
+   public function mutasi()
+   {
+      return $this->hasMany('App\Models\TrAssetMutation','asset_id');
+   }
+
+   public function depreciationPerMonthCustom($type, $year)
+   {
+      switch($type) {
+        case 'GARIS LURUS':
+          $persentase = $this->assetType->garis_lurus;
+          $price = $this->attributes['price'];
+          return $persentase * $price / 12;
+          break;
+        case 'SALDO MENURUN':
+          $startTime = Carbon::parse($this->attributes['date']);
+          $yearGap = $year - date('Y',strtotime($this->attributes['date'])) + 1;
+          $persentase = $this->assetType->saldo_menurun;
+          $price = $this->attributes['price'];
+          $temp = $price;
+          $depreciation = 0;
+          for ($i=0; $i < $yearGap; $i++) {
+            $depreciation = $temp * $persentase;
+            $temp = $temp - $depreciation;
+          }
+          return $depreciation / 12;
+          break;
+        case 'CUSTOM':
+          $persentase = $this->assetType->custom_rule;
+          $price = $this->attributes['price'];
+          return $persentase * $price / 12;
+          break;
+      }
    }
 
    public function depreciationPerMonth($year, $customFinishTime = null)

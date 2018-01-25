@@ -25,6 +25,7 @@ class AddingExtraParamToMsAssets extends Migration
             $table->string('departemen')->nullable();
             $table->string('user')->nullable();
             $table->string('kondisi')->nullable();
+            $table->text('image')->nullable();
             $table->text('keterangan')->nullable();
         });
     }
@@ -48,6 +49,7 @@ class AddingExtraParamToMsAssets extends Migration
             $table->dropColumn('departemen');
             $table->dropColumn('user');
             $table->dropColumn('kondisi');
+            $table->dropColumn('image');
             $table->dropColumn('keterangan');
         });
     }

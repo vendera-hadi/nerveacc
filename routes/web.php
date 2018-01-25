@@ -479,6 +479,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('assets', 'FixedAssetController@index')->name('fixed_asset.index');
 	Route::post('assets/add', 'FixedAssetController@add')->name('fixed_asset.modal.add');
 	Route::post('assets/edit', 'FixedAssetController@edit')->name('fixed_asset.modal.edit');
+	Route::post('assets/fiskal', 'FixedAssetController@fiskal')->name('fixed_asset.modal.fiskal');
+	Route::post('assets/komersial', 'FixedAssetController@komersial')->name('fixed_asset.modal.komersial');
+	Route::post('assets/custom', 'FixedAssetController@custom')->name('fixed_asset.modal.custom');
+	Route::post('assets/mutasi', 'FixedAssetController@mutasi')->name('fixed_asset.modal.mutasi');
 	Route::post('assets/insert', 'FixedAssetController@insert')->name('fixed_asset.insert');
 	Route::post('assets/update', 'FixedAssetController@update')->name('fixed_asset.update');
 	Route::post('assets/delete', 'FixedAssetController@delete')->name('fixed_asset.delete');

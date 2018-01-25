@@ -57,16 +57,16 @@
                             <th field="name" width="200" sortable="true">Nama Aset</th>
                             <th field="date" width="200" sortable="true">Tgl Perolehan</th>
                             <th field="price" width="200" sortable="true">Harga Perolehan</th>
-                            <th field="depreciation_type" width="200" sortable="true">Jenis penyusutan</th>
+                            <!-- <th field="depreciation_type" width="200" sortable="true">Jenis penyusutan</th> -->
                             <th field="jenis_harta" width="200" sortable="true">Jenis harta</th>
                             <th field="kelompok_harta" width="200" sortable="true">Kelompok harta</th>
                             <th field="masa_manfaat" width="200" sortable="true">Masa manfaat</th>
-                            <th field="nilai_sisa" width="250">Nilai sisa buku<br>Komersial<br>s/d {{date('M y')}}</th>
+                            <!-- <th field="nilai_sisa" width="250">Nilai sisa buku<br>Komersial<br>s/d {{date('M y')}}</th>
                             <th field="per_month" width="250">Peny Komersial<br>per Bln {{date('Y')}}</th>
                             <th field="per_year" width="250">Peny Komersial<br>per Thn {{date('Y')}}</th>
                             <th field="nilai_sisa" width="250">Nilai sisa buku<br>Fiskal<br>s/d {{date('M y')}}</th>
                             <th field="per_month" width="250">Peny Fiskal<br>per Bln {{date('Y')}}</th>
-                            <th field="per_year" width="250">Peny Fiskal<br>per Thn {{date('Y')}}</th>
+                            <th field="per_year" width="250">Peny Fiskal<br>per Thn {{date('Y')}}</th> -->
                         </tr>
                     </thead>
                 </table>
@@ -77,6 +77,12 @@
                     <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" id="addNew">New</a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">Edit</a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroy()">Remove</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="fiskal()"><i class="fa fa-eye"></i>&nbsp;Kartu Aktiva Fiskal </a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="komersial()"><i class="fa fa-eye"></i>&nbsp;Kartu Aktiva Komersial </a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="custom()"><i class="fa fa-eye"></i>&nbsp;Kartu Aktiva Custom </a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="mutasi()"><i class="fa fa-eye"></i>&nbsp;Mutasi </a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="perawatan()"><i class="fa fa-eye"></i>&nbsp;Perawatan </a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="asuransi()"><i class="fa fa-eye"></i>&nbsp;Asuransi </a>
                 </div>
                 <!-- end icon -->
 
@@ -145,6 +151,38 @@
                         location.reload();
                     })
             }
+        }
+
+        function fiskal(){
+            var row = $('#dg').datagrid('getSelected');
+            $.post('{{route('fixed_asset.modal.fiskal')}}',{id: row.id}, function(data){
+                    $('#FormModal').modal('show');
+                    $('#FormModal').find('.modal-content').html(data);
+                })
+        }
+
+        function komersial(){
+            var row = $('#dg').datagrid('getSelected');
+            $.post('{{route('fixed_asset.modal.komersial')}}',{id: row.id}, function(data){
+                    $('#FormModal').modal('show');
+                    $('#FormModal').find('.modal-content').html(data);
+                })
+        }
+
+        function custom(){
+            var row = $('#dg').datagrid('getSelected');
+            $.post('{{route('fixed_asset.modal.custom')}}',{id: row.id}, function(data){
+                    $('#FormModal').modal('show');
+                    $('#FormModal').find('.modal-content').html(data);
+                })
+        }
+
+        function mutasi(){
+            var row = $('#dg').datagrid('getSelected');
+            $.post('{{route('fixed_asset.modal.mutasi')}}',{id: row.id}, function(data){
+                    $('#FormModal').modal('show');
+                    $('#FormModal').find('.modal-content').html(data);
+                })
         }
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>

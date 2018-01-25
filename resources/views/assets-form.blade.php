@@ -5,7 +5,7 @@
 
 <div class="modal-body" style="padding: 20px 40px">
     <!-- isi form -->
-    <form method="POST" action="{{$action}}">
+    <form method="POST" action="{{$action}}" enctype="multipart/form-data">
         <div class="row">
             <div class="col-sm-6">
                 <div class="form-group">
@@ -23,6 +23,22 @@
                 <div class="form-group">
                     <label>Nama Harta</label>
                     <input type="text" class="form-control" name="name" placeholder="Nama Harta" value="{{ @$detail ? $detail->name : ''}}" required>
+                </div>
+            </div>
+
+            @if(!empty(@$detail->image))
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Image</label><br>
+                    <img src="/upload/{{$detail->image}}" width="200">
+                </div>
+            </div>
+            @endif
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Upload Image</label>
+                    <input type="file" name="image" />
                 </div>
             </div>
 
@@ -78,35 +94,35 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>PO no.</label>
-                    <input type="text" class="form-control" name="po_no" placeholder="Nomor PO (jika ada)" value="{{ @$detail ? $detail->po_no : ''}}" required>
+                    <input type="text" class="form-control" name="po_no" placeholder="Nomor PO (jika ada)" value="{{ @$detail ? $detail->po_no : ''}}">
                 </div>
             </div>
 
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Kode Induk</label>
-                    <input type="text" class="form-control" name="kode_induk" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->kode_induk : ''}}" required>
+                    <input type="text" class="form-control" name="kode_induk" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->kode_induk : ''}}">
                 </div>
             </div>
 
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Cabang</label>
-                    <input type="text" class="form-control" name="cabang" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->cabang : ''}}" required>
+                    <input type="text" class="form-control" name="cabang" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->cabang : ''}}">
                 </div>
             </div>
 
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Lokasi</label>
-                    <input type="text" class="form-control" name="lokasi" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->lokasi : ''}}" required>
+                    <input type="text" class="form-control" name="lokasi" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->lokasi : ''}}">
                 </div>
             </div>
 
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Area</label>
-                    <input type="text" class="form-control" name="area" placeholder="Area (jika ada)" value="{{ @$detail ? $detail->area : ''}}" required>
+                    <input type="text" class="form-control" name="area" placeholder="Area (jika ada)" value="{{ @$detail ? $detail->area : ''}}">
                 </div>
             </div>
 
@@ -120,21 +136,28 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>User / Pengguna</label>
-                    <input type="text" class="form-control" name="user" placeholder="User / Pengguna (jika ada)" value="{{ @$detail ? $detail->user : ''}}" required>
+                    <input type="text" class="form-control" name="user" placeholder="User / Pengguna" value="{{ @$detail ? $detail->user : ''}}" required>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Kondisi</label>
+                    <input type="text" class="form-control" name="kondisi" placeholder="Kondisi Barang" value="{{ @$detail ? $detail->kondisi : ''}}" required>
                 </div>
             </div>
 
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Tanggal Perolehan</label>
-                    <input type="text" class="form-control datepicker" name="date" placeholder="Tanggal Perolehan" data-date-format="yyyy-mm-dd" value="{{@$detail->date}}" required>
+                    <input type="text" class="form-control datepicker" name="date" placeholder="Tanggal Perolehan" data-date-format="yyyy-mm-dd" value="@if(!empty(@$detail->date)){{date('Y-m-d',strtotime(@$detail->date))}}@endif" required>
                 </div>
             </div>
 
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Harga Perolehan</label>
-                    <input type="text" class="form-control" name="price" placeholder="Harga Perolehan" value="{{@$detail->price}}" required>
+                    <input type="text" class="form-control" name="price" placeholder="Harga Perolehan" value="@if(!empty(@$detail->price)){{number_format(@$detail->price,0,',','')}}@endif" required>
                 </div>
             </div>
 
