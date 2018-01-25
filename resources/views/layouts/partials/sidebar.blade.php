@@ -346,7 +346,7 @@
                                 @if(Session::get('role')==1 || in_array(11,Session::get('permissions')))
                                 <li @if(Request::url() == url('coa')) class="active" @endif><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
                                 @endif
-                                <li><a href="#"><i class="fa fa-circle-o"></i> Budget</a></li>
+
                                 @if(Session::get('role')==1 || in_array(1,Session::get('permissions')))
                                 <li @if(Request::url() == url('department')) class="active" @endif><a href="{{url('department')}}"><i class="fa fa-circle-o"></i> Department</a></li>
                                 @endif
@@ -435,7 +435,7 @@
                     <ul class="treeview-menu">
                       <li @if(Request::url() == route('fixed_asset.index')) class="active" @endif><a href="{{route('fixed_asset.index')}}"><i class="fa fa-circle-o"></i> Assets List</a>
                       </li>
-                      <li @if(Request::url() == route('fixed_asset.report')) class="active" @endif><a href="{{route('fixed_asset.report')}}"><i class="fa fa-circle-o"></i> Fixed Assets Report</a></li>
+
                     </ul>
                 </li>
 
