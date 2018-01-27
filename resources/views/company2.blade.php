@@ -12,7 +12,7 @@
 
 <!-- tambahan script atas -->
 @section('htmlheader_scripts')
-    
+
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -28,7 +28,7 @@
 		<div class="box box-primary">
 		    <div class="box-header with-border">
 		      <h3 class="box-title">Company Detail Form</h3>
-		    </div> 
+		    </div>
 		    <form action="{{route('company.update')}}" method="post" enctype="multipart/form-data">
 		      <div class="box-body">
 		      	<div class="col-sm-6">
@@ -59,7 +59,7 @@
 		              <label>Company Title</label>
 		              <input type="text" value="{{$company->title}}" name="title" class="form-control" id="title" placeholder="Company Title" required>
 		            </div>
-		        
+
 		            <div class="form-group">
 		              <label>Company Name</label>
 		              <input type="text" value="{{$company->comp_name}}" name="comp_name" class="form-control" id="compName" placeholder="Company Name" required>
@@ -88,6 +88,11 @@
 		            <div class="form-group">
 		              <label>Invoice Signature Postion</label>
 		              <input type="text" value="{{$company->comp_sign_position}}" name="comp_sign_position" class="form-control" id="compSignPosition" placeholder="Company Signature Postion" required>
+		            </div>
+
+		            <div class="form-group">
+		              <label>Company Building Area Size (square foot)</label>
+		              <input type="text" value="{{number_format($company->comp_sqrt,0,',','')}}" name="comp_sqrt" class="form-control" id="compSize" placeholder="Company Building Area Size" required>
 		            </div>
 
 		            <div class="form-group">
@@ -137,7 +142,7 @@
 					<div class="form-group">
 		              <label>Current Image</label>
 		              <img src="{{asset('upload/'.$company->comp_image)}}" class="img-responsive">
-		            </div>						                
+		            </div>
 		            @endif
 
 		            <div class="form-group">
@@ -145,7 +150,7 @@
 		              <input type="file" name="image" id="companyImage">
 		              <p class="help-block">masukkan icon company anda</p>
 		            </div>
-		        
+
 				</div>
 		      </div>
 		      <!-- /.box-body -->
@@ -166,7 +171,7 @@ $(document).ready(function() {
         // Allow: backspace, delete, tab, escape, enter and .
         if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
              // Allow: Ctrl+A, Command+A
-            (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) || 
+            (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
              // Allow: home, end, left, right, down, up
             (e.keyCode >= 35 && e.keyCode <= 40)) {
                  // let it happen, don't do anything
