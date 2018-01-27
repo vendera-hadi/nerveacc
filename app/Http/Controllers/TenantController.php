@@ -11,6 +11,7 @@ use App\Models\MsTenantType;
 use App\Models\User;
 use App\Models\MsUnitOwner;
 use App\Models\TrContract;
+use App\Models\TrInvoice;
 use Validator;
 
 class TenantController extends Controller
@@ -25,7 +26,7 @@ class TenantController extends Controller
             // params
             $type = @$request->type;
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -38,7 +39,7 @@ class TenantController extends Controller
             $count = MsTenant::count();
             $fetch = MsTenant::select('ms_tenant.*','ms_tenant_type.tent_name')
                     ->leftJoin('ms_tenant_type','ms_tenant.tent_id',"=",'ms_tenant_type.id');
-            if(!empty($type)){ 
+            if(!empty($type)){
                 if($type == 'owner') $fetch = $fetch->where('ms_tenant_type.tent_isowner',1);
                 else if($type == 'tenant') $fetch = $fetch->where('ms_tenant_type.tent_isowner',0);
             }
@@ -63,7 +64,7 @@ class TenantController extends Controller
                 if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
                 else $fetch = $fetch->where($filter->field, $op, $filter->value);
             }
-            
+
 
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
@@ -94,7 +95,7 @@ class TenantController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getOptions(){
@@ -109,7 +110,7 @@ class TenantController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getPopupOptions(Request $request){
@@ -163,7 +164,7 @@ class TenantController extends Controller
                 // cek unit
                 $cekunit = MsUnitOwner::where('unit_id',$input['unit_id'])->first();
                 if($cekunit){
-                    return response()->json(['errorMsg' => 'Unit is already owned by others']);       
+                    return response()->json(['errorMsg' => 'Unit is already owned by others']);
                 }
             }
             $tenant = MsTenant::create($input);
@@ -172,11 +173,11 @@ class TenantController extends Controller
                 // insert ke unit owner
                 MsUnitOwner::create(['unit_id'=>$input['unit_id'], 'tenan_id'=>$tenant->id, 'unitow_start_date'=>@$input['unitow_start_date']]);
             }
-            
-            return $tenant;        
+
+            return $tenant;
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function update(Request $request){
@@ -218,7 +219,7 @@ class TenantController extends Controller
             return $tenant;
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function delete(Request $request){
@@ -235,7 +236,7 @@ class TenantController extends Controller
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function edit(Request $request){
@@ -278,7 +279,7 @@ class TenantController extends Controller
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function addunit(Request $request){
@@ -286,7 +287,7 @@ class TenantController extends Controller
             $unitid = $request->unitid;
             $tenanid = $request->tenanid;
             $date = $request->date;
-            
+
             $cekUnit = MsUnitOwner::where('unit_id',$unitid)->where('tenan_id',$tenanid)->first();
             if($cekUnit) return response()->json(['errorMsg' => 'Unit is already owned']);
             $cekUnit = MsUnitOwner::where('unit_id',$unitid)->first();
@@ -296,7 +297,18 @@ class TenantController extends Controller
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
+    }
+
+    public function outstanding(Request $request){
+        try{
+            $contractId = $request->contract_id;
+            $contract = TrContract::find($contractId);
+            $invoices = TrInvoice::where('tenan_id',$contract->tenan_id)->where('inv_outstanding','>',0)->where('inv_post',1)->get();
+            return response()->json($invoices);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
     }
 
 }

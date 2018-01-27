@@ -23,7 +23,7 @@
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Masa Manfaat<br></label>
+                    <label>Masa Manfaat (tahun)<br></label>
                     <input type="number" class="form-control" name="masa_manfaat" min="1" max="20" value="{{ @$detail ? $detail->masa_manfaat : 1 }}">
                 </div>
             </div>
@@ -35,7 +35,7 @@
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>COA Debit</label>
+                    <label>COA Beban Penyusutan (Debit)</label>
                     <div class="input-group input-group-md">
                         <select class="js-example-basic-single" name="debit_coa_code" style="width:100%">
                           <option value="">Choose Account</option>
@@ -48,7 +48,7 @@
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>COA Credit</label>
+                    <label>COA Akumulasi Penyusutan (Credit)</label>
                     <div class="input-group input-group-md">
                         <select class="js-example-basic-single" name="credit_coa_code" style="width:100%">
                           <option value="">Choose Account</option>

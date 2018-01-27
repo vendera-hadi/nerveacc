@@ -114,6 +114,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('tenant/delete', 'TenantController@delete')->name('tenant.delete');
 	Route::post('tenant/deleteunit', 'TenantController@deleteunit')->name('tenant.deleteunit');
 	Route::post('tenant/addunit', 'TenantController@addunit')->name('tenant.addunit');
+	Route::post('tenant/outstanding', 'TenantController@outstanding')->name('tenant.outstanding');
 
 	// master tenant type
 	Route::get('typetenant','TenantTypeController@index');
@@ -499,6 +500,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('assets/insert', 'FixedAssetController@insert')->name('fixed_asset.insert');
 	Route::post('assets/update', 'FixedAssetController@update')->name('fixed_asset.update');
 	Route::post('assets/delete', 'FixedAssetController@delete')->name('fixed_asset.delete');
+
+	Route::post('group_aktiva/insert', 'FixedAssetController@gaInsert')->name('group_aktiva.insert');
+	Route::post('group_aktiva/delete', 'FixedAssetController@gaDelete')->name('group_aktiva.delete');
 
 	Route::get('asset-type', 'FixedAssetController@indexTypes')->name('fixed_asset.type.index');
 	Route::post('asset-type/add', 'FixedAssetController@addTypes')->name('fixed_asset.type.modal.add');
