@@ -21,6 +21,16 @@ class MsAsset extends Model
       return $this->hasMany('App\Models\TrAssetMutation','asset_id');
    }
 
+   public function perawatan()
+   {
+      return $this->hasMany('App\Models\MsPerawatanAsset','asset_id');
+   }
+
+   public function asuransi()
+   {
+      return $this->hasMany('App\Models\MsAsuransiAsset','asset_id');
+   }
+
    public function depreciationPerMonthCustom($type, $year)
    {
       switch($type) {

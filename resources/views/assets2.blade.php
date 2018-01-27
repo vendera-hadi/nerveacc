@@ -184,6 +184,22 @@
                     $('#FormModal').find('.modal-content').html(data);
                 })
         }
+
+        function perawatan() {
+            var row = $('#dg').datagrid('getSelected');
+            $.post('{{route('fixed_asset.modal.perawatan')}}',{id: row.id}, function(data){
+                    $('#FormModal').modal('show');
+                    $('#FormModal').find('.modal-content').html(data);
+                })
+        }
+
+        function asuransi() {
+            var row = $('#dg').datagrid('getSelected');
+            $.post('{{route('fixed_asset.modal.asuransi')}}',{id: row.id}, function(data){
+                    $('#FormModal').modal('show');
+                    $('#FormModal').find('.modal-content').html(data);
+                })
+        }
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection

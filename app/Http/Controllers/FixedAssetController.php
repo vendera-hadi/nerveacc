@@ -9,6 +9,8 @@ use App\Models\MsAssetType;
 use App\Models\MsSupplier;
 use App\Models\MsGroupAccount;
 use App\Models\TrAssetMutation;
+use App\Models\MsPerawatanAsset;
+use App\Models\MsAsuransiAsset;
 
 use Auth;
 use DB;
@@ -313,6 +315,76 @@ class FixedAssetController extends Controller
         $id = $request->id;
         $data['asset'] = MsAsset::find($id);
         return view('assets-mutasi', $data);
+    }
+
+    public function perawatan(Request $request)
+    {
+        $id = $request->id;
+        $data['asset'] = MsAsset::find($id);
+        return view('assets-perawatan', $data);
+    }
+
+    public function getPerawatan(Request $request)
+    {
+        $id = $request->id;
+        $data = MsPerawatanAsset::find($id);
+        return $data;
+    }
+
+    public function insertPerawatan(Request $request)
+    {
+        $input = $request->except(['type','id']);
+        MsPerawatanAsset::create($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function updatePerawatan(Request $request)
+    {
+        $input = $request->except(['type','id']);
+        $data = MsPerawatanAsset::find($request->id);
+        $data->update($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function deletePerawatan(Request $request)
+    {
+        MsPerawatanAsset::destroy($request->id);
+        return response()->json(['success'=>true]);
+    }
+
+    public function asuransi(Request $request)
+    {
+        $id = $request->id;
+        $data['asset'] = MsAsset::find($id);
+        return view('assets-asuransi', $data);
+    }
+
+    public function getAsuransi(Request $request)
+    {
+        $id = $request->id;
+        $data = MsAsuransiAsset::find($id);
+        return $data;
+    }
+
+    public function insertAsuransi(Request $request)
+    {
+        $input = $request->except(['type','id']);
+        MsAsuransiAsset::create($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function updateAsuransi(Request $request)
+    {
+        $input = $request->except(['type','id']);
+        $data = MsAsuransiAsset::find($request->id);
+        $data->update($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function deleteAsuransi(Request $request)
+    {
+        MsAsuransiAsset::destroy($request->id);
+        return response()->json(['success'=>true]);
     }
 
     public function report()
