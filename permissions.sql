@@ -85,3 +85,7 @@ INSERT INTO "permissions" ("id", "name", "created_at", "updated_at") VALUES (76,
 INSERT INTO "permissions" ("id", "name", "created_at", "updated_at") VALUES (77, 'View Reminder', NULL, NULL);
 INSERT INTO "permissions" ("id", "name", "created_at", "updated_at") VALUES (78, 'Edit Reminder', NULL, NULL);
 INSERT INTO "permissions" ("id", "name", "created_at", "updated_at") VALUES (79, 'Send Reminder', NULL, NULL);
+INSERT INTO "permissions" ("id", "name", "created_at", "updated_at") VALUES (80, 'View Fixed Asset', NULL, NULL);
+INSERT INTO "permissions" ("id", "name", "created_at", "updated_at") VALUES (81, 'Add Fixed Asset', NULL, NULL);
+INSERT INTO "permissions" ("id", "name", "created_at", "updated_at") VALUES (82, 'Edit Fixed Asset', NULL, NULL);
+INSERT INTO "permissions" ("id", "name", "created_at", "updated_at") VALUES (83, 'Delete Fixed Asset', NULL, NULL);

@@ -1,0 +1,102 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class PermissionSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::statement('TRUNCATE permissions CASCADE');
+
+        DB::table('permissions')->insert([
+          ["id" => 1, "name" => "View Department"],
+          ["id" => 2, "name" => "Add Department"],
+          ["id" => 3, "name" => "Edit Department"],
+          ["id" => 4, "name" => "Delete Department"],
+          ["id" => 5, "name" => "Edit Company Details"],
+          ["id" => 6, "name" => "Edit Config"],
+          ["id" => 7, "name" => "View Invoice Type"],
+          ["id" => 8, "name" => "Add Invoice Type"],
+          ["id" => 9, "name" => "Edit Invoice Type"],
+          ["id" => 10, "name" => "Delete Invoice Type"],
+          ["id" => 11, "name" => "View COA"],
+          ["id" => 12, "name" => "Add COA"],
+          ["id" => 13, "name" => "Edit COA"],
+          ["id" => 14, "name" => "Delete COA"],
+          ["id" => 15, "name" => "View Unit"],
+          ["id" => 16, "name" => "Add Unit"],
+          ["id" => 17, "name" => "Edit Unit"],
+          ["id" => 18, "name" => "Delete Unit"],
+          ["id" => 19, "name" => "View Unit Type"],
+          ["id" => 20, "name" => "Add Unit Type"],
+          ["id" => 21, "name" => "Edit Unit Type"],
+          ["id" => 22, "name" => "Delete Unit Type"],
+          ["id" => 23, "name" => "View Floor"],
+          ["id" => 24, "name" => "Add Floor"],
+          ["id" => 25, "name" => "Edit Floor"],
+          ["id" => 26, "name" => "Delete Floor"],
+          ["id" => 27, "name" => "View Tenant"],
+          ["id" => 28, "name" => "Add Tenant"],
+          ["id" => 29, "name" => "Edit Tenant"],
+          ["id" => 30, "name" => "Delete Tenant"],
+          ["id" => 31, "name" => "View Tenant Type "],
+          ["id" => 32, "name" => "Add Tenant Type"],
+          ["id" => 33, "name" => "Edit Tenant Type"],
+          ["id" => 34, "name" => "Delete Tenant Type"],
+          ["id" => 35, "name" => "View Billing Information"],
+          ["id" => 36, "name" => "Add Billing Information"],
+          ["id" => 37, "name" => "Edit Billing Information"],
+          ["id" => 38, "name" => "Delete Billing Information"],
+          ["id" => 39, "name" => "Confirm Billing Information"],
+          ["id" => 40, "name" => "Addendum Billing Information"],
+          ["id" => 41, "name" => "Renew Billing Information"],
+          ["id" => 42, "name" => "Terminate Billing Information"],
+          ["id" => 43, "name" => "Close Billing Information at Reminder"],
+          ["id" => 44, "name" => "View Component Billing"],
+          ["id" => 45, "name" => "Add Component Billing"],
+          ["id" => 46, "name" => "Edit Component Billing"],
+          ["id" => 47, "name" => "Delete Component Billing"],
+          ["id" => 48, "name" => "Add Component Billing Detail"],
+          ["id" => 49, "name" => "Edit Component Billing Detail"],
+          ["id" => 50, "name" => "Delete Component Billing Detail"],
+          ["id" => 51, "name" => "View Tenancy Reports"],
+          ["id" => 52, "name" => "View Meter Input"],
+          ["id" => 53, "name" => "Add Meter Input"],
+          ["id" => 54, "name" => "Edit Meter Input"],
+          ["id" => 55, "name" => "Delete Meter Input"],
+          ["id" => 56, "name" => "Approve Meter Input"],
+          ["id" => 57, "name" => "Unpost Meter Input"],
+          ["id" => 58, "name" => "Generate Invoice"],
+          ["id" => 59, "name" => "View Invoices"],
+          ["id" => 60, "name" => "Add Invoice Lain"],
+          ["id" => 61, "name" => "Posting Invoice"],
+          ["id" => 62, "name" => "Cancel Invoice"],
+          ["id" => 63, "name" => "View Aging Invoices"],
+          ["id" => 64, "name" => "View Journal"],
+          ["id" => 65, "name" => "Add Journal"],
+          ["id" => 66, "name" => "Edit Journal"],
+          ["id" => 67, "name" => "Delete Journal"],
+          ["id" => 68, "name" => "View Payment Invoice"],
+          ["id" => 69, "name" => "Add Payment Invoice"],
+          ["id" => 70, "name" => "Posting Payment Invoice"],
+          ["id" => 71, "name" => "Void Payment Invoice"],
+          ["id" => 72, "name" => "View Cash Bank"],
+          ["id" => 73, "name" => "Add Cash Bank"],
+          ["id" => 74, "name" => "Edit Cash Bank"],
+          ["id" => 75, "name" => "Delete Cash Bank"],
+          ["id" => 76, "name" => "View Finance Reports"],
+          ["id" => 77, "name" => "View Reminder"],
+          ["id" => 78, "name" => "Edit Reminder"],
+          ["id" => 79, "name" => "Send Reminder"],
+          ["id" => 80, "name" => "View Fixed Asset"],
+          ["id" => 81, "name" => "Add Fixed Asset"],
+          ["id" => 82, "name" => "Edit Fixed Asset"],
+          ["id" => 83, "name" => "Delete Fixed Asset"],
+        ]);
+    }
+}

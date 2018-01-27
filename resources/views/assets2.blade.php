@@ -74,9 +74,15 @@
 
                 <!-- icon2 atas table -->
                 <div id="toolbar">
+                    @if(Session::get('role')==1 || in_array(81,Session::get('permissions')))
                     <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" id="addNew">New</a>
+                    @endif
+                    @if(Session::get('role')==1 || in_array(82,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">Edit</a>
+                    @endif
+                    @if(Session::get('role')==1 || in_array(83,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroy()">Remove</a>
+                    @endif
                     <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="fiskal()"><i class="fa fa-eye"></i>&nbsp;Kartu Aktiva Fiskal </a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="komersial()"><i class="fa fa-eye"></i>&nbsp;Kartu Aktiva Komersial </a>
                     <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" onclick="custom()"><i class="fa fa-eye"></i>&nbsp;Kartu Aktiva Custom </a>
@@ -127,14 +133,17 @@
             });
             dg.datagrid('enableFilter');
 
+            @if(Session::get('role')==1 || in_array(81,Session::get('permissions')))
             $('#addNew').click(function(){
                 $('#FormModal').modal('show');
                 $.post('{{route('fixed_asset.modal.add')}}',{}, function(data){
                     $('#FormModal').find('.modal-content').html(data);
                 })
             });
+            @endif
         });
 
+        @if(Session::get('role')==1 || in_array(82,Session::get('permissions')))
         function edit(){
             var row = $('#dg').datagrid('getSelected');
             $.post('{{route('fixed_asset.modal.edit')}}',{id: row.id}, function(data){
@@ -142,7 +151,9 @@
                     $('#FormModal').find('.modal-content').html(data);
                 })
         }
+        @endif
 
+        @if(Session::get('role')==1 || in_array(83,Session::get('permissions')))
         function destroy(){
             var row = $('#dg').datagrid('getSelected');
             if(confirm('Apa anda yakin ingin menghapus Harta ini ?')){
@@ -152,6 +163,7 @@
                     })
             }
         }
+        @endif
 
         function fiskal(){
             var row = $('#dg').datagrid('getSelected');
