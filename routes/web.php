@@ -114,6 +114,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('tenant/delete', 'TenantController@delete')->name('tenant.delete');
 	Route::post('tenant/deleteunit', 'TenantController@deleteunit')->name('tenant.deleteunit');
 	Route::post('tenant/addunit', 'TenantController@addunit')->name('tenant.addunit');
+	Route::post('tenant/outstanding', 'TenantController@outstanding')->name('tenant.outstanding');
 
 	// master tenant type
 	Route::get('typetenant','TenantTypeController@index');

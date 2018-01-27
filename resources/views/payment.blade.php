@@ -77,14 +77,14 @@
                       <th field="paymtp_name" width="50" sortable="true">Payment Type</th>
                       <th field="invpayh_date" width="50" sortable="true">Payment Date</th>
                       <th field="invpayh_amount" sortable="true">Total</th>
-                      
+
                       <th field="invpayh_post" width="50" sortable="true">Posting Status</th>
                       <th field="action_button">Action</th>
                   </tr>
               </thead>
           </table>
           <!-- end table -->
-          
+
           <!-- icon2 atas table -->
           <div id="toolbar" class="datagrid-toolbar">
               <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
@@ -93,13 +93,13 @@
               @endif
           </div>
           <!-- end icon -->
-          
+
         </div>
         <!-- /.tab-pane -->
         <div class="tab-pane" id="tab_2">
           <div id="contractStep1">
             <form method="POST" id="formPayment">
-                
+
                 <div class="form-group">
                     <label>Tenant Name</label>
                     <select class="form-control contrId choose-contract" name="contr_id" style="width:100%">
@@ -110,7 +110,7 @@
                     <label>No Giro</label>
                     <input type="text" name="invpayh_checkno" class="form-control">
                 </div>
-                
+
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
@@ -166,7 +166,7 @@
                           </div>
                       </div>
                    </div>
-                </div>    
+                </div>
 
                 <div class="form-group">
                     <label>Note</label>
@@ -174,7 +174,7 @@
                 </div>
 
                 <div class="ajax-detail"></div>
-                
+
                 <button type="submit" id="submitForm" class="btn btn-primary">submit</button>
             </form>
           </div>
@@ -182,7 +182,7 @@
       </div>
     </div>
           <!-- content -->
-      
+
           <!-- Modal extra -->
           <div id="detailModal" class="modal fade" role="dialog">
             <div class="modal-dialog">
@@ -210,7 +210,7 @@
 
               <!-- Modal content-->
               <div class="modal-content">
-                
+
                 <div class="modal-body" id="unitModalContent">
                 </div>
                 <div class="modal-footer">
@@ -221,7 +221,7 @@
             </div>
           </div>
           <!-- End Modal -->
-          
+
 
           <!-- modal form -->
           <div id="editModal" class="modal fade" role="dialog">
@@ -234,7 +234,7 @@
                   <h4 class="modal-title">Edit Payment</h4>
                 </div>
                 <div class="modal-body">
-                  
+
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -285,7 +285,7 @@
         e.preventDefault();
         $('#submitForm').attr('disabled','disabled');
         var startdate = $('#invpayhDate').val();
-        
+
         if(startdate == ''){
             $.messager.alert('Warning','Payment date must be choose');
         }else if($('#contrId').val() == ""){
@@ -301,11 +301,11 @@
               $('#submitForm').removeAttr('disabled');
               alert(result.message);
               if(result.status == 1){
-                for (i = 0; i < result.paym_id.length; i++) { 
+                for (i = 0; i < result.paym_id.length; i++) {
                   window.open("{{url('invoice/print_kwitansi?id=')}}"+result.paym_id[i],null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
                 }
                 location.reload();
-              } 
+              }
           });
 
           return false;
@@ -329,11 +329,19 @@
                     page: params.page
                   };
                 },
-                
+
                 cache: true
               },
               escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
               minimumInputLength: 0
+        }).on("select2:selecting", function(e) {
+            var contractId = $(".choose-contract").val();
+            $.post('{{route('tenant.outstanding')}}', {contract_id:contractId}, function(data){
+                console.log(data);
+                if(data.length > 0){
+                  alert('Masih ada '+data.length+' Invoice yang belum terbayar untuk tenant ini');
+                }
+            });
         });
 
     $(".contrId").change(function(){
@@ -366,7 +374,7 @@
     });
 
     $('input[name=checkall]').change(function() {
-        if($(this).is(':checked')){ 
+        if($(this).is(':checked')){
             $('input[name=check]').each(function(){
                 $(this).prop('checked',true);
             });
@@ -380,12 +388,12 @@
     var print_window = function(){
         $('.print-window').off('click');
         $('.print-window').click(function(){
-            var self = $(this); 
+            var self = $(this);
             var url = self.attr('href');
             var title = self.attr('title');
             var w = self.attr('data-width');
             var h = self.attr('data-height');
-            
+
             openWindow(url, title, w, h);
 
             return false;
@@ -436,7 +444,7 @@
     $(document).delegate('.void-confirm','click',function(){
       if(confirm("are you sure you want void this payment?")){
         var url = $(this).attr('href');
-        
+
         $.ajax({
             url: url,
             type: 'GET',
