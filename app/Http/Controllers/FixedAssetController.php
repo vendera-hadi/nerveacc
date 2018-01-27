@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use App\Models\MsMasterCoa;
 use App\Models\MsAsset;
 use App\Models\MsAssetType;
+use App\Models\MsSupplier;
+use App\Models\MsGroupAccount;
+use App\Models\TrAssetMutation;
+use App\Models\MsPerawatanAsset;
+use App\Models\MsAsuransiAsset;
 
 use Auth;
 use DB;
@@ -72,14 +77,14 @@ class FixedAssetController extends Controller
                 $temp['name'] = $value->name;
                 $temp['date'] = date('d F Y',strtotime($value->date));
                 $temp['price'] = "IDR ".number_format($value->price,0);
-                $temp['depreciation_type'] = $value->depreciation_type;
+                // $temp['depreciation_type'] = $value->depreciation_type;
                 $temp['jenis_harta'] = $value->assetType->jenis_harta;
                 $temp['kelompok_harta'] = $value->assetType->kelompok_harta;
                 $temp['masa_manfaat'] = $value->assetType->masa_manfaat." tahun";
 
-                $temp['nilai_sisa'] = "IDR ".number_format($value->nilaiSisaTahunan(date('Y')), 0);
-                $temp['per_month'] = "IDR ".number_format($value->depreciationPerMonth(date('Y')), 0);
-                $temp['per_year'] = "IDR ".number_format($value->depreciationPerYear(date('Y')), 0);
+                // $temp['nilai_sisa'] = "IDR ".number_format($value->nilaiSisaTahunan(date('Y')), 0);
+                // $temp['per_month'] = "IDR ".number_format($value->depreciationPerMonth(date('Y')), 0);
+                // $temp['per_year'] = "IDR ".number_format($value->depreciationPerYear(date('Y')), 0);
 
                 $result['rows'][] = $temp;
             }
@@ -152,16 +157,24 @@ class FixedAssetController extends Controller
 
     public function add(Request $request)
     {
+        $coaYear = date('Y');
         $data['title'] = 'Add';
         $data['kelompok_harta'] = MsAssetType::all();
+        $data['suppliers'] = MsSupplier::all();
+        $data['group_accounts'] = MsGroupAccount::all();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
         $data['action'] = route('fixed_asset.insert');
         return view('assets-form',$data);
     }
 
     public function edit(Request $request)
     {
+        $coaYear = date('Y');
         $data['title'] = 'Edit';
         $data['kelompok_harta'] = MsAssetType::all();
+        $data['suppliers'] = MsSupplier::all();
+        $data['group_accounts'] = MsGroupAccount::all();
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
         $data['detail'] = MsAsset::find($request->id);
         $data['action'] = route('fixed_asset.update', ['id' => $request->id]);
         return view('assets-form',$data);
@@ -170,7 +183,21 @@ class FixedAssetController extends Controller
     public function insert(Request $request)
     {
         $input = $request->all();
-        MsAsset::insert($input);
+        if ($request->hasFile('image')) {
+            $extension = $request->image->extension();
+            if(strtolower($extension)!='jpg' && strtolower($extension)!='png' && strtolower($extension)!='jpeg'){
+                $request->session()->flash('error', 'Image Format must be jpg or png');
+                return redirect()->back();
+            }
+            $newname = "asset-".microtime().'.'.$extension;
+            $path = $request->image->move(public_path('upload'), $newname);
+            // dd($path);
+            $input['image'] = $newname;
+        }
+        $asset = MsAsset::create($input);
+        $inputMutasi = $request->only(['kode_induk','cabang','lokasi','area','departemen','user','kondisi']);
+        $inputMutasi['asset_id'] = $asset->id;
+        TrAssetMutation::create($inputMutasi);
         return redirect()->back()->with('success','Insert success');
     }
 
@@ -178,6 +205,30 @@ class FixedAssetController extends Controller
     {
         $input = $request->all();
         $data = MsAsset::find($request->id);
+        if($data->kode_induk != @$request->kode_induk ||
+            $data->cabang != @$request->cabang ||
+            $data->lokasi != @$request->lokasi ||
+            $data->area != @$request->area ||
+            $data->departemen != @$request->departemen ||
+            $data->user != @$request->user ||
+            $data->kondisi != @$request->kondisi
+        ){
+            // insert mutasi
+            $inputMutasi = $request->only(['kode_induk','cabang','lokasi','area','departemen','user','kondisi']);
+            $inputMutasi['asset_id'] = $data->id;
+            TrAssetMutation::create($inputMutasi);
+        }
+        if ($request->hasFile('image')) {
+            $extension = $request->image->extension();
+            if(strtolower($extension)!='jpg' && strtolower($extension)!='png' && strtolower($extension)!='jpeg'){
+                $request->session()->flash('error', 'Image Format must be jpg or png');
+                return redirect()->back();
+            }
+            $newname = "asset-".microtime().'.'.$extension;
+            $path = $request->image->move(public_path('upload'), $newname);
+            // dd($path);
+            $input['image'] = $newname;
+        }
         $data->update($input);
         return redirect()->back()->with('success','Update success');
     }
@@ -236,6 +287,104 @@ class FixedAssetController extends Controller
         $input['garis_lurus'] = $persentase_lurus / 100;
         $input['saldo_menurun'] = $persentase_lurus * 2 / 100;
         return $input;
+    }
+
+    public function fiskal(Request $request)
+    {
+        $id = $request->id;
+        $data['asset'] = MsAsset::find($id);
+        return view('assets-fiskal', $data);
+    }
+
+    public function custom(Request $request)
+    {
+        $id = $request->id;
+        $data['asset'] = MsAsset::find($id);
+        return view('assets-custom', $data);
+    }
+
+    public function komersial(Request $request)
+    {
+        $id = $request->id;
+        $data['asset'] = MsAsset::find($id);
+        return view('assets-komersial', $data);
+    }
+
+    public function mutasi(Request $request)
+    {
+        $id = $request->id;
+        $data['asset'] = MsAsset::find($id);
+        return view('assets-mutasi', $data);
+    }
+
+    public function perawatan(Request $request)
+    {
+        $id = $request->id;
+        $data['asset'] = MsAsset::find($id);
+        return view('assets-perawatan', $data);
+    }
+
+    public function getPerawatan(Request $request)
+    {
+        $id = $request->id;
+        $data = MsPerawatanAsset::find($id);
+        return $data;
+    }
+
+    public function insertPerawatan(Request $request)
+    {
+        $input = $request->except(['type','id']);
+        MsPerawatanAsset::create($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function updatePerawatan(Request $request)
+    {
+        $input = $request->except(['type','id']);
+        $data = MsPerawatanAsset::find($request->id);
+        $data->update($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function deletePerawatan(Request $request)
+    {
+        MsPerawatanAsset::destroy($request->id);
+        return response()->json(['success'=>true]);
+    }
+
+    public function asuransi(Request $request)
+    {
+        $id = $request->id;
+        $data['asset'] = MsAsset::find($id);
+        return view('assets-asuransi', $data);
+    }
+
+    public function getAsuransi(Request $request)
+    {
+        $id = $request->id;
+        $data = MsAsuransiAsset::find($id);
+        return $data;
+    }
+
+    public function insertAsuransi(Request $request)
+    {
+        $input = $request->except(['type','id']);
+        MsAsuransiAsset::create($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function updateAsuransi(Request $request)
+    {
+        $input = $request->except(['type','id']);
+        $data = MsAsuransiAsset::find($request->id);
+        $data->update($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function deleteAsuransi(Request $request)
+    {
+        MsAsuransiAsset::destroy($request->id);
+        return response()->json(['success'=>true]);
     }
 
     public function report()

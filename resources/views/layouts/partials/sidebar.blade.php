@@ -176,7 +176,7 @@
               $invoices = [52,58,59];
               $ap = [100];
             ?>
-            <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || in_array(Request::url(),$glUrls) || in_array(Request::url(),$bbUrls) || Request::url() == url('cost_item') || in_array(Request::url(),$glSetupUrls) || in_array(Request::url(),$apUrls) || in_array(Request::url(),$apSetupUrls)){{'active'}}@endif">
+            <li class="treeview @if(in_array(Request::url(),$tenancyUrls) || in_array(Request::url(),$arUrls) || in_array(Request::url(),$glUrls) || in_array(Request::url(),$bbUrls) || Request::url() == url('cost_item') || in_array(Request::url(),$glSetupUrls) || in_array(Request::url(),$apUrls) || in_array(Request::url(),$apSetupUrls) || Request::url() == route('fixed_asset.index') || Request::url() == url('fixed_asset.type.index')){{'active'}}@endif">
               <a href="#">
                 <i class="fa fa-book"></i> <span>FINANCE</span>
                 <span class="pull-right-container">
@@ -346,7 +346,7 @@
                                 @if(Session::get('role')==1 || in_array(11,Session::get('permissions')))
                                 <li @if(Request::url() == url('coa')) class="active" @endif><a href="{{url('coa')}}"><i class="fa fa-circle-o"></i> Chart of Account</a></li>
                                 @endif
-                                <li><a href="#"><i class="fa fa-circle-o"></i> Budget</a></li>
+
                                 @if(Session::get('role')==1 || in_array(1,Session::get('permissions')))
                                 <li @if(Request::url() == url('department')) class="active" @endif><a href="{{url('department')}}"><i class="fa fa-circle-o"></i> Department</a></li>
                                 @endif
@@ -426,18 +426,9 @@
                   </li>
                 @endif
 
-                <li>
-                    <a href="#"><i class="fa fa-circle"></i> Fixed Asset
-                        <span class="pull-right-container">
-                          <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
-                    <ul class="treeview-menu">
-                      <li @if(Request::url() == route('fixed_asset.index')) class="active" @endif><a href="{{route('fixed_asset.index')}}"><i class="fa fa-circle-o"></i> Assets List</a>
-                      </li>
-                      <li @if(Request::url() == route('fixed_asset.report')) class="active" @endif><a href="{{route('fixed_asset.report')}}"><i class="fa fa-circle-o"></i> Fixed Assets Report</a></li>
-                    </ul>
-                </li>
+                @if(Session::get('role')==1 || in_array(80,Session::get('permissions')))
+                <li @if(Request::url() == route('fixed_asset.index') || Request::url() == route('fixed_asset.type.index') ) class="active" @endif><a href="{{route('fixed_asset.index')}}"><i class="fa fa-circle-o"></i> Fixed Asset</a></li>
+                @endif
 
               </ul>
             </li>

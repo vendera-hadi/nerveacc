@@ -479,8 +479,25 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('assets', 'FixedAssetController@index')->name('fixed_asset.index');
 	Route::post('assets/add', 'FixedAssetController@add')->name('fixed_asset.modal.add');
 	Route::post('assets/edit', 'FixedAssetController@edit')->name('fixed_asset.modal.edit');
+	Route::post('assets/fiskal', 'FixedAssetController@fiskal')->name('fixed_asset.modal.fiskal');
+	Route::post('assets/komersial', 'FixedAssetController@komersial')->name('fixed_asset.modal.komersial');
+	Route::post('assets/custom', 'FixedAssetController@custom')->name('fixed_asset.modal.custom');
+	Route::post('assets/mutasi', 'FixedAssetController@mutasi')->name('fixed_asset.modal.mutasi');
+
+	Route::post('assets/perawatan', 'FixedAssetController@perawatan')->name('fixed_asset.modal.perawatan');
+	Route::post('assets/perawatan/get', 'FixedAssetController@getPerawatan')->name('fixed_asset.modal.perawatan.get');
+	Route::post('assets/perawatan/insert', 'FixedAssetController@insertPerawatan')->name('fixed_asset.modal.perawatan.insert');
+	Route::post('assets/perawatan/update', 'FixedAssetController@updatePerawatan')->name('fixed_asset.modal.perawatan.update');
+	Route::post('assets/perawatan/delete', 'FixedAssetController@deletePerawatan')->name('fixed_asset.modal.perawatan.delete');
+
+	Route::post('assets/asuransi', 'FixedAssetController@asuransi')->name('fixed_asset.modal.asuransi');
+	Route::post('assets/asuransi/get', 'FixedAssetController@getAsuransi')->name('fixed_asset.modal.asuransi.get');
+	Route::post('assets/asuransi/insert', 'FixedAssetController@insertAsuransi')->name('fixed_asset.modal.asuransi.insert');
+	Route::post('assets/asuransi/update', 'FixedAssetController@updateAsuransi')->name('fixed_asset.modal.asuransi.update');
+	Route::post('assets/asuransi/delete', 'FixedAssetController@deleteAsuransi')->name('fixed_asset.modal.asuransi.delete');
+
 	Route::post('assets/insert', 'FixedAssetController@insert')->name('fixed_asset.insert');
-	Route::post('assets/update', 'FixedAssetController@insert')->name('fixed_asset.update');
+	Route::post('assets/update', 'FixedAssetController@update')->name('fixed_asset.update');
 	Route::post('assets/delete', 'FixedAssetController@delete')->name('fixed_asset.delete');
 
 	Route::get('asset-type', 'FixedAssetController@indexTypes')->name('fixed_asset.type.index');
