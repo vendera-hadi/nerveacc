@@ -11,6 +11,7 @@ use App\Models\MsGroupAccount;
 use App\Models\TrAssetMutation;
 use App\Models\MsPerawatanAsset;
 use App\Models\MsAsuransiAsset;
+use App\Models\MsGroupAktivaAsset;
 
 use Auth;
 use DB;
@@ -164,6 +165,7 @@ class FixedAssetController extends Controller
         $data['group_accounts'] = MsGroupAccount::all();
         $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
         $data['action'] = route('fixed_asset.insert');
+        $data['group_aktiva'] = MsGroupAktivaAsset::all();
         return view('assets-form',$data);
     }
 
@@ -177,6 +179,7 @@ class FixedAssetController extends Controller
         $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
         $data['detail'] = MsAsset::find($request->id);
         $data['action'] = route('fixed_asset.update', ['id' => $request->id]);
+        $data['group_aktiva'] = MsGroupAktivaAsset::all();
         return view('assets-form',$data);
     }
 
@@ -384,6 +387,19 @@ class FixedAssetController extends Controller
     public function deleteAsuransi(Request $request)
     {
         MsAsuransiAsset::destroy($request->id);
+        return response()->json(['success'=>true]);
+    }
+
+    public function gaInsert(Request $request)
+    {
+        $input = $request->all();
+        MsGroupAktivaAsset::create($input);
+        return response()->json(['success'=>true]);
+    }
+
+    public function gaDelete(Request $request)
+    {
+        MsGroupAktivaAsset::destroy($request->id);
         return response()->json(['success'=>true]);
     }
 

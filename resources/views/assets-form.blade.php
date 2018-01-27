@@ -5,7 +5,7 @@
 
 <div class="modal-body" style="padding: 20px 40px">
     <!-- isi form -->
-    <form method="POST" action="{{$action}}" enctype="multipart/form-data">
+    <form method="POST" action="{{$action}}" enctype="multipart/form-data" id="mainForm">
         <div class="row">
             <div class="col-sm-6">
                 <div class="form-group">
@@ -69,11 +69,11 @@
 
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Group Aktiva (Create & Edit Group <a href="{{url('groupaccount')}}">disini</a>)</label>
+                    <label>Group Aktiva (Create & Edit Group <a href="#" id="toFormAktiva">disini</a>)</label>
                     <select class="form-control" name="group_account_id" placeholder="Group Account ID">
                         <option value="">No group account</option>
-                        @foreach($group_accounts as $acc)
-                        <option value="{{$acc->id}}" @if(@$detail && $detail->group_account_id == $acc->id) selected @endif>{{$acc->grpaccn_name}}</option>
+                        @foreach($group_aktiva as $ga)
+                        <option value="{{$ga->id}}" @if(@$detail && $detail->group_account_id == $ga->id) selected @endif>{{$ga->name}} ({{$ga->code}})</option>
                         @endforeach
                     </select>
                 </div>
@@ -168,6 +168,71 @@
         </div>
     </form>
     <!-- end form -->
+
+    <!-- form group aktiva -->
+    <div id="Aktiva">
+        <div class="row">
+              <div class="col-sm-12">
+                <button id="newAktiva">New</button>
+                <button id="back" type="button" class="btn btn-danger pull-right">Back</button>
+              </div>
+          </div>
+
+    <div class="row">
+        <div class="col-sm-12 text-center" style="margin-bottom: 20px;">
+            <h4><strong>Group Aktiva</strong></h4>
+        </div>
+
+        <table id="aktivaTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if($group_aktiva->count() > 0)
+                @foreach($group_aktiva as $ga)
+                <tr>
+                    <td>{{$ga->code}}</td>
+                    <td>{{$ga->name}}</td>
+                    <td>
+                        <a href="#" class="deleteForm" data-id="{{$ga->id}}"><i class="fa fa-times"></i>&nbsp;Delete</a>
+                    </td>
+                </tr>
+                @endforeach
+                @else
+                <tr>
+                  <td colspan="3">
+                    <center>Data kosong</center>
+                  </td>
+                </tr>
+                @endif
+            </tbody>
+        </table>
+        <!-- UNIT -->
+        <form method="POST" id="formAktiva" style="display: none;">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Code</label>
+                <input type="text" class="form-control" name="code" placeholder="Code">
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" class="form-control" name="name" placeholder="Name">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <button class="btn btn-info pull-right">Submit</button>
+            <button type="button" class="btn btn-danger pull-right" style="margin-right: 10px" data-dismiss="modal">Close Modal</button>
+        </div>
+        </form>
+    </div>
+  </div>
+    <!-- end -->
 </div>
 
 <script type="text/javascript">
@@ -175,12 +240,52 @@
             autoclose: true
         });
 
+  $('#Aktiva').hide();
+
     $(function(){
         $(".js-example-basic-single").select2();
 
         @if(@$detail)
         $("select[name=aktiva_coa_code]").val("{{str_replace(" ","", @$detail->aktiva_coa_code)}}").trigger("change");
         @endif
+
+        $('#toFormAktiva').click(function(){
+            $('#Aktiva').show();
+            $('#mainForm').hide();
+            $('#formAktiva').hide();
+        });
+
+        $('#newAktiva').click(function(){
+            $('#formAktiva').show();
+        });
+
+        $('#back').click(function(){
+            pointerClass.trigger('click');
+        });
+
+        $('.deleteForm').click(function(){
+          if(confirm('Are you sure want to delete this data ?'))
+          {
+              var deleteClass = $(this);
+              $.post('{{route('group_aktiva.delete')}}', {id:$(this).data('id')}, function(data){
+                  console.log(data);
+                  if(data.success){
+                    alert('Delete Success');
+                    deleteClass.parent().parent().hide();
+                  }
+              });
+          }
+        });
+
+        $('#formAktiva').submit(function(e){
+            e.preventDefault();
+            $.post('{{route('group_aktiva.insert')}}', $(this).serialize(), function(data){
+                if(data.success){
+                    alert('Insert Success');
+                    pointerClass.trigger('click');
+                }
+            });
+        });
 
     });
 </script>

@@ -78,7 +78,7 @@
                     <a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" id="addNew">New</a>
                     @endif
                     @if(Session::get('role')==1 || in_array(82,Session::get('permissions')))
-                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="edit()">Edit</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton edit" iconCls="icon-edit" plain="true">Edit</a>
                     @endif
                     @if(Session::get('role')==1 || in_array(83,Session::get('permissions')))
                     <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="destroy()">Remove</a>
@@ -132,25 +132,30 @@
                 fitColumns: true
             });
             dg.datagrid('enableFilter');
-
-            @if(Session::get('role')==1 || in_array(81,Session::get('permissions')))
-            $('#addNew').click(function(){
-                $('#FormModal').modal('show');
-                $.post('{{route('fixed_asset.modal.add')}}',{}, function(data){
-                    $('#FormModal').find('.modal-content').html(data);
-                })
-            });
-            @endif
         });
 
+        var pointerClass;
+        @if(Session::get('role')==1 || in_array(81,Session::get('permissions')))
+        $('#addNew').click(function(){
+            pointerClass = $(this);
+            console.log(pointerClass);
+            $('#FormModal').modal('show');
+            $.post('{{route('fixed_asset.modal.add')}}',{}, function(data){
+                $('#FormModal').find('.modal-content').html(data);
+            })
+        });
+        @endif
+
         @if(Session::get('role')==1 || in_array(82,Session::get('permissions')))
-        function edit(){
+        $('.edit').click(function(){
+            pointerClass = $(this);
+            console.log(pointerClass);
             var row = $('#dg').datagrid('getSelected');
             $.post('{{route('fixed_asset.modal.edit')}}',{id: row.id}, function(data){
                     $('#FormModal').modal('show');
                     $('#FormModal').find('.modal-content').html(data);
                 })
-        }
+        });
         @endif
 
         @if(Session::get('role')==1 || in_array(83,Session::get('permissions')))

@@ -500,6 +500,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('assets/update', 'FixedAssetController@update')->name('fixed_asset.update');
 	Route::post('assets/delete', 'FixedAssetController@delete')->name('fixed_asset.delete');
 
+	Route::post('group_aktiva/insert', 'FixedAssetController@gaInsert')->name('group_aktiva.insert');
+	Route::post('group_aktiva/delete', 'FixedAssetController@gaDelete')->name('group_aktiva.delete');
+
 	Route::get('asset-type', 'FixedAssetController@indexTypes')->name('fixed_asset.type.index');
 	Route::post('asset-type/add', 'FixedAssetController@addTypes')->name('fixed_asset.type.modal.add');
 	Route::post('asset-type/edit', 'FixedAssetController@editTypes')->name('fixed_asset.type.modal.edit');
