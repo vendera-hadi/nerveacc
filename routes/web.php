@@ -516,4 +516,5 @@ Route::group(['middleware' => 'auth'], function () {
 
 });
 
+Route::get('membership', 'Auth\AuthController@membership');
 Route::get('logout','Auth\AuthController@logout');

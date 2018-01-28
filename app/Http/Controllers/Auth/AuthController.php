@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Illuminate\Http\Request;
 
+use App\Models\Membership;
+
 class AuthController extends Controller
 {
     /*
@@ -76,5 +78,27 @@ class AuthController extends Controller
         $request->session()->flush();
         \Auth::logout();
         return redirect('login');
+    }
+
+    public function membership(Request $request)
+    {
+        $token = @$request->token;
+        $checkMembership = Membership::where('token',$token)->first();
+        if($checkMembership){
+            if($checkMembership->active){
+                $request->session()->put('membership_token', $token);
+                return redirect('login');
+            }else{
+                $previousUrl = app('url')->previous();
+                $previousUrl = strtok($previousUrl,'?');
+                $previousUrl .= '?'.http_build_query(['error' => 'Your membership is inactive or expired']);
+                return redirect($previousUrl);
+            }
+        }else{
+            $previousUrl = app('url')->previous();
+            $previousUrl = strtok($previousUrl,'?');
+            $previousUrl .= '?'.http_build_query(['error' => 'Your company was never registered before']);
+            return redirect($previousUrl);
+        }
     }
 }
