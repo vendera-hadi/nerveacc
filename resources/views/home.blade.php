@@ -268,7 +268,7 @@ Dashboard
 
 
     var areaChartData2 = {
-      labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July',"Aug", "Sep", "Oct", "Nov", "Des"],
       datasets: [
         {
           label               : 'Listrik (kwh)',
@@ -284,7 +284,7 @@ Dashboard
     }
 
     var areaChartData3 = {
-      labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July',"Aug", "Sep", "Oct", "Nov", "Des"],
       datasets: [
         {
           label               : 'Air (m3)',
