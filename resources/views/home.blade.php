@@ -147,6 +147,54 @@ Dashboard
 			<!-- /.box -->
         </div>
 	</div>
+
+  <div class="row">
+      <div class="col-sm-6">
+          <!-- BAR CHART -->
+          <div class="box box-success">
+            <div class="box-header with-border">
+              <h3 class="box-title">Rata-rata Penggunaan Listrik Gedung (kWh)</h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>
+            <div class="box-body">
+              <div class="chart">
+                <canvas id="barChartListrik" style="height:230px"></canvas>
+              </div>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+      </div>
+
+
+      <div class="col-sm-6">
+          <!-- BAR CHART -->
+          <div class="box box-success">
+            <div class="box-header with-border">
+              <h3 class="box-title">Rata-rata Penggunaan Air Gedung (m3)</h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+                <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+              </div>
+            </div>
+            <div class="box-body">
+              <div class="chart">
+                <canvas id="barChartAir" style="height:230px"></canvas>
+              </div>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+      </div>
+
+  </div>
 @endsection
 @section('footer-scripts')
 <script type="text/javascript" src="{{ asset('plugins/chartjs/Chart.min.js') }}"></script>
@@ -217,6 +265,61 @@ Dashboard
 
     barChartOptions.datasetFill = false;
     barChart.Bar(barChartData, barChartOptions);
+
+
+    var areaChartData2 = {
+      labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      datasets: [
+        {
+          label               : 'Listrik (kwh)',
+          fillColor           : 'rgba(210, 214, 222, 1)',
+          strokeColor         : 'rgba(210, 214, 222, 1)',
+          pointColor          : 'rgba(210, 214, 222, 1)',
+          pointStrokeColor    : '#c1c7d1',
+          pointHighlightFill  : '#fff',
+          pointHighlightStroke: 'rgba(220,220,220,1)',
+          data                : {{$listrik}}
+        }
+      ]
+    }
+
+    var areaChartData3 = {
+      labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+      datasets: [
+        {
+          label               : 'Air (m3)',
+          fillColor           : 'rgba(210, 214, 222, 1)',
+          strokeColor         : 'rgba(210, 214, 222, 1)',
+          pointColor          : 'rgba(210, 214, 222, 1)',
+          pointStrokeColor    : '#c1c7d1',
+          pointHighlightFill  : '#fff',
+          pointHighlightStroke: 'rgba(220,220,220,1)',
+          data                : {{$air}}
+        }
+      ]
+    }
+
+    var barChartCanvas2                   = $('#barChartListrik').get(0).getContext('2d')
+    var barChart2                         = new Chart(barChartCanvas2)
+    var barChartData2                     = areaChartData2
+    barChartData2.datasets[0].fillColor = "#f7f70e";
+    barChartData2.datasets[0].strokeColor = "#e0e00d";
+    barChartData2.datasets[0].pointColor = "#e0e00d";
+    var barChartOptions2                  = barChartOptions;
+
+    barChartOptions2.datasetFill = false
+    barChart2.Bar(barChartData2, barChartOptions2)
+
+    var barChartCanvas3                   = $('#barChartAir').get(0).getContext('2d')
+    var barChart3                         = new Chart(barChartCanvas3)
+    var barChartData3                     = areaChartData3
+    barChartData3.datasets[0].fillColor = "#5292f9";
+    barChartData3.datasets[0].strokeColor = "#1c73ff";
+    barChartData3.datasets[0].pointColor = "#1c73ff";
+    var barChartOptions3                  = barChartOptions;
+
+    barChartOptions3.datasetFill = false
+    barChart3.Bar(barChartData3, barChartOptions3)
 
     //-------------
     //- PIE CHART -

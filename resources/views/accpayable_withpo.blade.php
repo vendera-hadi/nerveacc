@@ -272,7 +272,7 @@ $(function(){
                   if(item.coa_type == "DEBET") total += item.qty * item.amount;
                   else total -= item.qty * item.amount;
                   totalppn += parseFloat(item.ppn_amount);
-                  $('#tableDetail tbody').append('<tr><td>'+item.note+'</td><td>'+item.coa_code+'</td><td>'+item.qty+'</td><td>'+item.amount+'</td><td>'+item.coa_type+'</td><td>'+item.dept_id+'</td><td class="subtotal">'+subtotal+'</td></tr>');
+                  $('#tableDetail tbody').append('<tr><td>'+item.note+'</td><td>'+item.coa_code+'</td><td>'+item.qty+'</td><td>'+item.amount+'</td><td>'+item.discount+'</td><td>'+item.coa_type+'</td><td>'+item.dept.dept_name+'</td><td class="subtotal">'+item.final_total+'</td></tr>');
               });
               $('#subtotalAmount').text(total);
               // $('#ppnAmount').text(totalppn);

@@ -470,7 +470,7 @@ class PayableController extends Controller
     public function getPOajax(Request $request)
     {
         $id = $request->id;
-        $result = TrPOHeader::with('detail')->where('id',$id)->first();
+        $result = TrPOHeader::with('detail.dept')->where('id',$id)->first();
         echo $result;
     }
 

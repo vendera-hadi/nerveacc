@@ -13,7 +13,7 @@
 Route::group(['middleware' => 'auth'], function () {
 
 	Route::get('/', function () {
-	    return redirect('contract/unclosed');
+	    return redirect('/home');
 	});
 
 	// currency

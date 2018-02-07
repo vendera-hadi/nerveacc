@@ -8,6 +8,7 @@ use App\Models\TrContract;
 use App\Models\MsUnit;
 use App\Models\TrInvoice;
 use App\Models\TrInvoicePaymhdr;
+use App\Models\TrMeter;
 use DB;
 
 /**
@@ -113,11 +114,72 @@ class HomeController extends Controller
             $data['hutang_persen'] = number_format($fetch[0]['total']/$total_all*100,2);
             $data['bayar_persen'] = number_format($fetch2[0]['total']/$total_all*100,2);
         }
+
+        $fetchListrik = TrMeter::join('tr_period_meter','tr_period_meter.id','=','tr_meter.prdmet_id')->select(
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 1 THEN meter_used ELSE 0 END)) AS jan"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 2 THEN meter_used ELSE 0 END)) AS feb"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 3 THEN meter_used ELSE 0 END)) AS mar"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 4 THEN meter_used ELSE 0 END)) AS apr"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 5 THEN meter_used ELSE 0 END)) AS may"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 6 THEN meter_used ELSE 0 END)) AS jun"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 7 THEN meter_used ELSE 0 END)) AS jul"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 8 THEN meter_used ELSE 0 END)) AS aug"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 9 THEN meter_used ELSE 0 END)) AS sep"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 10 THEN meter_used ELSE 0 END)) AS okt"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 11 THEN meter_used ELSE 0 END)) AS nov"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 12 THEN meter_used ELSE 0 END)) AS des")
+            )->whereHas('cost_detail', function($q){
+                $q->where('cost_id',1);
+            })->where(DB::raw("DATE_PART('YEAR', prdmet_end_date)"), date('Y'))->first();
+        $listrik[0] = (float)$fetchListrik['jan'];
+        $listrik[1] = (float)$fetchListrik['feb'];
+        $listrik[2] = (float)$fetchListrik['mar'];
+        $listrik[3] = (float)$fetchListrik['apr'];
+        $listrik[4] = (float)$fetchListrik['may'];
+        $listrik[5] = (float)$fetchListrik['jun'];
+        $listrik[6] = (float)$fetchListrik['jul'];
+        $listrik[7] = (float)$fetchListrik['aug'];
+        $listrik[8] = (float)$fetchListrik['sep'];
+        $listrik[9] = (float)$fetchListrik['okt'];
+        $listrik[10] =(float)$fetchListrik['nov'];
+        $listrik[11] = (float)$fetchListrik['des'];
+        $data['listrik'] = json_encode($listrik);
+
+        $fetchAir = TrMeter::join('tr_period_meter','tr_period_meter.id','=','tr_meter.prdmet_id')->select(
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 1 THEN meter_used ELSE 0 END)) AS jan"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 2 THEN meter_used ELSE 0 END)) AS feb"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 3 THEN meter_used ELSE 0 END)) AS mar"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 4 THEN meter_used ELSE 0 END)) AS apr"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 5 THEN meter_used ELSE 0 END)) AS may"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 6 THEN meter_used ELSE 0 END)) AS jun"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 7 THEN meter_used ELSE 0 END)) AS jul"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 8 THEN meter_used ELSE 0 END)) AS aug"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 9 THEN meter_used ELSE 0 END)) AS sep"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 10 THEN meter_used ELSE 0 END)) AS okt"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 11 THEN meter_used ELSE 0 END)) AS nov"),
+            DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 12 THEN meter_used ELSE 0 END)) AS des")
+            )->whereHas('cost_detail', function($q){
+                $q->where('cost_id',2);
+            })->where(DB::raw("DATE_PART('YEAR', prdmet_end_date)"), date('Y'))->first();
+        $air[0] = (float)$fetchAir['jan'];
+        $air[1] = (float)$fetchAir['feb'];
+        $air[2] = (float)$fetchAir['mar'];
+        $air[3] = (float)$fetchAir['apr'];
+        $air[4] = (float)$fetchAir['may'];
+        $air[5] = (float)$fetchAir['jun'];
+        $air[6] = (float)$fetchAir['jul'];
+        $air[7] = (float)$fetchAir['aug'];
+        $air[8] = (float)$fetchAir['sep'];
+        $air[9] = (float)$fetchAir['okt'];
+        $air[10] =(float)$fetchAir['nov'];
+        $air[11] = (float)$fetchAir['des'];
+        $data['air'] = json_encode($air);
+
         return view('home',$data);
     }
 
     public function contoh(){
-        return view('contoh');   
+        return view('contoh');
     }
 
     public function contohget(Request $request){
