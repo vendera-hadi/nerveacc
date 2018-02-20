@@ -10,8 +10,8 @@
         <div class="login-logo">
             @php $logo = App\Models\MsCompany::first()->comp_image; @endphp
             <img src="{{ asset('/upload/'.$logo) }}" style="max-height: 150px;">
-            <br>
-            <div style="size: 12pt;"><a href="{{ url('/home') }}">Standard Operational Procedure</a></div>
+            <p style="font-size: 11pt;">prepared by PT.Jakarta Land Management</p>
+            <div style="size: 12pt;"><a href="{{ url('/home') }}">Accounting Software</a></div>
         </div><!-- /.login-logo -->
 
     @if (count($errors) > 0)
