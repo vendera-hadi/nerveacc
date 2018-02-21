@@ -28,7 +28,7 @@ class UnitController extends Controller
         try{
             // params
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -100,7 +100,7 @@ class UnitController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getAll(){
@@ -115,7 +115,7 @@ class UnitController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getOptions(){
@@ -130,7 +130,7 @@ class UnitController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function fopt(){
@@ -145,14 +145,14 @@ class UnitController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function insert(Request $request){
         try{
             $input = $request->all();
             DB::transaction(function () use($request){
-                // unit 
+                // unit
                 $unit = MsUnit::create([
                         'unit_code' => @$request->unit_code,
                         'unit_name' => @$request->unit_code,
@@ -198,7 +198,7 @@ class UnitController extends Controller
             return response()->json(['success'=>true, 'message'=>'Input Unit Success']);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function insert2(Request $request){
@@ -208,17 +208,17 @@ class UnitController extends Controller
             $input['unit_isavailable'] = 1;
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
-            return MsUnit::create($input);        
+            return MsUnit::create($input);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function update(Request $request){
         try{
             $id = $request->id;
             $input = $request->all();
-            // unit 
+            // unit
             $updateUnit = [
                     'unit_code' => @$request->unit_code,
                     'unit_name' => @$request->unit_code,
@@ -278,7 +278,7 @@ class UnitController extends Controller
             return response()->json(['success'=>true, 'message'=>'Update Unit Success']);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function update2(Request $request){
@@ -290,17 +290,23 @@ class UnitController extends Controller
             return MsUnit::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function delete(Request $request){
         try{
             $id = $request->id;
-            MsUnit::destroy($id);
-            return response()->json(['success'=>true]);
+            // cek unit tidak boleh di delete kalo ada contract sedang berjalan
+            $checkContract = TrContract::where('contr_status','confirmed')->where('contr_enddate', '>', date('Y-m-d H:i:s'))->whereNull('contr_terminate_date')->first();
+            if($checkContract){
+                return response()->json(['errorMsg' => 'Tidak bisa delete Unit karna ada contract yang sedang berjalan untuk unit ini']);
+            }else{
+                MsUnit::destroy($id);
+                return response()->json(['success'=>true]);
+            }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getOptUnit(Request $request){
@@ -352,7 +358,7 @@ class UnitController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function newAjaxUnitDetail(Request $request){
@@ -368,13 +374,13 @@ class UnitController extends Controller
             return response()->json($unit);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getdetail(Request $request){
         // try{
             $id = $request->id;
-            $unit = MsUnit::with('MsFloor','UnitType')->find($id); 
+            $unit = MsUnit::with('MsFloor','UnitType')->find($id);
             $unitowner = MsUnitOwner::where('unit_id',$id)->first();
             if($unitowner){
                 $tenant = MsTenant::find($unitowner->tenan_id);

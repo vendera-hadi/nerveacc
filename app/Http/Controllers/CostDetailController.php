@@ -8,6 +8,7 @@ use Auth;
 // load model
 use App\Models\MsCostDetail;
 use App\Models\MsCostItem;
+use App\Models\TrContractInvoice;
 
 class CostDetailController extends Controller
 {
@@ -19,7 +20,7 @@ class CostDetailController extends Controller
         try{
             // params
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -80,7 +81,7 @@ class CostDetailController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getOptions(){
@@ -95,17 +96,17 @@ class CostDetailController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function insert(Request $request){
         try{
             $input = $request->all();
             $input['costd_is'] = md5(date('Y-m-d H:i:s'));
-            return MsCostDetail::create($input);        
+            return MsCostDetail::create($input);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function update(Request $request){
@@ -116,7 +117,7 @@ class CostDetailController extends Controller
             return MsCostDetail::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function delete(Request $request){
@@ -125,12 +126,20 @@ class CostDetailController extends Controller
             if($id == 6 || $id ==7 || $id ==8){
                 return response()->json(['errorMsg'=>'Sorry This Item Cannot be Deleted']);
             }else{
-                MsCostDetail::destroy($id);
-                return response()->json(['success'=>true]);
+                // check tr contract invoice yg available kalo ada ga bs delete
+                $check = TrContractInvoice::whereHas('contract', function($query){
+                    $query->where('contr_status','confirmed')->where('contr_enddate', '>', date('Y-m-d H:i:s'))->whereNull('contr_terminate_date');
+                })->where('costd_id',$id)->first();
+                if($check){
+                    return response()->json(['errorMsg' => 'Cost Detail ini sedang dipakai di contract, hapus dulu contract terkait sebelum delete']);
+                }else{
+                    MsCostDetail::destroy($id);
+                    return response()->json(['success'=>true]);
+                }
             }
-            
+
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 }

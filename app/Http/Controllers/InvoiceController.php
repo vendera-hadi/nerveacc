@@ -679,7 +679,7 @@ class InvoiceController extends Controller
                                     }else if($value->costdetail->costitem->is_sinking_fund){
                                         // SINKING FUND (DUMMY)
                                         $currUnit = MsUnit::find($value->contract->unit_id);
-                                        $note = $value->costd_name." (SF)  ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costd_rate)." x ".$value->continv_period." months";
+                                        $note = $value->costdetail->costd_name." (SF)  ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
                                         // echo "SINKING FUND :<br>";
                                         // echo $note."<br>";
                                         $amount = ($value->contract->MsUnit->unit_sqrt * $value->costd_rate * $value->continv_period) + $value->costd_burden + $value->costd_admin;
@@ -705,7 +705,7 @@ class InvoiceController extends Controller
                                         'invdt_note' => $note,
                                         'costd_id' => $value->costd_id
                                     ];
-                                    $updateCtrInv[$value->tcinv_id] = [
+                                    $updateCtrInv[$value->id] = [
                                         'continv_start_inv' => $tempTimeStart,
                                         'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months"))
                                     ];
@@ -781,7 +781,7 @@ class InvoiceController extends Controller
                             $sendEmail = @MsConfig::where('name','send_inv_email')->first()->value;
                             $ccEmail = @MsConfig::where('name','cc_email')->first()->value;
                             $inv = [
-                                'tenan_id' => $value->tenan_id,
+                                'tenan_id' => $value->contract->tenan_id,
                                 'inv_number' => $value->invtype->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
                                 'inv_faktur_no' => $value->invtype->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
                                 'inv_faktur_date' => $now,
