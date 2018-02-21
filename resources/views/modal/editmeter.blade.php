@@ -1,5 +1,6 @@
 @if ($st->status === false)
 <form method="POST" id="formEditMeter">
+  <input type="hidden" name="prd_id" value="{{$prd}}">
 <!-- Custom Tabs -->
 <div class="nav-tabs-custom">
   <ul class="nav nav-tabs">
@@ -46,7 +47,7 @@
               <td>{{$cdt->daya}}</td>
               <td>{{$cdt->meter_start}}</td>
               <td>
-                <input type="text" name="meter_end[]" class="numeric meter_e" value="{{$cdt->meter_end}}">
+                <input type="text" name="meter_end[]" class="numeric meter_e" value="{{$cdt->meter_end == 0 ? $cdt->meter_start : $cdt->meter_end}}">
               </td>
               <td>{{$cdt->meter_used}}</td>
               <td>{{number_format($cdt->meter_cost)}}</td>
@@ -85,7 +86,7 @@
               <td>{{$cds->costd_name}}</td>
               <td>{{$cds->meter_start}}</td>
               <td>
-                <input type="text" name="meter_end[]" class="numeric meter_e" value="{{$cds->meter_end}}">
+                <input type="text" name="meter_end[]" class="numeric meter_e" value="{{$cds->meter_end == 0 ? $cds->meter_start : $cds->meter_end}}">
               </td>
               <td>{{$cds->meter_used}}</td>
               <td>{{number_format($cds->meter_cost)}}</td>
@@ -124,19 +125,19 @@
                 <p class="help-block">Upload File Excel Template.</p>
                 <input type="hidden" name="prd" value="{{$prd}}">
                 <button type="submit" class="btn btn-primary btn-sm">Import File</button>
-                
+
             </div>
-          </div>      
+          </div>
       </div>
       <div class="modal-footer">
-        
+
       </div>
-     </form> 
+     </form>
     </div>
   </div>
 </div>
 <script type="text/javascript">
-  
+
   $('#formEditMeter').submit(function(e){
     e.preventDefault();
     if(!$(this).serialize()){
@@ -147,7 +148,7 @@
             alert(result.message);
             if(result.status == 1) location.reload();
         });
-        
+
     }
 });
 
