@@ -597,7 +597,7 @@ class InvoiceController extends Controller
                         // GENERATE KALAU PERIODE LAST INV UDA LEWAT
                         if($tempTimeStart >= $last_inv_date){
                             // KALAU is meter true, hitung cost meteran
-                            if(!empty($value->costd_ismeter)){
+                            if(!empty($value->costdetail->costd_ismeter)){
                                 // echo 'meter<br>';
                                 // $totalPay = 0;
                                 // get harga meteran selama periode bulan ini
