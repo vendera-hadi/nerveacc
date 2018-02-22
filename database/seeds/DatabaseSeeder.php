@@ -39,5 +39,28 @@ class DatabaseSeeder extends Seeder
         $this->call(TrInvoicePaymhdrSeeder::class);
         $this->call(TrInvoicePaymdtlSeeder::class);
         $this->call(MsConfigSeeder::class);
+        // role
+        // role has permission (optional)
+        // user has role
+
+        // $this->call(MsTenantSeeder::class);
+        // $this->call(TrContractSeeder::class);
+        // $this->call(TrContractInvoiceSeeder::class);
+        // $this->call(MsUnitSeeder::class);
+        // $this->call(MsVirtualAccountSeeder::class);
+        // $this->call(TrPeriodMeterSeeder::class);
+        // $this->call(MsFloorSeeder::class);
+        // $this->call(MsUnitTypeSeeder::class);
+
+        // $this->call(MsMarketingAgentSeeder::class);
+        // $this->call(TrMeterSeeder::class);
+        // $this->call(MsSupplierSeeder::class);
+        // $this->call(TrInvoiceSeeder::class);
+        // $this->call(TrInvoiceDetailSeeder::class);
+
+        // $this->call(MsCashBankSeeder::class);
+        // $this->call(TrInvoicePaymhdrSeeder::class);
+        // $this->call(TrInvoicePaymdtlSeeder::class);
+
     }
 }
