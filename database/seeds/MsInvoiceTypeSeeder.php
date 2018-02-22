@@ -15,6 +15,7 @@ class MsInvoiceTypeSeeder extends Seeder
         [
             'invtp_name' => 'INVOICE UTILITIES',
             'invtp_prefix' => 'UT',
+            'invtp_coa_ar' => 10330,
             'created_by' => 1,
             'updated_by' => 1,
             'created_at' => date("Y-m-d H:i:s"),
@@ -23,6 +24,7 @@ class MsInvoiceTypeSeeder extends Seeder
         [
             'invtp_name' => 'INVOICE MAINTENANCE',
             'invtp_prefix' => 'MN',
+            'invtp_coa_ar' => 10310,
             'created_by' => 1,
             'updated_by' => 1,
             'created_at' => date("Y-m-d H:i:s"),
