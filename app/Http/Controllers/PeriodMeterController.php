@@ -159,7 +159,7 @@ class PeriodMeterController extends Controller
                                         'contr_id'=> $ctr->id,
                                         'prdmet_id'=> $newPeriodMeter->id,
                                         'unit_id'=>$ctr->unit_id
-                                    ]
+                                    ];
                                 $newMeter = TrMeter::create($meterInput);
 
                                 // Jika contract tenant diputus dlm jangka waktu prd meter saat ini ambil akhir meter sebelumnya dr tabel cutoff utk dijadikan meter start di next meternya
