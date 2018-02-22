@@ -134,6 +134,8 @@ class CostDetailController extends Controller
                     return response()->json(['errorMsg' => 'Cost Detail ini sedang dipakai di contract, hapus dulu contract terkait sebelum delete']);
                 }else{
                     MsCostDetail::destroy($id);
+                    // hapus jg semua tr meter yg mempunyai cost detail id tersebut
+                    TrMeter::where('costd_id',$id)->delete();
                     return response()->json(['success'=>true]);
                 }
             }
