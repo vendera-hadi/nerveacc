@@ -98,7 +98,7 @@ class InvoiceController extends Controller
             }
             // jika ada keyword
             if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
-                                        $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("unit_code"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'like','%'.$keyword.'%');
+                                        $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("unit_code"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'ilike','%'.$keyword.'%');
                                     });
             // jika ada inv type
             if(!empty($invtype)) $fetch = $fetch->where('tr_invoice.invtp_id',$invtype);
@@ -1096,6 +1096,7 @@ class InvoiceController extends Controller
 
         // INSERT DATABASE
         try{
+            $sendMailFlag = @MsConfig::where('name','send_inv_email')->first()->value;
             DB::transaction(function () use($successIds, $invJournal, $journal){
                 // insert journal
                 TrLedger::insert($journal);
@@ -1104,7 +1105,11 @@ class InvoiceController extends Controller
                 // update posting to yes
                 if(count($successIds) > 0){
                     foreach ($successIds as $id) {
-                        TrInvoice::where('id', $id)->update(['inv_post'=>1]);
+                        $invoice = TrInvoice::find($id);
+                        $invoice->update(['inv_post'=>1]);
+
+                        if(!empty($sendMailFlag))
+                            \Mail::to($invoice->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($invoice));
                     }
                 }
             });

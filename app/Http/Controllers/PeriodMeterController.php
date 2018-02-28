@@ -368,6 +368,11 @@ class PeriodMeterController extends Controller
             $status = TrPeriodMeter::select('status')->where('id',$id)->get();
             if($status[0]->status == FALSE){
                 $input = $request->all();
+                $prdstart = date("Y-m-d", strtotime($request->prdmet_start_date));
+                $prdend = date("Y-m-d", strtotime($request->prdmet_end_date));
+                $input['prdmet_start_date'] = $prdstart;
+                $input['prdmet_end_date'] = $prdend;
+                $input['prd_billing_date'] = date("Y-m-d", strtotime($request->prd_billing_date));
                 $input['updated_by'] = Auth::id();
                 TrPeriodMeter::find($id)->update($input);
                 return TrPeriodMeter::find($id);
