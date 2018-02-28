@@ -30,7 +30,7 @@
   		<!-- content -->
 
         <!-- template tabel -->
-  		<table id="dg" title="Master Unit" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+  		<table id="dg" title="Cash Banks" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
             <!-- kolom -->
             <thead>
                 <tr>
@@ -43,7 +43,7 @@
             </thead>
         </table>
         <!-- end table -->
-        
+
         <!-- icon2 atas table -->
         <div id="toolbar">
             @if(Session::get('role')==1 || in_array(73,Session::get('permissions')))
@@ -57,7 +57,7 @@
             @endif
         </div>
         <!-- end icon -->
-    
+
         <!-- hidden form buat create edit -->
         <div id="dlg" class="easyui-dialog" style="width:60%"
                 closed="true" buttons="#dlg-buttons">
@@ -80,7 +80,7 @@
                 </div>
                 <div style="margin-bottom:10px">
                     <input id="cc" class="easyui-combobox" required="true" name="curr_code" style="width:100%" label="Currency:" data-options="valueField:'id',textField:'text',url:'{{route('cash_bank.options')}}'">
-                </div>  
+                </div>
             </form>
         </div>
         <div id="dlg-buttons">

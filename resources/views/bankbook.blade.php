@@ -59,7 +59,7 @@
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">
             <!-- template tabel -->
-          <table id="dg" title="Payment" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          <table id="dg" title="Bank Book Transactions" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
               <!-- kolom -->
               <thead>
                   <tr>
@@ -77,7 +77,7 @@
               </thead>
           </table>
           <!-- end table -->
-          
+
           <!-- icon2 atas table -->
           <div id="toolbar" class="datagrid-toolbar">
               <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
@@ -86,13 +86,13 @@
               @endif
           </div>
           <!-- end icon -->
-          
+
         </div>
         <!-- /.tab-pane -->
         <div class="tab-pane" id="tab_2">
           <div id="contractStep1">
             <form method="POST" id="formPayment">
-                
+
                 <div class="row">
                   <div class="col-sm-4">
 	                <div class="form-group">
@@ -152,7 +152,7 @@
 		                </div>
                    </div>
 	            </div>
-                
+
                 <div class="row">
                   <div class="col-sm-6">
                     <div class="form-group">
@@ -184,7 +184,7 @@
                         </select>
                     </div>
                   </div>
-                </div>    
+                </div>
 
                 <div class="form-group">
                     <label>Description</label>
@@ -212,7 +212,7 @@
 		              <div class="form-group">
 		                <label>Department</label>
 		                <select name="dept_id" id="addDept" class="form-control">
-		                	<option value="">Choose Department</option> 
+		                	<option value="">Choose Department</option>
 		                	@foreach($departments as $dept)
 		                	<option value="{{$dept->id}}">{{$dept->dept_name}}</option>
 		                	@endforeach
@@ -234,7 +234,7 @@
 		                </span>
 		              </div>
 		            </div>
-		            
+
 		        </div>
 
 		        <div class="row">
@@ -261,7 +261,7 @@
               <h4 class="pull-right">Total Amount : <b id="totalAmount">0</b></h4>
             </div>
           </div>
-                
+
                 <button type="submit" id="submitForm" class="btn btn-primary">submit</button>
             </form>
           </div>
@@ -353,7 +353,7 @@
  	});
 
     $('input[name=checkall]').change(function() {
-        if($(this).is(':checked')){ 
+        if($(this).is(':checked')){
             $('input[name=check]').each(function(){
                 $(this).prop('checked',true);
             });
@@ -392,7 +392,7 @@
           $.post('{{route('bankbook.insert')}}',allFormData, function(result){
               $('#submitForm').removeAttr('disabled');
               if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-	            if(result.success){ 
+	            if(result.success){
 	              	$.messager.alert('Warning',result.message);
 	              	location.reload();
 	            }
@@ -415,7 +415,7 @@
             var id = $(this).data('id');
             $.post('{{route('bankbook.delete')}}', {id:id}, function(result){
                 if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-                if(result.success){ 
+                if(result.success){
                     $.messager.alert('Warning',result.message);
                     location.reload();
                 }

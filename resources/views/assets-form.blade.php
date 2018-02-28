@@ -46,7 +46,7 @@
                 <div class="form-group">
                     <label>COA Aktiva</label>
                     <div class="input-group input-group-md">
-                        <select class="js-example-basic-single" name="aktiva_coa_code" style="width:100%">
+                        <select class="js-example-basic-single" name="aktiva_coa_code" style="width:100%" required="">
                           <option value="">Choose Account</option>
                           @foreach($accounts as $key => $coa)
                               <option value="{{str_replace(" ","", $coa->coa_code)}}" data-name="{{$coa->coa_name}}" >{{$coa->coa_code." ".$coa->coa_name}}</option>
@@ -70,7 +70,7 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Group Aktiva (Create & Edit Group <a href="#" id="toFormAktiva">disini</a>)</label>
-                    <select class="form-control" name="group_account_id" placeholder="Group Account ID">
+                    <select class="form-control" name="group_account_id" placeholder="Group Account ID" required="">
                         <option value="">No group account</option>
                         @foreach($group_aktiva as $ga)
                         <option value="{{$ga->id}}" @if(@$detail && $detail->group_account_id == $ga->id) selected @endif>{{$ga->name}} ({{$ga->code}})</option>
@@ -100,8 +100,8 @@
 
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Kode Induk</label>
-                    <input type="text" class="form-control" name="kode_induk" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->kode_induk : ''}}">
+                    <label>Nomor Asset</label>
+                    <input type="text" class="form-control" name="kode_induk" placeholder="Nomor Asset (jika ada)" value="{{ @$detail ? $detail->kode_induk : ''}}">
                 </div>
             </div>
 
@@ -115,7 +115,7 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Lokasi</label>
-                    <input type="text" class="form-control" name="lokasi" placeholder="Kode Induk (jika ada)" value="{{ @$detail ? $detail->lokasi : ''}}">
+                    <input type="text" class="form-control" name="lokasi" placeholder="Lokasi (jika ada)" value="{{ @$detail ? $detail->lokasi : ''}}">
                 </div>
             </div>
 
@@ -129,7 +129,7 @@
             <div class="col-sm-6">
                 <div class="form-group">
                     <label>Departemen</label>
-                    <input type="text" class="form-control" name="departemen" placeholder="Departemen (jika ada)" value="{{ @$detail ? $detail->departemen : ''}}" required>
+                    <input type="text" class="form-control" name="departemen" placeholder="Departemen" value="{{ @$detail ? $detail->departemen : ''}}" required>
                 </div>
             </div>
 

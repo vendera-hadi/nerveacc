@@ -22,7 +22,7 @@ Dashboard
 				<div class="icon">
 					<i class="ion ion-cash"></i>
 				</div>
-				<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+
 			</div>
 		</div>
 		<!-- ./col -->
@@ -37,7 +37,7 @@ Dashboard
 				<div class="icon">
 					<i class="ion ion-document"></i>
 				</div>
-				<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+
 			</div>
 		</div>
 		<!-- ./col -->
@@ -52,7 +52,7 @@ Dashboard
 				<div class="icon">
 					<i class="ion ion-person-stalker"></i>
 				</div>
-				<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+
 			</div>
 		</div>
 		<!-- ./col -->
@@ -67,17 +67,36 @@ Dashboard
 				<div class="icon">
 			 		<i class="ion ion-ios-home"></i>
 				</div>
-				<a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+
 			</div>
 		</div>
 		<!-- ./col -->
 	</div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <form>
+        <button type="submit" class="pull-right">Choose Year</button>
+        <select class="pull-right">
+          @php
+          $selectedYear = Request::input('year', date('Y'));
+          @endphp
+          @for($i=2017; $i<=date('Y'); $i++)
+            <option @if($selectedYear == $i) selected @endif>{{$i}}</option>
+          @endfor
+        </select>
+
+      </form>
+      <br><br>
+    </div>
+  </div>
+
 	<div class="row">
 		<div class="col-md-6">
 			<!-- BAR CHART -->
 			<div class="box box-success">
 				<div class="box-header with-border">
-				  <h3 class="box-title">Outstanding and Payment <?php echo date('Y'); ?></h3>
+				  <h3 class="box-title">Outstanding and Payment {{ Request::input('year', date('Y')) }} </h3>
 
 				  <div class="box-tools pull-right">
 				    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -114,7 +133,7 @@ Dashboard
 			<!-- DONUT CHART -->
 			<div class="box box-danger">
 				<div class="box-header with-border">
-				  <h3 class="box-title">Outstanding vs Payment  <?php echo date('Y'); ?></h3>
+				  <h3 class="box-title">Outstanding vs Payment  {{ Request::input('year', date('Y')) }}</h3>
 
 				  <div class="box-tools pull-right">
 				    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -153,7 +172,7 @@ Dashboard
           <!-- BAR CHART -->
           <div class="box box-success">
             <div class="box-header with-border">
-              <h3 class="box-title">Rata-rata Penggunaan Listrik Gedung (kWh)</h3>
+              <h3 class="box-title">Rata-rata Penggunaan Listrik Gedung (kWh) {{ Request::input('year', date('Y')) }}</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -176,7 +195,7 @@ Dashboard
           <!-- BAR CHART -->
           <div class="box box-success">
             <div class="box-header with-border">
-              <h3 class="box-title">Rata-rata Penggunaan Air Gedung (m3)</h3>
+              <h3 class="box-title">Rata-rata Penggunaan Air Gedung (m3) {{ Request::input('year', date('Y')) }}</h3>
 
               <div class="box-tools pull-right">
                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>

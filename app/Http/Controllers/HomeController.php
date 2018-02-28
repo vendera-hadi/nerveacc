@@ -32,12 +32,13 @@ class HomeController extends Controller
      *
      * @return Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $year = $request->input('year', date('Y'));
         $data['tenant'] = TrContract::where('contr_terminate_date',NULL)->count();
         $data['unit'] = MsUnit::count();
         $data['out'] = TrInvoice::select(DB::raw("SUM(inv_outstanding) AS ttl"))->where('inv_post',TRUE)->get();
-        $data['inv'] = TrInvoice::where('inv_post',TRUE)->where(\DB::raw('date_part(\'year\', inv_date)'),'=',date('Y'))->where(\DB::raw('date_part(\'month\', inv_date)'),'=',date('m'))->count();
+        $data['inv'] = TrInvoice::where('inv_post',TRUE)->where(\DB::raw('date_part(\'year\', inv_date)'),'=',$year)->where(\DB::raw('date_part(\'month\', inv_date)'),'=',date('m'))->count();
         $fetch = TrInvoice::select(
             DB::raw("SUM((CASE WHEN DATE_PART('MONTH', inv_date) = 1 THEN inv_outstanding ELSE 0 END)) AS jan"),
             DB::raw("SUM((CASE WHEN DATE_PART('MONTH', inv_date) = 2 THEN inv_outstanding ELSE 0 END)) AS feb"),
@@ -54,7 +55,7 @@ class HomeController extends Controller
             DB::raw("SUM(inv_outstanding) AS total")
             )
             ->where('inv_post',TRUE)
-            ->whereYear('inv_date','=',date('Y'))->get()->toArray();
+            ->whereYear('inv_date','=',$year)->get()->toArray();
         $isi = array();
         $isi[0] = (float)$fetch[0]['jan'];
         $isi[1] = (float)$fetch[0]['feb'];
@@ -87,7 +88,7 @@ class HomeController extends Controller
             )
             ->where('invpayh_post',TRUE)
             ->where('status_void',FALSE)
-            ->whereYear('invpayh_date','=',date('Y'))->get()->toArray();
+            ->whereYear('invpayh_date','=',$year)->get()->toArray();
         $isi2 = array();
         $isi2[0] = (float)$fetch2[0]['jan'];
         $isi2[1] = (float)$fetch2[0]['feb'];
@@ -130,7 +131,7 @@ class HomeController extends Controller
             DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 12 THEN meter_used ELSE 0 END)) AS des")
             )->whereHas('cost_detail', function($q){
                 $q->where('cost_id',1);
-            })->where(DB::raw("DATE_PART('YEAR', prdmet_end_date)"), date('Y'))->first();
+            })->where(DB::raw("DATE_PART('YEAR', prdmet_end_date)"), $year)->first();
         $listrik[0] = (float)$fetchListrik['jan'];
         $listrik[1] = (float)$fetchListrik['feb'];
         $listrik[2] = (float)$fetchListrik['mar'];
@@ -160,7 +161,7 @@ class HomeController extends Controller
             DB::raw("SUM((CASE WHEN DATE_PART('MONTH', tr_period_meter.prdmet_end_date) = 12 THEN meter_used ELSE 0 END)) AS des")
             )->whereHas('cost_detail', function($q){
                 $q->where('cost_id',2);
-            })->where(DB::raw("DATE_PART('YEAR', prdmet_end_date)"), date('Y'))->first();
+            })->where(DB::raw("DATE_PART('YEAR', prdmet_end_date)"), $year)->first();
         $air[0] = (float)$fetchAir['jan'];
         $air[1] = (float)$fetchAir['feb'];
         $air[2] = (float)$fetchAir['mar'];

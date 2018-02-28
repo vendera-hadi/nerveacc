@@ -59,7 +59,7 @@
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">
             <!-- template tabel -->
-          <table id="dg" title="Payment" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+          <table id="dg" title="Account Payable" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
               <!-- kolom -->
               <thead>
                   <tr>
@@ -76,7 +76,7 @@
               </thead>
           </table>
           <!-- end table -->
-          
+
           <!-- icon2 atas table -->
           <div id="toolbar" class="datagrid-toolbar">
               <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
@@ -85,7 +85,7 @@
               @endif
           </div>
           <!-- end icon -->
-          
+
         </div>
         </div>
     </div>
@@ -129,7 +129,7 @@
                   var id = $(this).data('id');
                   $.post('{{route('payable.delete')}}', {id:id}, function(result){
                       if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
-                      if(result.success){ 
+                      if(result.success){
                           $.messager.alert('Warning',result.message);
                           location.reload();
                       }
@@ -138,7 +138,7 @@
          });
 
         $('input[name=checkall]').change(function() {
-            if($(this).is(':checked')){ 
+            if($(this).is(':checked')){
                 $('input[name=check]').each(function(){
                     $(this).prop('checked',true);
                 });

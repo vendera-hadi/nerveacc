@@ -49,7 +49,7 @@
               <!-- content -->
 
                 <!-- template tabel -->
-              <table id="dg" title="Master Assets {{date('Y')}}" class="easyui-datagrid" style="width:110%;height:100%" toolbar="#toolbar">
+              <table id="dg" title="Assets" class="easyui-datagrid" style="width:110%;height:100%" toolbar="#toolbar">
                     <!-- kolom -->
                     <thead>
                         <tr>

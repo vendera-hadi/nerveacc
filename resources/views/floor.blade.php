@@ -30,7 +30,7 @@
   		<!-- content -->
 
         <!-- template tabel -->
-  		<table id="dg" title="Master Cost Item" class="easyui-datagrid" style="width:100%;height:500px" toolbar="#toolbar">
+  		<table id="dg" title="Master Floor" class="easyui-datagrid" style="width:100%;height:500px" toolbar="#toolbar">
             <!-- kolom -->
             <thead>
                 <tr>
@@ -41,7 +41,7 @@
             </thead>
         </table>
         <!-- end table -->
-                
+
         <!-- icon2 atas table -->
         <div id="toolbar">
             @if(Session::get('role')==1 || in_array(24,Session::get('permissions')))
@@ -55,7 +55,7 @@
             @endif
         </div>
         <!-- end icon -->
-            
+
         <!-- hidden form buat create edit -->
         <div id="dlg" class="easyui-dialog" style="width:60%"
                 closed="true" buttons="#dlg-buttons">
