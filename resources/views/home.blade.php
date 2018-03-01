@@ -77,7 +77,7 @@ Dashboard
     <div class="col-md-12">
       <form>
         <button type="submit" class="pull-right">Choose Year</button>
-        <select class="pull-right">
+        <select class="pull-right" name="year">
           @php
           $selectedYear = Request::input('year', date('Y'));
           @endphp
