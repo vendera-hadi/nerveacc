@@ -903,7 +903,7 @@ class ReportController extends Controller
             return $pdf->download('Report_Tenant.pdf');
         }else if($excel){
             $data['type'] = 'excel';
-            $data = MsTenant::select('tenan_name AS Name','tenan_idno AS NIP','tenan_phone AS Phone','tenan_fax AS Fax','tenan_email AS Email','tenan_address AS Address','tenan_npwp AS NPWP','tenan_taxname AS Taxname','tenan_tax_address AS TaxAddress')
+            $data = MsTenant::select('tenan_name AS Name','tenan_idno AS NIK','tenan_phone AS Phone','tenan_fax AS Fax','tenan_email AS Email','tenan_address AS Address','tenan_npwp AS NPWP','tenan_taxname AS Taxname','tenan_tax_address AS TaxAddress')
                 ->orWhereNull('deleted_at')->get()->toArray();
             $border = 'A1:I';
             $tp = 'xls';

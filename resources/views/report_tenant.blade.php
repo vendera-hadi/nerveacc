@@ -2,7 +2,7 @@
     <thead>
       <tr>
         <th style="text-align: center;">Nama Tenan</th>
-        <th style="text-align: center;">No NIP</th>
+        <th style="text-align: center;">No NIK</th>
         <th style="text-align: center;">Phone</th>
         <th style="text-align: center;">Fax</th>  
         <th style="text-align: center;">Email</th>
