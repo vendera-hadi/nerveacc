@@ -32,13 +32,13 @@ class MsDetailFormat extends Model
     	// jika berupa coa code
     	if(is_numeric($this->attributes['coa_code'])){
             $coa_laba_rugi = @MsConfig::where('name','coa_laba_rugi')->first()->value;
-    		if($this->attributes['coa_code'] == $coa_laba_rugi){
+    		if(str_replace(' ','',$this->attributes['coa_code']) == str_replace(' ','',$coa_laba_rugi)){
                 // pengecualian buat laba rugi berjalan
                 $total = $this->labarugiBerjalanStartYeartoFrom() + $this->labarugiBerjalan();
             }else{
                 $total = $this->getTotalFromLedgerStartYeartoFrom($this->attributes['coa_code']) + $this->getTotalFromLedger($this->attributes['coa_code']);
             }
-    	}else if(substr($this->attributes['coa_code'], 0, 1) === '@'){ 
+    	}else if(substr($this->attributes['coa_code'], 0, 1) === '@'){
     		// kalau group account
     		$key = str_replace('@', '', $this->attributes['coa_code']);
     		$group = MsGroupAccount::where('grpaccn_name',$key)->first();
@@ -52,7 +52,7 @@ class MsDetailFormat extends Model
     		}
     	}else if(!empty($this->attributes['formula'])){
     		return $this->parseFormula();
-    	}else{ 
+    	}else{
     		return 0;
     	}
     	return $total;

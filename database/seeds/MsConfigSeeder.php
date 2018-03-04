@@ -84,6 +84,10 @@ class MsConfigSeeder extends Seeder
                 'name' => 'email_pengelola',
                 'desc' => 'Email Pengelola',
                 'value' => 'admin@example.com'
+            ],[
+                'name' => 'coa_laba_rugi',
+                'desc' => 'COA Laba Rugi',
+                'value' => 30120
             ]
             ]);
     }

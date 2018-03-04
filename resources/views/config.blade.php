@@ -38,7 +38,7 @@
                         </div>
                         <!-- /.box-header -->
                         <!-- form start -->
-                        
+
                         <form action="{{route('config.update')}}" method="post" enctype="multipart/form-data">
                           <div class="box-body">
                             <div class="col-sm-12">
@@ -64,7 +64,7 @@
                                     </ul>
                                   </div>
                                 @endif
-                            
+
                                 <div class="form-group">
                                   <label>Footer Invoice Text</label>
                                   <textarea class="textarea" name="footer_invoice" class="form-control" style="width: 100%;" required>{{$footer}}</textarea>
@@ -79,7 +79,7 @@
                                   <label>Service Charge Alias</label>
                                   <input type="text" name="service_charge_alias" class="form-control" value="{{$service_charge}}">
                                 </div>
-                                      
+
                                 <div class="form-group">
                                   <label>Due Date Interval Invoice</label>
                                   <input type="number" name="duedate_interval" class="form-control" value="{{$duedate}}">
@@ -151,10 +151,10 @@
 
                                 <div class="form-group">
                                   <label>COA Code Laba Rugi Berjalan (wajib isi)</label>
-                                  <select class="js-example-basic-single" name="coa_laba_rugi" id="selectAccount" style="width:100%">
+                                  <select name="coa_laba_rugi" id="selectAccount" style="width:100%">
                                     <option value="">Choose Account</option>
                                     @foreach($accounts as $key => $coa)
-                                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}">{{$coa->coa_code." ".$coa->coa_name}}</option>
+                                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}" @if($coa_laba_rugi == $coa->coa_code) selected @endif>{{$coa->coa_code." ".$coa->coa_name}}</option>
                                     @endforeach
                                   </select>
                                 </div>
@@ -167,7 +167,7 @@
                             <button type="submit" class="btn btn-flat btn-primary">Submit</button>
                           </div>
                         </form>
-                        
+
 
                       </div>
                 </div>
@@ -187,7 +187,7 @@ $(document).ready(function() {
         // Allow: backspace, delete, tab, escape, enter and .
         if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
              // Allow: Ctrl+A, Command+A
-            (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) || 
+            (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
              // Allow: home, end, left, right, down, up
             (e.keyCode >= 35 && e.keyCode <= 40)) {
                  // let it happen, don't do anything

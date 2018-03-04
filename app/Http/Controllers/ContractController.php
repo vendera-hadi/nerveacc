@@ -93,6 +93,7 @@ class ContractController extends Controller
                 $temp['contr_no'] = $value->contr_no;
                 $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
                 $temp['contr_enddate'] = date('d/m/Y',strtotime($value->contr_enddate));
+                if($temp['contr_enddate'] == '31/12/2030') $temp['contr_enddate'] = '-';
                 $temp['tenan_name'] = $value->tenan_name;
                 if($value->contr_status == 'confirmed') $status = '<strong class="text-success">'.$value->contr_status.'</strong>';
                 else if($value->contr_status == 'cancelled' || $value->contr_status == 'closed') $status = '<strong class="text-danger">'.$value->contr_status.'</strong>';
@@ -181,6 +182,7 @@ class ContractController extends Controller
                 $temp['contr_no'] = $value->contr_no;
                 $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
                 $temp['contr_enddate'] = date('d/m/Y',strtotime($value->contr_enddate));
+                if($temp['contr_enddate'] == '31/12/2030') $temp['contr_enddate'] = '-';
                 $temp['tenan_name'] = $value->tenan_name;
                 if($value->contr_status == 'confirmed') $status = '<strong class="text-success">'.$value->contr_status.'</strong>';
                 else if($value->contr_status == 'cancelled' || $value->contr_status == 'closed') $status = '<strong class="text-danger">'.$value->contr_status.'</strong>';

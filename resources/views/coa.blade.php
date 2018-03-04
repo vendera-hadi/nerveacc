@@ -29,6 +29,14 @@
 	<div class="col-md-12">
   		<!-- content -->
 
+    @if (Session::has('error'))
+    <div class="alert alert-error">{{ Session::get('error') }}</div>
+    @endif
+
+    @if (Session::has('success'))
+    <div class="alert alert-success">{{ Session::get('success') }}</div>
+    @endif
+
         <!-- template tabel -->
   		<table id="dg" title="Master COA" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
             <!-- kolom -->
@@ -49,7 +57,7 @@
             </thead>
         </table>
         <!-- end table -->
-        
+
         <!-- icon2 atas table -->
         <div id="toolbar">
             @if(Session::get('role')==1 || in_array(12,Session::get('permissions')))
@@ -63,9 +71,10 @@
             @endif
             <a href="{{ url('coa/downloadCoaExcel') }}" class="easyui-linkbutton" iconCls="icon-save" plain="true">Excel</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-print" plain="true" id="print">Print</a>
+            <a href="javascript:void(0)" onclick="modalUpload()" class="easyui-linkbutton" iconCls="icon-add" plain="true" id="print">Upload COA via Excel</a>
         </div>
         <!-- end icon -->
-    
+
         <!-- hidden form buat create edit -->
         <div id="dlg" class="easyui-dialog" style="width:60%"
                 closed="true" buttons="#dlg-buttons">
@@ -84,12 +93,12 @@
                 <div style="margin-bottom:10px">
                     <input name="coa_name" class="easyui-textbox" label="COA Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
                 </div>
-                <div style="margin-bottom:10px">
+                <!-- <div style="margin-bottom:10px">
                     <select id="cc" class="easyui-combobox" name="coa_isparent" label="Active:" style="width:300px;">
                         <option value="true" selected>yes</option>
                         <option value="false">no</option>
                     </select>
-                </div>
+                </div> -->
                 <div style="margin-bottom:10px">
                     <input name="coa_level" class="easyui-textbox" label="COA Level:" style="width:100%" data-options="required:true,numeric:true">
                 </div>
@@ -116,6 +125,46 @@
   		<!-- content -->
 	</div>
 </div>
+
+<!-- Modal extra -->
+<div id="uploadExcelModal" class="modal fade" role="dialog">
+    <div class="modal-dialog" style="width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Upload Excel</h4>
+            </div>
+            <div class="modal-body" id="addUnitModalContent" style="padding: 20px 40px">
+                <!-- isi form -->
+                <form method="POST" id="uploadExcelForm" action="{{route('coa.upload')}}" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-sm-12 text-center" style="margin-bottom: 20px;">
+                            <h4>
+                                <strong>Download Excel Template</strong><br><br>
+                                <a href="{{url('coa/tplUploadCoaExcel')}}" class="btn btn-warning">Download Excel</a>
+                            </h4>
+                        </div>
+                        <!-- UNIT -->
+                        <div class="col-sm-6 col-sm-offset-3">
+                            <div class="form-group">
+                                <label>Upload template yg sudah diisi</label><br>
+                                <input type="file" class="form-control" name="file" placeholder="Browse File" required><br>
+                                <small class="text-danger">* Perlu diperhatikan : data coa lama, group account dan format report akan terhapus semua dan akan di replace dgn coa yg diupload</small>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-12">
+                            <button class="btn btn-info pull-right">Submit</button>
+                            <button type="button" class="btn btn-danger pull-right" style="margin-right: 10px" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </form>
+                <!-- end form -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Modal -->
 @endsection
 
 @section('footer-scripts')
@@ -166,10 +215,14 @@
         var title = 'PRINT COA';
         var w = 640;
         var h = 660;
-        
+
         openWindow(url, title, w, h);
         return false;
     });
+
+    function modalUpload(){
+        $('#uploadExcelModal').modal("show");
+    }
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection

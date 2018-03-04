@@ -85,6 +85,8 @@ class AccountController extends Controller
 	public function users(){
 		$data['users'] = User::select('users.id','users.name','roles.id as role_id','roles.name as role')->leftJoin('user_has_roles','users.id','=','user_has_roles.user_id')
 							->leftJoin('roles','user_has_roles.role_id','=','roles.id')->paginate(20);
+		$data['first_superadmin'] = \DB::table('user_has_roles')->where('role_id',1)->orderBy('user_id')->first();
+		$data['first_superadmin'] = @$data['first_superadmin']->user_id;
 		$data['roles'] = Role::all();
 		return view('acl_user',$data);
 	}
@@ -98,7 +100,7 @@ class AccountController extends Controller
 		// cek email
 		$cek = User::where('email',$email)->first();
 		if(!empty($cek)) return response()->json(['errorMsg'=> 'Email sudah terdaftar, coba ganti dengan email lain']);
-		
+
 		// insert
 		$newuser = User::create([
             'name' => $name,
@@ -135,7 +137,7 @@ class AccountController extends Controller
 			\DB::table('user_has_roles')->insert(['user_id' => $id, 'role_id' => $role_id]);
 		}
 		\Session::flash('success', 'Update Success');
-		return response()->json(['success'=>1]);		
+		return response()->json(['success'=>1]);
 	}
 
 	public function usersDetail(Request $request){

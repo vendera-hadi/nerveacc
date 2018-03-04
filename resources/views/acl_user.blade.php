@@ -56,7 +56,7 @@
                                   <td>{{ $user->name }}</td>
                                   <td>{{ $user->role }}</td>
                                   <td data-id="{{$user->id}}">
-                                    @if($user->role_id!=1)
+                                    @if($user->role_id!=1 || $first_superadmin != $user->id)
                                     <a href="javascript:void(0);" class="edit"><i class="fa fa-pencil"></i></a>
                                     <a href="javascript:void(0);" class="delete"><i class="fa fa-times"></i></a>
                                     @endif
@@ -68,7 +68,7 @@
                         </div>
                         <!-- /.box-body -->
                         <div class="box-footer clearfix">
-                            {{ $users->render() }} 
+                            {{ $users->render() }}
                         </div>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                                   <label for="exampleInputEmail1">Password</label>
                                   <input type="password" class="form-control" name="password" placeholder="Password" required>
                                 </div>
-                                
+
                                 <div class="form-group">
                                   <label for="exampleInputEmail1">Role</label>
                                   <select class="form-control" name="role_id">
@@ -104,9 +104,9 @@
                                   	@endforeach
                                   </select>
                                 </div>
-                              
+
                                 <button type="submit" class="btn btn-primary" style="margin-top:25px">Submit</button>
-                              
+
                             </form>
                         </div>
                     </div>
@@ -134,7 +134,7 @@
                                   <label for="exampleInputEmail1">Password (isi kalau ingin diubah)</label>
                                   <input type="password" class="form-control" name="password" placeholder="Password">
                                 </div>
-                                
+
                                 <div class="form-group">
                                   <label for="exampleInputEmail1">Role</label>
                                   <select class="form-control" name="role_id">
@@ -143,9 +143,9 @@
                                   	@endforeach
                                   </select>
                                 </div>
-                              
+
                                 <button type="submit" class="btn btn-primary" style="margin-top:25px">Submit</button>
-                              
+
                             </form>
                         </div>
                     </div>

@@ -54,13 +54,12 @@
                     <th field="tenan_phone" width="50" sortable="true">Phone</th>
                     <th field="tenan_email" width="50" sortable="true">Email</th>
                     <th field="tent_name" width="50" sortable="true">Tenant Type</th>
-                    <th field="action" width="50">Action</th>
                 </tr>
             </thead>
         </table>
         </div>
         <!-- end table -->
-        
+
         <!-- icon2 atas table -->
         <div id="toolbar">
             @if(Session::get('role')==1 || in_array(28,Session::get('permissions')))
@@ -75,7 +74,7 @@
             @endif
         </div>
         <!-- end icon -->
-    
+
         <!-- hidden form buat create edit -->
         <div id="dlg" class="easyui-dialog" style="width:60%"
                 closed="true" buttons="#dlg-buttons">
@@ -116,7 +115,7 @@
                     <select id="tentype" name="tent_id" style="width: 50%; height: 30px; border-radius: 4px; border-color: #95B8E7;" required>
                         @foreach($tenantTypes as $tent)
                         <option value="{{$tent->id}}" data-owner="{{$tent->tent_isowner}}">{{$tent->tent_name}}</option>
-                        @endforeach           
+                        @endforeach
                     </select>
                 </div>
                 <div style="margin-bottom:10px">
@@ -134,7 +133,7 @@
                     <label class="textbox-label textbox-label-before" for="_easyui_textbox_input10" style="text-align: left; height: 27px; line-height: 27px;">Unit Start Owned</label>
                     <input type="text" id="unitStartDate" name="unitow_start_date" disabled class="datepicker" data-date-format="yyyy-mm-dd">
                 </div>
-                
+
             </form>
         </div>
         <div id="dlg-buttons">
@@ -150,7 +149,7 @@
 
             <!-- Modal content-->
             <div class="modal-content">
-              
+
               <div class="modal-body" id="unitModalContent">
               </div>
               <div class="modal-footer">
@@ -168,7 +167,7 @@
 
             <!-- Modal content-->
             <div class="modal-content">
-              
+
               <div class="modal-body" id="detailModalContent">
               </div>
               <div class="modal-footer">
@@ -186,7 +185,7 @@
 
             <!-- Modal content-->
             <div class="modal-content">
-              
+
               <div class="modal-body" id="addUnitModalContent">
                     <center>
                         <h3>Add Unit</h3>
@@ -314,7 +313,7 @@
             $('#unitColumn').hide();
             $('#unitButton').attr('disabled','disabled');
             $('#unitStartDateColumn').hide();
-            
+
             var row = $('#dg').datagrid('getSelected');
             if (row){
                 // ajax
@@ -323,7 +322,7 @@
                     if(data.tenan_isppn) $('input[name=tenan_isppn]').prop('checked', true);
                     if(data.tenan_ispkp) $('input[name=tenan_ispkp]').prop('checked', true);
                     $('#tentype').val(data.tent_id);
-                    // if(data.unit_id){ 
+                    // if(data.unit_id){
                     //     $('#unitView').val(data.unit_code+" "+data.unit_name);
                     //     $('input[name=unit_id]').val(data.unit_id);
                     //     $('input[name=current_unit_id]').val(data.unit_id);
@@ -425,7 +424,7 @@
                     if (result.success){
                         $.messager.alert('Success','Remove unit from tenant Success');
                         currentClass.closest('table').remove();
-                        // $('#dg').datagrid('reload'); 
+                        // $('#dg').datagrid('reload');
                     } else {
                         $.messager.show({   // show error message
                             title: 'Error',
@@ -456,7 +455,7 @@
                         $.messager.alert('Success','Insert Success');
                         $('#startDate').val('');
                         $('#addUnitView').val('');
-                        $('#addUnitId').val(''); 
+                        $('#addUnitId').val('');
                         $('#addUnitModal').modal('hide');
                     } else {
                         $.messager.show({   // show error message

@@ -671,7 +671,7 @@ class InvoiceController extends Controller
                                         // SERVICE CHARGE
                                         $currUnit = MsUnit::find($value->contract->unit_id);
                                         $alias = @MsConfig::where('name','service_charge_alias')->first()->value;
-                                        $note = $alias." ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
+                                        $note = $alias." ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
                                         // echo "SERVICE CHARGE :<br>";
                                         // echo $note."<br>";
                                         $amount = ($value->contract->MsUnit->unit_sqrt * $value->costdetail->costd_rate * $value->continv_period) + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
@@ -679,7 +679,7 @@ class InvoiceController extends Controller
                                     }else if($value->costdetail->costitem->is_sinking_fund){
                                         // SINKING FUND (DUMMY)
                                         $currUnit = MsUnit::find($value->contract->unit_id);
-                                        $note = $value->costdetail->costd_name." (SF)  ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
+                                        $note = $value->costdetail->costd_name." (SF)  ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
                                         // echo "SINKING FUND :<br>";
                                         // echo $note."<br>";
                                         $amount = ($value->contract->MsUnit->unit_sqrt * $value->costdetail->costd_rate * $value->continv_period) + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
@@ -691,12 +691,12 @@ class InvoiceController extends Controller
                                         $npp_building = $companyData->comp_npp_insurance;
                                         // npp unit  = lust unit per luas total unit
                                         $npp_unit =  $currUnit->unit_sqrt / $companyData->comp_sqrt;
-                                        $note = $value->costd_name." (Rp. ".number_format($value->costdetail->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
+                                        $note = $value->costd_name." (Rp. ".number_format($value->costdetail->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
                                         // rumus cost + burden + admin
                                         $smount = $value->costdetail->costd_rate / $npp_building * $npp_unit;
                                     }else{
                                         // ELSE
-                                        $note = $value->costd_name." Periode ".date('d-m-Y',strtotime($tempTimeStart))." s/d ".date('d-m-Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
+                                        $note = $value->costd_name." Periode ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
                                         // rumus cost + burden + admin
                                         $amount = $value->costdetail->costd_rate + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
                                     }

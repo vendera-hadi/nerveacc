@@ -332,7 +332,6 @@
                             @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                             <li @if(Request::url() == route('report.profitloss')) class="active" @endif><a href="{{route('report.profitloss')}}"><i class="fa fa-circle-o"></i> Income Statement</a></li>
                             @endif
-                            <li><a href="#"><i class="fa fa-circle-o"></i> Income Statement Dept</a></li>
 
                           </ul>
 

@@ -8,6 +8,10 @@ use Auth;
 // load model
 use App\Models\MsMasterCoa;
 use App\Models\MsCompany;
+use App\Models\MsGroupAccount;
+use App\Models\MsGroupAccnDtl;
+use App\Models\MsHeaderFormat;
+use App\Models\MsDetailFormat;
 use Excel;
 
 class CoaController extends Controller
@@ -20,7 +24,7 @@ class CoaController extends Controller
         try{
         	// params
         	$page = $request->page;
-        	$perPage = $request->rows; 
+        	$perPage = $request->rows;
         	$page-=1;
         	$offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -81,7 +85,7 @@ class CoaController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function insert(Request $request){
@@ -94,7 +98,7 @@ class CoaController extends Controller
 		    return MsMasterCoa::create($input);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        }     	
+        }
     }
 
     public function update(Request $request){
@@ -105,7 +109,7 @@ class CoaController extends Controller
         	return MsMasterCoa::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function delete(Request $request){
@@ -117,7 +121,7 @@ class CoaController extends Controller
         	return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getCoaYear(){
@@ -132,7 +136,7 @@ class CoaController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getCoaCode(){
@@ -147,7 +151,7 @@ class CoaController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
      public function downloadCoaExcel()
@@ -177,17 +181,95 @@ class CoaController extends Controller
         })->download($tp);
     }
 
+    public function dlTemplateUploadCoaExcel()
+    {
+        $data_ori = MsMasterCoa::select('coa_year','coa_code','coa_name','coa_isparent','coa_level','coa_type','coa_ending')
+                ->get()->toArray();
+        $data = array();
+        foreach($data_ori as $coa){
+            $data[]=array(
+                'Year'=>$coa['coa_year'],
+                'Chart Account Code'=>trim($coa['coa_code']),
+                'Chart Account Name'=>$coa['coa_name'],
+                'Is Parent ? (0 = tidak, 1 = ya)'=> !empty($coa['coa_isparent']) ? 1 : 0,
+                'Parent COA Code'=> trim($coa['coa_level']),
+                'COA Type (DEBET/KREDIT)'=> trim($coa['coa_type']),
+                'Total COA Value Last Year'=> number_format($coa['coa_ending'],2));
+        }
+
+        $border = 'A1:G';
+        $tp = 'xls';
+        return Excel::create('template_coa', function($excel) use ($data,$border) {
+            $excel->sheet('mySheet', function($sheet) use ($data,$border)
+            {
+                $total = count($data)+1;
+                $sheet->setBorder($border.$total, 'thin');
+                $sheet->fromArray($data);
+            });
+        })->download($tp);
+    }
+
     public function printCoa(Request $request){
         $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "COA Report";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_coa_template';
         $data['tahun'] = '';
-        $data['type'] = 'print'; 
-        
+        $data['type'] = 'print';
+
         $fetch = MsMasterCoa::select('coa_year','coa_code','coa_name','coa_beginning','coa_debit','coa_credit','coa_ending');
         $fetch = $fetch->get();
         $data['coa'] = $fetch;
-        return view('layouts.report_template2', $data);    
+        return view('layouts.report_template2', $data);
+    }
+
+    public function upload(Request $request)
+    {
+        if($request->hasFile('file')){
+            $path = $request->file('file')->getRealPath();
+            $data = Excel::load($path, function($reader) {
+
+            })->get();
+
+            \DB::beginTransaction();
+            try{
+                if(!empty($data) && $data->count()){
+                    MsMasterCoa::truncate();
+                    foreach ($data as $key => $value) {
+                        $insert[] = [
+                                'coa_year' => $value->year,
+                                'coa_code' => $value->chart_account_code,
+                                'coa_name' => $value->chart_account_name,
+                                'coa_isparent' => !empty($value->is_parent_0_tidak_1_ya) ? true : false,
+                                'coa_level' => $value->parent_coa_code,
+                                'coa_type' => $value->coa_type_debetkredit,
+                                'coa_ending' => $value->total_coa_value_last_year,
+                                'coa_beginning' => 0,
+                                'coa_debit' => 0,
+                                'coa_credit' => 0
+                            ];
+                    }
+                    MsMasterCoa::insert($insert);
+
+                    // hapus group account
+                    MsGroupAccount::truncate();
+                    MsGroupAccnDtl::truncate();
+                    // hapus layout
+                    MsDetailFormat::truncate();
+                    MsHeaderFormat::truncate();
+                    \DB::commit();
+                    return back()->with('success', 'Upload new COA success');
+                }else{
+                    return back()->with('error','Excel kosong, data harap diisi');
+                }
+
+            }catch(\Exception $e){
+                \DB::rollBack();
+                // return back()->with('error','Error terjadi, harap dilihat kembali format input yang dimasukkan benar atau salah');
+                return back()->with('error',$e->getMessage());
+            }
+
+        }
+        return back();
     }
 }
