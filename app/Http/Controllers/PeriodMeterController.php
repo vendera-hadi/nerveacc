@@ -248,10 +248,9 @@ class PeriodMeterController extends Controller
                         }else{
                             $meter_cost = $min * $meter_rate[$key];
                         }
+
                         $bpju = (0.03 * $meter_cost);
-                        $subtotal = ($meter_cost + $bpju);
-                        $biaya_admin = 10/100 * $subtotal;
-                        $total = $subtotal + $biaya_admin;
+                        $total = $meter_cost + $bpju;
                         $input = [
                             'meter_end' => $meter_end[$key],
                             'meter_used' => $meter_used,
@@ -556,9 +555,7 @@ class PeriodMeterController extends Controller
                                 $meter_cost = $min * $formula[0];
                             }
                             $bpju = (0.03 * $meter_cost);
-                            $subtotal = $meter_cost + $bpju;
-                            $biaya_admin = 10/100 * $subtotal;
-                            $total = $subtotal + $biaya_admin;
+                            $total = $meter_cost + $bpju;
 
                             DB::table('tr_meter')
                             ->where('prdmet_id', $prd)
