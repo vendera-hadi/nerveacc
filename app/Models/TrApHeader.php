@@ -21,4 +21,9 @@ class TrApHeader extends Model
    	{
    		return $this->belongsTo('App\Models\MsSupplier','spl_id');
    	}
+
+      public function po()
+      {
+         return $this->belongsTo('App\Models\TrPOHeader','po_id');
+      }
 }

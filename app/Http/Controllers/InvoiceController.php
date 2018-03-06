@@ -572,11 +572,11 @@ class InvoiceController extends Controller
                     // AMBIL CONTRACT INVOICE PER INVOICE TYPE
                     $details = TrContractInvoice::join('tr_contract',DB::raw('tr_contract_invoice.contr_id::integer'),'=','tr_contract.id')->select('tr_contract_invoice.*')->where('contr_id',$ctrInv->contr_id)->where('invtp_id',$ctrInv->invtp_id);
                     // HANDLE JOIN UNIT
-                    if(array_key_exists($contract->unit_id, $mergedunits)){
-                        $details = $details->orWhere(function($query) use($ctrInv, $contract, $mergedunits){
-                                        $query->where('tr_contract.unit_id',$mergedunits[$contract->unit_id])->where('invtp_id',$ctrInv->invtp_id);
-                                    });
-                    }
+                    // if(array_key_exists($contract->unit_id, $mergedunits)){
+                    //     $details = $details->orWhere(function($query) use($ctrInv, $contract, $mergedunits){
+                    //                     $query->where('tr_contract.unit_id',$mergedunits[$contract->unit_id])->where('invtp_id',$ctrInv->invtp_id);
+                    //                 });
+                    // }
                     $details = $details->get();
                     // echo "DETAILS<br>";
                     // echo $details->pluck('unit_id')."<br>";
@@ -666,20 +666,63 @@ class InvoiceController extends Controller
                                     echo "<br><b>Contract #".$contract->contr_no."</b><br> expired at ".date('d/m/Y',strtotime($value->contract->contr_enddate)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here";
                                     $insertFlag = false;
                                 }else{
+                                    $usingRumusPeriod = false;
                                     // JENIS COST ITEM
                                     if($value->costdetail->costitem->is_service_charge){
+                                        // RUMUS KHUSUS PERIODE
+                                        $usingRumusPeriod = true;
+                                        $period = $value->continv_period;
+                                        $period_classifications = [];
+                                        for($i=1; $i<=12; $i++){
+                                            $temp[] = $i;
+                                            if($i%$period == 0){
+                                                $period_classifications[] = $temp;
+                                                $temp = [];
+                                            }
+                                        }
+                                        $currentmonth = date('m',strtotime($tempTimeStart));
+                                        $currentmonth = (int)$currentmonth;
+                                        foreach ($period_classifications as $pval) {
+                                            if(in_array($currentmonth, $pval)){
+                                                $first = reset($pval);
+                                                $last = end($pval);
+                                                $monthGapPrev = $currentmonth - $first;
+                                                $monthGapNext = $last - $currentmonth;
+                                            }
+                                        }
                                         // SERVICE CHARGE
                                         $currUnit = MsUnit::find($value->contract->unit_id);
                                         $alias = @MsConfig::where('name','service_charge_alias')->first()->value;
-                                        $note = $alias." ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
+                                        $note = $alias." ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$monthGapNext." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
                                         // echo "SERVICE CHARGE :<br>";
                                         // echo $note."<br>";
                                         $amount = ($value->contract->MsUnit->unit_sqrt * $value->costdetail->costd_rate * $value->continv_period) + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
                                         $amount = round($amount,2);
                                     }else if($value->costdetail->costitem->is_sinking_fund){
+                                        $usingRumusPeriod = true;
+                                        // RUMUS KHUSUS PERIODE
+                                        $period = $value->continv_period;
+                                        $period_classifications = [];
+                                        for($i=1; $i<=12; $i++){
+                                            $temp[] = $i;
+                                            if($i%$period == 0){
+                                                $period_classifications[] = $temp;
+                                                $temp = [];
+                                            }
+                                        }
+                                        $currentmonth = date('m',strtotime($tempTimeStart));
+                                        $currentmonth = (int)$currentmonth;
+                                        foreach ($period_classifications as $pval) {
+                                            if(in_array($currentmonth, $pval)){
+                                                $first = reset($pval);
+                                                $last = end($pval);
+                                                $monthGapPrev = $currentmonth - $first;
+                                                $monthGapNext = $last - $currentmonth;
+                                            }
+                                        }
                                         // SINKING FUND (DUMMY)
                                         $currUnit = MsUnit::find($value->contract->unit_id);
-                                        $note = $value->costdetail->costd_name." (SF)  ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
+                                        $note = $value->costdetail->costd_name." (SF)  ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$monthGapNext." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
                                         // echo "SINKING FUND :<br>";
                                         // echo $note."<br>";
                                         $amount = ($value->contract->MsUnit->unit_sqrt * $value->costdetail->costd_rate * $value->continv_period) + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
@@ -709,6 +752,13 @@ class InvoiceController extends Controller
                                         'continv_start_inv' => $tempTimeStart,
                                         'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months"))
                                     ];
+
+                                    if($usingRumusPeriod){
+                                        $updateCtrInv[$value->id] = [
+                                            'continv_start_inv' => date('Y-m-d',strtotime($tempTimeStart)),
+                                            'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$monthGapNext." months"))
+                                        ];
+                                    }
                                     // echo 'non meter cost '.$amount."<br>";
                                     $totalPay+=$amount;
                                     // echo 'totalpay : '.$totalPay."<br>";

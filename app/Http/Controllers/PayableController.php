@@ -31,7 +31,7 @@ class PayableController extends Controller
 		try{
             // params
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -70,7 +70,7 @@ class PayableController extends Controller
 
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
-            
+
             $fetch = $fetch->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
@@ -83,11 +83,11 @@ class PayableController extends Controller
                 $temp['total'] = number_format($value->total,2);
                 $temp['posting'] = $value->posting ? 'yes' : 'no';
                 $temp['po_no'] = !empty($value->po_number) ? $value->po_number : "-";
-                $action_button = "";
+                $action_button = '<a href="javascript:void(0)" data-id="'.$value->id.'" class="detail"><i class="fa fa-eye"></i></a>';
                 if($temp['posting'] == 'no'){
                     // if(!empty($value->po_number))
                     //     $action_button = '<a href="'.route('payable.withpo.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
-                    // else  
+                    // else
                     //     $action_button = '<a href="'.route('payable.withoutpo.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
                     $action_button .= '&nbsp;&nbsp; <a href="#" data-id="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
                 }
@@ -98,7 +98,7 @@ class PayableController extends Controller
            	return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
 	}
 
 	public function withpo(){
@@ -124,7 +124,7 @@ class PayableController extends Controller
 		$data['departments'] = MsDepartment::where('dept_isactive',1)->get();
 		$data['payment_terms'] = DB::table('ms_payment_terms')->get();
 		$data['ppn_options'] = DB::table('ms_ppn')->get();
-		return view('accpayable_withoutpo',$data);	
+		return view('accpayable_withoutpo',$data);
 	}
 
 	public function withoutpoInsert(Request $request)
@@ -207,7 +207,7 @@ class PayableController extends Controller
             $header->created_by = \Auth::id();
             $header->updated_by = \Auth::id();
 
-            
+
             $total = $totalppn = 0;
             foreach ($po->detail as $key => $dt) {
                 $detail = new TrApDetail;
@@ -318,7 +318,7 @@ class PayableController extends Controller
                         $total -= $detail->qty * $detail->amount;
                     }
                     TrLedger::create($journal);
-             
+
                     // if(!empty($detail->ppn_coa_code)){
                     //     $nextJournalNumber++;
                     //     $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
@@ -391,7 +391,7 @@ class PayableController extends Controller
 		try{
 			// params
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -439,7 +439,7 @@ class PayableController extends Controller
                 $temp['po_date'] = $value->po_date;
                 $temp['due_date'] = $value->due_date;
                 $temp['spl_name'] = $value->spl_name;
-                $action_button = '<a href="'.route('po.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>'; 
+                $action_button = '<a href="'.route('po.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
                 $action_button .= '| <a href="'.route('po.pdf',$value->id).'" ><i class="fa fa-file"></i></a>';
                 $action_button .= '| <a href="#" data-id="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
                 $temp['action_button'] = $action_button;
@@ -482,7 +482,7 @@ class PayableController extends Controller
 		$data['departments'] = MsDepartment::where('dept_isactive',1)->get();
 		$data['payment_terms'] = DB::table('ms_payment_terms')->get();
 		$data['ppn_options'] = DB::table('ms_ppn')->get();
-        
+
         $prefix = @MsConfig::where('name','po_prefix')->first()->value;
 		$temp = $prefix."-".date('ymd')."-";
         $check = TrPOHeader::where('po_number','like',$temp."%")->orderBy('po_number','desc')->first();
@@ -519,7 +519,7 @@ class PayableController extends Controller
         try{
             $header = new TrPOHeader;
             $header->spl_id = $request->spl_id;
-            if($request->number_mode == "auto"){ 
+            if($request->number_mode == "auto"){
                 $header->po_number = $request->po_number;
             }else{
                 $check = TrPOHeader::where('po_number',$request->po_number_manual)->first();
@@ -640,7 +640,7 @@ class PayableController extends Controller
     }
 
     public function poPdf(Request $request, $id)
-    {   
+    {
         $data['po'] = TrPOHeader::find($id);
         $data['company'] = MsCompany::first()->toArray();
         $data['signature'] = @MsConfig::where('name','footer_signature_name')->first()->value;
@@ -648,6 +648,13 @@ class PayableController extends Controller
         $data['footer'] = @MsConfig::where('name','footer_po')->first()->value;
         $data['label'] = @MsConfig::where('name','footer_label_po')->first()->value;
         return view('layouts.report_po', $data);
+    }
+
+    public function detail(Request $request)
+    {
+        $id = $request->id;
+        $data['ap'] = TrApHeader::find($id);
+        return view('modal.detailap', $data);
     }
 
 }

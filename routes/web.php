@@ -391,6 +391,7 @@ Route::group(['middleware' => 'auth'], function () {
 	// account payable
 	Route::get('accpayable', 'PayableController@index')->name('payable.index');
 	Route::post('accpayable/get', 'PayableController@get')->name('payable.get');
+	Route::post('accpayable/detail', 'PayableController@detail')->name('payable.detail');
 	Route::post('accpayable/delete', 'PayableController@delete')->name('payable.delete');
 	Route::get('accpayable/withpo', 'PayableController@withpo')->name('payable.withpo');
 	Route::get('accpayable/withoutpo', 'PayableController@withoutpo')->name('payable.withoutpo');

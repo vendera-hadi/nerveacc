@@ -90,6 +90,24 @@
         </div>
     </div>
           <!-- content -->
+
+<!-- modal -->
+<div id="detailModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+  <!-- Modal content-->
+    <div class="modal-content" style="width:100%">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Account Payable Detail</h4>
+      </div>
+      <div class="modal-body" id="detailModalContent"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end modal -->
 @endsection
 
 @section('footer-scripts')
@@ -148,6 +166,15 @@
                 });
             }
          });
+
+        // trigger detail
+        $(document).delegate('.detail', 'click', function(){
+            var id = $(this).data('id');
+            $.post('{{route('payable.detail')}}', {id:id}, function(result){
+                $('#detailModal').modal('show');
+                $('#detailModalContent').html(result);
+            });
+        });
 
     });
 
