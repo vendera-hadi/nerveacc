@@ -24,14 +24,15 @@ class BackupRestoreController extends Controller
 	public function dump()
 	{
 		$dumpDB = PostgreSql::create()
-			->setDumpBinaryPath('C:\\PostgreSQL\\pg96\\bin\\pg_dump.exe')
-			->setHost('127.0.0.1')
+			// ->setDumpBinaryPath('C:\\PostgreSQL\\pg96\\bin\\pg_dump.exe')
+			->setDumpBinaryPath('pg_dump')
+			->setHost(env('DB_HOST'))
     		->setDbName(env('DB_DATABASE'))
     		->setUserName(env('DB_USERNAME'))
     		->setPassword(env('DB_PASSWORD'))
-    		->setStorePath('D:\\backup.sql')
-    		->includeTables(['tr_ledger', 'tr_invoice', 'tr_invoice_detail']);
-    		
+    		->setStorePath(public_path('upload/backup.sql'))
+    		->includeTables(['tr_ap_invoice_dtl', 'tr_ap_invoice_hdr', 'tr_ap_invoice_dtl', 'tr_ap_invoice_hdr', 'tr_asset_mutations', 'tr_bank', 'tr_bankjv', 'tr_contract', 'tr_contract_invoice', 'tr_currency_rate', 'tr_invoice_journal', 'tr_invoice_paymdtl', 'tr_invoice_paymhdr', 'tr_invpaym_journal', 'tr_meter', 'tr_period_meter', 'tr_purchase_order_dtl', 'tr_purchase_order_hdr', 'tr_ledger', 'tr_invoice', 'tr_invoice_detail', 'ms_unit', 'ms_tenant', 'users']);
+
     	if($dumpDB->dumpToFile()) return $dumpDB->downloadBackup();
 	}
 
@@ -41,8 +42,9 @@ class BackupRestoreController extends Controller
 			$path = $request->dbfile->store('upload');
 			$realpath = storage_path('app'.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $path));
 			$dumpDB = PostgreSql::create()
-				->setDumpBinaryPath('C:\\PostgreSQL\\pg96\\bin\\pg_restore.exe')
-				->setHost('127.0.0.1')
+				// ->setDumpBinaryPath('C:\\PostgreSQL\\pg96\\bin\\pg_restore.exe')
+				->setDumpBinaryPath('pg_restore')
+				->setHost(env('DB_HOST'))
 	    		->setDbName(env('DB_DATABASE'))
 	    		->setUserName(env('DB_USERNAME'))
 	    		->setPassword(env('DB_PASSWORD'))
