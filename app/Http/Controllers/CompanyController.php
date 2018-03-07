@@ -23,6 +23,7 @@ class CompanyController extends Controller
         $data['label'] = @MsConfig::where('name','footer_label_inv')->first()->value;
         $data['service_charge'] = @MsConfig::where('name','service_charge_alias')->first()->value;
         $data['duedate'] = @MsConfig::where('name','duedate_interval')->first()->value;
+        $data['invoice_startdate'] = @MsConfig::where('name','invoice_startdate')->first()->value;
         $data['signature'] = @MsConfig::where('name','digital_signature')->first()->value;
         $data['cc_email'] = @MsConfig::where('name','cc_email')->first()->value;
         $data['sendEmail'] = @MsConfig::where('name','send_inv_email')->first()->value;
@@ -58,7 +59,7 @@ class CompanyController extends Controller
         }
         $request->session()->flash('success', 'Update other configuration success');
         return redirect()->back();
-    }    
+    }
 
     public function index2(){
         $data['company'] = MsCompany::first();
@@ -70,7 +71,7 @@ class CompanyController extends Controller
         try{
             // params
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -122,7 +123,7 @@ class CompanyController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getOptions(){
@@ -137,16 +138,16 @@ class CompanyController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function insert(Request $request){
         try{
             $input = $request->all();
-            return MsCompany::create($input);        
+            return MsCompany::create($input);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function update(Request $request){
@@ -168,7 +169,7 @@ class CompanyController extends Controller
         $company = MsCompany::first();
         if ($request->hasFile('image')) {
             $extension = $request->image->extension();
-            if(strtolower($extension)!='jpg' && strtolower($extension)!='png' && strtolower($extension)!='jpeg'){ 
+            if(strtolower($extension)!='jpg' && strtolower($extension)!='png' && strtolower($extension)!='jpeg'){
                 $request->session()->flash('error', 'Image Format must be jpg or png');
                 return redirect()->back();
             }
@@ -189,7 +190,7 @@ class CompanyController extends Controller
             return MsCompany::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function delete(Request $request){
@@ -199,6 +200,6 @@ class CompanyController extends Controller
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 }

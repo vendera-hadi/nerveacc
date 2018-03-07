@@ -85,6 +85,11 @@
                                   <input type="number" name="duedate_interval" class="form-control" value="{{$duedate}}">
                                 </div>
 
+                                <div class="form-group">
+                                  <label>Invoice start Date (every month)</label>
+                                  <input type="number" min="1" max="31" name="invoice_startdate" class="form-control" value="{{$invoice_startdate}}">
+                                </div>
+
                                 @if(!empty($signature))
                                 <div class="form-group">
                                   <label>Current Signature</label><br>

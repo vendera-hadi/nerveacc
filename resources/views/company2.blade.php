@@ -12,7 +12,7 @@
 
 <!-- tambahan script atas -->
 @section('htmlheader_scripts')
-
+	<link rel="stylesheet" type="text/css" href="{{ asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
 @endsection
 
 @section('contentheader_breadcrumbs')
@@ -67,7 +67,7 @@
 
 		            <div class="form-group">
 		              <label>Company Address</label>
-		              <input type="text" value="{{$company->comp_address}}" name="comp_address" class="form-control" id="compAddress" placeholder="Company Address" required>
+		              <textarea id="compAddress" class="textarea" name="comp_address" class="form-control" style="width: 100%;" required>{{$company->comp_address}}</textarea>
 		            </div>
 
 		            <div class="form-group">
@@ -165,6 +165,7 @@
 @endsection
 
 @section('footer-scripts')
+<script type="text/javascript" src="{{asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js')}}"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $(".numeric").keydown(function (e) {
@@ -182,6 +183,8 @@ $(document).ready(function() {
             e.preventDefault();
         }
     });
+
+    $(".textarea").wysihtml5();
 });
 </script>
 @endsection

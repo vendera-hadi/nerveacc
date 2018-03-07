@@ -88,6 +88,10 @@ class MsConfigSeeder extends Seeder
                 'name' => 'coa_laba_rugi',
                 'desc' => 'COA Laba Rugi',
                 'value' => 30120
+            ],[
+                'name' => 'invoice_startdate',
+                'desc' => 'Invoice Start Date',
+                'value' => 5
             ]
             ]);
     }

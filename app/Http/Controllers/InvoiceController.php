@@ -797,12 +797,17 @@ class InvoiceController extends Controller
                         }
 
                         // TAMBAHIN STAMP DUTY
-                        if($totalPay <= $companyData->comp_materai1_amount){
+                        // total pay lebih dr 1jt
+                        if($totalPay > $companyData->comp_materai2_amount){
+                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'MATERAI', 'costd_id'=> 0, 'coa_code' => $stampCoa];
+                            $totalStamp = $companyData->comp_materai2;
+                        }else if($totalPay >= $companyData->comp_materai1_amount && $totalPay <= $companyData->comp_materai2_amount){
+                            // 250rb sampai 1jt
                             $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'MATERAI', 'costd_id'=> 0, 'coa_code' => $stampCoa];
                             $totalStamp = $companyData->comp_materai1;
                         }else{
-                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'MATERAI', 'costd_id'=> 0, 'coa_code' => $stampCoa];
-                            $totalStamp = $companyData->comp_materai2;
+                            // under 250rb
+                            $totalStamp = 0;
                         }
 
                         DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail, $totalStamp, $updateCtrInv){
@@ -819,9 +824,17 @@ class InvoiceController extends Controller
                             $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
 
                             $now = date('Y-m-d');
+                            // tambahan, date invoice diambil dr config invoice start date
+                            $invoice_startdate = @MsConfig::where('name','invoice_startdate')->first()->value;
+                            if(!empty($invoice_startdate)){
+                                $invoice_startdate = str_pad($invoice_startdate,2,'0',STR_PAD_LEFT);
+                                $invoice_startdate = date('Y-m-'.$invoice_startdate);
+                            }else{
+                                $invoice_startdate = $now;
+                            }
                             // $duedate = date('Y-m-d', strtotime('+'.$value->continv_period.' month'));
                             $duedate_interval = @MsConfig::where('name','duedate_interval')->first()->value;
-                            $duedate = date('Y-m-d', strtotime('+'.$duedate_interval.' days'));
+                            $duedate = date('Y-m-d', strtotime($invoice_startdate.' +'.$duedate_interval.' days'));
 
                             // $totalWithTaxStamp = ($totalPay * 1.1) + $totalStamp;
                             $totalWithStamp = $totalPay + $totalStamp;
@@ -830,12 +843,13 @@ class InvoiceController extends Controller
                             $label = @MsConfig::where('name','footer_label_inv')->first()->value;
                             $sendEmail = @MsConfig::where('name','send_inv_email')->first()->value;
                             $ccEmail = @MsConfig::where('name','cc_email')->first()->value;
+
                             $inv = [
                                 'tenan_id' => $value->contract->tenan_id,
                                 'inv_number' => $value->invtype->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
                                 'inv_faktur_no' => $value->invtype->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
-                                'inv_faktur_date' => $now,
-                                'inv_date' => $now,
+                                'inv_faktur_date' => $invoice_startdate,
+                                'inv_date' => $invoice_startdate,
                                 'inv_duedate' => $duedate,
                                 'inv_amount' => $totalWithStamp,
                                 'inv_ppn' => 0.1,

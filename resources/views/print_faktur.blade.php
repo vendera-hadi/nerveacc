@@ -51,7 +51,7 @@ body {
 @media print {
     html, body {
         width: 210mm;
-        height: 277mm;        
+        height: 277mm;
     }
     .page {
         margin: 0;
@@ -77,14 +77,14 @@ table tr td{font-size:9pt;}
     $tenan_name = $inv['ms_tenant']['tenan_taxname'];
     $tenan_address = $inv['ms_tenant']['tenan_tax_address'];
     $invoice_type_prefix = $inv['invoice_type']['invtp_prefix'];
-    $virtual_account = ($invoice_type_prefix == 'MN ') ? $inv['va_maintenance'] : $inv['va_utilities']; 
+    $virtual_account = ($invoice_type_prefix == 'MN ') ? $inv['va_maintenance'] : $inv['va_utilities'];
     ?>
     <div class="page">
         <div class="subpage">
             <div style="position:absolute;"><img src="{{asset($company_logo)}}" style="width:110px;"/></div>
             <div style="font-size:10pt; text-align: center; width: 100%;">
                     <b>{{ $company_name }}</b><br>
-                    {{ $company_address }}<br>
+                    {!! $company_address !!}<br>
                     {{'Tlp: '.$company_phone.'/Fax: '.$company_fax}}<br><br><br>
             </div>
 
@@ -139,7 +139,7 @@ table tr td{font-size:9pt;}
             <br>
             <table width="100%" style="border-collapse: collapse; border: solid 1px; line-height: 18px;">
                 <tr style="text-align: center;">
-                    
+
                     <td width="80%" style="border-collapse: collapse; border: solid 1px;"><b>KETERANGAN</b><br><i>Description</i></td>
                     <td width="20%" colspan="2" style="border-collapse: collapse; border: solid 1px;"><b>JUMLAH</b><br><i>Amount</i></td>
                 </tr>
@@ -163,17 +163,17 @@ table tr td{font-size:9pt;}
                     }
                 ?>
                 <tr>
-                    
+
                     <td style="padding-left:15px; padding-right:10px">BIAYA ADMINISTRASI</td>
                     <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;"></td>
                 </tr>
                 <tr>
-                    
+
                     <td>&nbsp;</td>
                     <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
                 <tr style="border-top: 1px solid black;">
-                    
+
                     <td style="padding-left:15px; padding-right:10px; padding-bottom:10px; padding-top:10px"><b>TOTAL TAGIHAN BULAN INI</b></td>
                     <td style="border-left: solid 1px; text-align:right">Rp.</td>
                     <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
@@ -205,10 +205,10 @@ table tr td{font-size:9pt;}
                         <b><u>{{$company_sign}}</u></b><br>
                         {{$company_position}}
                         @endif
-                        
+
                     </td>
                 </tr>
-                
+
             </table>
         </div>
     </div>

@@ -51,7 +51,7 @@ body {
 @media print {
     html, body {
         width: 210mm;
-        height: 277mm;        
+        height: 277mm;
     }
     .page {
         margin: 0;
@@ -82,7 +82,7 @@ table tr td{font-size:9pt;}
             <div style="position:absolute;"><img src="{{asset($company_logo)}}" style="width:110px;"/></div>
             <div style="font-size:10pt; text-align: center; width: 100%;">
                     <b>{{ $company_name }}</b><br>
-                    {{ $company_address }}<br>
+                    {!! $company_address !!}<br>
                     {{'Tlp: '.$company_phone.'/Fax: '.$company_fax}}<br><br><br>
             </div>
 
@@ -119,7 +119,7 @@ table tr td{font-size:9pt;}
                             $total += $value['invdt_amount'];
                 ?>
                 <tr>
-                    
+
                     <td style="vertical-align: top; padding-left:15px; padding-right:10px; padding-bottom:10px">
                         <?php echo $value['invdt_note'];?>
                     </td>
@@ -137,7 +137,7 @@ table tr td{font-size:9pt;}
                     <td style="border-collapse: collapse; border-left: solid 1px;"></td>
                 </tr> -->
                 <tr>
-                    
+
                     <td >&nbsp;</td>
                     <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
@@ -157,12 +157,12 @@ table tr td{font-size:9pt;}
                     <td style="border-collapse: collapse; border-left: solid 1px;"></td>
                 </tr> -->
                 <tr>
-                    
+
                     <td >&nbsp;</td>
                     <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
                 <tr style="border-top: 1px solid black;">
-                    
+
                     <td style="padding-left:15px; padding-right:10px; padding-bottom:10px; padding-top:10px"><b>TOTAL</b></td>
                     <td style="border-left: solid 1px; text-align:right"><b>Rp.</b></td>
                     <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
@@ -179,13 +179,13 @@ table tr td{font-size:9pt;}
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
                         Jakarta, <?php echo date('d M Y'); ?><br><br>
-                        
+
                         <br><br><br>
                         <br><br>
                         <div style="width:100%; border:1px solid black"></div>
-                    </td> 
+                    </td>
                 </tr>
-                
+
             </table>
         </div>
     </div>
