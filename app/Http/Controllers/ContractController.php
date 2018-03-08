@@ -53,11 +53,12 @@ class ContractController extends Controller
 
             // olah data
             $count = TrContract::count();
+            // contract yg bukan milik owner unit. tenan yg gada di ms_owner_list dimasukkan disini
             $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name', 'ms_unit.unit_code')
             		->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
                     ->join('ms_unit', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('tr_contract.unit_id::integer'))
-                    ->leftJoin('ms_unit_owner', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('ms_unit_owner.unit_id::integer'))
-                    ->whereNull('ms_unit_owner.unit_id');
+                    ->leftJoin('ms_unit_owner', \DB::raw('tr_contract.tenan_id::integer'), '=', \DB::raw('ms_unit_owner.tenan_id::integer'))
+                    ->whereNull('ms_unit_owner.tenan_id');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -142,11 +143,12 @@ class ContractController extends Controller
 
             // olah data
             $count = TrContract::count();
+            // contract disini adalah contract yg dimiliki oleh si owner. join dgn unit owner using tenan_id
             $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name', 'ms_unit.unit_code')
                     ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
                     ->join('ms_unit', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('tr_contract.unit_id::integer'))
-                    ->leftJoin('ms_unit_owner', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('ms_unit_owner.unit_id::integer'))
-                    ->whereNotNull('ms_unit_owner.unit_id');
+                    ->join('ms_unit_owner', \DB::raw('tr_contract.tenan_id::integer'), '=', \DB::raw('ms_unit_owner.tenan_id::integer'));
+
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";

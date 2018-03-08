@@ -8,8 +8,11 @@
 				<td><strong>Unit Area</strong></td><td width="15">:</td><td>{{$unit->unit_sqrt}}</td>
 			</tr>
 			<tr>
-				<td><strong>Virtual Account</strong></td><td width="15">:</td><td>{{$unit->virtual_account}}</td>
+				<td><strong>No VA Utilities</strong></td><td width="15">:</td><td>{{$unit->va_utilities}}</td>
 			</tr>
+      <tr>
+        <td><strong>No VA Maintenance</strong></td><td width="15">:</td><td>{{$unit->va_maintenance}}</td>
+      </tr>
 			<tr>
 				<td><strong>Floor</strong></td><td width="15">:</td><td>{{$unit->MsFloor->floor_name}}</td>
 			</tr>
@@ -17,12 +20,12 @@
 				<td><strong>Unit Type</strong></td><td width="15">:</td><td>{{$unit->UnitType->untype_name}}</td>
 			</tr>
 			<tr>
-				<td><strong>No Meteran Air</strong></td><td width="15">:</td><td>{{$unit->meter_airs}}</td>
+				<td><strong>No Meteran Air</strong></td><td width="15">:</td><td>{{$unit->meter_air}}</td>
 			</tr>
 			<tr>
 				<td><strong>No Meteran Listrik</strong></td><td width="15">:</td><td>{{$unit->meter_listrik}}</td>
 			</tr>
-			
+
 		</table>
 	</div>
 	<div class="col-sm-6">
@@ -31,6 +34,11 @@
 			<tr>
 				<td width="120"><strong>Owner Name</strong></td><td width="15">:</td><td>{{$tenant->tenan_name}}</td>
 			</tr>
+      @if(!empty($unitowner))
+      <tr>
+        <td width="120"><strong>Owned Since</strong></td><td width="15">:</td><td>{{date('d F Y', strtotime($unitowner->unitow_start_date))}}</td>
+      </tr>
+      @endif
 			<tr>
 				<td><strong>KTP</strong></td><td width="15">:</td><td>{{$tenant->tenan_idno}}</td>
 			</tr>

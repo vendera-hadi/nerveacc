@@ -10,6 +10,7 @@ use App\Models\MsTenant;
 use App\Models\MsTenantType;
 use App\Models\User;
 use App\Models\MsUnitOwner;
+use App\Models\MsUnit;
 use App\Models\TrContract;
 use App\Models\TrInvoice;
 use Validator;
@@ -264,11 +265,19 @@ class TenantController extends Controller
         $fetch = MsTenant::select('ms_tenant.*','ms_tenant_type.tent_name')
                         ->join('ms_tenant_type','ms_tenant.tent_id','=','ms_tenant_type.id')
                         ->where('ms_tenant.id',$id)->first();
-        $units = MsUnitOwner::select('ms_unit_owner.unit_id','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_sqrt','ms_virtual_account.viracc_no')
+        $units = MsUnitOwner::select('ms_unit_owner.unit_id','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_sqrt', 'ms_unit.va_utilities', 'ms_unit.va_maintenance')
                             ->join('ms_unit','ms_unit_owner.unit_id','=','ms_unit.id')
-                            ->leftJoin('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
                             ->where('tenan_id',$id)->get();
-        return view('modal.tenantdetail', ['id'=>$id,'fetch' => $fetch, 'units'=>$units]);
+
+        $rented_units = MsUnit::select('ms_unit.*')->join('tr_contract','tr_contract.unit_id','=','ms_unit.id')
+                        ->where('tr_contract.contr_status','confirmed')
+                        ->where('tr_contract.contr_iscancel',false)
+                        ->where('tr_contract.contr_startdate' , '<=', date('Y-m-d'))
+                        ->where('tr_contract.contr_enddate' , '>=', date('Y-m-d'))
+                        ->where('tr_contract.tenan_id',$id)
+                        ->get();
+
+        return view('modal.tenantdetail', ['id'=>$id,'fetch' => $fetch, 'units'=>$units, 'rented' => $rented_units]);
     }
 
     public function deleteunit(Request $request){

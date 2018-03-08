@@ -1,7 +1,7 @@
 <div class="nav-tabs-custom">
             <ul class="nav nav-tabs">
               <li class="active"><a href="#modaltab_1" data-toggle="tab">Tenant Information</a></li>
-              <li><a href="#modaltab_2" data-toggle="tab">Unit Owned</a></li>
+              <li><a href="#modaltab_2" data-toggle="tab">@if(count($units) > 0){{ 'Unit Owned' }}@else{{ 'Rented Unit' }}@endif</a></li>
             </ul>
             <div class="tab-content">
               <div class="tab-pane active" id="modaltab_1">
@@ -18,8 +18,8 @@
 	<tr><td><strong>Tax Name</strong></td><td>:</td><td>{{$fetch['tenan_taxname']}}</td></tr>
 	<tr><td><strong>Tax Address</strong></td><td>:</td><td>{{$fetch['tenan_tax_address']}}</td></tr>
 	<tr><td><strong>PPN</strong></td><td>:</td><td>{{$fetch['tenan_isppn'] ? 'yes' : 'no'}}</td></tr>
-	<tr><td><strong>Tenan Type</strong></td><td>:</td><td>{{$fetch['tent_name']}}</td></tr>
-	
+	<tr><td><strong>Tenant Type</strong></td><td>:</td><td>{{$fetch['tent_name']}}</td></tr>
+
 	</table>
 	<!-- end information -->
 	</div>
@@ -30,17 +30,29 @@
 	<table width="100%">
 	<tr><td width="40%"><strong><u>Unit #{{$unit->unit_code}}</u></strong></td><td></td><td></td></tr>
 	<tr><td><strong>Unit Name</strong></td><td>:</td><td>{{$unit['unit_name']}} ({{$unit['unit_sqrt']}} m2)</td></tr>
-	<tr><td><strong>Virtual Account</strong></td><td>:</td><td>{{$unit['viracc_no']}}</td></tr>
+	<tr><td><strong>Virtual Account Utilities</strong></td><td>:</td><td>{{@$unit['va_utilities']}}</td></tr>
+  <tr><td><strong>Virtual Account Maintenance</strong></td><td>:</td><td>{{@$unit['va_maintenance']}}</td></tr>
 	<tr><td><a href="#" data-tenan="{{$id}}" data-unit="{{$unit['unit_id']}}" class="deleteUnit" title="Delete Tenant Unit"><i class="fa fa-trash" aria-hidden="true"></i> Delete this unit</a></td><td></td><td></td></tr>
 	</table>
 	<br><br>
 	@endforeach
 	@else
-	<h3>No property owned by this tenant</h3>
+      @if(count($rented) > 0)
+        @foreach($rented as $key => $unit)
+        <table width="100%">
+        <tr><td width="40%"><strong><u>Unit #{{$unit->unit_code}}</u></strong></td><td></td><td></td></tr>
+        <tr><td><strong>Unit Name</strong></td><td>:</td><td>{{$unit['unit_name']}} ({{$unit['unit_sqrt']}} m2)</td></tr>
+        <tr><td><strong>Virtual Account Utilities</strong></td><td>:</td><td>{{@$unit['va_utilities']}}</td></tr>
+        <tr><td><strong>Virtual Account Maintenance</strong></td><td>:</td><td>{{@$unit['va_maintenance']}}</td></tr>
+        </table>
+        <br><br>
+        @endforeach
+      @else
+        <h3>No property owned / rented by this tenant</h3>
+      @endif
 	@endif
 			</div>
-              
+
             </div>
             <!-- /.tab-content -->
           </div>
-            

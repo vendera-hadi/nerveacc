@@ -333,7 +333,7 @@ class UnitController extends Controller
                                     // ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
                                     ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id')
                                     ->where(function($query) use($keyword){
-                                        $query->where(DB::raw('LOWER(unit_code)'),'like','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'like','%'.$keyword.'%');
+                                        $query->where(DB::raw('LOWER(unit_code)'),'ilike','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'ilike','%'.$keyword.'%');
                                     });
         else $fetch = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
                         ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id');
@@ -341,9 +341,16 @@ class UnitController extends Controller
 
         // KOMEN INI BIAR KELUAR SEMUA
         if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
-        if(!empty($tenan_id)) $fetch = $fetch->orWhere('ms_unit_owner.tenan_id','=',$tenan_id);
+        if(!empty($tenan_id)){
+            // get owned unit
+            $owned_units = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
+                        ->join('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id')->where('ms_unit_owner.tenan_id',$tenan_id)->get();
+        }else{
+            $owned_units = [];
+        }
+        // $fetch = $fetch->orWhere('ms_unit_owner.tenan_id','=',$tenan_id);
         $fetch = $fetch->paginate(10);
-        return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit]);
+        return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit, 'owned_units' => $owned_units, 'tenan_id' => $tenan_id]);
     }
 
     public function getOptions_account(){
@@ -378,7 +385,7 @@ class UnitController extends Controller
     }
 
     public function getdetail(Request $request){
-        // try{
+        try{
             $id = $request->id;
             $unit = MsUnit::with('MsFloor','UnitType')->find($id);
             $unitowner = MsUnitOwner::where('unit_id',$id)->first();
@@ -392,9 +399,9 @@ class UnitController extends Controller
             $renter = $renter->with('MsTenant')->get();
 
             return view('modal.detailunit', ['unit' => $unit, 'unitowner' => $unitowner, 'tenant' => $tenant, 'renter' => $renter]);
-        // }catch(\Exception $e){
-        //     return response()->json(['errorMsg' => $e->getMessage()]);
-        // }
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
     }
 
 }

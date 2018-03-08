@@ -4,6 +4,7 @@
 <div class="col-xs-6 col-xs-offset-6">
 	<div class="input-group">
       <input type="text" name="keyword" class="form-control" placeholder="Search Unit" value="@if(!empty($keyword)){{$keyword}}@endif">
+      <input type="hidden" name="tenan" value="{{$tenan_id}}">
       <span class="input-group-btn">
         <button class="btn btn-info" type="submit">Search</button>
       </span>
@@ -19,7 +20,16 @@
 		<th>Unit Name</th>
 		<th>Size</th>
 	</tr>
+	@foreach($owned_units as $unit)
+	<tr style="background: lightgreen">
+		<td><center><input type="radio" name="@if($edit){{'unitedit'}}@else{{'unit'}}@endif" data-name="{{$unit->unit_code}}" data-vaccount="{{$unit->virtual_account}}" data-owner="{{$unit->tenan_id}}" value="{{$unit->id}}"></center></td>
+		<td>{{$unit->unit_code}} <b>(own unit)</b></td>
+		<td>{{$unit->unit_name}} <b>(own unit)</b></td>
+		<td>{{(int)$unit->unit_sqrt." m2"}}</td>
+	</tr>
+	@endforeach
 	@foreach($units as $unit)
+	<tr>
 		<td><center><input type="radio" name="@if($edit){{'unitedit'}}@else{{'unit'}}@endif" data-name="{{$unit->unit_code}}" data-vaccount="{{$unit->virtual_account}}" data-owner="{{$unit->tenan_id}}" value="{{$unit->id}}"></center></td>
 		<td>{{$unit->unit_code}}</td>
 		<td>{{$unit->unit_name}}</td>
