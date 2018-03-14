@@ -102,6 +102,9 @@ class CostDetailController extends Controller
     public function insert(Request $request){
         try{
             $input = $request->all();
+            if(empty(@$input['value_type'])) $input['value_type'] = 'value';
+            if(empty(@$input['daya'])) $input['daya'] = 0;
+            if(empty(@$input['percentage'])) $input['percentage'] = 0;
             $input['costd_is'] = md5(date('Y-m-d H:i:s'));
             return MsCostDetail::create($input);
         }catch(\Exception $e){
@@ -113,6 +116,9 @@ class CostDetailController extends Controller
         try{
             $id = $request->id;
             $input = $request->all();
+            if(empty(@$input['value_type'])) $input['value_type'] = 'value';
+            if(empty(@$input['daya'])) $input['daya'] = 0;
+            if(empty(@$input['percentage'])) $input['percentage'] = 0;
             MsCostDetail::find($id)->update($input);
             return MsCostDetail::find($id);
         }catch(\Exception $e){

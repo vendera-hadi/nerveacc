@@ -144,10 +144,7 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract disini adalah contract yg dimiliki oleh si owner. join dgn unit owner using tenan_id
-            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name', 'ms_unit.unit_code')
-                    ->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
-                    ->join('ms_unit', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('tr_contract.unit_id::integer'))
-                    ->join('ms_unit_owner', \DB::raw('tr_contract.tenan_id::integer'), '=', \DB::raw('ms_unit_owner.tenan_id::integer'));
+            $fetch = TrContract::select('tr_contract.*')->join('ms_unit_owner', \DB::raw('tr_contract.tenan_id::integer'), '=', \DB::raw('ms_unit_owner.tenan_id::integer'))->groupBy('tr_contract.id');
 
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -172,20 +169,20 @@ class ContractController extends Controller
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
-            else $fetch->orderBy('ms_unit.unit_code');
+            // else $fetch->orderBy('ms_unit.unit_code');
 
             $fetch = $fetch->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['unit_code'] = $value->unit_code;
+                $temp['unit_code'] = $value->MsUnit->unit_code;
                 $temp['contr_code'] = $value->contr_code;
                 $temp['contr_no'] = $value->contr_no;
                 $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
                 $temp['contr_enddate'] = date('d/m/Y',strtotime($value->contr_enddate));
                 if($temp['contr_enddate'] == '31/12/2030') $temp['contr_enddate'] = '-';
-                $temp['tenan_name'] = $value->tenan_name;
+                $temp['tenan_name'] = $value->MsTenant->tenan_name;
                 if($value->contr_status == 'confirmed') $status = '<strong class="text-success">'.$value->contr_status.'</strong>';
                 else if($value->contr_status == 'cancelled' || $value->contr_status == 'closed') $status = '<strong class="text-danger">'.$value->contr_status.'</strong>';
                 else $status = '<strong>'.$value->contr_status.'</strong>';
@@ -243,7 +240,7 @@ class ContractController extends Controller
     public function citmDetail(Request $request){
         try{
             $contractId = $request->id;
-            $costdetail = TrContractInvoice::select('ms_cost_detail.id','ms_cost_detail.cost_id','ms_cost_detail.costd_unit','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code','tr_contract_invoice.continv_period','tr_contract_invoice.invtp_id')
+            $costdetail = TrContractInvoice::select('ms_cost_detail.id','ms_cost_detail.cost_id','ms_cost_detail.costd_unit','ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter','ms_cost_item.cost_name','ms_cost_item.cost_code','tr_contract_invoice.continv_period','tr_contract_invoice.invtp_id','tr_contract_invoice.order')
                 ->join('ms_invoice_type','tr_contract_invoice.invtp_id',"=",'ms_invoice_type.id')
                 ->join('ms_cost_detail','tr_contract_invoice.costd_id',"=",'ms_cost_detail.id')
                 ->join('ms_cost_item','ms_cost_detail.cost_id',"=",'ms_cost_item.id')
@@ -341,12 +338,13 @@ class ContractController extends Controller
             'mark_id' => !empty($request->input('mark_id')) ? $request->input('mark_id') : 0,
             'viracc_id' => 0,
             'const_id' => $request->input('const_id',0),
-            'unit_id' => $request->input('unit_id')
+            'unit_id' => $request->input('unit_id'),
         ];
         $costd_ids = $request->input('costd_is');
         $inv_type = $request->input('inv_type');
         $cost_name = $request->input('cost_name');
         $cost_code = $request->input('cost_code');
+        $orders = $request->input('order');
 
         $cost_id = $request->input('cost_id');
         $costd_name = $request->input('costd_name');
@@ -358,7 +356,7 @@ class ContractController extends Controller
         $periods = $request->input('period');
         $is_meter = $request->input('is_meter');
         try{
-            DB::transaction(function () use($input, $request, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $costd_ids, $inv_type_custom, $cost_name, $cost_code, $periods) {
+            DB::transaction(function () use($input, $request, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $costd_ids, $inv_type_custom, $cost_name, $cost_code, $periods, $orders) {
                 $contract = TrContract::create($input);
 
                 // insert
@@ -370,7 +368,8 @@ class ContractController extends Controller
                             'invtp_id' => $inv_type[$key],
                             'costd_id' => $costd_ids[$key],
                             'continv_amount' => $total,
-                            'continv_period' => $periods[$key]
+                            'continv_period' => $periods[$key],
+                            'order' => $orders[$key]
                         ];
                         TrContractInvoice::create($inputContractInv);
                     }
@@ -473,6 +472,7 @@ class ContractController extends Controller
 
         $cost_name = $request->input('cost_name');
         $cost_code = $request->input('cost_code');
+        $orders = $request->input('order');
         $inv_type_custom = $request->input('inv_type_custom');
 
         $costd_ids = $request->input('costd_id');
@@ -486,7 +486,7 @@ class ContractController extends Controller
         $periods = $request->input('period');
         $is_meter = $request->input('is_meter');
         try{
-            DB::transaction(function () use($cost_id, $costd_ids, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $contractID, $cost_name, $cost_code, $inv_type_custom, $periods){
+            DB::transaction(function () use($cost_id, $costd_ids, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $contractID, $cost_name, $cost_code, $inv_type_custom, $periods, $orders){
                 // delete all of cost detail of current contract id
                 TrContractInvoice::where('contr_id',$contractID)->delete();
                 // reinsert to cost detail and tr contract invoice
@@ -499,7 +499,8 @@ class ContractController extends Controller
                             'invtp_id' => $inv_type[$key],
                             'costd_id' => $costd_ids[$key],
                             'continv_amount' => $total,
-                            'continv_period' => $periods[$key]
+                            'continv_period' => $periods[$key],
+                            'order' => $orders[$key]
                         ];
                         TrContractInvoice::create($inputContractInv);
                     }

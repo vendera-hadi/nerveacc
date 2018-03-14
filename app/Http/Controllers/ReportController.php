@@ -243,7 +243,7 @@ class ReportController extends Controller
         }else{
             $data['template'] = 'report_ar_aging_detail';
         }
-    	
+
         if($ty == 1 && $tyt == 1){
             $data['title_r'] = 'Summary Outstanding Invoice';
         }else if($ty == 1 && $tyt == 2){
@@ -641,7 +641,7 @@ class ReportController extends Controller
         $data['title'] = "Payment History";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_payment';
-        
+
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.no_kwitansi','tr_invoice_paymhdr.invpayh_date','ms_payment_type.paymtp_name','ms_cash_bank.cashbk_name','tr_invoice_paymhdr.invpayh_checkno','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount','ms_tenant.tenan_name','tr_invoice.inv_post','ms_unit.unit_name')
                     ->join('tr_invoice_paymdtl','tr_invoice_paymhdr.id','=','tr_invoice_paymdtl.invpayh_id')
@@ -664,7 +664,7 @@ class ReportController extends Controller
         if($from) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','>=',$from);
         if($to) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','<=',$to);
 
-        if(!empty($unit_id)){ 
+        if(!empty($unit_id)){
             $fetch = $fetch->where('tr_contract.unit_id',$unit_id);
             $fetch2 = $fetch2->where('tr_contract.unit_id',$unit_id);
             $unit = MsUnit::find($unit_id);
@@ -672,12 +672,12 @@ class ReportController extends Controller
         }
         if(!empty($inv_number)) $fetch = $fetch->where(DB::raw("LOWER(inv_number)"),'like','%'.$inv_number.'%');
         if(!empty($post_status)) $fetch = $fetch->where('tr_invoice.inv_post',$post_flag);
-        if(!empty($paym_type_id)){ 
+        if(!empty($paym_type_id)){
             $fetch = $fetch->where('paymtp_code',$paym_type_id);
             $paymtype = MsPaymentType::find($paym_type_id);
             $data['tahun'] .= "Payment Type : ".$paymtype->paymtp_name."<br>";
         }
-        if(!empty($bank_id)){ 
+        if(!empty($bank_id)){
             $fetch = $fetch->where('cashbk_id',$bank_id);
             $bank = MsCashBank::find($bank_id);
             $data['tahun'] .= "Bank : ".$bank->cashbk_name."<br>";
@@ -685,7 +685,7 @@ class ReportController extends Controller
 
         $fetch = $fetch->get();
         $data['payments'] = $fetch;
-        
+
         $fetch2 = $fetch2->get();
         $data['inv'] = $fetch2;
 
@@ -710,7 +710,7 @@ class ReportController extends Controller
                     'Debet' =>number_format($data_ori[$i]['invpayd_amount'],2),
                     'Kredit' => ''
                     );
-                $total_debet = $total_debet + $data_ori[$i]['invpayd_amount'];       
+                $total_debet = $total_debet + $data_ori[$i]['invpayd_amount'];
             }
             for($k=0; $k<count($data_ori2); $k++){
                 $data[$i]=array(
@@ -723,8 +723,8 @@ class ReportController extends Controller
                     'Kredit' => number_format($data_ori2[$k]['inv_amount'],2)
                     );
                 $total_kredit = $total_kredit + $data_ori2[$k]['inv_amount'];
-                $i++;  
-            } 
+                $i++;
+            }
             $data[$i]=array(
                     'No Invoice / No Kwitansi' =>'',
                     'Tgl Invoice / Tgl Payment' =>'',
@@ -970,8 +970,8 @@ class ReportController extends Controller
         else if(!empty($coa) && !empty($tocoa) && $coa == $tocoa) $fetch = $fetch->where('tr_ledger.coa_code',$coa);
         else if(!empty($coa) && !empty($tocoa) && $coa > $tocoa) $fetch = $fetch->whereBetween('tr_ledger.coa_code',[$tocoa,$coa]);
         else if(!empty($coa) && !empty($tocoa) && $coa < $tocoa) $fetch = $fetch->whereBetween('tr_ledger.coa_code',[$coa,$tocoa]);
-        
-        if(!empty($keyword)){ 
+
+        if(!empty($keyword)){
             $fetch = $fetch->where(function($query) use($keyword){
                     $query->where(DB::raw("LOWER(ledg_description)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(tenan_name)"),'like','%'.$keyword.'%')->orWhere(DB::raw("LOWER(ledg_refno)"),'like','%'.$keyword.'%');
                 });
@@ -1045,14 +1045,15 @@ class ReportController extends Controller
         $data['title'] = "Year to Date General Ledger Report";
         $data['logo'] = MsCompany::first()->comp_image;
         $data['template'] = 'report_ytd_gl_template';
-        
-        
+
+
         // $data['ledger'] = $fetch;
 
         $from = strtotime($from);
         $to = strtotime($to);
         $balances = [];
         $ledger = [];
+        $array_excel = [];
         while($from < $to){
             $fetch = TrLedger::join('ms_master_coa','ms_master_coa.coa_code','=','tr_ledger.coa_code')
                             ->join('ms_journal_type','ms_journal_type.id','=','tr_ledger.jour_type_id')
@@ -1067,9 +1068,41 @@ class ReportController extends Controller
             $balances[date('Y-m',$from)] = !empty($log_gl->total) ? $log_gl->total : 0;
             $from = strtotime("+1 month", $from);
         }
+
         $data['ledger'] = $ledger;
         $data['balances'] = $balances;
-        return view('layouts.report_template2', $data);
+
+        if($pdf){
+            $data['type'] = 'pdf';
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('YTD_Report_'.date('d-m-y', $from).'_to_'.date('d-m-y', $to).'.pdf');
+        }else if($excel){
+            foreach($ledger as $key => $ledg_per_month){
+                $totalDebit = 0;
+                $totalCredit = 0;
+                foreach($ledg_per_month as $ledg){
+                    $totalDebit += $ledg->ledg_debit;
+                    $totalCredit += $ledg->ledg_credit;
+                    $array_excel[] = ['Date'=>date('d/m/Y',strtotime($ledg->ledg_date)),'Acc No'=>$ledg->coa_code,'Description'=>$ledg->ledg_description,'DEBET'=>"Rp. ".number_format($ledg->ledg_debit,2),'KREDIT'=>"Rp. ".number_format($ledg->ledg_credit,2),'Jurnal Type'=>$ledg->jour_type_prefix,'Balance'=>''];
+                }
+                $array_excel[] = ['Date'=>"<< ".date('F Y',strtotime(date($key."-01") ))." >>",'Acc No'=>'','Description'=>'','DEBET'=>"Rp. ".number_format($totalDebit,2),'KREDIT'=>"Rp. ".number_format($totalCredit,2),'Jurnal Type'=>'','Balance'=> $balances[$key] < 0 ? "(Rp. ".number_format($balances[$key],2).")" : "Rp. ".number_format($balances[$key],2)];
+            }
+
+            $data['type'] = 'excel';
+            $data = $array_excel;
+            $border = 'A1:K';
+            $tp = 'xls';
+            return Excel::create('YTD Report', function($excel) use ($data,$border) {
+                $excel->sheet('YTD Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
+            return view('layouts.report_template2', $data);
+        }
     }
 
     public function ledger_view(){
@@ -1149,9 +1182,9 @@ class ReportController extends Controller
             $tot_mutasi = $saldo_awal;
             foreach ($mutasi_history as $key => $value) {
                 if(trim($inv->coa_type) == 'DEBET'){
-                    $tot_mutasi =  $tot_mutasi  + (float)$value->ledg_debit - (float)$value->ledg_credit; 
+                    $tot_mutasi =  $tot_mutasi  + (float)$value->ledg_debit - (float)$value->ledg_credit;
                 }else{
-                    $tot_mutasi =  $tot_mutasi  + (float)$value->ledg_credit - (float)$value->ledg_debit; 
+                    $tot_mutasi =  $tot_mutasi  + (float)$value->ledg_credit - (float)$value->ledg_debit;
                 }
                 $tempInv['details'][] = [
                     'ledg_date' => $value->ledg_date,
@@ -1228,11 +1261,11 @@ class ReportController extends Controller
         foreach ($coa_code as $inv) {
             $mutasi = TrLedger::select(DB::raw("SUM(ledg_debit) AS total_debet"),DB::raw("SUM(ledg_credit) AS total_credit"))->where('coa_code',$inv->coa_code)->where('ledg_date','>=',$first_date)->where('ledg_date','<=',$last_date)->get();
             $mutasi_history = TrLedger::select(DB::raw("SUM(ledg_debit) AS total_mutasi_debet"),DB::raw("SUM(ledg_credit) AS total_mutasi_credit"))->where('coa_code',$inv->coa_code)->where('ledg_date','>=',$from)->where('ledg_date','<=',$to)->get();
-            
+
             if(trim($inv->coa_type) == 'DEBET'){
                 $saldo_awal = $inv->coa_beginning + $mutasi[0]->total_debet - $mutasi[0]->total_credit;
                 $saldo_akhir = $saldo_awal + $mutasi_history[0]->total_mutasi_debet - $mutasi_history[0]->total_mutasi_credit;
-                
+
             }else{
                 $saldo_awal = $inv->coa_beginning - $mutasi[0]->total_debet + $mutasi[0]->total_credit;
                 $saldo_akhir = $saldo_awal - $mutasi_history[0]->total_mutasi_debet + $mutasi_history[0]->total_mutasi_credit;
@@ -1367,7 +1400,7 @@ class ReportController extends Controller
         }else{
             $data['template'] = 'report_ap_aging_detail';
         }
-        
+
         if($ty == 1 && $tyt == 1){
             $data['title_r'] = 'Summary Outstanding Ap';
         }else if($ty == 1 && $tyt == 2){
@@ -1539,7 +1572,7 @@ class ReportController extends Controller
                             'ags180' => ($difference > $ag180 ? $value->total : 0)
                             ];
                     }
-                    
+
                     $result2 = TrApPaymentDetail::select('tr_ap_payment_dtl.amount','tr_ap_invoice_hdr.invoice_no',
                                 DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"))
                             ->join('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
@@ -1564,7 +1597,7 @@ class ReportController extends Controller
                             'ags180' => ($difference > $ag180 ? ($value->amount * -1) : 0)
                             ];
                     }
-                    
+
                     $data['invoices'][] = $tempInv;
                 }
             }

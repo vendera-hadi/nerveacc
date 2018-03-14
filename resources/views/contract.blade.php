@@ -63,10 +63,10 @@
                           <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                           <th field="unit_code" width="120" sortable="true">Unit</th>
                           <th field="tenan_name" width="120" sortable="true">Nama Tenant</th>
-                          
+
                           <th field="contr_startdate" width="120" sortable="true">Start Date</th>
                           <th field="contr_enddate" width="120" sortable="true">End Date</th>
-                          
+
                           <th field="contr_status" width="120" sortable="true">Status</th>
                           <th field="contr_terminate_date" width="120" sortable="true">Terminated Date</th>
                           <th field="action">Action</th>
@@ -74,8 +74,8 @@
                   </thead>
               </table>
               <!-- end table -->
-              
-              
+
+
             </div>
             <div class="tab-pane" id="tab_5">
                 <!-- template tabel -->
@@ -86,10 +86,10 @@
                           <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                           <th field="unit_code" width="120" sortable="true">Unit</th>
                           <th field="tenan_name" width="120" sortable="true">Nama Tenant</th>
-                          
+
                           <th field="contr_startdate" width="120" sortable="true">Start Date</th>
                           <th field="contr_enddate" width="120" sortable="true">End Date</th>
-                          
+
                           <th field="contr_status" width="120" sortable="true">Status</th>
                           <th field="contr_terminate_date" width="120" sortable="true">Terminated Date</th>
                           <th field="action">Action</th>
@@ -97,14 +97,14 @@
                   </thead>
               </table>
               <!-- end table -->
-              
-              
+
+
             </div>
             <!-- /.tab-pane -->
             <div class="tab-pane" id="tab_2">
                       <div id="contractStep1">
                       <form method="POST" id="formContract">
-                          
+
                           <div class="form-group">
                               <label>Billing Info Start Date</label>
                               <div class="input-group date">
@@ -153,8 +153,8 @@
                                       </div>
                                   </div>
                               </div>
-                              
-                          
+
+
                               <div class="col-xs-6">
                                   <div class="form-group">
                                       <label>Unit</label>
@@ -167,18 +167,18 @@
                                           </div><!-- /input-group -->
                                   </div>
                               </div>
-                              
-                              
-                          </div>
-                          
 
-                          
+
+                          </div>
+
+
+
                           <button type="submit" class="btn btn-default">Next</button>
                       </form>
                       </div>
 
                       <div id="contractStep2" style="display:none">
-                        
+
                       <!-- Form step 2 -->
                               <h4>Component Billing Detail</h4>
                 <div class="form-group">
@@ -207,9 +207,10 @@
                     <td width="85">Use Meter</td>
                     <td>Invoice Type</td>
                     <td>Billing Period</td>
+                    <td>Urutan di Faktur</td>
                     <td></td>
                   </tr>
-                  
+
                 </table>
                 <br><br>
                 <button type="button" id="backStep1">Back</button>
@@ -231,7 +232,7 @@
                  <!-- form -->
                   <form method="POST" id="formEditContract" style="display:none">
                       <input type="hidden" name="id">
-                      
+
                       <div class="form-group">
                           <label>Billing Info Start Date</label>
                           <div class="input-group date">
@@ -272,7 +273,7 @@
                                   <div class="form-group">
                                       <label>Tenant</label>
                                       <div class="input-group">
-                                          
+
                                           <input type="hidden" name="tenan_id" id="txtTenanEditId" required>
                                           <input type="text" class="form-control" id="txtTenanEdit" disabled>
                                           <span class="input-group-btn">
@@ -281,7 +282,7 @@
                                       </div>
                                   </div>
                               </div>
-                              
+
                           <div class="col-xs-6">
                               <div class="form-group">
                                   <label>Unit</label>
@@ -296,7 +297,7 @@
                               </div>
                           </div>
 
-                          
+
                       </div>
                       <button type="submit" class="btn btn-default">Submit</button>
                   </form>
@@ -306,7 +307,7 @@
 
             <!-- /.tab-pane -->
             <div class="tab-pane" id="tab_4">
-                
+
             </div>
 
           </div>
@@ -314,11 +315,11 @@
 
         </div>
         <!-- Tabs -->
-     
+
 
 
               <!-- content -->
-          
+
               <!-- Modal extra -->
               <div id="detailModal" class="modal fade" role="dialog">
                 <div class="modal-dialog">
@@ -346,7 +347,7 @@
 
                   <!-- Modal content-->
                   <div class="modal-content">
-                    
+
                     <div class="modal-body" id="unitModalContent">
                     </div>
                     <div class="modal-footer">
@@ -357,7 +358,7 @@
                 </div>
               </div>
               <!-- End Modal -->
-              
+
 
               <!-- modal form -->
               <div id="editModal" class="modal fade" role="dialog">
@@ -370,7 +371,7 @@
                       <h4 class="modal-title">Edit Billing Info</h4>
                     </div>
                     <div class="modal-body">
-                      
+
                     </div>
                     <div class="modal-footer">
                       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -407,7 +408,7 @@
                     page: params.page
                   };
                 },
-                
+
                 cache: true
               },
               escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
@@ -425,7 +426,7 @@
                     page: params.page
                   };
                 },
-                
+
                 cache: true
               },
               escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
@@ -445,7 +446,7 @@
                     page: params.page
                   };
                 },
-                
+
                 cache: true
               },
               escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
@@ -463,7 +464,7 @@
         //             page: params.page
         //           };
         //         },
-                
+
         //         cache: true
         //       },
         //       escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
@@ -514,14 +515,14 @@
             costDetail = $('#selectCostItem').val();
             costDetailName = $('#selectCostItem option:selected').text();
             $('.costdid').each(function(){
-                if($(this).val() == costDetail){ 
+                if($(this).val() == costDetail){
                   $.messager.alert('Warning', "Component Billing already exist in the list below");
                   flag = true;
                 }
             });
             if(!flag){
               $.post('{{route('cost_item.getDetail')}}', {id: costDetail}, function(result){
-                  $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" class="costdid" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><select name="period[]" class="form-control"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="4">4 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');              
+                  $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" class="costdid" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><select name="period[]" class="form-control"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="4">4 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></td><td><input type="number" name="order[]" class="order" value="0" style="width:60px"></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
               });
             }
         });
@@ -582,7 +583,7 @@
             dg.datagrid('enableFilter');
         });
 
-        var tenantableflag = 0;        
+        var tenantableflag = 0;
         $('.tenan_tab').click(function(){
             if(tenantableflag == 0){
               setTimeout(function(){
@@ -597,11 +598,11 @@
                   dg2.datagrid('enableFilter');
               },500);
               tenantableflag = 1;
-              console.log('test');  
+              console.log('test');
             }
         });
-            
-        
+
+
 
         $(document).delegate('.getDetail','click',function(){
             $('#detailModalContent').html('<center><img src="{{ asset('img/loading.gif') }}"><p>Loading ...</p></center>');
@@ -611,7 +612,7 @@
             });
         });
 
-        var currenturl, tenanid; 
+        var currenturl, tenanid;
         $('#chooseUnitButton').click(function(){
             $('#unitModal').modal("show");
             currenturl = '{{route('unit.popup')}}';
@@ -676,9 +677,9 @@
             var tenanname = $('input[name="tenant"]:checked').data('name');
             var isowner = $('input[name="tenant"]:checked').data('owned');
             if(isowner != null && isowner != ""){
-              $('input[name=contr_enddate]').val(''); 
+              $('input[name=contr_enddate]').val('');
               $('input[name=contr_enddate]').attr('disabled','disabled');
-            }else{ 
+            }else{
               $('input[name=contr_enddate]').removeAttr('disabled');
             }
             $('#txtTenanId').val(tenanid);
@@ -747,7 +748,7 @@
             $('#unitModalContent').text('');
             $('#unitModal').modal("hide");
         });
-        
+
         // popup tenant
 
         // edit
@@ -757,7 +758,7 @@
             $('#formEditContract').hide();
             $.post('{{route('contract.ctrdetail')}}',{id:id},function(result){
                 if(result.errorMsg){ $.messager.alert('Warning',result.errorMsg); }
-                else{ 
+                else{
                   console.log(result);
                     $('#editLoading').hide();
                     $('#formEditContract').show();
@@ -767,7 +768,7 @@
                     // form.find('input[name=contr_code]').val(data.contr_code);
                     // form.find('input[name=contr_no]').val(data.contr_no);
                     form.find('input[name=contr_startdate]').val(data.contr_startdate);
-                    
+
                     form.find('input[name=contr_bast_date]').val(data.contr_enddate);
                     form.find('input[name=contr_bast_by]').val(data.contr_bast_by);
                     form.find('textarea[name=contr_note]').val(data.contr_note);
@@ -778,10 +779,10 @@
                     form.find('#txtVAEdit').val(data.virtual_account);
                     console.log(data.virtual_account, 'VA');
                     form.find('#txtCrUnitId').val(data.unit_id);
-                    if(data.owner == null){ 
+                    if(data.owner == null){
                       form.find('input[name=contr_enddate]').removeAttr('disabled');
                       form.find('input[name=contr_enddate]').val(data.contr_enddate);
-                    }else{ 
+                    }else{
                       form.find('input[name=contr_enddate]').attr('disabled','disabled');
                     }
                 }

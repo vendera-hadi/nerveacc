@@ -21,7 +21,7 @@ class CostItemController extends Controller
         try{
             // params
             $page = $request->page;
-            $perPage = $request->rows; 
+            $perPage = $request->rows;
             $page-=1;
             $offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -78,7 +78,7 @@ class CostItemController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function insert(Request $request){
@@ -88,10 +88,10 @@ class CostItemController extends Controller
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
             MsCostItem::create($input);
-            return response()->json(['success'=>true]);        
+            return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function update(Request $request){
@@ -103,21 +103,22 @@ class CostItemController extends Controller
             return MsCostItem::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function delete(Request $request){
         try{
             $id = $request->id;
-            if($id == 4 || $id ==5 || $id ==6){
+            $exceptions = [1,2,4,5,6,9,10];
+            if(in_array($id, $exceptions)){
                 return response()->json(['errorMsg'=>'Sorry This Item Cannot be Deleted']);
             }else{
                 MsCostItem::destroy($id);
                 return response()->json(['success'=>true]);
-            }     
+            }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getDetail(Request $request){
@@ -134,7 +135,7 @@ class CostItemController extends Controller
         try{
             $id = $request->id;
             $count = MsCostDetail::count();
-            $fetch = MsCostDetail::select('*')->where('cost_id',$id)->get();
+            $fetch = MsCostDetail::where('cost_id',$id)->get();
             $count = $fetch->count();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
@@ -147,13 +148,15 @@ class CostItemController extends Controller
                 $temp['costd_burden'] = $value->costd_burden;
                 $temp['costd_admin'] = $value->costd_admin;
                 $temp['daya'] = $value->daya;
+                $temp['value_type'] = $value->value_type;
+                $temp['percentage'] = $value->percentage;
                 $temp['costd_ismeter'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function getOptionsCoa(){
@@ -168,6 +171,6 @@ class CostItemController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 }

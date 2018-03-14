@@ -107,6 +107,30 @@ class MsCostItemSeeder extends Seeder
             'is_sinking_fund' => FALSE,
             'created_at' => date("Y-m-d H:i:s"),
             'updated_at' => date("Y-m-d H:i:s"),
+        ],
+        [
+            'cost_code' => 'STAMP',
+            'cost_name' => 'MATERAI',
+            'cost_isactive' => TRUE,
+            'created_by' => 1,
+            'updated_by' => 1,
+            'is_service_charge' => FALSE,
+            'is_insurance' => FALSE,
+            'is_sinking_fund' => FALSE,
+            'created_at' => date("Y-m-d H:i:s"),
+            'updated_at' => date("Y-m-d H:i:s"),
+        ],
+        [
+            'cost_code' => 'ADM',
+            'cost_name' => 'ADMINISTRASI',
+            'cost_isactive' => TRUE,
+            'created_by' => 1,
+            'updated_by' => 1,
+            'is_service_charge' => FALSE,
+            'is_insurance' => FALSE,
+            'is_sinking_fund' => FALSE,
+            'created_at' => date("Y-m-d H:i:s"),
+            'updated_at' => date("Y-m-d H:i:s"),
         ]
         ]);
     }

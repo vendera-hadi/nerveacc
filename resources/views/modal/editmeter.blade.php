@@ -42,6 +42,8 @@
               <input type="hidden" name="meter_admin[]" value="{{$cdt->meter_admin}}">
               <input type="hidden" name="cost_id[]" value="{{$cdt->cost_id}}">
               <input type="hidden" name="daya[]" value="{{$cdt->daya}}">
+              <input type="hidden" name="percentage[]" value="{{empty($cdt->percentage) ? 0 : $cdt->percentage }}">
+              <input type="hidden" name="value_type[]" value="{{$cdt->value_type}}">
               <td>{{$cdt->unit_code}}</td>
               <td>{{$cdt->costd_name}}</td>
               <td>{{$cdt->daya}}</td>

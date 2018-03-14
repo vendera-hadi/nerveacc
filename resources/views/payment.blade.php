@@ -334,15 +334,16 @@
               },
               escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
               minimumInputLength: 0
-        }).on("select2:selecting", function(e) {
-            var contractId = $(".choose-contract").val();
-            $.post('{{route('tenant.outstanding')}}', {contract_id:contractId}, function(data){
-                console.log(data);
-                if(data.length > 0){
-                  alert('Masih ada '+data.length+' Invoice yang belum terbayar untuk tenant ini');
-                }
-            });
-        });
+        })
+        // .on("select2:selecting", function(e) {
+        //     var contractId = $(".choose-contract").val();
+        //     $.post('{{route('tenant.outstanding')}}', {contract_id:contractId}, function(data){
+        //         console.log(data);
+        //         if(data.length > 0){
+        //           alert('Masih ada '+data.length+' Invoice yang belum terbayar untuk tenant ini');
+        //         }
+        //     });
+        // });
 
     $(".contrId").change(function(){
         var url = "{{route('payment.get_invoice')}}";

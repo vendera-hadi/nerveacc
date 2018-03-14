@@ -151,9 +151,10 @@ class InvoiceController extends Controller
     public function getdetail(Request $request){
         try{
             $inv_id = $request->id;
+            $invoiceHd = TrInvoice::find($inv_id);
             $nilai = TrInvoiceDetail::select('costd_id')->where('inv_id',$inv_id)->get();
             $cost_id = $nilai[0]->costd_is;
-            $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name','ms_cost_detail.costd_unit')
+            $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.costd_id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name','ms_cost_detail.costd_unit')
                 ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
                 ->leftJoin('ms_cost_detail','tr_invoice_detail.costd_id',"=",'ms_cost_detail.id')
                 ->leftJoin('tr_meter','tr_meter.id',"=",'tr_invoice_detail.meter_id')
@@ -166,7 +167,14 @@ class InvoiceController extends Controller
                 $result[$key]->meter_start = (int)$value->meter_start;
                 $result[$key]->meter_end = (int)$value->meter_end;
                 $result[$key]->meter_used = !empty($value->meter_used) ? (int)$value->meter_used." ".$value->costd_unit : (int)$value->meter_used;
+                // get order
+                $ctrInv = TrContractInvoice::where('contr_id',$invoiceHd->contr_id)->where('costd_id',$value->costd_id)->first();
+                $result[$key]->order = !empty(@$ctrInv->order) ? $ctrInv->order : 255;
             }
+            $result = $result->toArray();
+            usort($result, function($a, $b) {
+                    return $a['order'] - $b['order'];
+                });
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -515,10 +523,10 @@ class InvoiceController extends Controller
         $month = $request->input('month');
         // bulan dikurang 1 karna generate invoice utk bulan kemarin
         $year = $request->input('year');
-        if($month == 1) $year = $year-1;
+        // if($month == 1) $year = $year-1;
 
-        if($month == 1) $month = 12;
-        else $month = $month - 1;
+        // if($month == 1) $month = 12;
+        // else $month = $month - 1;
         $month = str_pad($month, 2, 0, STR_PAD_LEFT);
         // BUAT DATE LIMITATION PERIOD METER
         $tempTimeStart = implode('-', [$year,$month,'01']);
@@ -528,7 +536,8 @@ class InvoiceController extends Controller
         if(!empty($stampData)) $stampCoa = $stampData->cost_coa_code;
         else $stampCoa = 21400;
 
-        $maxTime = date('Y-m-d',strtotime("first day of previous month"));
+        // $maxTime = date('Y-m-d',strtotime("first day of previous month"));
+        $maxTime = date('Y-m-d',strtotime("first day of this month"));
         // invoice dpt di generate paling lama bulan sekarang, generate utk bulan kmaren
         if($tempTimeStart > $maxTime) return response()->json(['errorMsg' => 'Invoice can\'t be generated more than this month']);
 
@@ -734,12 +743,33 @@ class InvoiceController extends Controller
                                         $npp_building = $companyData->comp_npp_insurance;
                                         // npp unit  = lust unit per luas total unit
                                         $npp_unit =  $currUnit->unit_sqrt / $companyData->comp_sqrt;
-                                        $note = $value->costd_name." (Rp. ".number_format($value->costdetail->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
+                                        $note = $value->costdetail->costd_name." (Rp. ".number_format($value->costdetail->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
                                         // rumus cost + burden + admin
                                         $smount = $value->costdetail->costd_rate / $npp_building * $npp_unit;
                                     }else{
+                                        // RUMUS KHUSUS PERIODE
+                                        $usingRumusPeriod = true;
+                                        $period = $value->continv_period;
+                                        $period_classifications = [];
+                                        for($i=1; $i<=12; $i++){
+                                            $temp[] = $i;
+                                            if($i%$period == 0){
+                                                $period_classifications[] = $temp;
+                                                $temp = [];
+                                            }
+                                        }
+                                        $currentmonth = date('m',strtotime($tempTimeStart));
+                                        $currentmonth = (int)$currentmonth;
+                                        foreach ($period_classifications as $pval) {
+                                            if(in_array($currentmonth, $pval)){
+                                                $first = reset($pval);
+                                                $last = end($pval);
+                                                $monthGapPrev = $currentmonth - $first;
+                                                $monthGapNext = $last - $currentmonth;
+                                            }
+                                        }
                                         // ELSE
-                                        $note = $value->costd_name." Periode ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
+                                        $note = $value->costdetail->costd_name." Periode ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$monthGapNext." months"));
                                         // rumus cost + burden + admin
                                         $amount = $value->costdetail->costd_rate + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
                                     }
@@ -922,13 +952,22 @@ class InvoiceController extends Controller
                                     ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                     ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant','InvoiceType')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
-                $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
+                $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_invoice_detail.costd_id','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
                 ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
                 ->leftJoin('ms_cost_detail','tr_invoice_detail.costd_id',"=",'ms_cost_detail.id')
                 ->leftJoin('tr_meter','tr_meter.id',"=",'tr_invoice_detail.meter_id')
                 ->leftJoin('tr_period_meter','tr_period_meter.id',"=",'tr_meter.prdmet_id')
                 ->where('tr_invoice_detail.inv_id',$inv['id'])
                 ->get()->toArray();
+                // jabarin detail dan sisipkan order
+                foreach ($result as $key2 => $detail) {
+                    $ctrInv = TrContractInvoice::where('contr_id',$inv['contr_id'])->where('costd_id',$detail['costd_id'])->first();
+                    $result[$key2]['order'] = !empty(@$ctrInv->order) ? $ctrInv->order : 255;
+                }
+                usort($result, function($a, $b) {
+                    return $a['order'] - $b['order'];
+                });
+
                 $invoice_data[$key]['details'] = $result;
                 $terbilang = $this->terbilang($inv['inv_amount']);
                 $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
@@ -977,12 +1016,22 @@ class InvoiceController extends Controller
                 $total += $value->invpayd_amount;
                 // get detail invoice
                 $temp = [];
+                $invHd = TrInvoice::find($value->id);
                 $inv_details = TrInvoiceDetail::where('inv_id',$value->id)->get();
+                // jabarin detail dan sisipkan order
                 if(count($inv_details) > 0){
-                    foreach ($inv_details as $value2) {
-                        $note = explode('<br>', $value2->invdt_note);
+                    foreach ($inv_details as $key2 => $value2) {
+                        $ctrInv = TrContractInvoice::where('contr_id',$invHd->contr_id)->where('costd_id', $value2->costd_id)->first();
+                        $inv_details[$key2]['order'] = !empty(@$ctrInv->order) ? $ctrInv->order : 255;
+                    }
+                    $inv_details = $inv_details->toArray();
+                    usort($inv_details, function($a, $b) {
+                        return $a['order'] - $b['order'];
+                    });
+                    foreach ($inv_details as $key2 => $value2) {
+                        $note = explode('<br>', $value2['invdt_note']);
                         if(count($note) > 1) $temp[] = @$note[0];
-                        else $temp[] = $value2->invdt_note;
+                        else $temp[] = $value2['invdt_note'];
                     }
                 }
                 $paymentDetails[$key]->details = $temp;
@@ -1279,13 +1328,21 @@ class InvoiceController extends Controller
                                     ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                     ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
-                $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
+                $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.costd_id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
                 ->join('tr_invoice','tr_invoice.id',"=",'tr_invoice_detail.inv_id')
                 ->leftJoin('ms_cost_detail','tr_invoice_detail.costd_id',"=",'ms_cost_detail.id')
                 ->leftJoin('tr_meter','tr_meter.id',"=",'tr_invoice_detail.meter_id')
                 ->leftJoin('tr_period_meter','tr_period_meter.id',"=",'tr_meter.prdmet_id')
                 ->where('tr_invoice_detail.inv_id',$inv['id'])
                 ->get()->toArray();
+                // jabarin detail dan sisipkan order
+                foreach ($result as $key2 => $detail) {
+                    $ctrInv = TrContractInvoice::where('contr_id',$inv['contr_id'])->where('costd_id',$detail['costd_id'])->first();
+                    $result[$key2]['order'] = !empty(@$ctrInv->order) ? $ctrInv->order : 255;
+                }
+                usort($result, function($a, $b) {
+                    return $a['order'] - $b['order'];
+                });
                 $invoice_data[$key]['details'] = $result;
             }
             $total = $invoice_data[0]['inv_outstanding'];

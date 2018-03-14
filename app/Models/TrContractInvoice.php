@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TrContractInvoice extends Model
 {
    protected $table ='tr_contract_invoice';
-   protected $fillable =['continv_amount','invtp_id','costd_id','contr_id','continv_period','continv_start_inv','continv_next_inv'];
+   protected $fillable =['continv_amount','invtp_id','costd_id','contr_id','continv_period','continv_start_inv','continv_next_inv', 'order'];
    public $timestamps  = false;
 
    public function costdetail()

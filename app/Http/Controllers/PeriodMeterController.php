@@ -192,12 +192,14 @@ class PeriodMeterController extends Controller
         try{
             $id = $request->id;
             $currentPrd = TrPeriodMeter::find($id);
-            $electric = TrMeter::select('tr_meter.*','ms_cost_detail.costd_rate','tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','ms_cost_detail.daya','ms_cost_detail.cost_id')
+            $electric = TrMeter::select('tr_meter.*','ms_cost_detail.costd_rate','tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','ms_cost_detail.daya','ms_cost_detail.cost_id','ms_cost_detail.value_type','ms_cost_detail.percentage')
                     ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
                     ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
                     ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
                     ->where('prdmet_id',$id)
                     ->where('ms_cost_detail.cost_id',1)
+                    ->where('tr_contract.contr_startdate','<=',$currentPrd->prdmet_end_date)
+                    ->where('tr_contract.contr_status','confirmed')
                     ->orderBy('ms_unit.unit_code','asc')
                     ->orderBy('ms_cost_detail.costd_name','asc')
                     ->get();
@@ -207,6 +209,8 @@ class PeriodMeterController extends Controller
                     ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
                     ->where('prdmet_id',$id)
                     ->where('ms_cost_detail.cost_id',2)
+                    ->where('tr_contract.contr_startdate','<=',$currentPrd->prdmet_end_date)
+                    ->where('tr_contract.contr_status','confirmed')
                     ->orderBy('ms_unit.unit_code','asc')
                     ->orderBy('ms_cost_detail.costd_name','asc')
                     ->get();
@@ -217,9 +221,85 @@ class PeriodMeterController extends Controller
         }
     }
     //KHUSUS CITYLOFT
+    // public function meterdetailUpdate(Request $request){
+    //     $id = $request->input('tr_meter_id');
+    //     // echo count($id); die();
+    //     $meter_end = $request->input('meter_end');
+    //     $meter_start = $request->input('meter_start');
+    //     $meter_rate = $request->input('meter_rate');
+    //     $meter_burden = $request->input('meter_burden');
+    //     $meter_admin = $request->input('meter_admin');
+    //     $cost_id = $request->input('cost_id');
+    //     $daya = $request->input('daya');
+    //     $period_meter_id = $request->input('prd_id');
+    //     $trmeter = TrPeriodMeter::find($period_meter_id);
+    //     $log_period = date('Y-m-01',strtotime($trmeter->prdmet_end_date));
+
+    //     try{
+    //         $totalUsedListrik = 0;
+    //         $totalUsedAir = 0;
+    //         DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin, $cost_id, $daya, $log_period, $totalUsedAir, $totalUsedListrik){
+    //             foreach ($id as $key => $value) {
+    //                 $meter_used = ($meter_end[$key] - $meter_start[$key]);
+    //                 // echo "test: ".$key."\n";
+    //                 if($cost_id[$key] == '1'){
+    //                     $totalUsedListrik += $meter_used;
+    //                     //CEK MIN 40 JAM PEMAKAIAN LISTRIK
+    //                     $min = 40 * $daya[$key];
+    //                     $elec_cost = $meter_used *  $meter_rate[$key];
+    //                     if($meter_used > $min){
+    //                         $meter_cost = $elec_cost;
+    //                     }else{
+    //                         $meter_cost = $min * $meter_rate[$key];
+    //                     }
+
+    //                     $bpju = (0.03 * $meter_cost);
+    //                     $total = $meter_cost + $bpju;
+    //                     $input = [
+    //                         'meter_end' => $meter_end[$key],
+    //                         'meter_used' => $meter_used,
+    //                         'meter_cost' => $meter_cost,
+    //                         'meter_admin' => $meter_admin,
+    //                         'other_cost' => $bpju,
+    //                         'total' => $total
+    //                     ];
+    //                 }else{
+    //                     // echo $meter_used; die();
+    //                     $totalUsedAir += $meter_used;
+    //                     $bpju = 0;
+    //                     $meter_cost = $meter_used * $meter_rate[$key];
+    //                     $total = $meter_cost + $meter_burden[$key] + $meter_admin[$key] + $bpju;
+    //                     $input = [
+    //                         'meter_end' => $meter_end[$key],
+    //                         'meter_used' => $meter_used,
+    //                         'meter_cost' => $meter_cost,
+    //                         'other_cost' => $bpju,
+    //                         'total' => $total
+    //                     ];
+    //                 }
+
+    //                 TrMeter::find($id[$key])->update($input);
+    //             }
+    //             // echo "Total listrik : ".$totalUsedListrik;
+    //             // echo ", Total air : ".$totalUsedAir;
+    //             // $log = ListrikAirLog::where('periode',$log_period)->first();
+    //             // if(!$log){
+    //             //     $log = new ListrikAirLog;
+    //             //     $log->periode = $log_period;
+    //             // }
+    //             // $log->listrik = $totalUsedListrik;
+    //             // $log->air = $totalUsedAir;
+    //             // $log->save();
+    //         });
+    //     }catch(\Exception $e){
+    //         return response()->json(['errorMsg' => $e->getMessage()]);
+    //     }
+    //     return ['status' => 1, 'message' => 'Update Success', 'listrik' => $totalUsedListrik, 'air' => $totalUsedAir];
+    // }
+
+    // ORIGINAL
     public function meterdetailUpdate(Request $request){
         $id = $request->input('tr_meter_id');
-        // echo count($id); die();
         $meter_end = $request->input('meter_end');
         $meter_start = $request->input('meter_start');
         $meter_rate = $request->input('meter_rate');
@@ -227,89 +307,15 @@ class PeriodMeterController extends Controller
         $meter_admin = $request->input('meter_admin');
         $cost_id = $request->input('cost_id');
         $daya = $request->input('daya');
-        $period_meter_id = $request->input('prd_id');
-        $trmeter = TrPeriodMeter::find($period_meter_id);
-        $log_period = date('Y-m-01',strtotime($trmeter->prdmet_end_date));
-
+        $value_type = $request->input('value_type');
+        $percentage = $request->input('percentage');
         try{
-            $totalUsedListrik = 0;
-            $totalUsedAir = 0;
-            DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin, $cost_id, $daya, $log_period, $totalUsedAir, $totalUsedListrik){
-                foreach ($id as $key => $value) {
-                    $meter_used = ($meter_end[$key] - $meter_start[$key]);
-                    // echo "test: ".$key."\n";
-                    if($cost_id[$key] == '1'){
-                        $totalUsedListrik += $meter_used;
-                        //CEK MIN 40 JAM PEMAKAIAN LISTRIK
-                        $min = 40 * $daya[$key];
-                        $elec_cost = $meter_used *  $meter_rate[$key];
-                        if($meter_used > $min){
-                            $meter_cost = $elec_cost;
-                        }else{
-                            $meter_cost = $min * $meter_rate[$key];
-                        }
-
-                        $bpju = (0.03 * $meter_cost);
-                        $total = $meter_cost + $bpju;
-                        $input = [
-                            'meter_end' => $meter_end[$key],
-                            'meter_used' => $meter_used,
-                            'meter_cost' => $meter_cost,
-                            'meter_admin' =>$biaya_admin,
-                            'other_cost' => $bpju,
-                            'total' => $total
-                        ];
-                    }else{
-                        // echo $meter_used; die();
-                        $totalUsedAir += $meter_used;
-                        $bpju = 0;
-                        $meter_cost = $meter_used * $meter_rate[$key];
-                        $total = $meter_cost + $meter_burden[$key] + $meter_admin[$key] + $bpju;
-                        $input = [
-                            'meter_end' => $meter_end[$key],
-                            'meter_used' => $meter_used,
-                            'meter_cost' => $meter_cost,
-                            'other_cost' => $bpju,
-                            'total' => $total
-                        ];
-                    }
-
-                    TrMeter::find($id[$key])->update($input);
-                }
-                // echo "Total listrik : ".$totalUsedListrik;
-                // echo ", Total air : ".$totalUsedAir;
-                // $log = ListrikAirLog::where('periode',$log_period)->first();
-                // if(!$log){
-                //     $log = new ListrikAirLog;
-                //     $log->periode = $log_period;
-                // }
-                // $log->listrik = $totalUsedListrik;
-                // $log->air = $totalUsedAir;
-                // $log->save();
-            });
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
-        }
-        return ['status' => 1, 'message' => 'Update Success', 'listrik' => $totalUsedListrik, 'air' => $totalUsedAir];
-    }
-    /*
-    ORIGINAL
-    public function meterdetailUpdate(Request $request){
-        $id = $request->input('tr_meter_id');
-        $meter_end = $request->input('meter_end');
-        $meter_start = $request->input('meter_start');
-        $meter_rate = $request->input('meter_rate');
-        $meter_burden = $request->input('meter_burden');
-        $meter_admin = $request->input('meter_admin');
-        $cost_id = $request->input('cost_id');
-        $daya = $request->input('daya');
-        try{
-            DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin, $cost_id, $daya){
+            DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin, $cost_id, $daya, $value_type, $percentage){
                 foreach ($id as $key => $value) {
                     $meter_used = ($meter_end[$key] - $meter_start[$key]);
                     if($cost_id[$key] == '1'){
                         //CEK MIN 40 JAM PEMAKAIAN LISTRIK
-                        $min = 40 * ($daya[$key]/1000) * $meter_rate[$key];
+                        $min = 40 * $daya[$key] * $meter_rate[$key];
                         $elec_cost = $meter_used *  $meter_rate[$key];
                         if($elec_cost > $min){
                             $meter_cost = $elec_cost;
@@ -317,7 +323,20 @@ class PeriodMeterController extends Controller
                             $meter_cost = $min;
                         }
                         $bpju = (0.03 * $meter_cost);
-                        $total = ($meter_cost + $bpju);
+                        $subtotal = $meter_cost + $bpju;
+                        // Tambah public area
+                        if($value_type[$key] == 'percent'){
+                            $public_area = $percentage[$key] / 100 * $subtotal;
+                        }else{
+                            $public_area = $percentage[$key];
+                            if(empty($public_area)) $public_area = 0;
+                        }
+                        $total = $subtotal + $meter_admin[$key] + $public_area;
+                        // materai
+                        $materai = 6000;
+                        $total += $materai;
+                        $grossup = $total / 0.9 * 0.1;
+                        $total += $grossup;
                     }else{
                         $bpju = 0;
                         $meter_cost = $meter_used * $meter_rate[$key];
@@ -338,7 +357,7 @@ class PeriodMeterController extends Controller
         }
         return ['status' => 1, 'message' => 'Update Success'];
     }
-    */
+
     public function approve(Request $request){
         try{
             $id = $request->id;

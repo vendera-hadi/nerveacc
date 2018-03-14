@@ -35,7 +35,7 @@ class HomeController extends Controller
     public function index(Request $request)
     {
         $year = $request->input('year', date('Y'));
-        $data['tenant'] = TrContract::where('contr_terminate_date',NULL)->count();
+        $data['tenant'] = TrContract::where('contr_terminate_date',NULL)->where('contr_status','confirmed')->where('contr_iscancel',false)->count();
         $data['unit'] = MsUnit::count();
         $data['out'] = TrInvoice::select(DB::raw("SUM(inv_outstanding) AS ttl"))->where('inv_post',TRUE)->get();
         $data['inv'] = TrInvoice::where('inv_post',TRUE)->where(\DB::raw('date_part(\'year\', inv_date)'),'=',$year)->where(\DB::raw('date_part(\'month\', inv_date)'),'=',date('m'))->count();

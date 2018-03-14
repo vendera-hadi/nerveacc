@@ -5,11 +5,11 @@
             <tr>
                 <th width="10" ></th>
                 <th width="100">No.Invoice</th>
-                <th width="100">Unit</th>  
+                <th width="100">Unit</th>
                 <th width="50">Tgl Invoice</th>
                 <th width="50">Jatuh Tempo</th>
                 <th width="80">Outstanding Amount</th>
-                <th width="100">Terbayar</th>  
+                <th width="100">Terbayar</th>
             </tr>
         </thead>
         <tbody>
@@ -34,7 +34,7 @@
                     <td><?php echo date('d/m/y', $inv_date);?></td>
                     <td><?php echo date('d/m/y', $inv_duedate);?></td>
                     <td><?php echo 'Rp. '.number_format($value['inv_outstanding']);?></td>
-                    <td><input type="text" name="data_payment[totalpay][{{$inv_id}}]" value="{{floor($value['inv_outstanding'])}}" maxlength="{{floor($value['inv_outstanding'])}}" minlength="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
+                    <td><input type="number" name="data_payment[totalpay][{{$inv_id}}]" value="{{floor($value['inv_outstanding'])}}" max="{{floor($value['inv_outstanding'])}}" min="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
                 </tr>
                 @endforeach
             @else
@@ -46,7 +46,7 @@
             <tr>
                 <td colspan="6"><span class="pull-right">Grand Total</span></td>
                 <td>Rp. <span id="totalCash">0</span></td>
-            </tr> 
+            </tr>
         </tbody>
     </table>
 </div>
@@ -60,7 +60,7 @@ function reCount(){
             total = total + parseFloat($(this).val());
         }
     });
-    $('#totalCash').text(addCommas(total)); 
+    $('#totalCash').text(addCommas(total));
 }
 function addCommas(nStr)
 {
@@ -74,8 +74,25 @@ function addCommas(nStr)
     }
     return x1 + x2;
 }
-$('.paid-check,.paid-amount').change(function(){
+$('.paid-check').change(function(){
     reCount();
 });
+$('.paid-amount').change(function(){
+    checkPaidAmount($(this));
+    reCount();
+});
+function checkPaidAmount(target)
+{
+    var max = parseInt(target.attr('max'));
+    var value = parseInt(target.val());
+    if(!$.isNumeric(target.val())){
+        alert('harap masukkan format angka yang benar');
+        target.val(max);
+    }
+    if(value > max){
+        alert('pembayaran maksimal sejumlah outstanding saat ini');
+        target.val(max);
+    }
+}
 </script>
 @endif

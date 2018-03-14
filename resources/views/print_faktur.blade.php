@@ -162,11 +162,7 @@ table tr td{font-size:9pt;}
                 <?php
                     }
                 ?>
-                <tr>
 
-                    <td style="padding-left:15px; padding-right:10px">BIAYA ADMINISTRASI</td>
-                    <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;"></td>
-                </tr>
                 <tr>
 
                     <td>&nbsp;</td>

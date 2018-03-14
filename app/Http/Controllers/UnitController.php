@@ -344,7 +344,8 @@ class UnitController extends Controller
         if(!empty($tenan_id)){
             // get owned unit
             $owned_units = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
-                        ->join('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id')->where('ms_unit_owner.tenan_id',$tenan_id)->get();
+                        ->join('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id')
+                        ->where('ms_unit_owner.tenan_id',$tenan_id)->get();
         }else{
             $owned_units = [];
         }

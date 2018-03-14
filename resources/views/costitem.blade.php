@@ -44,7 +44,7 @@
             </thead>
         </table>
         <!-- end table -->
-        
+
         <!-- icon2 atas table -->
         <div id="toolbar">
             @if(Session::get('role')==1 || in_array(45,Session::get('permissions')))
@@ -58,7 +58,7 @@
             @endif
         </div>
         <!-- end icon -->
-    
+
         <!-- hidden form buat create edit -->
         <div id="dlg" class="easyui-dialog" style="width:60%"
                 closed="true" buttons="#dlg-buttons">
@@ -94,6 +94,7 @@
         <div id="dlg2" class="easyui-dialog" style="width:60%"
                 closed="true" buttons="#dlg-buttons">
             <form id="fm2" method="post" novalidate style="margin:0;padding:20px 50px">
+                <input type="hidden" id="chosen-costitem" name="cost_id">
                 <div style="margin-bottom:20px;font-size:14px;border-bottom:1px solid #ccc">Input Data</div>
                 <div style="margin-bottom:10px">
                     <input name="costd_name" class="easyui-textbox" label="Component Name:" style="width:100%" data-options="required:true,validType:'length[0,100]'">
@@ -111,17 +112,30 @@
                     <input name="costd_unit" class="easyui-textbox" label="Satuan:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
                 </div>
                 <div style="margin-bottom:10px">
-                    <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Component Billing:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
-                </div>
-                <div style="margin-bottom:10px">
-                    <input name="daya" class="easyui-textbox" label="Daya:" style="width:100%" data-options="validType:'length[0,100]'">
-                </div>
-                <div style="margin-bottom:10px">
                     <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Komponen Ber-Meter:" style="width:300px;">
                         <option value="true" >yes</option>
                         <option value="false">no</option>
                     </select>
                 </div>
+                <br><br>
+                <h5><b>Opsi untuk listrik, Hiraukan jika bukan</b></h5>
+                <br>
+                <div style="margin-bottom:10px">
+                    <select class="easyui-combobox" name="value_type" label="Use Percent" style="width:300px;">
+                        <option value="value">no (default)</option>
+                        <option value="percent" >yes</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:10px">
+                    <input name="percentage" class="easyui-textbox" label="Value Percent / Cost:" style="width:100%" data-options="validType:'length[0,100]'">
+                </div>
+                <!-- <div style="margin-bottom:10px">
+                    <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Component Billing:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
+                </div> -->
+                <div style="margin-bottom:10px">
+                    <input name="daya" class="easyui-textbox" label="Daya :" style="width:100%" data-options="validType:'length[0,100]'">
+                </div>
+
             </form>
         </div>
         <div id="dlg-buttons">
@@ -146,7 +160,7 @@
         var insert_url = "{{route('cost_item.insert')}}";
         var update_url = "{{route('cost_item.update')}}";
         var delete_url = "{{route('cost_item.delete')}}";
-        var entity2 = "Master Cost Detail"; 
+        var entity2 = "Master Cost Detail";
         var get_url2 = "{{route('cost_item.cost_detail')}}";
         var insert_url2 = "{{route('cost_detail.insert')}}";
         var update_url2 = "{{route('cost_detail.update')}}";
@@ -165,7 +179,7 @@
                 detailFormatter:function(index,row){
                     return '<div style="padding:2px"><table class="ddv"></table></div>';
                 },
-                <?php 
+                <?php
                     $detailcommand = '';
                     if(\Session::get('role')==1 || in_array(49,\Session::get('permissions'))){
                         $detailcommand .= '<button onclick="editRecord(this)">Edit</button>&nbsp;';
@@ -194,6 +208,8 @@
                             {field:'costd_unit',title:'Satuan',width:100},
                             {field:'costd_ismeter',title:'Meter Status',width:100},
                             {field:'daya',title:'Daya',width:100},
+                            {field:'value_type',title:'PA Val Type',width:100},
+                            {field:'percentage',title:'PA Value',width:100},
                             {field: 'action', title: 'Action',
                                  formatter:function(value,row,index)
                                  {
@@ -209,6 +225,7 @@
                             setTimeout(function(){
                                 $('#dg').datagrid('fixDetailRowHeight',index);
                             },0);
+                            $('#chosen-costitem').val(row.id);
                         }
                     });
                     $('#dg').datagrid('fixDetailRowHeight',index);
@@ -221,7 +238,9 @@
             iconCls:'icon-add',
             handler:function(){
                 $('#dlg2').dialog('open').dialog('center').dialog('setTitle','New '+entity2);
+                var tempId = $('#chosen-costitem').val();
                 $('#fm2').form('clear');
+                $('#chosen-costitem').val(tempId);
                 url = insert_url2;
             }
         }];
@@ -254,6 +273,10 @@
                             msg: result.errorMsg
                         });
                     } else {
+                        $.messager.show({
+                            title: 'Success',
+                            msg: 'Insert component billing detail success'
+                        });
                         $('#dlg2').dialog('close');      // close the dialog
                         $('#dg').datagrid('reload');    // reload the user data
                     }
