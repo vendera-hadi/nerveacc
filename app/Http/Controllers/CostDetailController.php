@@ -9,6 +9,7 @@ use Auth;
 use App\Models\MsCostDetail;
 use App\Models\MsCostItem;
 use App\Models\TrContractInvoice;
+use App\Models\TrMeter;
 
 class CostDetailController extends Controller
 {

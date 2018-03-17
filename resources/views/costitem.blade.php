@@ -297,7 +297,8 @@
                     if (r){
                         $.post(delete_url2,{id:row.id},function(result){
                             if (result.success){
-                                $('.ddv').datagrid('reload');    // reload the user data
+                                alert('Delete component billing detail success');
+                                $('#dg').datagrid('reload');    // reload the user data
                             } else {
                                 $.messager.alert('Warning','The warning message');
                             }
