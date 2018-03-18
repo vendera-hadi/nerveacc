@@ -930,7 +930,9 @@ class ContractController extends Controller
         // LAST MONTH PERIOD METER
         $tempTimeStart = date("Y-m-01", strtotime("-1 months"));
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
-        $lastMonthPeriod = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();
+        // $lastMonthPeriod = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();
+        $lastMonthPeriod = TrPeriodMeter::where('status',1)->orderBy('id','desc')->first();
+
         // kalau last month period ketemu, tampung meter start nya adalah meter end dari period kmaren
         $lastMeterLog = [];
         if($lastMonthPeriod){
@@ -1013,7 +1015,6 @@ class ContractController extends Controller
                     $lastPrefix = 0;
                 }
                 $newPrefix = $lastPrefix;
-
                 // looping jumlah masukan form
                 foreach($nonmeter_unit_id as $key => $unit) {
                     if(in_array($nonmeter_costd_id[$key], $grp)){
@@ -1092,6 +1093,7 @@ class ContractController extends Controller
                                                     'costd_id'=>$meter_costdids[$key]];
                             }
                         }else{
+                            // echo $nonmeter_costd_id[$key]; die();
                             // SHARING BIAYA
                             // RUMUS DUMMY
                             $totalDayinPeriod = $currTrInv->continv_period * 30;
@@ -1112,7 +1114,7 @@ class ContractController extends Controller
                             $tempTotalCost = floor($tempTotalCost);
                             $totalAmount+=$tempTotalCost;
                             $insertInvDetail[$keygrp][] = ['invdt_amount' => $tempTotalCost, 'invdt_note' => $currCostDetail->costd_name." Periode ".date('d-m-Y',strtotime($startPeriodInv))." s/d ".date('d-m-Y')." (Closed)",
-                                                'costd_id'=>$meter_costdids[$key]];
+                                                'costd_id'=>$nonmeter_costd_id[$key]];
 
                             // hitungan cutoff an owner, akan ditagihkan next period
                             if(!empty($cutoffStatus)){
@@ -1134,8 +1136,9 @@ class ContractController extends Controller
                     $insertInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
                     $totalStamp = $companyData->comp_materai2;
                 }
+
                 // tambahin jg stampduty di owner
-                if(count($insertOwnerInvDetail) > 0){
+                if(count($insertOwnerInvDetail[$keygrp]) > 0){
                     if($totalAmountOwner <= $companyData->comp_materai1_amount){
                         $insertOwnerInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
                         $totalStampOwner = $companyData->comp_materai1;
@@ -1163,7 +1166,7 @@ class ContractController extends Controller
                                 ];
 
                     // insert invoice juga buat si Owner
-                    if(isset($insertOwnerInvDetail[$keygrp])){
+                    if(isset($insertOwnerInvDetail[$keygrp]) && count($insertOwnerInvDetail[$keygrp]) > 0){
                         // cari next period dari contract owner sekarang
                         $contrInvOwner = TrContractInvoice::where('contr_id',$contractOwner->id)->where('invtp_id',$keygrp)->where('costd_id',$grp[$key])->first();
                         $contrInv = TrContractInvoice::where('contr_id',$contr_id)->where('invtp_id',$keygrp)->where('costd_id',$grp[$key])->first();
@@ -1197,7 +1200,7 @@ class ContractController extends Controller
                                 'inv_faktur_date'=>date('Y-m-d'), 'invtp_id' => $keygrp, 'contr_id' => $contr_id, 'created_by' => Auth::id(), 'updated_by' => Auth::id()
                             ];
                         // var_dump($insertInvDetail);
-                        // var_dump($insertOwnerInvDetail);
+                        // var_dump($insertOwnerInvDetail); die();
                     }
                 }
             }
@@ -1227,7 +1230,7 @@ class ContractController extends Controller
 
                 }
             });
-            // echo 'Invoice Non Meter Generated';
+            echo 'Invoice Non Meter Generated';
         }
         // end non meter
 
