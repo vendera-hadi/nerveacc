@@ -92,6 +92,10 @@ class MsConfigSeeder extends Seeder
                 'name' => 'invoice_startdate',
                 'desc' => 'Invoice Start Date',
                 'value' => 5
+            ],[
+                'name' => 'coa_hutang_titipan',
+                'desc' => 'COA Hutang Titipan',
+                'value' => 21999
             ]
             ]);
     }

@@ -155,6 +155,16 @@
                                 </div>
 
                                 <div class="form-group">
+                                  <label>COA Hutang Titipan di fitur Payment (wajib isi)</label>
+                                  <select name="coa_hutang_titipan" style="width:100%">
+                                    <option value="">Choose Account</option>
+                                    @foreach($accounts as $key => $coa)
+                                        <option value="{{$coa->coa_code}}" data-name="{{$coa->coa_name}}" @if($coa_hutang_titipan == $coa->coa_code) selected @endif>{{$coa->coa_code." ".$coa->coa_name}}</option>
+                                    @endforeach
+                                  </select>
+                                </div>
+
+                                <div class="form-group">
                                   <label>COA Code Laba Rugi Berjalan (wajib isi)</label>
                                   <select name="coa_laba_rugi" id="selectAccount" style="width:100%">
                                     <option value="">Choose Account</option>

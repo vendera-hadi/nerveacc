@@ -267,20 +267,22 @@ class PaymentController extends Controller
 
                     $payVal = (int)$data_payment['totalpay'][$key];
                     $total = $payVal;
-                    // $total += (int) $value;
+                    // echo "Terbayar $total<br>";
                     $detail_payment = array(
                         // 'invpayd_amount' => $value,
                         'invpayd_amount' => $payVal,
                         'inv_id' => $key
                     );
 
-                    $tempAmount = 0;
+                    $tempAmount = $currentOutstanding = 0;
                     $invoice = TrInvoice::find($key);
                     if(isset($invoice->inv_outstanding)){
                         // $tempAmount = $invoice->inv_outstanding - $value;
+                        $currentOutstanding = $invoice->inv_outstanding;
                         $tempAmount = $invoice->inv_outstanding - $payVal;
                         // update
                         if((int)$tempAmount < 0) $tempAmount = 0;
+                        // echo "Outstanding tersisa $tempAmount<br>";
                         $invoice->inv_outstanding = (int)$tempAmount;
                         $invoice->save();
                     }
@@ -339,13 +341,11 @@ class PaymentController extends Controller
                                 $action_detail->invpayd_amount = $detail_payment['invpayd_amount'];
                                 $action_detail->inv_id = $detail_payment['inv_id'];
                                 $action_detail->invpayh_id = $payment_id;
-
+                                $action_detail->last_outstanding = $currentOutstanding;
                                 $action_detail->save();
                             }
                         // }
 
-                        // insert ke trbank ?? masi beresiko kalau diposting jd ttp masuk tp dibikin posted
-                        $this->saveToTrBank($action, $invoice, $total);
                     }
 
                     $indexNumber++;
@@ -418,6 +418,7 @@ class PaymentController extends Controller
         $month = date('m');
         $journal = [];
         $payJournal = [];
+        $storeTrBank = [];
 
         // cari last prefix, order by journal type
         $jourType = MsJournalType::where('jour_type_prefix','AR')->first();
@@ -452,6 +453,11 @@ class PaymentController extends Controller
             $coaDebet = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$paymentHd->Cashbank->coa_code)->first();
             if(empty($coaDebet)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$paymentHd->Cashbank->coa_code.' is not found on this year list. Please ReInsert this COA Code']);
 
+            // COA titipan
+            $coaHutangTitipanVal = @MsConfig::where('name','coa_hutang_titipan')->first()->value;
+            $coaHutangTitipan = MsMasterCoa::where('coa_year',$coayear)->where('coa_code', $coaHutangTitipanVal)->first();
+            if(empty($coaHutangTitipan)) return response()->json(['error'=>1, 'message'=>'COA hutang titipan is not found. Please set this COA Code in Config']);
+
             $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
             $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
             $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
@@ -460,35 +466,73 @@ class PaymentController extends Controller
                                             ->join('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
                                             ->where('invpayh_id',$id)->get();
             $refno = !empty($paymentHd->invpayh_checkno) ? $paymentHd->invpayh_checkno : $paymentHd->no_kwitansi;
-            foreach ($paymentDtl as $dtl) {
-                if($dtl->inv_outstanding <= 0){
-                    $journal[] = [
-                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
-                                    'ledge_fisyear' => $coayear,
-                                    'ledg_number' => $journalNumber,
-                                    'ledg_date' => date('Y-m-d'),
-                                    'ledg_refno' => $refno,
-                                    'ledg_debit' => $dtl->invpayd_amount,
-                                    'ledg_credit' => 0,
-                                    'ledg_description' => $dtl->tenan_name." - ".$dtl->inv_number,
-                                    'coa_year' => $coaDebet->coa_year,
-                                    'coa_code' => $coaDebet->coa_code,
-                                    'created_by' => Auth::id(),
-                                    'updated_by' => Auth::id(),
-                                    'jour_type_id' => $jourType->id,
-                                    'dept_id' => 3 //hardcode utk finance
-                                ];
 
-                    $payJournal[] = [
-                    		'ipayjour_date' => date('Y-m-d'),
-                    		'ipayjour_voucher' => $journalNumber,
-                    		'ipayjour_note' => $dtl->tenan_name." - ".$dtl->inv_number,
-                    		'coa_code' => $coaDebet->coa_code,
-                    		'ipayjour_debit' => $dtl->invpayd_amount,
-                    		'ipayjour_credit' => 0,
-                    		'invpayh_id' => $id
-                    	];
+
+            foreach ($paymentDtl as $dtl) {
+                $totalpayDebet = $dtl->invpayd_amount;
+                if($dtl->inv_outstanding <= 0){
+                    $totalpayDebet = $dtl->inv_amount;
+                    // KALAU LUNAS BALIKIN SEMUA HUTANG TITIPAN
+                    $checkTitipan = TrLedger::where('ledg_description',"Hutang Titipan ".$dtl->inv_number)->get();
+                    if(count($checkTitipan) > 0){
+                        foreach ($checkTitipan as $titipan) {
+                            $nextJournalNumber += 1;
+                            $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                            $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+
+                            $journal[] = [
+                                            'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
+                                            'ledge_fisyear' => $coayear,
+                                            'ledg_number' => $journalNumber,
+                                            'ledg_date' => date('Y-m-d'),
+                                            // REF NO HUTANG TITIPAN HRS DIPIKIRIN PAKE REFNO YG MANA
+                                            'ledg_refno' => $titipan->ledg_refno,
+                                            'ledg_debit' => $titipan->ledg_credit,
+                                            'ledg_credit' => 0,
+                                            'ledg_description' => $titipan->ledg_description,
+                                            'coa_year' => $coayear,
+                                            'coa_code' => $titipan->coa_code,
+                                            'created_by' => Auth::id(),
+                                            'updated_by' => Auth::id(),
+                                            'jour_type_id' => $titipan->jour_type_id,
+                                            'dept_id' => $titipan->dept_id
+                                        ];
+                        }
+                    }
                 }
+
+                $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => date('Y-m-d'),
+                                'ledg_refno' => $refno,
+                                'ledg_debit' => $totalpayDebet,
+                                'ledg_credit' => 0,
+                                'ledg_description' => $dtl->tenan_name." - ".$dtl->inv_number,
+                                'coa_year' => $coaDebet->coa_year,
+                                'coa_code' => $coaDebet->coa_code,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id,
+                                'dept_id' => 3 //hardcode utk finance
+                            ];
+
+                $payJournal[] = [
+                		'ipayjour_date' => date('Y-m-d'),
+                		'ipayjour_voucher' => $journalNumber,
+                		'ipayjour_note' => $dtl->tenan_name." - ".$dtl->inv_number,
+                		'coa_code' => $coaDebet->coa_code,
+                		'ipayjour_debit' => $dtl->invpayd_amount,
+                		'ipayjour_credit' => 0,
+                		'invpayh_id' => $id
+                	];
+
+                // insert ke trbank ?? masi beresiko kalau diposting jd ttp masuk tp dibikin posted
+                $storeTrBank[] = [
+                        'invoice' => $dtl->TrInvoice,
+                        'total' => $dtl->invpayd_amount
+                    ];
             }
             // End DEBET
 
@@ -498,7 +542,7 @@ class PaymentController extends Controller
                 $paymentDtl = TrInvoicePaymdtl::join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
                 								->join('ms_invoice_type','tr_invoice.invtp_id','=','ms_invoice_type.id')
                 								->where('invpayh_id',$id)->get();
-                // echo "paymDtl :<br>";
+                // echo "paymDtl : $paymentDtl<br>"; die();
                 // setiap pembayaran inv, cek where outstanding nya yg 0 aja yg di post
                 foreach($paymentDtl as $dtl){
                     // if(empty(@$paymentDtl->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$paymentDtl->invtp_name.' need to be set with COA code']);
@@ -508,40 +552,94 @@ class PaymentController extends Controller
                     $checkDebitLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('ledg_credit',0)->first();
                     $checkCreditLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('coa_code',$checkDebitLedger->coa_code)->where('ledg_debit',0)->first();
                     // blum ada lawanan & outstanding suda 0, insert
-                    if(empty($checkCreditLedger) && $dtl->inv_outstanding <= 0){
+                    if(empty($checkCreditLedger)){
                         $debitLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('ledg_credit',0)->get();
                         // echo "Masuk :<br>";
                         // echo $debitLedger."<br><br>";
-                        foreach($debitLedger as $dbt){
-                            // clone dr debit
-                            $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+
+                        // JIKA SUDAH LUNAS
+                        if($dtl->inv_outstanding <= 0){
+
+                            // JIKA LUNAS & ADA LEBIH BAYAR
+                            if($dtl->invpayd_amount > $dtl->last_outstanding){
+                                $lebihBayar = $dtl->invpayd_amount - $dtl->last_outstanding;
+                                $nextJournalNumber += 1;
+                                $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                                $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+
+                                $journal[] = [
+                                                'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
+                                                'ledge_fisyear' => $coayear,
+                                                'ledg_number' => $journalNumber,
+                                                'ledg_date' => date('Y-m-d'),
+                                                // REF NO HUTANG TITIPAN HRS DIPIKIRIN PAKE REFNO YG MANA
+                                                'ledg_refno' => $dtl->inv_number,
+                                                'ledg_debit' => 0,
+                                                'ledg_credit' => $lebihBayar,
+                                                'ledg_description' => "Hutang Titipan ".$dtl->inv_number,
+                                                'coa_year' => $coayear,
+                                                'coa_code' => $coaHutangTitipan->coa_code,
+                                                'created_by' => Auth::id(),
+                                                'updated_by' => Auth::id(),
+                                                'jour_type_id' => $jourType->id,
+                                                'dept_id' => 3
+                                            ];
+                            }
+
+                            foreach($debitLedger as $dbt){
+                                // clone dr debit
+                                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                                $journal[] = [
+                                                'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
+                                                'ledge_fisyear' => $dbt->ledge_fisyear,
+                                                'ledg_number' => $dbt->ledg_number,
+                                                'ledg_date' => date('Y-m-d'),
+                                                'ledg_refno' => $dbt->ledg_refno,
+                                                'ledg_debit' => 0,
+                                                'ledg_credit' => $paymentPercentage * $dbt->ledg_debit,
+                                                'ledg_description' => $dbt->ledg_description,
+                                                'coa_year' => $dbt->coa_year,
+                                                'coa_code' => $dbt->coa_code,
+                                                'created_by' => Auth::id(),
+                                                'updated_by' => Auth::id(),
+                                                'jour_type_id' => $dbt->jour_type_id,
+                                                'dept_id' => $dbt->dept_id
+                                            ];
+
+                                $payJournal[] = [
+                                        'ipayjour_date' => date('Y-m-d'),
+                                        'ipayjour_voucher' => $journalNumber,
+                                        'ipayjour_note' => $dbt->ledg_refno." - ".$dbt->ledg_description,
+                                        'coa_code' => $dbt->coa_code,
+                                        'ipayjour_debit' => 0,
+                                        'ipayjour_credit' => $paymentPercentage * $dbt->ledg_debit,
+                                        'invpayh_id' => $id
+                                    ];
+
+                            }
+                        }else{
+                            // JIKA BELUM LUNAS
+                            $nextJournalNumber += 1;
+                            $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
+                            $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
+
                             $journal[] = [
                                             'ledg_id' => "JRNL".substr($microtime,-10).str_random(5),
-                                            'ledge_fisyear' => $dbt->ledge_fisyear,
-                                            'ledg_number' => $dbt->ledg_number,
+                                            'ledge_fisyear' => $coayear,
+                                            'ledg_number' => $journalNumber,
                                             'ledg_date' => date('Y-m-d'),
-                                            'ledg_refno' => $dbt->ledg_refno,
+                                            // REF NO HUTANG TITIPAN HRS DIPIKIRIN PAKE REFNO YG MANA
+                                            'ledg_refno' => $dtl->inv_number,
                                             'ledg_debit' => 0,
-                                            'ledg_credit' => $paymentPercentage * $dbt->ledg_debit,
-                                            'ledg_description' => $dbt->ledg_description,
-                                            'coa_year' => $dbt->coa_year,
-                                            'coa_code' => $dbt->coa_code,
+                                            'ledg_credit' => $dtl->invpayd_amount,
+                                            'ledg_description' => "Hutang Titipan ".$dtl->inv_number,
+                                            'coa_year' => $coayear,
+                                            'coa_code' => $coaHutangTitipan->coa_code,
                                             'created_by' => Auth::id(),
                                             'updated_by' => Auth::id(),
-                                            'jour_type_id' => $dbt->jour_type_id,
-                                            'dept_id' => $dbt->dept_id
+                                            'jour_type_id' => $jourType->id,
+                                            'dept_id' => 3
                                         ];
-
-                            $payJournal[] = [
-                                    'ipayjour_date' => date('Y-m-d'),
-                                    'ipayjour_voucher' => $journalNumber,
-                                    'ipayjour_note' => $dbt->ledg_refno." - ".$dbt->ledg_description,
-                                    'coa_code' => $dbt->coa_code,
-                                    'ipayjour_debit' => 0,
-                                    'ipayjour_credit' => $paymentPercentage * $dbt->ledg_debit,
-                                    'invpayh_id' => $id
-                                ];
-
                         }
 
                         $successIds[] = $id;
@@ -561,7 +659,7 @@ class PaymentController extends Controller
         $unsuccessPosting = count($ids) - $successPosting;
         $message = $successPosting.' Invoice Terposting';
         if($unsuccessPosting  > 0) $message .= ', Invoice Belum Lunas / Terposting masih tersisa '.$unsuccessPosting;
-        // var_dump($journal);
+        // var_dump($journal); die();
         // echo $message; die();
         // var_dump($payJournal);
 
@@ -576,8 +674,12 @@ class PaymentController extends Controller
             if(count($successIds) > 0){
                 foreach ($successIds as $id) {
                     TrInvoicePaymhdr::where('id', $id)->update(['invpayh_post'=>1, 'posting_at'=>date('Y-m-d'), 'posting_by'=>Auth::id()]);
+                    foreach ($storeTrBank as $val) {
+                        $this->saveToTrBank($paymentHd, $val['invoice'], $val['total']);
+                    }
                 }
             }
+
             DB::commit();
         }catch(\Exception $e){
             DB::rollback();
@@ -597,16 +699,23 @@ class PaymentController extends Controller
             'message'=> 'Data not found'
         );
 
-        if($paymHeader->invpayh_post) return response()->json($result);
-
         if(!empty($paymHeader)){
+            if($paymHeader->invpayh_post){
+                $result['message'] = 'You can\'t void posted payment';
+                return response()->json($result);
+            }
+            // void payment
             $paymHeader->status_void = true;
             if($paymHeader->save()){
                 foreach ($paymHeader->TrInvoicePaymdtl as $payDtl) {
                     $invoice_id = $payDtl->inv_id;
                     $invoice = TrInvoice::find($invoice_id);
                     if($invoice){
-                        $invoice->inv_outstanding += $payDtl->invpayd_amount;
+                        if($payDtl->invpayd_amount > $payDtl->last_outstanding){
+                            $invoice->inv_outstanding += $payDtl->last_outstanding;
+                        }else{
+                            $invoice->inv_outstanding += $payDtl->invpayd_amount;
+                        }
                         $invoice->save();
                     }
                 }
@@ -620,6 +729,8 @@ class PaymentController extends Controller
                     'message'=> 'Cannot void payment, try again later'
                 );
             }
+        }else{
+            return response()->json($result);
         }
 
         return response()->json($result);
