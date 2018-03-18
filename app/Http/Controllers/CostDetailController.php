@@ -76,6 +76,10 @@ class CostDetailController extends Controller
                 $temp['costd_admin'] = $value->costd_admin;
                 $temp['costd_unit'] = $value->costd_unit;
                 $temp['daya'] = $value->daya;
+                $temp['value_type'] = $value->value_type;
+                $temp['percentage'] = $value->percentage;
+                $temp['grossup_pph'] = $value->grossup_pph;
+
                 $temp['costd_ismeter'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }
@@ -106,6 +110,7 @@ class CostDetailController extends Controller
             if(empty(@$input['value_type'])) $input['value_type'] = 'value';
             if(empty(@$input['daya'])) $input['daya'] = 0;
             if(empty(@$input['percentage'])) $input['percentage'] = 0;
+            if(empty(@$input['grossup_pph'])) $input['percentage'] = 0;
             $input['costd_is'] = md5(date('Y-m-d H:i:s'));
             return MsCostDetail::create($input);
         }catch(\Exception $e){
@@ -120,6 +125,7 @@ class CostDetailController extends Controller
             if(empty(@$input['value_type'])) $input['value_type'] = 'value';
             if(empty(@$input['daya'])) $input['daya'] = 0;
             if(empty(@$input['percentage'])) $input['percentage'] = 0;
+            if(empty(@$input['grossup_pph'])) $input['percentage'] = 0;
             MsCostDetail::find($id)->update($input);
             return MsCostDetail::find($id);
         }catch(\Exception $e){

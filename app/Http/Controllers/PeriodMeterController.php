@@ -192,7 +192,7 @@ class PeriodMeterController extends Controller
         try{
             $id = $request->id;
             $currentPrd = TrPeriodMeter::find($id);
-            $electric = TrMeter::select('tr_meter.*','ms_cost_detail.costd_rate','tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','ms_cost_detail.daya','ms_cost_detail.cost_id','ms_cost_detail.value_type','ms_cost_detail.percentage')
+            $electric = TrMeter::select('tr_meter.*','ms_cost_detail.costd_rate','tr_contract.contr_code','ms_unit.unit_code','ms_cost_detail.costd_name','ms_cost_detail.daya','ms_cost_detail.cost_id','ms_cost_detail.value_type','ms_cost_detail.percentage','ms_cost_detail.grossup_pph')
                     ->leftJoin('tr_contract','tr_contract.id',"=",'tr_meter.contr_id')
                     ->leftJoin('ms_cost_detail','ms_cost_detail.id',"=",'tr_meter.costd_id')
                     ->leftJoin('ms_unit','ms_unit.id',"=",'tr_meter.unit_id')
@@ -309,8 +309,9 @@ class PeriodMeterController extends Controller
         $daya = $request->input('daya');
         $value_type = $request->input('value_type');
         $percentage = $request->input('percentage');
+        $grossup = $request->input('grossup');
         try{
-            DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin, $cost_id, $daya, $value_type, $percentage){
+            DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin, $cost_id, $daya, $value_type, $percentage, $grossup){
                 foreach ($id as $key => $value) {
                     $meter_used = ($meter_end[$key] - $meter_start[$key]);
                     if($cost_id[$key] == '1'){
@@ -323,7 +324,10 @@ class PeriodMeterController extends Controller
                             $meter_cost = $min;
                         }
                         $bpju = (0.03 * $meter_cost);
+                        // echo "Meter cost $meter_cost<br>";
+                        // echo "BPJU $bpju<br>";
                         $subtotal = $meter_cost + $bpju;
+                        // echo "Subtotal $subtotal<br>";
                         // Tambah public area
                         if($value_type[$key] == 'percent'){
                             $public_area = $percentage[$key] / 100 * $subtotal;
@@ -331,12 +335,15 @@ class PeriodMeterController extends Controller
                             $public_area = $percentage[$key];
                             if(empty($public_area)) $public_area = 0;
                         }
+                        // echo "Public Area $public_area<br>";
                         $total = $subtotal + $meter_admin[$key] + $public_area;
-                        // materai
-                        $materai = 6000;
-                        $total += $materai;
-                        $grossup = $total / 0.9 * 0.1;
-                        $total += $grossup;
+                        // echo "Total before grossup $total<br>";
+                        if(!empty($grossup[$key])){
+                            $grossup_total = $total / 0.9 * 0.1;
+                            // echo "Grossup $grossup_total<br>";
+                            $total += $grossup_total;
+                        }
+                        // echo "Grandtotal $total<br>";
                     }else{
                         $bpju = 0;
                         $meter_cost = $meter_used * $meter_rate[$key];
@@ -544,55 +551,56 @@ class PeriodMeterController extends Controller
 
             })->get();
             $prd = $request->input('prd');
-            $meter = MsCostDetail::select('id','cost_id','daya','costd_name','costd_rate','costd_burden','costd_admin')->where('costd_ismeter',TRUE)->get();
-            $array_meter=[];
-            $array_rate =[];
-            foreach ($meter as $row) {
-                $array_meter[$row->costd_name]= $row->id;
-                $array_rate[$row->daya]= $row->costd_rate.'~'.$row->costd_burden.'~'.$row->costd_admin;
-            }
 
-            $unit = MsUnit::select('id','unit_code')->get();
-            $array_unit=[];
-            foreach ($unit as $row) {
-                $array_unit[$row->unit_code]= $row->id;
-            }
+            foreach ($data as $key => $value) {
+                if(!empty(@$value->unit)){
+                    $meter_used = $value->end - $value->start;
+                    $costdt = MsCostDetail::where('costd_name',$value->cost)->first();
+                    if(!$costdt) return redirect()->back()->with('error','Component Billing $value->cost uploaded does not exists, Pls download again upload template and reupload');
+                    $unit = MsUnit::where('unit_code',$value->unit)->first();
+                    if(!$unit) return redirect()->back()->with('error','Unit $value->unit uploaded does not exists, Pls download again upload template and reupload');
+                    $meter_row = TrMeter::where('prdmet_id', $prd)
+                                ->where('costd_id', $costdt->id)
+                                ->where('unit_id', $unit->id);
 
-            if(!empty($data) && $data->count()){
-                foreach ($data as $key => $value) {
-                    if(!empty(@$value->unit)){
-                        $meter_used = ($value->end - $value->start);
-                        $formula = explode('~', $array_rate[$value->daya]);
-
-                        if (strpos($value->cost, 'ELECTRICITY') !== false) {
-                            //CEK MIN 40 JAM PEMAKAIAN LISTRIK
-                            $min = 40 * $value->daya;
-                            $elec_cost = $meter_used * $formula[0];
-                            if($meter_used > $min){
-                                $meter_cost = $elec_cost;
-                            }else{
-                                $meter_cost = $min * $formula[0];
-                            }
-                            $bpju = (0.03 * $meter_cost);
-                            $total = $meter_cost + $bpju;
-
-                            DB::table('tr_meter')
-                            ->where('prdmet_id', $prd)
-                            ->where('costd_id', $array_meter[$value->cost])
-                            ->where('unit_id', $array_unit[$value->unit])
-                            ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'meter_admin'=>$biaya_admin,'other_cost'=>$bpju,'total'=>$total]);
+                    // LISTRIK
+                    if ($costdt->costitem->id == 1){
+                        //CEK MIN 40 JAM PEMAKAIAN LISTRIK
+                        $min = 40 * $value->daya * $costdt->costd_rate;
+                        $elec_cost = $meter_used *  $costdt->costd_rate;
+                        if($elec_cost > $min){
+                            $meter_cost = $elec_cost;
                         }else{
-                            $bpju = 0;
-                            $formula = explode('~', $array_rate[0]);
-                            $meter_cost = $meter_used * $formula[0];
-                            $total =  $meter_cost + $formula[1] + $formula[2];
-
-                            DB::table('tr_meter')
-                            ->where('prdmet_id', $prd)
-                            ->where('costd_id', $array_meter[$value->cost])
-                            ->where('unit_id', $array_unit[$value->unit])
-                            ->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>$bpju,'total'=>$total]);
+                            $meter_cost = $min;
                         }
+                        $bpju = (0.03 * $meter_cost);
+                        // echo "Meter cost $meter_cost<br>";
+                        // echo "BPJU $bpju<br>";
+                        $subtotal = $meter_cost + $bpju;
+                        // echo "Subtotal $subtotal<br>";
+                        // Tambah public area
+                        if($costdt->value_type == 'percent'){
+                            $public_area = $costdt->percentage / 100 * $subtotal;
+                        }else{
+                            $public_area = $costdt->percentage;
+                            if(empty($public_area)) $public_area = 0;
+                        }
+                        // echo "Public Area $public_area<br>";
+                        $total = $subtotal + $costdt->costd_admin + $public_area;
+                        // echo "Total before grossup $total<br>";
+                        if(!empty($costdt->grossup_pph)){
+                            $grossup_total = $total / 0.9 * 0.1;
+                            // echo "Grossup $grossup_total<br>";
+                            $total += $grossup_total;
+                        }
+                        // echo "Grandtotal $total<br>";
+
+                        $meter_row->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'meter_admin'=>$costdt->costd_admin,'other_cost'=>$bpju,'total'=>$total]);
+                    }else{
+                        // AIR
+                        $meter_cost = $meter_used * $costdt->costd_rate;
+                        $total =  $meter_cost + $costdt->costd_burden + $costdt->costd_admin;
+                        $meter_row->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>0,'total'=>$total]);
                     }
                 }
                 Session::flash('msg', 'Upload Success.');

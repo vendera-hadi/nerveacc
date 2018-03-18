@@ -44,6 +44,7 @@
               <input type="hidden" name="daya[]" value="{{$cdt->daya}}">
               <input type="hidden" name="percentage[]" value="{{empty($cdt->percentage) ? 0 : $cdt->percentage }}">
               <input type="hidden" name="value_type[]" value="{{$cdt->value_type}}">
+              <input type="hidden" name="grossup[]" value="{{$cdt->grossup_pph}}">
               <td>{{$cdt->unit_code}}</td>
               <td>{{$cdt->costd_name}}</td>
               <td>{{$cdt->daya}}</td>

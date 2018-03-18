@@ -150,6 +150,7 @@ class CostItemController extends Controller
                 $temp['daya'] = $value->daya;
                 $temp['value_type'] = $value->value_type;
                 $temp['percentage'] = $value->percentage;
+                $temp['grossup_pph'] = $value->grossup_pph;
                 $temp['costd_ismeter'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }

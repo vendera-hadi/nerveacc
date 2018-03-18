@@ -127,6 +127,12 @@
                     </select>
                 </div>
                 <div style="margin-bottom:10px">
+                    <select class="easyui-combobox" name="grossup_pph" label="Use Gross up PPH" style="width:300px;">
+                        <option value="0">no</option>
+                        <option value="1" >yes</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:10px">
                     <input name="percentage" class="easyui-textbox" label="Value Percent / Cost:" style="width:100%" data-options="validType:'length[0,100]'">
                 </div>
                 <!-- <div style="margin-bottom:10px">
@@ -210,6 +216,7 @@
                             {field:'daya',title:'Daya',width:100},
                             {field:'value_type',title:'PA Val Type',width:100},
                             {field:'percentage',title:'PA Value',width:100},
+                            {field:'grossup_pph',title:'Gross up PPH',width:100},
                             {field: 'action', title: 'Action',
                                  formatter:function(value,row,index)
                                  {
