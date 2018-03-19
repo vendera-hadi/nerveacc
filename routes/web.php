@@ -352,6 +352,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/r_meter','ReportController@HistoryMeter')->name('report.r_meter');
 	Route::get('report/r_unit','ReportController@ReportUnit')->name('report.r_unit');
 	Route::get('report/r_tenant','ReportController@ReportTenant')->name('report.r_tenant');
+	Route::get('report/arsummary','ReportController@arsummary')->name('report.ar_summary');
 
 	Route::get('report/glreport','ReportController@glview')->name('report.glview');
 	Route::get('report/ytd','ReportController@ytd')->name('report.ytd');

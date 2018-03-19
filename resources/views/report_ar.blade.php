@@ -49,6 +49,7 @@
                         <option value="payment">Payment History</option>
                         <option value="outinv">Outstanding By Unit</option>
                         <option value="outcontr">Outstanding By Billing Info</option>
+                        <option value="arsummary">AR Summary By Unit</option>
                     </select>
                 </div>
                 <div class="row dates">
@@ -86,6 +87,13 @@
                             <option value="{{$invtype->id}}">{{$invtype->invtp_name}}</option>
                             @endforeach
                          </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row unit2" style="display:none">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                         <select class="form-control choose-unit" name="unit5" style="width: 100%;"></select>
                         </div>
                     </div>
                 </div>
@@ -272,16 +280,19 @@
     $('#type').on('change', function() {
       var hasil = this.value;
       if(hasil == "araging"){
-        $( ".dates,.unit,.payment" ).hide();
+        $( ".dates,.unit,.payment,.unit2" ).hide();
         $( ".history" ).show();
       }else if(hasil == 'outinv'){
-        $( ".unit,.dates" ).show();
+        $( ".unit,.dates,.unit2" ).show();
         $( ".history,.payment" ).hide();
       }else if(hasil == 'payment'){
         $( ".dates,.payment" ).show();
-        $( ".history,.unit" ).hide();
+        $( ".history,.unit,.unit2" ).hide();
+      }else if(hasil == 'arsummary'){
+        $( ".dates,.history,.payment,.unit" ).hide();
+        $( ".unit2" ).show();
       }else{
-        $( ".history,.unit,.payment" ).hide();
+        $( ".history,.unit,.payment,.unit2" ).hide();
         $( ".dates" ).show();
       }
     });

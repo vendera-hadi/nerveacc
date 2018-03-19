@@ -26,6 +26,7 @@ use App\Models\TrApHeader;
 use App\Models\TrApDetail;
 use App\Models\TrApPaymentHeader;
 use App\Models\TrApPaymentDetail;
+use App\Models\ViewInv;
 use PDF;
 use DB;
 use Excel;
@@ -1636,6 +1637,112 @@ class ReportController extends Controller
             })->download($tp);
         }else{
             return view('layouts.report_template2', $data);
+        }
+    }
+
+    public function arsummary(Request $request){
+        $pdf = @$request->pdf;
+        $excel = @$request->excel;
+        $print = @$request->print;
+        $unit_id = @$request->unit5;
+
+        $data['tahun'] = '';
+        if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to))."<br>";
+        $data['name'] = MsCompany::first()->comp_name;
+        $data['title'] = "INVOICE TAGIHAN";
+        $data['logo'] = MsCompany::first()->comp_image;
+        $data['unit_code'] = MsUnit::where('id',$unit_id)->first()->unit_code;
+        $data['unit_sqrt'] = MsUnit::where('id',$unit_id)->first()->unit_sqrt;
+        $data['template'] = 'report_ar_summary';
+        $data['type'] = 'none';
+
+        $fetch = ViewInv::select('*',
+                            DB::raw("to_char(inv_duedate, 'DD-MM-YYYY') AS jatuhtempo"),
+                            DB::raw("to_char(invpayh_date, 'DD-MM-YYYY') AS tanggalbayar"))
+                            ->where('unit_id',$unit_id)
+                            ->where('inv_iscancel',FALSE)
+                        ->get();
+        $data['invoices'] = $fetch;
+
+        $fetch2 = ViewInv::select(
+                    DB::raw("SUM(inv_outstanding) AS total"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) >= -1 AND (current_date::date - inv_duedate::date) <= 30 THEN inv_outstanding ELSE 0 END)) AS ag30"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) > 31 AND (current_date::date - inv_duedate::date)<= 60 THEN inv_outstanding ELSE 0 END)) AS ag60"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) > 61 AND (current_date::date - inv_duedate::date)<= 90 THEN inv_outstanding ELSE 0 END)) AS ag90"),
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) > 180 THEN inv_outstanding ELSE 0 END)) AS agl180"))
+                ->where('unit_id','=',$unit_id)->get();
+        $data['current'] = $fetch2;
+        $data['terbilang'] = $this->terbilang($fetch2[0]->total);
+        if($pdf){
+            $data['type'] = 'pdf';
+            $pdf = PDF::loadView('layouts.report_template4', $data)->setPaper('a4', 'landscape');
+            return $pdf->download('AR_Summary.pdf');
+        }else if($excel){
+            $data['type'] = 'excel';
+            $data_ori = $fetch->toArray();
+            $data = array();
+            for($i=0; $i<count($data_ori); $i++){
+                if($data_ori[$i]['invpayh_date'] == NULL){
+                    $date1=date_create(date('Y-m-d'));
+                    $date2=date_create($data_ori[$i]['inv_duedate']);
+                    $diff=date_diff($date1,$date2);
+                    $hari = $diff->format("%a") - 7;
+                    $denda = 1/1000 * $hari * $data_ori[$i]['inv_amount'];
+                }else{
+                    $date1=date_create($inv->inv_payh_date);
+                    $date2=date_create($inv->inv_duedate);
+                    $diff=date_diff($date1,$date2);
+                    $hari = $diff->format("%a");
+                    $denda = 1/1000 * $hari * $data_ori[$i]['inv_amount'];
+                }
+                $data[$i]=array(
+                    'Tgl. JT' =>$data_ori[$i]['jatuhtempo'],
+                    'No. Invoice' =>$data_ori[$i]['inv_number'],
+                    'Nilai Invoice' =>number_format($data_ori[$i]['inv_amount']),
+                    'No. Bayar' =>$data_ori[$i]['no_kwitansi'],
+                    'Tgl Bayar' =>$data_ori[$i]['tanggalbayar'],
+                    'No. Giro' =>$data_ori[$i]['invpayh_checkno'],
+                    'Nilai Bayar Koreksi' =>number_format($data_ori[$i]['invpayd_amount']),
+                    'Sisa' =>number_format($data_ori[$i]['invpayd_amount']),
+                    'Hari' =>($hari < 0 ? '-' : $hari),
+                    'Denda' =>number_format(($hari < 0 ? '0' : number_format($denda))),
+                );
+            }
+            $border = 'A1:J';
+            $tp = 'xls';
+            return Excel::create('AR Summary Report', function($excel) use ($data,$border) {
+                $excel->sheet('AR Summary Report', function($sheet) use ($data,$border)
+                {
+                    $total = count($data)+1;
+                    $sheet->setBorder($border.$total, 'thin');
+                    $sheet->fromArray($data);
+                });
+            })->download($tp);
+        }else{
+            return view('layouts.report_template4', $data);
+        }
+    }
+
+    public function terbilang ($angka) {
+        $angka = (float)$angka;
+        $bilangan = array('','Satu','Dua','Tiga','Empat','Lima','Enam','Tujuh','Delapan','Sembilan','Sepuluh','Sebelas');
+        if ($angka < 12) {
+            return $bilangan[$angka];
+        } else if ($angka < 20) {
+            return $bilangan[$angka - 10] . ' Belas';
+        } else if ($angka < 100) {
+            $hasil_bagi = (int)($angka / 10);
+            $hasil_mod = $angka % 10;
+            return trim(sprintf('%s Puluh %s', $bilangan[$hasil_bagi], $bilangan[$hasil_mod]));
+        } else if ($angka < 200) { return sprintf('Seratus %s', $this->terbilang($angka - 100));
+        } else if ($angka < 1000) { $hasil_bagi = (int)($angka / 100); $hasil_mod = $angka % 100; return trim(sprintf('%s Ratus %s', $bilangan[$hasil_bagi], $this->terbilang($hasil_mod)));
+        } else if ($angka < 2000) { return trim(sprintf('Seribu %s', $this->terbilang($angka - 1000)));
+        } else if ($angka < 1000000) { $hasil_bagi = (int)($angka / 1000); $hasil_mod = $angka % 1000; return sprintf('%s Ribu %s', $this->terbilang($hasil_bagi), $this->terbilang($hasil_mod));
+        } else if ($angka < 1000000000) { $hasil_bagi = (int)($angka / 1000000); $hasil_mod = $angka % 1000000; return trim(sprintf('%s Juta %s', $this->terbilang($hasil_bagi), $this->terbilang($hasil_mod)));
+        } else if ($angka < 1000000000000) { $hasil_bagi = (int)($angka / 1000000000); $hasil_mod = fmod($angka, 1000000000); return trim(sprintf('%s Milyar %s', $this->terbilang($hasil_bagi), $this->terbilang($hasil_mod)));
+        } else if ($angka < 1000000000000000) { $hasil_bagi = $angka / 1000000000000; $hasil_mod = fmod($angka, 1000000000000); return trim(sprintf('%s Triliun %s', $this->terbilang($hasil_bagi), $this->terbilang($hasil_mod)));
+        } else {
+            return 'Data Salah';
         }
     }
 }
