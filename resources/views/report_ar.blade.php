@@ -45,7 +45,6 @@
                         <option value="arbyinvoice">Invoice Issued Summary</option>
                         <option value="arbyinvoicecancel">List Canceled Invoice</option>
                         <option value="araging">Aged Receivable</option>
-                        <option value="daily">Daily Collection Sort By Account</option>
                         <option value="payment">Payment History</option>
                         <option value="outinv">Outstanding By Unit</option>
                         <option value="outcontr">Outstanding By Billing Info</option>
@@ -231,8 +230,8 @@
         var type = $('#type').val();
         var report_url = '{!! url('/') !!}/report/';
         var from = $('input[name=from]').val();
-        var to = $('input[name=to]').val(); 
-        
+        var to = $('input[name=to]').val();
+
         var queryString = $(this).serialize();
         current_url = report_url+type+'?'+queryString;
         $('#frame').attr('src', current_url);
@@ -272,7 +271,7 @@
         var title = 'PRINT REPORT';
         var w = 640;
         var h = 660;
-        
+
         openWindow(url, title, w, h);
         return false;
     });

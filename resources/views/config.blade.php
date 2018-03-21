@@ -81,7 +81,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                  <label>Due Date Interval Invoice</label>
+                                  <label>Due Date Invoice (every month)</label>
                                   <input type="number" name="duedate_interval" class="form-control" value="{{$duedate}}">
                                 </div>
 

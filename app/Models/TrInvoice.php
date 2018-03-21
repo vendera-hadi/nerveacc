@@ -21,4 +21,9 @@ class TrInvoice extends Model
    public function TrContract(){
          return $this->belongsTo('App\Models\TrContract','contr_id');
    }
+   public function paymentdtl()
+   {
+      return $this->hasMany('App\Models\TrInvoicePaymdtl','inv_id');
+   }
+
 }

@@ -13,4 +13,8 @@ class TrInvoicePaymdtl extends Model
    public function TrInvoice(){
          return $this->belongsTo('App\Models\TrInvoice','inv_id');
    }
+
+   public function paymenthdr(){
+      return $this->belongsTo('App\Models\TrInvoicePaymhdr','invpayh_id');
+   }
 }

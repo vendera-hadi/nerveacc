@@ -536,6 +536,7 @@ class InvoiceController extends Controller
         if(!empty($stampData)) $stampCoa = $stampData->cost_coa_code;
         else $stampCoa = 21400;
 
+
         // $maxTime = date('Y-m-d',strtotime("first day of previous month"));
         $maxTime = date('Y-m-d',strtotime("first day of this month"));
         // invoice dpt di generate paling lama bulan sekarang, generate utk bulan kmaren
@@ -840,7 +841,7 @@ class InvoiceController extends Controller
                             $totalStamp = 0;
                         }
 
-                        DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail, $totalStamp, $updateCtrInv){
+                        DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail, $totalStamp, $updateCtrInv, $tempTimeStart){
                             // insert invoice
                             // get last prefix
                             $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$value->invtype->invtp_prefix.'-'.substr($year, -2).$month.'-%')->orderBy('id','desc')->first();
@@ -858,13 +859,13 @@ class InvoiceController extends Controller
                             $invoice_startdate = @MsConfig::where('name','invoice_startdate')->first()->value;
                             if(!empty($invoice_startdate)){
                                 $invoice_startdate = str_pad($invoice_startdate,2,'0',STR_PAD_LEFT);
-                                $invoice_startdate = date('Y-m-'.$invoice_startdate);
+                                $invoice_startdate = date('Y-m-'.$invoice_startdate, strtotime($tempTimeStart." +1 month"));
                             }else{
                                 $invoice_startdate = $now;
                             }
                             // $duedate = date('Y-m-d', strtotime('+'.$value->continv_period.' month'));
                             $duedate_interval = @MsConfig::where('name','duedate_interval')->first()->value;
-                            $duedate = date('Y-m-d', strtotime($invoice_startdate.' +'.$duedate_interval.' days'));
+                            $duedate = date('Y-m-'.$duedate_interval, strtotime($tempTimeStart.' +1 month'));
 
                             // $totalWithTaxStamp = ($totalPay * 1.1) + $totalStamp;
                             $totalWithStamp = $totalPay + $totalStamp;

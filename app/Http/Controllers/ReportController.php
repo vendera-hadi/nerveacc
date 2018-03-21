@@ -1645,34 +1645,32 @@ class ReportController extends Controller
         $excel = @$request->excel;
         $print = @$request->print;
         $unit_id = @$request->unit5;
+        if(empty($unit_id)) return '<center><h3>Harap Masukkan Unit terlebih dahulu sebelum generate report AR Summary</h3></center>';
 
         $data['tahun'] = '';
         if(!empty($from) && !empty($to)) $data['tahun'] = 'Periode : '.date('d M Y',strtotime($from)).' s/d '.date('d M Y',strtotime($to))."<br>";
         $data['name'] = MsCompany::first()->comp_name;
-        $data['title'] = "INVOICE TAGIHAN";
+        $data['title'] = "AR SUMMARY";
         $data['logo'] = MsCompany::first()->comp_image;
-        $data['unit_code'] = MsUnit::where('id',$unit_id)->first()->unit_code;
-        $data['unit_sqrt'] = MsUnit::where('id',$unit_id)->first()->unit_sqrt;
+        $data['unit_code'] = MsUnit::find($unit_id)->unit_code;
+        $data['unit_sqrt'] = MsUnit::find($unit_id)->unit_sqrt;
         $data['template'] = 'report_ar_summary';
         $data['type'] = 'none';
 
-        $fetch = ViewInv::select('*',
-                            DB::raw("to_char(inv_duedate, 'DD-MM-YYYY') AS jatuhtempo"),
-                            DB::raw("to_char(invpayh_date, 'DD-MM-YYYY') AS tanggalbayar"))
-                            ->where('unit_id',$unit_id)
-                            ->where('inv_iscancel',FALSE)
-                        ->get();
-        $data['invoices'] = $fetch;
+        $fetch = TrInvoice::where('inv_iscancel',FALSE)->whereHas('TrContract', function($query) use($unit_id){
+                $query->where('unit_id', $unit_id);
+            });
+        $data['invoices'] = $fetch->get();
 
-        $fetch2 = ViewInv::select(
+        $fetch2 = $fetch->select(
                     DB::raw("SUM(inv_outstanding) AS total"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) >= -1 AND (current_date::date - inv_duedate::date) <= 30 THEN inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) > 31 AND (current_date::date - inv_duedate::date)<= 60 THEN inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) > 61 AND (current_date::date - inv_duedate::date)<= 90 THEN inv_outstanding ELSE 0 END)) AS ag90"),
-                    DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) > 180 THEN inv_outstanding ELSE 0 END)) AS agl180"))
-                ->where('unit_id','=',$unit_id)->get();
+                    DB::raw("SUM((CASE WHEN (current_date::date - inv_duedate::date) > 180 THEN inv_outstanding ELSE 0 END)) AS agl180"))->first();
         $data['current'] = $fetch2;
-        $data['terbilang'] = $this->terbilang($fetch2[0]->total);
+
+        $data['terbilang'] = $this->terbilang($fetch2->total);
         if($pdf){
             $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template4', $data)->setPaper('a4', 'landscape');

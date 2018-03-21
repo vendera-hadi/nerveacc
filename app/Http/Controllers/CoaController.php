@@ -183,7 +183,7 @@ class CoaController extends Controller
 
     public function dlTemplateUploadCoaExcel()
     {
-        $data_ori = MsMasterCoa::select('coa_year','coa_code','coa_name','coa_isparent','coa_level','coa_type','coa_ending')
+        $data_ori = MsMasterCoa::select('coa_year','coa_code','coa_name','coa_isparent','coa_level','coa_type', 'coa_beginning', 'coa_debit', 'coa_credit','coa_ending')
                 ->get()->toArray();
         $data = array();
         foreach($data_ori as $coa){
@@ -194,10 +194,13 @@ class CoaController extends Controller
                 'Is Parent ? (0 = tidak, 1 = ya)'=> !empty($coa['coa_isparent']) ? 1 : 0,
                 'Parent COA Code'=> trim($coa['coa_level']),
                 'COA Type (DEBET/KREDIT)'=> trim($coa['coa_type']),
+                'Saldo Awal COA' => number_format($coa['coa_beginning'],2),
+                'Total Debit' => number_format($coa['coa_debit'],2),
+                'Total Credit' => number_format($coa['coa_credit'],2),
                 'Total COA Value Last Year'=> number_format($coa['coa_ending'],2));
         }
 
-        $border = 'A1:G';
+        $border = 'A1:J';
         $tp = 'xls';
         return Excel::create('template_coa', function($excel) use ($data,$border) {
             $excel->sheet('mySheet', function($sheet) use ($data,$border)
@@ -244,9 +247,9 @@ class CoaController extends Controller
                                 'coa_level' => $value->parent_coa_code,
                                 'coa_type' => $value->coa_type_debetkredit,
                                 'coa_ending' => $value->total_coa_value_last_year,
-                                'coa_beginning' => 0,
-                                'coa_debit' => 0,
-                                'coa_credit' => 0
+                                'coa_beginning' => $value->saldo_awal_coa,
+                                'coa_debit' => $value->total_debit,
+                                'coa_credit' => $value->total_credit
                             ];
                     }
                     MsMasterCoa::insert($insert);
@@ -265,8 +268,8 @@ class CoaController extends Controller
 
             }catch(\Exception $e){
                 \DB::rollBack();
-                // return back()->with('error','Error terjadi, harap dilihat kembali format input yang dimasukkan benar atau salah');
-                return back()->with('error',$e->getMessage());
+                return back()->with('error','Error terjadi, harap dilihat kembali format input yang dimasukkan benar atau salah');
+                // return back()->with('error',$e->getMessage());
             }
 
         }
