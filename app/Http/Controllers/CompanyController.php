@@ -37,6 +37,7 @@ class CompanyController extends Controller
         $data['footer_signature_position'] = @MsConfig::where('name','footer_signature_position')->first()->value;
         $data['coa_laba_rugi'] = @MsConfig::where('name','coa_laba_rugi')->first()->value;
         $data['coa_hutang_titipan'] = @MsConfig::where('name','coa_hutang_titipan')->first()->value;
+        $data['ppju'] = @MsConfig::where('name','ppju')->first()->value;
 
         $data['accounts'] = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',0)->orderBy('coa_type')->get();
         return view('config',$data);

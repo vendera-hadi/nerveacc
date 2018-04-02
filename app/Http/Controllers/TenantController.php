@@ -269,11 +269,10 @@ class TenantController extends Controller
                             ->join('ms_unit','ms_unit_owner.unit_id','=','ms_unit.id')
                             ->where('tenan_id',$id)->get();
 
-        $rented_units = MsUnit::select('ms_unit.*')->join('tr_contract','tr_contract.unit_id','=','ms_unit.id')
+        $rented_units = MsUnit::select('ms_unit.*','tr_contract.contr_status')
+                        ->join('tr_contract','tr_contract.unit_id','=','ms_unit.id')
                         ->where('tr_contract.contr_status','confirmed')
                         ->where('tr_contract.contr_iscancel',false)
-                        ->where('tr_contract.contr_startdate' , '<=', date('Y-m-d'))
-                        ->where('tr_contract.contr_enddate' , '>=', date('Y-m-d'))
                         ->where('tr_contract.tenan_id',$id)
                         ->get();
 

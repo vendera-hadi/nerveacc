@@ -3,7 +3,7 @@
       <tr>
         <th>No.Invoice</th>
         <th>No Kontrak</th>
-        <th>Nama Tenan</th>
+        <th>Nama Tenant</th>
         <th>Unit</th>  
         <th>Tgl Invoice</th>
         <th>Jatuh Tempo</th>
