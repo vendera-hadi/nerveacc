@@ -188,9 +188,10 @@ class ContractController extends Controller
                 else $status = '<strong>'.$value->contr_status.'</strong>';
                 $temp['contr_status'] = $status;
                 $temp['contr_terminate_date'] = !empty($value->contr_terminate_date) ? date('d/m/Y',strtotime($value->contr_terminate_date)) : '';
-                if($value->contr_status != 'confirmed') $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-                                                                    &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>
-                                                                    &nbsp;<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
+                if($value->contr_status != 'confirmed')
+                    $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>&nbsp;
+                        <a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>&nbsp;
+                        <a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
                 else if($value->contr_status == 'confirmed' && !empty($value->contr_terminate_date) ) $confirmed = '<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
                 else $confirmed = '';
 
@@ -356,6 +357,16 @@ class ContractController extends Controller
         $periods = $request->input('period');
         $is_meter = $request->input('is_meter');
         try{
+            // check owner
+            $unitOwner = MsUnitOwner::where('unit_id',$request->input('unit_id'))->first();
+            if(!empty($unitOwner)){
+                $checkUnitOwner = TrContract::where('tenan_id',$unitOwner->tenan_id)->where('unit_id',$request->input('unit_id'))->where('contr_status','confirmed')->count();
+                if($checkUnitOwner < 1)
+                    return ['status' => 0, 'message' => 'Contract Pemilik harus dibuat dan diconfirm terlebih dahulu sebelum membuat contract tenant'];
+            }else{
+                return ['status' => 0, 'message' => 'Unit harus mempunyai owner dahulu'];
+            }
+
             DB::transaction(function () use($input, $request, $cost_id, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $costd_ids, $inv_type_custom, $cost_name, $cost_code, $periods, $orders) {
                 $contract = TrContract::create($input);
 
@@ -375,9 +386,12 @@ class ContractController extends Controller
                     }
                 }
 
-                 // unit jadi unavailable
-                 MsUnit::where('id',$request->input('unit_id'))->update(['unit_isavailable'=>0]);
-
+                // cek unit uda ada pasangan blum
+                $checkUnitCtr = TrContract::where('unit_id',$request->input('unit_id'))->where('contr_status','confirmed')->count();
+                if($checkUnitCtr >= 2){
+                    // unit jadi unavailable
+                    MsUnit::where('id',$request->input('unit_id'))->update(['unit_isavailable'=>0]);
+                }
                 // insert custom
                 if(count($cost_name) > 0){
                     foreach ($cost_name as $key => $value) {
@@ -454,12 +468,20 @@ class ContractController extends Controller
         if($request->input('mark_id')) $update['mark_id'] = $request->input('mark_id');
         // if($request->input('const_id')) $update['const_id'] = $request->input('const_id');
         // if($request->input('viracc_id')) $update['viracc_id'] = $request->input('viracc_id');
+
         if(!empty($request->input('unit_id')) && $request->input('current_unit_id') != $request->input('unit_id')){
             $update['unit_id'] = $request->input('unit_id');
-            // unit lama jadi available
-            MsUnit::where('id',$request->input('current_unit_id'))->update(['unit_isavailable'=>1]);
-            // unit jadi unavailable
-            MsUnit::where('id',$request->input('unit_id'))->update(['unit_isavailable'=>0]);
+
+            // check unit contract
+            $checkUnitCtr = TrContract::where('unit_id', $request->input('unit_id'))->where('contr_status','confirmed')->count();
+            if($checkUnitCtr >= 2){
+                return ['status' => 0, 'message' => 'Update gagal, Unit sudah dipakai di contract lain'];
+            }else{
+                // unit lama jadi available
+                MsUnit::where('id',$request->input('current_unit_id'))->update(['unit_isavailable'=>1]);
+                // unit jadi unavailable
+                MsUnit::where('id',$request->input('unit_id'))->update(['unit_isavailable'=>0]);
+            }
         }
 
         TrContract::where('id',$request->input('id'))->update($update);
@@ -557,6 +579,11 @@ class ContractController extends Controller
     public function delete(Request $request){
         try{
             $id = $request->id;
+            $contract = TrContract::find($id);
+            // balikin unit
+            $unit = MsUnit::find($contract->unit_id);
+            $unit->unit_isavailable = true;
+            $unit->save();
             // TrContract::destroy($id);
             TrContract::where('id',$id)->update(['contr_iscancel' => true,'contr_cancel_date' => date('Y-m-d'), 'contr_status' => 'cancelled']);
             return response()->json(['success'=>true]);
@@ -672,6 +699,13 @@ class ContractController extends Controller
         if(!is_array($ids)) $ids = [$ids];
 
         foreach($ids as $id){
+            // check unit
+            $contract = TrContract::find($id);
+            $checkUnitCtr = TrContract::where('unit_id',$contract->unit_id)->where('contr_status','confirmed')->count();
+            if($checkUnitCtr >= 2){
+                // gagal, unit dibatasin cuma di 2 contract aja
+                return response()->json(['errorMsg' => 'Confirm gagal, unit dalam contract ini sudah dipakai di contract lain']);
+            }
             TrContract::where('id',$id)->update(['contr_status'=>'confirmed']);
         }
         return response()->json(['success'=>true]);
@@ -819,6 +853,9 @@ class ContractController extends Controller
 
             // olah data
             $count = TrContract::count();
+            // GET all contract yg
+            //  1. Sudah ditag terminate (pny terminate date) yg masuk jangka waktu seminggu ini
+            //  2. Contract yg bakal Expired dalam minggu2 ini
             $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name')
                     ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')->where(function($query){
                         $query->where('contr_terminate_date','<=', date("Y-m-d", strtotime("+1 week")))->where('contr_status','confirmed');
@@ -907,7 +944,7 @@ class ContractController extends Controller
 
         // cari kontrak pairing, owner dari unit tersebut
 
-        // get all meter yang ada di unit si tenant
+        // get all cost detail yg gunain meter yang ada di unit si tenant
         $data['contInvMeter'] = TrContractInvoice::join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
                                 ->join('tr_contract','tr_contract.id','=','tr_contract_invoice.contr_id')
                                 ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
@@ -918,6 +955,7 @@ class ContractController extends Controller
                                 ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                 ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                                 ->where('contr_id',$id)->where('costd_ismeter',0)->get();
+
         if(count($data['contInvMeter']) > 0){
             $data['contractNo'] = $data['contInvMeter'][0]->contr_no;
             $data['unitCode'] = $data['contInvMeter'][0]->unit_code;

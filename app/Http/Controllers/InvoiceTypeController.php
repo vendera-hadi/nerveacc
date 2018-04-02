@@ -19,7 +19,7 @@ class InvoiceTypeController extends Controller
         try{
         	// params
         	$page = $request->page;
-        	$perPage = $request->rows; 
+        	$perPage = $request->rows;
         	$page-=1;
         	$offset = $page * $perPage;
             // @ -> isset(var) ? var : null
@@ -69,7 +69,7 @@ class InvoiceTypeController extends Controller
             return response()->json($result);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function insert(Request $request){
@@ -77,35 +77,38 @@ class InvoiceTypeController extends Controller
     		$input = $request->all();
     		$input['created_by'] = Auth::id();
     		$input['updated_by'] = Auth::id();
-    		return MsInvoiceType::create($input);    	
+    		return MsInvoiceType::create($input);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function update(Request $request){
         try{
         	$id = $request->id;
+            if(in_array($id, [1,2,3])){
+                return response()->json(['errorMsg' => 'Invoice ini adalah default dari sistem dan tidak dapat diubah']);
+            }
         	$input = $request->all();
         	$input['updated_by'] = Auth::id();
         	MsInvoiceType::find($id)->update($input);
         	return MsInvoiceType::find($id);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 
     public function delete(Request $request){
         try{
         	$id = $request->id;
-            if($id == 3){
-                return response()->json(['errorMsg' => 'Invoice Lain-lain adalah varibel tetap dan tidak dapat dihapus']);
+            if(in_array($id, [1,2,3])){
+                return response()->json(['errorMsg' => 'Invoice Type ini adalah default dari sistem dan tidak dapat dihapus']);
             }else{
         	   // MsInvoiceType::destroy($id);
         	   return response()->json(['success'=>true]);
             }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
-        } 
+        }
     }
 }

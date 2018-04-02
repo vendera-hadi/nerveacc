@@ -57,18 +57,18 @@ class HomeController extends Controller
             ->where('inv_post',TRUE)
             ->whereYear('inv_date','=',$year)->get()->toArray();
         $isi = array();
-        $isi[0] = (float)$fetch[0]['jan'] / 1000;
-        $isi[1] = (float)$fetch[0]['feb'] / 1000;
-        $isi[2] = (float)$fetch[0]['mar'] / 1000;
-        $isi[3] = (float)$fetch[0]['apr'] / 1000;
-        $isi[4] = (float)$fetch[0]['may'] / 1000;
-        $isi[5] = (float)$fetch[0]['jun'] / 1000;
-        $isi[6] = (float)$fetch[0]['jul'] / 1000;
-        $isi[7] = (float)$fetch[0]['aug'] / 1000;
-        $isi[8] = (float)$fetch[0]['sep'] / 1000;
-        $isi[9] = (float)$fetch[0]['okt'] / 1000;
-        $isi[10] =(float)$fetch[0]['nov'] / 1000;
-        $isi[11] = (float)$fetch[0]['des'] / 1000;
+        $isi[0] = (float)round($fetch[0]['jan'] / 1000);
+        $isi[1] = (float)round($fetch[0]['feb'] / 1000);
+        $isi[2] = (float)round($fetch[0]['mar'] / 1000);
+        $isi[3] = (float)round($fetch[0]['apr'] / 1000);
+        $isi[4] = (float)round($fetch[0]['may'] / 1000);
+        $isi[5] = (float)round($fetch[0]['jun'] / 1000);
+        $isi[6] = (float)round($fetch[0]['jul'] / 1000);
+        $isi[7] = (float)round($fetch[0]['aug'] / 1000);
+        $isi[8] = (float)round($fetch[0]['sep'] / 1000);
+        $isi[9] = (float)round($fetch[0]['okt'] / 1000);
+        $isi[10] =(float)round($fetch[0]['nov'] / 1000);
+        $isi[11] = (float)round($fetch[0]['des'] / 1000);
         $data['hutang'] = json_encode($isi);
 
         $fetch2 = TrInvoicePaymHdr::select(
@@ -90,18 +90,18 @@ class HomeController extends Controller
             ->where('status_void',FALSE)
             ->whereYear('invpayh_date','=',$year)->get()->toArray();
         $isi2 = array();
-        $isi2[0] = (float)$fetch2[0]['jan'] / 1000;
-        $isi2[1] = (float)$fetch2[0]['feb'] / 1000;
-        $isi2[2] = (float)$fetch2[0]['mar'] / 1000;
-        $isi2[3] = (float)$fetch2[0]['apr'] / 1000;
-        $isi2[4] = (float)$fetch2[0]['may'] / 1000;
-        $isi2[5] = (float)$fetch2[0]['jun'] / 1000;
-        $isi2[6] = (float)$fetch2[0]['jul'] / 1000;
-        $isi2[7] = (float)$fetch2[0]['aug'] / 1000;
-        $isi2[8] = (float)$fetch2[0]['sep'] / 1000;
-        $isi2[9] = (float)$fetch2[0]['okt'] / 1000;
-        $isi2[10] =(float)$fetch2[0]['nov'] / 1000;
-        $isi2[11] = (float)$fetch2[0]['des'] / 1000;
+        $isi2[0] = (float)round($fetch2[0]['jan'] / 1000);
+        $isi2[1] = (float)round($fetch2[0]['feb'] / 1000);
+        $isi2[2] = (float)round($fetch2[0]['mar'] / 1000);
+        $isi2[3] = (float)round($fetch2[0]['apr'] / 1000);
+        $isi2[4] = (float)round($fetch2[0]['may'] / 1000);
+        $isi2[5] = (float)round($fetch2[0]['jun'] / 1000);
+        $isi2[6] = (float)round($fetch2[0]['jul'] / 1000);
+        $isi2[7] = (float)round($fetch2[0]['aug'] / 1000);
+        $isi2[8] = (float)round($fetch2[0]['sep'] / 1000);
+        $isi2[9] = (float)round($fetch2[0]['okt'] / 1000);
+        $isi2[10] =(float)round($fetch2[0]['nov'] / 1000);
+        $isi2[11] = (float)round($fetch2[0]['des'] / 1000);
         $data['bayar'] = json_encode($isi2);
 
         $total_all = $fetch[0]['total'] + $fetch2[0]['total'];

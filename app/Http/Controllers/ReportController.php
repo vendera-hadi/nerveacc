@@ -1677,43 +1677,60 @@ class ReportController extends Controller
             return $pdf->download('AR_Summary.pdf');
         }else if($excel){
             $data['type'] = 'excel';
-            $data_ori = $fetch->toArray();
-            $data = array();
-            for($i=0; $i<count($data_ori); $i++){
-                if($data_ori[$i]['invpayh_date'] == NULL){
+            $excelData = array();
+            foreach($data['invoices'] as $inv){
+                $kwitansi = $paydate = $checkno = $payamount = [];
+                foreach($inv->paymentdtl as $paymdtl){
+                    if(!$paymdtl->paymenthdr->status_void){
+                        $kwitansi[] = $paymdtl->paymenthdr->no_kwitansi;
+                        $paydate[] = $paymdtl->paymenthdr->invpayh_date;
+                        $checkno[] = $paymdtl->paymenthdr->invpayh_checkno;
+                        $payamount[] = $paymdtl->invpayd_amount;
+                    }
+                }
+
+                if(count($paydate) <= 0){
+                    // kalau tidak ada pembayaran denda
                     $date1=date_create(date('Y-m-d'));
-                    $date2=date_create($data_ori[$i]['inv_duedate']);
-                    $diff=date_diff($date1,$date2);
-                    $hari = $diff->format("%a") - 7;
-                    $denda = 1/1000 * $hari * $data_ori[$i]['inv_amount'];
-                }else{
-                    $date1=date_create($inv->inv_payh_date);
                     $date2=date_create($inv->inv_duedate);
                     $diff=date_diff($date1,$date2);
+                    // $hari = $diff->format("%a") - 7;
                     $hari = $diff->format("%a");
-                    $denda = 1/1000 * $hari * $data_ori[$i]['inv_amount'];
+                    $denda = 1/1000 * $hari * $inv->inv_amount;
+                }else{
+                    // echo "denda gada";
+                    $hari = $denda = 0;
+                    if(end($paydate) > $inv->inv_duedate){
+                        $date1=date_create(end($paydate));
+                        $date2=date_create($inv->inv_duedate);
+                        $diff=date_diff($date1,$date2);
+                        $hari = $diff->format("%a");
+                        $denda = 1/1000 * $hari * $inv->inv_amount;
+                    }
                 }
-                $data[$i]=array(
-                    'Tgl. JT' =>$data_ori[$i]['jatuhtempo'],
-                    'No. Invoice' =>$data_ori[$i]['inv_number'],
-                    'Nilai Invoice' =>number_format($data_ori[$i]['inv_amount']),
-                    'No. Bayar' =>$data_ori[$i]['no_kwitansi'],
-                    'Tgl Bayar' =>$data_ori[$i]['tanggalbayar'],
-                    'No. Giro' =>$data_ori[$i]['invpayh_checkno'],
-                    'Nilai Bayar Koreksi' =>number_format($data_ori[$i]['invpayd_amount']),
-                    'Sisa' =>number_format($data_ori[$i]['invpayd_amount']),
-                    'Hari' =>($hari < 0 ? '-' : $hari),
-                    'Denda' =>number_format(($hari < 0 ? '0' : number_format($denda))),
+
+                // inv data
+                $excelData[]=array(
+                    'Tgl. JT' => date('d-m-Y',strtotime($inv->inv_duedate)),
+                    'No. Invoice' => $inv->inv_number,
+                    'Nilai Invoice' => "Rp ".number_format($inv->inv_amount),
+                    'Tgl Bayar' => implode(", ", $paydate),
+                    'No. Bayar' => implode(", ", $kwitansi),
+                    'Pembayaran' => implode(", ", $payamount),
+                    'Overdue' => $inv->inv_outstanding,
+                    'Keterlambatan (Hari)' =>($hari < 0 ? '-' : $hari),
+                    'Denda' => ($hari < 0 ? 0 : $denda),
                 );
             }
-            $border = 'A1:J';
+
+            $border = 'A1:I';
             $tp = 'xls';
-            return Excel::create('AR Summary Report', function($excel) use ($data,$border) {
-                $excel->sheet('AR Summary Report', function($sheet) use ($data,$border)
+            return Excel::create('AR Summary Report', function($excel) use ($excelData,$border) {
+                $excel->sheet('AR Summary Report', function($sheet) use ($excelData,$border)
                 {
-                    $total = count($data)+1;
+                    $total = count($excelData)+1;
                     $sheet->setBorder($border.$total, 'thin');
-                    $sheet->fromArray($data);
+                    $sheet->fromArray($excelData);
                 });
             })->download($tp);
         }else{
