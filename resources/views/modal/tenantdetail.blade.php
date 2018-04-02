@@ -40,11 +40,30 @@
       @if(count($rented) > 0)
         @foreach($rented as $key => $unit)
         <table width="100%">
-        <tr><td width="40%"><strong><u>Unit #{{$unit->unit_code}}</u></strong></td><td></td><td></td></tr>
-        <tr><td><strong>Unit Name</strong></td><td>:</td><td>{{$unit['unit_name']}} ({{$unit['unit_sqrt']}} m2)</td></tr>
-        <tr><td><strong>Virtual Account Utilities</strong></td><td>:</td><td>{{@$unit['va_utilities']}}</td></tr>
-        <tr><td><strong>Virtual Account Maintenance</strong></td><td>:</td><td>{{@$unit['va_maintenance']}}</td></tr>
-        </table>
+        	<tr>
+        		<td width="40%"><strong><u>Unit #{{$unit->unit_code}}</u></strong></td>
+        		<td></td>
+        		<td></td>
+        	</tr>
+        	<tr>
+        		<td width="40%"><strong>Status Kontrak</strong></td>
+        		<td>:</td>
+        		<td>{{$unit->contr_status}}</td>
+        	</tr>
+        	<tr>
+        		<td><strong>Unit Name</strong></td>
+        		<td>:</td>
+        		<td>{{$unit['unit_name']}} ({{$unit['unit_sqrt']}} m2)</td>
+        	</tr>
+        	<tr>
+				<td><strong>Virtual Account Utilities</strong></td>
+				<td>:</td><td>{{@$unit['va_utilities']}}</td>
+			</tr>
+			<tr>
+				<td><strong>Virtual Account Maintenance</strong></td>
+				<td>:</td>
+				<td>{{@$unit['va_maintenance']}}</td></tr>
+		</table>
         <br><br>
         @endforeach
       @else

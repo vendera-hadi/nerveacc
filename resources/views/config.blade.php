@@ -90,6 +90,11 @@
                                   <input type="number" min="1" max="31" name="invoice_startdate" class="form-control" value="{{$invoice_startdate}}">
                                 </div>
 
+                                <div class="form-group">
+                                  <label>PPJU</label>
+                                  <input type="number" min="1" max="31" name="ppju" class="form-control" value="{{$ppju}}" placeholder="Percentage">
+                                </div>
+
                                 @if(!empty($signature))
                                 <div class="form-group">
                                   <label>Current Signature</label><br>

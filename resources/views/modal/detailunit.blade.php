@@ -90,12 +90,13 @@
               <th>Email</th>
               <th>Address</th>
               <th>NPWP</th>
-              <th>Tax Name</th>
-              <th>Tax Address</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
             </tr>
             @if(count($renter) > 0)
             @foreach($renter as $rt)
-            <tr class="text-center">
+            <tr>
               <td>{{$rt->MsTenant->tenan_name}}</td>
               <td>{{$rt->MsTenant->tenan_idno}}</td>
               <td>{{$rt->MsTenant->tenan_phone}}</td>
@@ -103,8 +104,9 @@
               <td>{{$rt->MsTenant->tenan_email}}</td>
               <td>{{$rt->MsTenant->tenan_address}}</td>
               <td>{{$rt->MsTenant->tenan_npwp}}</td>
-              <td>{{$rt->MsTenant->tenan_taxname}}</td>
-              <td>{{$rt->MsTenant->tenan_tax_address}}</td>
+              <td>{{$rt->contr_startdate}}</td>
+              <td>{{$rt->contr_enddate}}</td>
+              <td>{{$rt->contr_status}}</td>
             </tr>
             @endforeach
             @else
