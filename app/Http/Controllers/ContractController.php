@@ -199,7 +199,7 @@ class ContractController extends Controller
                 else $status = '<strong>'.$value->contr_status.'</strong>';
                 $temp['contr_status'] = $status;
                 $temp['contr_terminate_date'] = !empty($value->contr_terminate_date) ? date('d/m/Y',strtotime($value->contr_terminate_date)) : '';
-                if($value->contr_status != 'confirmed') $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+                if($value->contr_status == 'inputed') $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                                                                     &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>
                                                                     &nbsp;<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
                 else if($value->contr_status == 'confirmed' && !empty($value->contr_terminate_date) ) $confirmed = '<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
@@ -1120,26 +1120,37 @@ class ContractController extends Controller
                 }
             });
         }
-        //PINDAH COST DETAIL TENANT KE OWNER
-        $contract_detail = TrContractInvoice::where('contr_id',$contr_id)->get();
         
-        if(count($contract_detail) >0){
-           $owner_unit = MsUnitOwner::where('unit_id',$contractData->unit_id)->get();
-           $ctr_owner = TrContract::where('tenan_id',$owner_unit[0]->tenan_id)->where('unit_id',$owner_unit[0]->unit_id)->get();
-           for($i=0; $i<count($contract_detail); $i++){
-                 $inputContractInv = [
-                            'continv_amount' => $contract_detail[$i]->continv_amount,
-                            'continv_period' => $contract_detail[$i]->continv_period,
-                            'continv_start_inv' => $contract_detail[$i]->continv_start_inv,
-                            'continv_next_inv' => $contract_detail[$i]->continv_next_inv,
-                            'contr_id' => $ctr_owner[0]->id,
-                            'invtp_id' => $contract_detail[$i]->invtp_id,
-                            'costd_id' => $contract_detail[$i]->costd_id,
-                            'order' => $contract_detail[$i]->order,
-                        ];
-                        TrContractInvoice::create($inputContractInv);
-           }
+        $status_kepemilikan = MsTenant::where('id',$tenan_id)->first();
+        if($status_kepemilikan->tent_id == 1){
+            //JIKA OWNER
+            $update_unit = ['unit_isavailable'=>'t'];
+            MsUnit::where('id',$contractData->unit_id)->update($update_unit);
+            $update_tenan_type = ['tent_id'=>'4'];
+            MsTenant::where('id',$contractData->tenan_id)->update($update_tenan_type);
+            MsUnitOwner::where('unit_id',$contractData->unit_id)->where('tenan_id',$contractData->tenan_id)->delete();
+        }else if($status_kepemilikan->tent_id == 2){
+            //PINDAH COST DETAIL TENANT KE OWNER
+            $contract_detail = TrContractInvoice::where('contr_id',$contr_id)->get();
+            if(count($contract_detail) >0){
+               $owner_unit = MsUnitOwner::where('unit_id',$contractData->unit_id)->get();
+               $ctr_owner = TrContract::where('tenan_id',$owner_unit[0]->tenan_id)->where('unit_id',$owner_unit[0]->unit_id)->get();
+               for($i=0; $i<count($contract_detail); $i++){
+                     $inputContractInv = [
+                                'continv_amount' => $contract_detail[$i]->continv_amount,
+                                'continv_period' => $contract_detail[$i]->continv_period,
+                                'continv_start_inv' => $contract_detail[$i]->continv_start_inv,
+                                'continv_next_inv' => $contract_detail[$i]->continv_next_inv,
+                                'contr_id' => $ctr_owner[0]->id,
+                                'invtp_id' => $contract_detail[$i]->invtp_id,
+                                'costd_id' => $contract_detail[$i]->costd_id,
+                                'order' => $contract_detail[$i]->order,
+                            ];
+                            TrContractInvoice::create($inputContractInv);
+               }
+            }
         }
+
         //UPDATE STATUS KE CLOSED
         $update_contract = ['contr_status'=>'closed'];
         TrContract::where('id',$contr_id)->update($update_contract);

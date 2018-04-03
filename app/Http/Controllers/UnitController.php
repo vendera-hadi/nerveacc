@@ -358,6 +358,17 @@ class UnitController extends Controller
         return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit, 'owned_units' => $owned_units, 'tenan_id' => $tenan_id]);
     }
 
+    public function getPopupOptions2(Request $request){
+        $keyword = $request->input('keyword');
+        $edit = $request->input('edit');
+        $getAll = @$request->input('all');
+        $tenan_id = @$request->tenan;
+        $fetch = MsUnit::where('unit_isavailable','t');
+        $fetch = $fetch->paginate(10);
+        $owned_units = [];
+        return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit, 'owned_units' => $owned_units, 'tenan_id' => $tenan_id]);
+    }
+
     public function getOptions_account(){
         try{
             $all = MsVirtualAccount::all()->where('viracc_isactive',TRUE);

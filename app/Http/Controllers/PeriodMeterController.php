@@ -15,6 +15,7 @@ use App\Models\TrMeter;
 use App\Models\MsUnit;
 use App\Models\MsCostDetail;
 use App\Models\CutoffHistory;
+use App\Models\MsConfig;
 // use App\Models\ListrikAirLog;
 use DB;
 use Excel;
@@ -551,6 +552,7 @@ class PeriodMeterController extends Controller
 
             })->get();
             $prd = $request->input('prd');
+            $ppju = MsConfig::where('name','ppju')->first();
 
             foreach ($data as $key => $value) {
                 if(!empty(@$value->unit)){
@@ -573,7 +575,7 @@ class PeriodMeterController extends Controller
                         }else{
                             $meter_cost = $min;
                         }
-                        $bpju = (0.03 * $meter_cost);
+                        $bpju = ($ppju->value/100 * $meter_cost);
                         // echo "Meter cost $meter_cost<br>";
                         // echo "BPJU $bpju<br>";
                         $subtotal = $meter_cost + $bpju;
@@ -603,9 +605,9 @@ class PeriodMeterController extends Controller
                         $meter_row->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>0,'total'=>$total]);
                     }
                 }
-                Session::flash('msg', 'Upload Success.');
-                return back();
             }
+            Session::flash('msg', 'Upload Success.');
+            return back();
         }
         return back();
     }

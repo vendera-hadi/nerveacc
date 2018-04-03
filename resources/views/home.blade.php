@@ -216,7 +216,7 @@ Dashboard
   </div>
 @endsection
 @section('footer-scripts')
-<script type="text/javascript" src="{{ asset('plugins/chartjs/Chart.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/chartjs/Chart.js') }}"></script>
 <script>
   $(function () {
 
@@ -279,12 +279,12 @@ Dashboard
       legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
       //Boolean - whether to make the chart responsive
       responsive: true,
-      maintainAspectRatio: true
+      maintainAspectRatio: true,
+      multiTooltipTemplate: "<%= addCommas(value) %>",
     };
 
     barChartOptions.datasetFill = false;
     barChart.Bar(barChartData, barChartOptions);
-
 
     var areaChartData2 = {
       labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July',"Aug", "Sep", "Oct", "Nov", "Des"],
@@ -382,12 +382,25 @@ Dashboard
       // Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
       maintainAspectRatio: true,
       //String - A legend template
-      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>"
+      legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<segments.length; i++){%><li><span style=\"background-color:<%=segments[i].fillColor%>\"></span><%if(segments[i].label){%><%=segments[i].label%><%}%></li><%}%></ul>",
+      multiTooltipTemplate: "<%= addCommas(value) %>",
     };
     //Create pie or douhnut chart
     // You can switch between pie and douhnut using the method below.
     pieChart.Doughnut(PieData, pieOptions);
 
   });
+
+  function addCommas(nStr) {
+    nStr += '';
+    x = nStr.split('.');
+    x1 = x[0];
+    x2 = x.length > 1 ? '.' + x[1] : '';
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
+    }
+    return x1 + x2;
+  }
 </script>
 @endsection

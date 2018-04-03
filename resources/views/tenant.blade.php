@@ -266,7 +266,7 @@
         var currenturl;
         $('#addUnitButton,#unitButton').click(function(){
             $('#unitModal').modal('show');
-            currenturl = '{{route('unit.popup',['all'=>1])}}';
+            currenturl = '{{route('unit.popup2',['all'=>1])}}';
             $.post(currenturl,null, function(data){
                 $('#unitModalContent').html(data);
             });
