@@ -52,7 +52,7 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        if(!\Session::has('membership_token')) return redirect('login')->with('error','You can\'t Login before signin from JLM website');
+        //if(!\Session::has('membership_token')) return redirect('login')->with('error','You can\'t Login before signin from JLM website');
         $this->validateLogin($request);
 
         // If the class is using the ThrottlesLogins trait, we can automatically throttle

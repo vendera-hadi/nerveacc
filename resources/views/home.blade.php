@@ -220,6 +220,21 @@ Dashboard
 <script>
   $(function () {
 
+    function formatNumber(number, decimalsLength, decimalSeparator, thousandSeparator) {
+           var n = number,
+               decimalsLength = isNaN(decimalsLength = Math.abs(decimalsLength)) ? 2 : decimalsLength,
+               decimalSeparator = decimalSeparator == undefined ? "," : decimalSeparator,
+               thousandSeparator = thousandSeparator == undefined ? "." : thousandSeparator,
+               sign = n < 0 ? "-" : "",
+               i = parseInt(n = Math.abs(+n || 0).toFixed(decimalsLength)) + "",
+               j = (j = i.length) > 3 ? j % 3 : 0;
+
+           return sign +
+               (j ? i.substr(0, j) + thousandSeparator : "") +
+               i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousandSeparator) +
+               (decimalsLength ? decimalSeparator + Math.abs(n - i).toFixed(decimalsLength).slice(2) : "");
+    }
+
   	var areaChartData = {
       labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Des"],
       datasets: [
@@ -241,7 +256,7 @@ Dashboard
           pointStrokeColor: "rgba(60,141,188,1)",
           pointHighlightFill: "#fff",
           pointHighlightStroke: "rgba(60,141,188,1)",
-          data: {{ $bayar }}
+          data: {{ $bayar }},
         }
       ]
     };
@@ -277,6 +292,12 @@ Dashboard
       barDatasetSpacing: 1,
       //String - A legend template
       legendTemplate: "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].fillColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+      tooltipTemplate : function(valueObj) {
+        return formatNumber(valueObj.value, 2, ',',  '.');
+      },
+      multiTooltipTemplate: function(valueObj) {
+        return formatNumber(valueObj.value, 0, ',',  '.')+' K';
+      },
       //Boolean - whether to make the chart responsive
       responsive: true,
       maintainAspectRatio: true,
@@ -324,6 +345,9 @@ Dashboard
     barChartData2.datasets[0].fillColor = "#f7f70e";
     barChartData2.datasets[0].strokeColor = "#e0e00d";
     barChartData2.datasets[0].pointColor = "#e0e00d";
+    barChartOptions.tooltipTemplate = function(valueObj) {
+        return formatNumber(valueObj.value, 0, ',',  '.') + 'KwH';
+      }
     var barChartOptions2                  = barChartOptions;
 
     barChartOptions2.datasetFill = false
@@ -335,6 +359,9 @@ Dashboard
     barChartData3.datasets[0].fillColor = "#5292f9";
     barChartData3.datasets[0].strokeColor = "#1c73ff";
     barChartData3.datasets[0].pointColor = "#1c73ff";
+    barChartOptions.tooltipTemplate = function(valueObj) {
+        return formatNumber(valueObj.value, 0, ',',  '.') + 'm3';
+      }
     var barChartOptions3                  = barChartOptions;
 
     barChartOptions3.datasetFill = false

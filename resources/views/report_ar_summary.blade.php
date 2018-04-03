@@ -71,9 +71,9 @@
                 }else{
                     // echo "denda gada";
                     $hari = $denda = 0;
-                    if($paydate[0] > $inv->inv_duedate){
-                        $date1=date_create($inv->inv_payh_date);
-                        $date2=date_create($paydate[0]);
+                    if(end($paydate) > $inv->inv_duedate){
+                        $date1=date_create(end($paydate));
+                        $date2=date_create($inv->inv_duedate);
                         $diff=date_diff($date1,$date2);
                         $hari = $diff->format("%a");
                         $denda = 1/1000 * $hari * $inv->inv_amount;

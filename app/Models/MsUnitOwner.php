@@ -9,4 +9,9 @@ class MsUnitOwner extends Model
    protected $table ='ms_unit_owner';
    protected $fillable =['unitow_id','unitow_start_date','unit_id','tenan_id'];
    public $timestamps  = false;
+
+   public function tenant()
+   {
+      return $this->belongsTo('App\Models\MsTenant','tenan_id');
+   }
 }

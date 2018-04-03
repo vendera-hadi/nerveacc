@@ -96,6 +96,19 @@ class MsConfigSeeder extends Seeder
                 'name' => 'coa_hutang_titipan',
                 'desc' => 'COA Hutang Titipan',
                 'value' => 21999
+            ],[
+                'name' => 'ppju',
+                'desc' => 'PPJU',
+                'value' => 3
+            ],[
+                'name' => 'coa_denda',
+                'desc' => 'COA Denda',
+                'value' => 21999
+            ],
+            [
+                'name' => 'coa_ppn',
+                'desc' => 'COA PPN',
+                'value' => 21999
             ]
             ]);
     }

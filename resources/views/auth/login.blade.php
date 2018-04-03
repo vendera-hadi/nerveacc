@@ -32,7 +32,6 @@
     @endif
 
     <div class="login-box-body">
-    @if(Session::get('membership_token'))
     <p class="login-box-msg"> Signin terlebih dulu untuk masuk ke aplikasi</p>
     <form action="{{ url('/login') }}" method="post">
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -58,10 +57,7 @@
         </div>
     </form>
 
-    <a href="{{ url('/password/reset') }}">{{ trans('adminlte_lang::message.forgotpassword') }}</a>
-    @else
-    <p class="login-box-msg"> Maaf, anda harus login terlebih dahulu melalui website JLM <a href="http://accounting.ptjlm.com">DISINI</a></p>
-    @endif
+
 
 
 
