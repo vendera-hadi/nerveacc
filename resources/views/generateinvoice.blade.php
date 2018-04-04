@@ -34,6 +34,13 @@
                     <form action="post" id="formGenerate">
                     <div class ="row">
                         <div class="col-sm-3">
+                            <select name="invtp_id" class="form-control" required>
+                                @foreach($invtypes as $invtp)
+                                <option value="{{$invtp->id}}">{{$invtp->invtp_name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
                             <select id="month" name="month" class="form-control" required>
                                 <option value="">Choose Month</option>
                                 @for($i=1;$i<=12;$i++)
@@ -87,8 +94,8 @@
         var data = $(this).serialize();
         $('#generateResult').html('<img src="{{asset('img/facebook.gif')}}">');
         $.post('{{route('invoice.generate')}}',data, function(result){
-            if(result.errorMsg){ 
-                $.messager.alert('Warning',result.errorMsg); 
+            if(result.errorMsg){
+                $.messager.alert('Warning',result.errorMsg);
                 $('#generateResult').html('');
             }
             else{ $('#generateResult').html(result); }

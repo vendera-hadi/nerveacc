@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests;
 use Auth;
+// load library
+use App\Libs\Invoice;
+use App\Libs\Contract;
+use App\Libs\CostCreator;
+
 // load model
 use App\Models\TrInvoice;
 use App\Models\TrInvoiceDetail;
@@ -27,6 +32,7 @@ use App\Models\TrInvoicePaymhdr;
 use App\Models\TrInvoicePaymdtl;
 use App\Models\Autoreminder;
 use App\Models\MsEmailTemplate;
+use App\Models\InvoiceScheduler;
 use DB;
 use PDF;
 
@@ -135,11 +141,13 @@ class InvoiceController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['inv_post'] = !empty($value->inv_post) ? 'yes' : 'no';
                 $temp['checkbox'] = '<input type="checkbox" name="check" data-posting="'.$value->inv_post.'" value="'.$value->id.'">';
+
                 if(!$value->inv_iscancel){
                     $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Receipt</a>';
 
                     if(!empty((int)number_format($value->inv_outstanding))) $temp['action_button'] .= ' | <a href="'.url('invoice/sendreminder?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Send Reminder</a>';
                 }
+
                 $temp['inv_iscancel'] = $value->inv_iscancel;
                 // $temp['daysLeft']
                 $result['rows'][] = $temp;
@@ -184,7 +192,8 @@ class InvoiceController extends Controller
     }
 
     public function generateInvoice(Request $request){
-        return view('generateinvoice');
+        $data['invtypes'] = MsInvoiceType::all();
+        return view('generateinvoice', $data);
     }
     /*
     //ORIGINAL
@@ -519,425 +528,117 @@ class InvoiceController extends Controller
     }
     */
 
+    public function generateInvSchedule($total, $periodStart, $periodEnd, $invoice_type_id)
+    {
+        // get sejumlah total task yang akan dikerjakan
+        $schedules = InvoiceScheduler::where('status','new')->where('period_start', $periodStart)->where('period_end', $periodEnd)
+                        ->where('invtp_id', $invoice_type_id)
+                        ->orderBy('id');
+        if(!empty($total)) $schedules = $schedules->limit($total);
+        $schedules = $schedules->get();
+        $total = 0;
+        foreach ($schedules as $sch) {
+            // call class invoice
+            $invoice = new Invoice;
+            $invoice->setPeriod(date('m',strtotime($sch->period_start)), date('Y',strtotime($sch->period_end)));
+            $invoice->setInvoiceType($sch->invtp_id);
+            $invoice->setContract($sch->contract_id);
+
+            $contract = $invoice->getContract();
+            echo "<br><b>Contract # ".$contract->contr_no."</b> ";
+            if(!$invoice->exists()){
+                // generating cost details
+                $contract = new Contract($periodStart, $periodEnd);
+                $contract->setContract($sch->contract_id);
+                $cost_details = $contract->getCostItems($sch->invtp_id);
+                $countCost = 0;
+                $tempDetails = [];
+                foreach ($cost_details as $costdt) {
+                    // echo $costdt.",";
+                    $cost = new CostCreator;
+                    $cost->setCostItem($costdt);
+                    $cost->setInvType($sch->invtp_id);
+                    $cost->setContract($sch->contract_id);
+                    $cost->setInvStartDate($invoice->getInvStartDate());
+                    $cost->setPeriod($sch->period_start, $sch->period_end);
+                    $detail = $cost->generateDetail();
+                    // var_dump($detail);
+                    if(!empty($detail)){
+                        $countCost++;
+                        $tempDetails[] = $detail;
+                    }
+                }
+                // jika semua cost lengkap dan bisa digenerate, masukin child
+                // echo $countCost." dan ".count($cost_details)."<br>";
+                if($countCost == count($cost_details)){
+                    // echo "ADD CHILD";
+                    foreach ($tempDetails as $dt) {
+                        $invoice->addChild($dt);
+                    }
+                    $invoice->addDenda();
+                    $invoice->addPPN();
+                    $invoice->addMaterai();
+                }
+                // echo "SKIPPED";
+
+                // echo $invoice->create();
+                if($invoice->create()){
+                    echo "Generated<br>--------------<br>";
+                    $total++;
+                }else{
+                    echo "<br>Not Generated<br>--------------<br>";
+                }
+            }else{
+                echo "Already Generated<br>--------------<br>";
+            }
+
+        }
+        echo "<h3>$total Invoice(s) Generated</h3><br><br>";
+    }
+
     public function postGenerateInvoice(Request $request){
         try{
-        $include_outstanding = @MsConfig::where('name','inv_outstanding_active')->first()->value;
-        $month = $request->input('month');
-        // bulan dikurang 1 karna generate invoice utk bulan kemarin
-        $year = $request->input('year');
-        // if($month == 1) $year = $year-1;
+            $month = $request->input('month');
+            $year = $request->input('year');
+            $invoice_type_id = $request->input('invtp_id');
 
-        // if($month == 1) $month = 12;
-        // else $month = $month - 1;
-        $month = str_pad($month, 2, 0, STR_PAD_LEFT);
-        // BUAT DATE LIMITATION PERIOD METER
-        $tempTimeStart = implode('-', [$year,$month,'01']);
-        $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
-        $companyData = MsCompany::first();
-        $stampData = MsCostItem::where('cost_code','STAMP')->first();
-        if(!empty($stampData)) $stampCoa = $stampData->cost_coa_code;
-        else $stampCoa = 21400;
+            // call class invoice
+            $invoice = new Invoice;
+            $invoice->setPeriod($month, $year);
+            $periodStart = $invoice->getPeriodStart();
+            $periodEnd = $invoice->getPeriodEnd();
 
+            // call class contract
+            $contract = new Contract($periodStart, $periodEnd);
+            // cari contract availabel, yg bakal dipakai utk generate
+            $contract->setInvType($invoice_type_id);
+            $countAvailableContract = $contract->countAvailable();
+            // validasi jika contract availabel kosong
+            if(empty($countAvailableContract)) return '<h4><strong>There is no contract available</strong></h4>';
 
-        // $maxTime = date('Y-m-d',strtotime("first day of previous month"));
-        $maxTime = date('Y-m-d',strtotime("first day of this month"));
-        // invoice dpt di generate paling lama bulan sekarang, generate utk bulan kmaren
-        if($tempTimeStart > $maxTime) return response()->json(['errorMsg' => 'Invoice can\'t be generated more than this month']);
+            // validasi jika generate lebih dari bulan ini
+            // if($periodStart > date('Y-m-d',strtotime("first day of this month"))) return response()->json(['errorMsg' => 'Invoice can\'t be generated more than this month']);
 
-        // cari di contract where date between start & end date
-        // $availableContract = TrContract::whereNull('contr_terminate_date')->where(DB::raw("'".$tempTimeStart."'"),'>=','contr_startdate')->where(DB::raw("'".$tempTimeEnd."'"),'<=','contr_enddate')->get();
-        $availableContract = DB::select('select * from "tr_contract" where "contr_iscancel" = false and "contr_status" != \'closed\' and \''.$tempTimeStart.'\' >= "contr_startdate" and \''.$tempTimeStart.'\' <= "contr_enddate" and "contr_status" = \'confirmed\' ');
-
-        $totalavContract = count($availableContract);
-        if($totalavContract == 0) return '<h4><strong>There is no contract available</strong></h4>';
-
-        // dari semua yg available check invoice yg sudah exist di BULAN YG DIFILTER
-        // $invoiceExists = TrInvoice::select('tr_contract.id')->join('tr_contract','tr_invoice.contr_id','=','tr_contract.id')->whereNull('tr_contract.contr_terminate_date')->where('tr_contract.contr_startdate','>=',$tempTimeStart)->where('tr_contract.contr_enddate','<=',$tempTimeEnd)->toSql();
-        //edited rahmat, gw ganti monthnya jadi bulan berjalan soalnya aneh kok dia ngecek malah bulan yg lalu harusnya ngecek bulan berjalan
-        $invoiceExists = DB::select('select "tr_contract"."id" from "tr_invoice" inner join "tr_contract" on "tr_invoice"."contr_id" = "tr_contract"."id" where "tr_contract"."contr_iscancel" = false and "tr_contract"."contr_status" != \'closed\' and \''.$tempTimeStart.'\' >= "tr_contract"."contr_startdate" and \''.$tempTimeStart.'\' <= "tr_contract"."contr_enddate" and EXTRACT(MONTH FROM "tr_invoice"."inv_date") = '.$month.' group by "tr_contract"."id" ');
-        // echo 'total available : '.$totalavContract.' , total exist : '.$invoiceExists->count(); die();
-        if(count($invoiceExists) >= $totalavContract){
-            return '<h4><strong>All of Invoices this month is already exist in Invoice List</strong></h4> ';
-        }
-
-        // contract pengecualian
-        $invExceptions = [];
-        if(count($invoiceExists) > 0){
-            foreach ($invoiceExists as $key => $val) {
-                array_push($invExceptions, $val->id);
-            }
-        }
-
-        $invoiceGenerated = 0;
-        $totalInvoice = 0;
-        $countInvoice = 0;
-        // looping contract yg bs digenerate PER CONTRACT
-        foreach ($availableContract as $key => $contract) {
-            if(!in_array($contract->id, $invExceptions)){
-                // generate invoice, tentuin berapa invoice yg digenerate PER CONTRACT group by Invoice type
-                $totalInv = TrContractInvoice::select('tr_contract_invoice.contr_id','tr_contract_invoice.invtp_id')->join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
-                            ->where('tr_contract_invoice.contr_id',$contract->id)->groupBy('tr_contract_invoice.invtp_id','tr_contract_invoice.contr_id')->get();
-                $totalInvoice+= count($totalInv);
-                foreach ($totalInv as $key => $ctrInv) {
-                    // echo "Contract #".$ctrInv->contr_id."<br>";
-                    $countInvoice+=1;
-                    // AMBIL CONTRACT INVOICE PER INVOICE TYPE
-                    $details = TrContractInvoice::join('tr_contract',DB::raw('tr_contract_invoice.contr_id::integer'),'=','tr_contract.id')->select('tr_contract_invoice.*')->where('contr_id',$ctrInv->contr_id)->where('invtp_id',$ctrInv->invtp_id);
-                    // HANDLE JOIN UNIT
-                    // if(array_key_exists($contract->unit_id, $mergedunits)){
-                    //     $details = $details->orWhere(function($query) use($ctrInv, $contract, $mergedunits){
-                    //                     $query->where('tr_contract.unit_id',$mergedunits[$contract->unit_id])->where('invtp_id',$ctrInv->invtp_id);
-                    //                 });
-                    // }
-                    $details = $details->get();
-                    // echo "DETAILS<br>";
-                    // echo $details->pluck('unit_id')."<br>";
-
-                    $invDetail = [];
-                    $insertFlag = true;
-                    // echo "<br>Invoice #".$countInvoice."<br>";
-                    // Looping per Invoice yg sdh di grouping (CONTRACT INVOICE PER INV TYPE)
-                    $totalPay = 0;
-                    foreach ($details as $key2 => $value) {
-                        //echo "Invoice ".$key." , detail ".$key2."<br><br>";
-                        // LAST INV DATE
-                        //echo $value->continv_next_inv;
-                        if(!empty($value->continv_next_inv)) $last_inv_date = $value->continv_next_inv;
-                        else $last_inv_date = $tempTimeStart;
-
-                        //echo $tempTimeStart." dan ".$last_inv_date;
-                        // GENERATE KALAU PERIODE LAST INV UDA LEWAT
-                        if($tempTimeStart >= $last_inv_date){
-                            // KALAU is meter true, hitung cost meteran
-                            if(!empty($value->costdetail->costd_ismeter)){
-                                // echo 'meter<br>';
-                                // $totalPay = 0;
-                                // get harga meteran selama periode bulan ini
-                                $lastPeriodMeterofMonth = TrPeriodMeter::where(\DB::raw('Extract(month from prd_billing_date)'),'=',$month)->where('status',1)->orderBy('id','desc')->first();
-                                // echo $tempTimeStart." dan ".$tempTimeEnd; die();
-                                if($lastPeriodMeterofMonth){
-                                    $meter = TrMeter::select('tr_meter.id as tr_meter_id','tr_meter.*','tr_period_meter.*','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_unit','ms_cost_detail.id as costd_id')
-                                        ->join('tr_period_meter','tr_meter.prdmet_id','=','tr_period_meter.id')
-                                        ->join('ms_cost_detail','tr_meter.costd_id','=','ms_cost_detail.id')
-                                        ->where('tr_meter.contr_id', $contract->id)->where('tr_meter.costd_id',$value->costd_id)
-                                        ->where('tr_period_meter.id',$lastPeriodMeterofMonth->id)->first();
-                                    // echo "<br>Last Prd ".$lastPeriodMeterofMonth->id."<br>";
-                                    // echo "<br>Meter<br>".$meter."<br>";
-                                    if(empty($meter)){
-                                        echo "<br><b>Contract #".$contract->contr_no."</b><br>Contract Code <strong>".$value->contract->contr_code."</strong> Cost Item <strong>".$value->costd_name."</strong>, Meter ID is not inputed yet<br>";
-                                        $insertFlag = false;
-                                    }else{
-                                        $amount = $meter->total;
-                                        // note masi minus rumus
-                                        // KALAU ELECTRICITY
-                                        if($value->costdetail->cost_id == 1){
-                                            // echo 'listrik '.$amount."<br>";
-                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Awal : ".number_format($meter->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($meter->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($meter->meter_used,2);
-                                        }else if($value->costdetail->cost_id == 2){
-                                            // KALAU AIR
-                                            // echo 'air '.$amount."<br>";
-                                            $note = $meter->costd_name." : ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date))."<br>Meter Awal : ".number_format($meter->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($meter->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($meter->meter_used,0)."<br>Biaya Pemakaian : ".number_format($meter->meter_used,0);
-                                        }else{
-                                            // echo 'other '.$amount."<br>";
-                                            $note = $meter->costd_name."<br>Konsumsi : ".number_format($meter->meter_used,0)." ".$meter->costd_unit." Per ".date('d/m/Y',strtotime($meter->prdmet_start_date))." - ".date('d/m/Y',strtotime($meter->prdmet_end_date));
-                                        }
-
-
-                                        // rumus masih standar, rate * meter used + burden + admin
-                                        // $amount = ($meter->meter_used * $meter->meter_cost) + $meter->meter_burden + $meter->meter_admin;
-                                        // $amount = $meter->meter_cost;
-                                        $invDetail[] = [
-                                            'invdt_amount' => $amount,
-                                            'invdt_note' => $note,
-                                            'costd_id' => $meter->costd_id,
-                                            'meter_id' => $meter->tr_meter_id
-                                        ];
-                                        $updateCtrInv[$value->id] = [
-                                            'continv_start_inv' => $meter->prd_billing_date,
-                                            'continv_next_inv' => date('Y-m-d',strtotime($meter->prd_billing_date." +".$value->continv_period." months"))
-                                        ];
-                                        $totalPay+=$amount;
-                                        // echo 'totalpay : '.$totalPay."<br>";
-                                    }
-                                }else{
-                                    echo "<br><b>Contract #".$contract->contr_no."</b><br> Meter Input for ".date('F Y',strtotime($tempTimeStart)).' was not inputed yet. Go to <a href="'.url('period_meter').'">Meter Input</a> and create Period then Input Meter of this particular month<br>';
-                                    $insertFlag = false;
-                                }
-
-                            }
-                            else{
-                                // echo 'non meter<br>';
-                                // YG NOT USING METER, GENERATE FULLRATE AJA
-                                // $totalPay = 0;
-                                if(!empty($value->contract->contr_terminate_date) && ($tempTimeEnd > $value->contract->contr_terminate_date)){
-                                    // JIKA CONTRACT TERMINATE DATE BERAKHIR BULAN INI
-                                    echo "<br><b>Contract #".$contract->contr_no."</b><br> terminated at ".date('d/m/Y',strtotime($value->contract->contr_terminate_date)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here";
-                                    $insertFlag = false;
-                                }else if($tempTimeEnd > $value->contract->contr_enddate){
-                                    // JIKA CONTRACT SUDAH BERAKHIR
-                                    echo "<br><b>Contract #".$contract->contr_no."</b><br> expired at ".date('d/m/Y',strtotime($value->contract->contr_enddate)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here";
-                                    $insertFlag = false;
-                                }else{
-                                    $usingRumusPeriod = false;
-                                    // JENIS COST ITEM
-                                    if($value->costdetail->costitem->is_service_charge){
-                                        // RUMUS KHUSUS PERIODE
-                                        $usingRumusPeriod = true;
-                                        $period = $value->continv_period;
-                                        $period_classifications = [];
-                                        for($i=1; $i<=12; $i++){
-                                            $temp[] = $i;
-                                            if($i%$period == 0){
-                                                $period_classifications[] = $temp;
-                                                $temp = [];
-                                            }
-                                        }
-                                        $currentmonth = date('m',strtotime($tempTimeStart));
-                                        $currentmonth = (int)$currentmonth;
-                                        foreach ($period_classifications as $pval) {
-                                            if(in_array($currentmonth, $pval)){
-                                                $first = reset($pval);
-                                                $last = end($pval);
-                                                $monthGapPrev = $currentmonth - $first;
-                                                $monthGapNext = $last - $currentmonth;
-                                            }
-                                        }
-                                        // SERVICE CHARGE
-                                        $currUnit = MsUnit::find($value->contract->unit_id);
-                                        $alias = @MsConfig::where('name','service_charge_alias')->first()->value;
-                                        $note = $alias." ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$monthGapNext." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
-                                        // echo "SERVICE CHARGE :<br>";
-                                        // echo $note."<br>";
-                                        $amount = ($value->contract->MsUnit->unit_sqrt * $value->costdetail->costd_rate * $value->continv_period) + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
-                                        $amount = round($amount,2);
-                                    }else if($value->costdetail->costitem->is_sinking_fund){
-                                        $usingRumusPeriod = true;
-                                        // RUMUS KHUSUS PERIODE
-                                        $period = $value->continv_period;
-                                        $period_classifications = [];
-                                        for($i=1; $i<=12; $i++){
-                                            $temp[] = $i;
-                                            if($i%$period == 0){
-                                                $period_classifications[] = $temp;
-                                                $temp = [];
-                                            }
-                                        }
-                                        $currentmonth = date('m',strtotime($tempTimeStart));
-                                        $currentmonth = (int)$currentmonth;
-                                        foreach ($period_classifications as $pval) {
-                                            if(in_array($currentmonth, $pval)){
-                                                $first = reset($pval);
-                                                $last = end($pval);
-                                                $monthGapPrev = $currentmonth - $first;
-                                                $monthGapNext = $last - $currentmonth;
-                                            }
-                                        }
-                                        // SINKING FUND (DUMMY)
-                                        $currUnit = MsUnit::find($value->contract->unit_id);
-                                        $note = $value->costdetail->costd_name." (SF)  ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$monthGapNext." months"))."<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($value->costdetail->costd_rate)." x ".$value->continv_period." months";
-                                        // echo "SINKING FUND :<br>";
-                                        // echo $note."<br>";
-                                        $amount = ($value->contract->MsUnit->unit_sqrt * $value->costdetail->costd_rate * $value->continv_period) + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
-                                        $amount = round($amount,2);
-                                    }else if($value->costdetail->costitem->is_insurance){
-                                        // INSURANCE
-                                        // find unit utk ngambil luas unit
-                                        $currUnit = MsUnit::find($value->contract->unit_id);
-                                        $npp_building = $companyData->comp_npp_insurance;
-                                        // npp unit  = lust unit per luas total unit
-                                        $npp_unit =  $currUnit->unit_sqrt / $companyData->comp_sqrt;
-                                        $note = $value->costdetail->costd_name." (Rp. ".number_format($value->costdetail->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$value->continv_period." months"));
-                                        // rumus cost + burden + admin
-                                        $smount = $value->costdetail->costd_rate / $npp_building * $npp_unit;
-                                    }else{
-                                        // RUMUS KHUSUS PERIODE
-                                        $usingRumusPeriod = true;
-                                        $period = $value->continv_period;
-                                        $period_classifications = [];
-                                        for($i=1; $i<=12; $i++){
-                                            $temp[] = $i;
-                                            if($i%$period == 0){
-                                                $period_classifications[] = $temp;
-                                                $temp = [];
-                                            }
-                                        }
-                                        $currentmonth = date('m',strtotime($tempTimeStart));
-                                        $currentmonth = (int)$currentmonth;
-                                        foreach ($period_classifications as $pval) {
-                                            if(in_array($currentmonth, $pval)){
-                                                $first = reset($pval);
-                                                $last = end($pval);
-                                                $monthGapPrev = $currentmonth - $first;
-                                                $monthGapNext = $last - $currentmonth;
-                                            }
-                                        }
-                                        // ELSE
-                                        $note = $value->costdetail->costd_name." Periode ".date('F Y',strtotime($tempTimeStart))." s/d ".date('F Y',strtotime($tempTimeStart." +".$monthGapNext." months"));
-                                        // rumus cost + burden + admin
-                                        $amount = $value->costdetail->costd_rate + $value->costdetail->costd_burden + $value->costdetail->costd_admin;
-                                    }
-                                    $invDetail[] = [
-                                        'invdt_amount' => $amount,
-                                        'invdt_note' => $note,
-                                        'costd_id' => $value->costd_id
-                                    ];
-                                    $updateCtrInv[$value->id] = [
-                                        'continv_start_inv' => $tempTimeStart,
-                                        'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$value->continv_period." months"))
-                                    ];
-
-                                    if($usingRumusPeriod){
-                                        $updateCtrInv[$value->id] = [
-                                            'continv_start_inv' => date('Y-m-d',strtotime($tempTimeStart)),
-                                            'continv_next_inv' => date('Y-m-d',strtotime($tempTimeStart." +".$monthGapNext." months"))
-                                        ];
-                                    }
-                                    // echo 'non meter cost '.$amount."<br>";
-                                    $totalPay+=$amount;
-                                    // echo 'totalpay : '.$totalPay."<br>";
-                                }
-                                // ends
-                            }
-                            // end cek meter not meter
-                        }else{
-                            $insertFlag = false;
-                        }
-                        // end cek periode dan rangkai detail
-
-                    }
-
-                    //echo var_dump($invDetail)."<br><br>";
-
-                    // $insertFlag = false;
-                    // INSERT DB
-                    if($insertFlag && count($details) > 0){
-                        // HABIS JABARIN DETAIL, INSERT INVOICE
-
-                        // INCLUDE OUTSTANDING JK ADA
-                        if(!empty($include_outstanding)){
-                            $totalOutstanding = TrInvoice::where('contr_id',$contract->id)->sum('inv_outstanding');
-                            $invDetail[] = ['invdt_amount' => $totalOutstanding, 'invdt_note'=> 'Tagihan Belum Terbayar', 'costd_id' => 0];
-                        }
-                        // KARNA DENDA ITU KAN UTK PAYMENT TELAT, GENERATOR DIGENERATE SEBELUM WKT BAYAR JD BLUM TENTU ADA DISINI
-
-                        // PPN
-                        $tenan = MsTenant::find($value->contract->tenan_id);
-                        $usePPN = !empty($tenan) ? $tenan->tenan_isppn : 0;
-                        if(!empty($usePPN)){
-                            $totalPPN = 0.1 * $totalPay;
-                            $invDetail[] = ['invdt_amount' => $totalPPN, 'invdt_note' => 'PPH 10%', 'costd_id'=> 0, 'coa_code' => '40900'];
-                            $totalPay += $totalPPN;
-                        }
-
-                        // TAMBAHIN STAMP DUTY
-                        // total pay lebih dr 1jt
-                        if($totalPay > $companyData->comp_materai2_amount){
-                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'MATERAI', 'costd_id'=> 0, 'coa_code' => $stampCoa];
-                            $totalStamp = $companyData->comp_materai2;
-                        }else if($totalPay >= $companyData->comp_materai1_amount && $totalPay <= $companyData->comp_materai2_amount){
-                            // 250rb sampai 1jt
-                            $invDetail[] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'MATERAI', 'costd_id'=> 0, 'coa_code' => $stampCoa];
-                            $totalStamp = $companyData->comp_materai1;
-                        }else{
-                            // under 250rb
-                            $totalStamp = 0;
-                        }
-
-                        DB::transaction(function () use($year, $month, $value, $totalPay, $contract, $invDetail, $totalStamp, $updateCtrInv, $tempTimeStart){
-                            // insert invoice
-                            // get last prefix
-                            $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$value->invtype->invtp_prefix.'-'.substr($year, -2).$month.'-%')->orderBy('id','desc')->first();
-                            if($lastInvoiceofMonth){
-                                $lastPrefix = explode('-', $lastInvoiceofMonth->inv_number);
-                                $lastPrefix = (int) $lastPrefix[2];
-                            }else{
-                                $lastPrefix = 0;
-                            }
-                            $newPrefix = $lastPrefix + 1;
-                            $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
-
-                            $now = date('Y-m-d');
-                            // tambahan, date invoice diambil dr config invoice start date
-                            $invoice_startdate = @MsConfig::where('name','invoice_startdate')->first()->value;
-                            if(!empty($invoice_startdate)){
-                                $invoice_startdate = str_pad($invoice_startdate,2,'0',STR_PAD_LEFT);
-                                $invoice_startdate = date('Y-m-'.$invoice_startdate, strtotime($tempTimeStart." +1 month"));
-                            }else{
-                                $invoice_startdate = $now;
-                            }
-                            // $duedate = date('Y-m-d', strtotime('+'.$value->continv_period.' month'));
-                            $duedate_interval = @MsConfig::where('name','duedate_interval')->first()->value;
-                            $duedate = date('Y-m-'.$duedate_interval, strtotime($tempTimeStart.' +1 month'));
-
-                            // $totalWithTaxStamp = ($totalPay * 1.1) + $totalStamp;
-                            $totalWithStamp = $totalPay + $totalStamp;
-
-                            $footer = @MsConfig::where('name','footer_invoice')->first()->value;
-                            $label = @MsConfig::where('name','footer_label_inv')->first()->value;
-                            $sendEmail = @MsConfig::where('name','send_inv_email')->first()->value;
-                            $ccEmail = @MsConfig::where('name','cc_email')->first()->value;
-
-                            $inv = [
-                                'tenan_id' => $value->contract->tenan_id,
-                                'inv_number' => $value->invtype->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
-                                'inv_faktur_no' => $value->invtype->invtp_prefix."-".substr($year, -2).$month."-".$newPrefix,
-                                'inv_faktur_date' => $invoice_startdate,
-                                'inv_date' => $invoice_startdate,
-                                'inv_duedate' => $duedate,
-                                'inv_amount' => $totalWithStamp,
-                                'inv_ppn' => 0.1,
-                                'inv_outstanding' => $totalWithStamp,
-                                'inv_ppn_amount' => $totalWithStamp, // sementara begini dulu, ikutin cara di foto invoice
-                                'inv_post' => 0,
-                                'invtp_id' => $value->invtp_id,
-                                'contr_id' => $contract->id,
-                                'created_by' => Auth::id(),
-                                'updated_by' => Auth::id(),
-                                'footer' => $footer,
-                                'label' => $label
-                            ];
-                            $insertInvoice = TrInvoice::create($inv);
-
-                            // insert detail
-                            foreach($invDetail as $indt){
-                                $indt['inv_id'] = $insertInvoice->id;
-                                TrInvoiceDetail::create($indt);
-                            }
-
-                            // update periode di tr contract inv
-                            foreach ($updateCtrInv as $key => $contractInvoice) {
-                                TrContractInvoice::where('id',$key)->update($contractInvoice);
-                            }
-
-                            // email
-                            if(!empty($sendEmail)){
-                                // BTH SMTP BUAT TESTING, UNSTABLE
-                                try{
-                                    // $txtMessage = 'Yth Customer kami di tempat, Berikut adalah Invoice yang harus dibayarkan. Detail bisa di download di attachment';
-                                    $txtMessage = @MsConfig::where('name','inv_body_email')->first()->value;
-                                    \Mail::send('email-template',['message', $txtMessage], function($message) use($inv, $companyData, $ccEmail, $insertInvoice){
-                                        $tenan = MsTenant::find($inv['inv_id']);
-                                        $data = file_get_contents(url('invoice/print_faktur').'?id='.$insertInvoice->id.'&type=pdf');
-                                        $message->attachData($data, 'Invoice-'.$inv['inv_number'].'.pdf');
-                                        $message->from('admin@ptjlm.com', 'Admin Unit');
-                                        if(!empty($ccEmail)) $message->cc($ccEmail);
-                                        $message->to($tenan->tenan_email)->subject('Tagihan '.$inv['inv_number'].' - '.$companyData->comp_name);
-                                    });
-                                }catch(\Exception $e){
-
-                                }
-                            }
-                        });
-                        $invoiceGenerated++;
-                    }
-                    //end insert db
+            $availableContract = $contract->getAvailable();
+            // loop sejumlah contract = sejumlah invoice
+            $generated = 0;
+            foreach ($availableContract as $contract) {
+                // check contract is generated or not
+                $check = InvoiceScheduler::where('period_start',$periodStart)->where('period_end', $periodEnd)->where('invtp_id', $invoice_type_id)->where('contract_id', $contract->id)->first();
+                if(!$check){
+                    $scheduler = new InvoiceScheduler;
+                    $scheduler->period_start = $periodStart;
+                    $scheduler->period_end = $periodEnd;
+                    $scheduler->invtp_id = $invoice_type_id;
+                    $scheduler->contract_id = $contract->id;
+                    $scheduler->status = 'new';
+                    $scheduler->save();
                 }
-
-
+                $generated += 1;
             }
-        }
-
-        return '<h3>'.$invoiceGenerated.' of '.$totalInvoice.' Invoices Generated, Please Check Invoice List <a href="'.url('invoice').'">Here</a></h3>';
+            // echo "generated $generated";
+            // generate 100 task pertama
+            $this->generateInvSchedule(null, $periodStart, $periodEnd, $invoice_type_id);
         }catch(\Exception $e){
             return response()->json(['errorMsg'=>$e->getMessage()]);
         }

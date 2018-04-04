@@ -13,7 +13,7 @@ class TrInvoice extends Model
    		return $this->belongsTo('App\Models\MsTenant','tenan_id');
    }
    public function TrInvoiceDetail(){
-   		return $this->hasMany('App\Models\TrInvoiceDetail','tenan_id');
+   		return $this->hasMany('App\Models\TrInvoiceDetail','inv_id');
    }
    public function InvoiceType(){
    		return $this->belongsTo('App\Models\MsInvoiceType','invtp_id');
