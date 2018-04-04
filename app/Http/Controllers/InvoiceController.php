@@ -135,9 +135,11 @@ class InvoiceController extends Controller
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['inv_post'] = !empty($value->inv_post) ? 'yes' : 'no';
                 $temp['checkbox'] = '<input type="checkbox" name="check" data-posting="'.$value->inv_post.'" value="'.$value->id.'">';
-                $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Receipt</a>';
+                if(!$value->inv_iscancel){
+                    $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Receipt</a>';
 
-                if(!empty((int)number_format($value->inv_outstanding))) $temp['action_button'] .= ' | <a href="'.url('invoice/sendreminder?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Send Reminder</a>';
+                    if(!empty((int)number_format($value->inv_outstanding))) $temp['action_button'] .= ' | <a href="'.url('invoice/sendreminder?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Send Reminder</a>';
+                }
                 $temp['inv_iscancel'] = $value->inv_iscancel;
                 // $temp['daysLeft']
                 $result['rows'][] = $temp;
@@ -1082,6 +1084,10 @@ class InvoiceController extends Controller
         if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closing_at));
 
         foreach ($ids as $id) {
+            // get coa code dari invoice type
+            $invoiceHd = TrInvoice::with('MsTenant')->find($id);
+            if($invoiceHd->inv_iscancel) break;
+
             // coa ambil dari grouping cost detail
             $invDetails = TrInvoiceDetail::select('coa_code','ar_coa_code','cost_name','invdt_amount','invdt_note')->leftJoin('ms_cost_detail','ms_cost_detail.id','=','tr_invoice_detail.costd_id')
                                         ->leftJoin('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')
@@ -1106,8 +1112,6 @@ class InvoiceController extends Controller
                 }
             }
 
-            // get coa code dari invoice type
-            $invoiceHd = TrInvoice::with('MsTenant')->find($id);
             // validasi backdate posting
             if(!empty($limitMinPostingDate) && $invoiceHd->inv_date < $limitMinPostingDate){
                 return response()->json(['error'=>1, 'message'=> "You can't posting if one of these invoice date is before last close date"]);
@@ -1309,10 +1313,10 @@ class InvoiceController extends Controller
     public function cancel(Request $request){
         try{
             $id = $request->id;
-            // TrInvoice::where('id',$id)->update(['inv_iscancel'=>1]);
             $invoice = TrInvoice::find($id);
             TrContractInvoice::where('invtp_id',$invoice->invtp_id)->where('contr_id',$invoice->contr_id)->update(['continv_next_inv'=>null]);
-            TrInvoice::where('id',$id)->delete();
+            // TrInvoice::where('id',$id)->delete();
+            TrInvoice::where('id',$id)->update(['inv_iscancel'=>1]);
             return response()->json(['success' => 1, 'message' => 'Cancel Invoice Success']);
         }catch(\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Error Occured']);
@@ -1431,6 +1435,8 @@ class InvoiceController extends Controller
         $list = TrInvoice::select('tenan_id','tenan_name',\DB::raw('COUNT(tr_invoice.id) as totalinv'))
                 ->join('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
                 ->where('inv_outstanding', '>', 0)
+                ->where('inv_iscancel', 0)
+                ->where('inv_post',1)
                 ->where('inv_duedate', '<=', $now);
         if(!empty($request->q))
             $list = $list->where('ms_tenant.tenan_name','ilike','%'.$request->q.'%');
@@ -1440,7 +1446,7 @@ class InvoiceController extends Controller
                 ->orderBy('tenan_name')
                 ->paginate(20);
         foreach ($list as $key => $val) {
-            $temp = TrInvoice::select('inv_number','inv_outstanding')->where('tenan_id',$val->tenan_id)->where('inv_outstanding', '>', 0)->where('inv_duedate', '<=', $now);
+            $temp = TrInvoice::select('inv_number','inv_outstanding')->where('tenan_id',$val->tenan_id)->where('inv_outstanding', '>', 0)->where('inv_duedate', '<=', $now)->where('inv_iscancel',0);
             if(!empty($request->start) && !empty($request->end))
                 $temp = $temp->where('inv_date','>=',$request->start." 00:00:00")->where('inv_date','<=',$request->end.' 23:59:59');
             $list[$key]->invoices = $temp->get();
