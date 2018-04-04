@@ -570,7 +570,7 @@ class InvoiceController extends Controller
                 }
                 // jika semua cost lengkap dan bisa digenerate, masukin child
                 // echo $countCost." dan ".count($cost_details)."<br>";
-                if($countCost == count($cost_details)){
+                // if($countCost == count($cost_details)){
                     // echo "ADD CHILD";
                     foreach ($tempDetails as $dt) {
                         $invoice->addChild($dt);
@@ -578,7 +578,7 @@ class InvoiceController extends Controller
                     $invoice->addDenda();
                     $invoice->addPPN();
                     $invoice->addMaterai();
-                }
+                // }
                 // echo "SKIPPED";
 
                 // echo $invoice->create();
