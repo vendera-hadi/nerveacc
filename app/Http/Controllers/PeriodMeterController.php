@@ -311,6 +311,7 @@ class PeriodMeterController extends Controller
         $value_type = $request->input('value_type');
         $percentage = $request->input('percentage');
         $grossup = $request->input('grossup');
+        $ppjuData = @MsConfig::where('name','ppju')->first();
         try{
             DB::transaction(function () use($id, $meter_end, $meter_start, $meter_rate, $meter_burden, $meter_admin, $cost_id, $daya, $value_type, $percentage, $grossup){
                 foreach ($id as $key => $value) {
@@ -324,7 +325,8 @@ class PeriodMeterController extends Controller
                         }else{
                             $meter_cost = $min;
                         }
-                        $bpju = (0.03 * $meter_cost);
+                        $bpju_variable = !empty(@$ppjuData->value) ? $ppjuData->value : 0;
+                        $bpju = ($bpju_variable/100 * $meter_cost);
                         // echo "Meter cost $meter_cost<br>";
                         // echo "BPJU $bpju<br>";
                         $subtotal = $meter_cost + $bpju;

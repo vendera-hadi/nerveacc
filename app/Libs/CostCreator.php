@@ -278,17 +278,22 @@ class CostCreator {
         }
         $currentmonth = date('m',strtotime($this->periodStart));
         $currentmonth = (int)$currentmonth;
+        $invoice = null;
         foreach ($period_classifications as $pval) {
             if(in_array($currentmonth, $pval)){
                 $first = reset($pval);
                 $last = end($pval);
                 $this->monthGapPrev = $currentmonth - $first;
                 $this->monthGapNext = $last - $currentmonth;
+
+                // cari invoice yg ada dalam gap waktu ini
+                $invoice = TrInvoice::where('contr_id', $this->contract->id)->where('invtp_id',$this->invtp->id)->whereBetween(\DB::raw('EXTRACT(month from inv_date)'), [$first+1, $last+1])->where('inv_iscancel',0)->first();
             }
         }
+        // echo "<br>INVOICE:<br>".$invoice."<br><br>";
         // echo "<br>MONTH GAP : ".$this->monthGapNext."<br>";
-        if(date('m',strtotime($this->periodStart)) % $period == 1){
-            // suda lewat
+        if(empty($invoice)){
+            // inv kosong dalam gap waktu periode, allow insert
             $result = true;
         }
         return $result;

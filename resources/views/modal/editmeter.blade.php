@@ -30,7 +30,7 @@
               <th>Meter End</th>
               <th>Meter Used</th>
               <th>Meter Cost</th>
-              <th>BPJU 3%</th>
+              <th>BPJU</th>
               <th>Total</th>
             </tr>
             @foreach($listrik as $cdt)
