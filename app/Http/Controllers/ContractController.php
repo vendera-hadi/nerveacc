@@ -22,6 +22,12 @@ use App\Models\CutoffHistory;
 use App\Models\MsCompany;
 use App\Models\MsConfig;
 use App\Models\MsTenant;
+use App\Models\MsTenantType;
+// libs
+use App\Libs\Invoice;
+use App\Libs\Contract;
+use App\Libs\CostCreator;
+
 use Validator;
 use DB;
 use Auth;
@@ -39,13 +45,14 @@ class ContractController extends Controller
         ->count();
         $data['total_unit'] = $total_unit;
         $data['total_contract'] = $total_contract;
-        $data['cost_items'] = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
+        $data['cost_items'] = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name', 'ms_cost_detail.cost_id')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
         $invoice_types = MsInvoiceType::all();
         $data['marketing_agents'] = MsMarketingAgent::all();
         $data['invoice_types'] = '';
         foreach ($invoice_types as $key => $val) {
             $data['invoice_types'] = $data['invoice_types'].'<option value="'.$val->id.'">'.$val->invtp_name.'</option>';
         }
+        $data['invoice_utility'] = @MsInvoiceType::first()->invtp_name;
         return view('contract', $data);
     }
 
@@ -238,9 +245,8 @@ class ContractController extends Controller
 
     public function getdetail(Request $request){
         $contractId = $request->id;
-        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.virtual_account','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
+        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_unit.va_utilities','ms_unit.va_maintenance','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
         ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
-        ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
         // ->join('ms_virtual_account','ms_virtual_account.id',"=",'tr_contract.viracc_id')
         ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
         ->where('tr_contract.id',$contractId)->first();
@@ -284,8 +290,10 @@ class ContractController extends Controller
             foreach ($invoice_types as $key => $val) {
                 $inv_types_options = $inv_types_options.'<option value="'.$val->id.'">'.$val->invtp_name.'</option>';
             }
-            $cost_items = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
+            $cost_items = MsCostDetail::select('ms_cost_detail.id','ms_cost_detail.cost_id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
+            $invoice_utility = @MsInvoiceType::first()->invtp_name;
             return view('modal.editcontract', ['id'=>$contractId, 'costdetail' => $costdetail, 'invoice_types'=>$invoice_types, 'cost_items' => $cost_items, 'inv_types_options' => $inv_types_options
+                ,'invoice_utility' => $invoice_utility
                 ]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -327,15 +335,18 @@ class ContractController extends Controller
 
     public function optionParent(Request $request){
         $key = $request->q;
-        $fetch = TrContract::select('tr_contract.id','contr_code','contr_no','ms_tenant.tenan_name','ms_unit.unit_code')
-                ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
-                ->join('ms_tenant','tr_contract.tenan_id','=','ms_tenant.id')
-                ->where(\DB::raw('LOWER(ms_tenant.tenan_name)'),'ilike','%'.$key.'%')->orWhere(\DB::raw('LOWER(ms_unit.unit_code)'),'ilike','%'.$key.'%')
-                ->orderBy('ms_tenant.tenan_name')->limit(15)->get();
+        // $fetch = TrContract::select('tr_contract.id','contr_code','contr_no','ms_tenant.tenan_name','ms_unit.unit_code')
+        //         ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+        //         ->join('ms_tenant','tr_contract.tenan_id','=','ms_tenant.id')
+        //         ->where(\DB::raw('LOWER(ms_tenant.tenan_name)'),'ilike','%'.$key.'%')->orWhere(\DB::raw('LOWER(ms_unit.unit_code)'),'ilike','%'.$key.'%')
+        //         ->orderBy('ms_tenant.tenan_name')->limit(15)->get();
+
+        $fetch = MsTenant::where(\DB::raw('LOWER(tenan_name)'),'ilike','%'.$key.'%')->orderBy('tenan_name')->limit(15)->get();
         $result['results'] = [];
         // array_push($result['results'], ['id'=>"0",'text'=>'No Tenan / Unit']);
         foreach ($fetch as $key => $value) {
-            $temp = ['id'=>$value->id, 'text'=>$value->tenan_name." / ".$value->unit_code];
+            // $temp = ['id'=>$value->id, 'text'=>$value->tenan_name." / ".$value->unit_code];
+            $temp = ['id'=>$value->id, 'text'=>$value->tenan_name];
             array_push($result['results'], $temp);
         }
         return json_encode($result);
@@ -391,8 +402,8 @@ class ContractController extends Controller
             // check owner
             $unitOwner = MsUnitOwner::where('unit_id',$request->input('unit_id'))->first();
             if(!empty($unitOwner)){
-                $checkUnitOwner = TrContract::where('tenan_id',$unitOwner->tenan_id)->where('unit_id',$request->input('unit_id'))->where('contr_status','confirmed')->count();
-                if($checkUnitOwner < 1)
+                $checkUnitOwner = TrContract::where('tenan_id',$unitOwner->tenan_id)->where('unit_id',$request->input('unit_id'))->where('contr_status','confirmed')->first();
+                if(!$checkUnitOwner)
                     return ['status' => 0, 'message' => 'Contract Pemilik harus dibuat dan diconfirm terlebih dahulu sebelum membuat contract tenant'];
             }else{
                 return ['status' => 0, 'message' => 'Unit harus mempunyai owner dahulu'];
@@ -543,7 +554,7 @@ class ContractController extends Controller
             try{
                 DB::transaction(function () use($cost_id, $costd_ids, $costd_name, $costd_unit, $costd_rate, $costd_burden, $costd_admin, $inv_type, $is_meter, $contractID, $cost_name, $cost_code, $inv_type_custom, $periods, $orders){
                     // delete all of cost detail of current contract id
-                    
+
                     // reinsert to cost detail and tr contract invoice
                     // insert
                     if(count($costd_ids) > 0){
@@ -606,7 +617,7 @@ class ContractController extends Controller
             }catch(\Exception $e){
                 return response()->json(['errorMsg' => $e->getMessage()]);
             }
-        
+
         return ['status' => 1, 'message' => 'Update Success'];
     }
 
@@ -735,11 +746,24 @@ class ContractController extends Controller
         foreach($ids as $id){
             // check unit
             $contract = TrContract::find($id);
-            $checkUnitCtr = TrContract::where('unit_id',$contract->unit_id)->where('contr_status','confirmed')->count();
-            if($checkUnitCtr >= 2){
+            $checkUnitCtr = TrContract::where('unit_id',$contract->unit_id)->where('contr_status','confirmed')->get();
+            if(count($checkUnitCtr) >= 2){
                 // gagal, unit dibatasin cuma di 2 contract aja
                 return response()->json(['errorMsg' => 'Confirm gagal, unit dalam contract ini sudah dipakai di contract lain']);
             }
+            // check exists
+            $exists = TrContract::where('unit_id',$contract->unit_id)->where('tenan_id',$contract->tenan_id)->where('contr_status','confirmed')->where('contr_iscancel',0)->first();
+            if($exists) return response()->json(['errorMsg' => 'Confirm gagal, contract dengan tenant dan unit yang sama sudah ada sebelumnya di contract dan status sudah confirmed']);
+
+            // check owner
+            $checkOwner = MsUnitOwner::where('unit_id',$contract->unit_id)->first();
+            if(!$checkOwner) return response()->json(['errorMsg' => 'Confirm gagal, Unit yang anda pilih sebelumnya belum mempunyai owner. Harap diisi owner dari unit tersebut utk melanjutkan']);
+            // jika tenanid bukan owner, maka dianggap sebagai penyewa baru, maka hapus trcontractinv dari owner agar dapat dilanjutkan penyewa baru
+            if(@$checkOwner->tenan_id != $contract->tenan_id){
+                $contractOwner = TrContract::where('tenan_id', @$checkOwner->tenan_id)->where('unit_id',$contract->unit_id)->where('contr_status','confirmed')->where('contr_iscancel',0)->first();
+                if($contractOwner) TrContractInvoice::where('contr_id',@$contractOwner->id)->delete();
+            }
+
             TrContract::where('id',$id)->update(['contr_status'=>'confirmed']);
         }
         return response()->json(['success'=>true]);
@@ -920,10 +944,13 @@ class ContractController extends Controller
             //  2. Contract yg bakal Expired dalam minggu2 ini
             $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name')
                     ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')->where(function($query){
-                        $query->where('contr_terminate_date','<=', date("Y-m-d", strtotime("+1 week")))->where('contr_status','confirmed');
-                    })->orWhere(function($query){
                         $query->where('contr_enddate','<=', date("Y-m-d", strtotime("+1 week")))->whereNull('contr_terminate_date')->where('contr_status','confirmed');
+                    })->orWhere(function($query){
+                        $query->whereNotNull('contr_terminate_date')->where('contr_status','confirmed');
                     });
+                    /*->where(function($query){
+                        $query->where('contr_terminate_date','<=', date("Y-m-d", strtotime("+1 week")))->where('contr_status','confirmed');
+                    })*/
             // pake ini utk list yg semingguan
             // whereBetween('contr_terminate_date', [date('Y-m-d'), date("Y-m-d", strtotime("+1 week"))])
 
@@ -995,13 +1022,24 @@ class ContractController extends Controller
         }
     }
 
+    public function close(Request $request)
+    {
+        $id = $request->contr_id;
+        $contract = TrContract::find($id);
+        $contract->contr_status = 'closed';
+        $contract->save();
+        return redirect()->back()->with('success', 'Contract closed');
+    }
+
     public function closeCtrModal(Request $request){
         $id = $request->id;
         $contract = TrContract::find($id);
+        $data['contract'] = $contract;
         // cek apakah si contract ini adalah si owner
         $cekOwner = MsUnitOwner::where('unit_id',$contract->unit_id)->where('tenan_id',$contract->tenan_id)->first();
-        $data['cutoffFlag'] = 0;
+
         // klo owner, tetep generate tapi minta renew contract. kalo bukan owner, generate dan cutoff nya dilimpahin
+        $data['cutoffFlag'] = 0;
         if(!$cekOwner) $data['cutoffFlag'] = 1;
 
         // cari kontrak pairing, owner dari unit tersebut
@@ -1017,16 +1055,15 @@ class ContractController extends Controller
                                 ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                 ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                                 ->where('contr_id',$id)->where('costd_ismeter',0)->get();
-
-        if(count($data['contInvMeter']) > 0){
-            $data['contractNo'] = $data['contInvMeter'][0]->contr_no;
-            $data['unitCode'] = $data['contInvMeter'][0]->unit_code;
-        }else{
-            $data['contractNo'] = $data['contInvNoMeter'][0]->contr_no;
-            $data['unitCode'] = $data['contInvNoMeter'][0]->unit_code;
+        $data['direct_close'] = false;
+        if(empty(count($data['contInvMeter'])) && empty(count($data['contInvNoMeter'])) ){
+            // jika sama sekali tidak punya contract invoice arahin utk close lgsg
+            $data['direct_close'] = true;
+            return view('modal.closecontract', $data);
         }
         $data['contr_id'] = $id;
         $data['tenan_id'] = $contract->tenan_id;
+        $data['bpju'] = @MsConfig::where('name','ppju')->first()->value;
         // LAST MONTH PERIOD METER
         $tempTimeStart = date("Y-m-01", strtotime("-1 months"));
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
@@ -1056,6 +1093,12 @@ class ContractController extends Controller
         $meter_rate = @$request->meter_rate;
         $meter_burden = @$request->meter_burden;
         $meter_admin = @$request->meter_admin;
+        $cost_id = @$request->cost_id;
+        $daya = @$request->daya;
+        $value_type = @$request->value_type;
+        $percentage = @$request->percentage;
+        $grossup = @$request->grossup;
+
         $nonmeter_unit_id = @$request->nonmeter_unit_id;
         $nonmeter_costd_id = @$request->nonmeter_costd_id;
         $nonmeter_rate = @$request->nonmeter_rate;
@@ -1065,6 +1108,7 @@ class ContractController extends Controller
         $contr_id = @$request->contr_id;
         $tenan_id = @$request->tenan_id;
         $cutoffStatus = @$request->cutoff;
+        $date_end = @$request->date;
 
         $insertCutoff = [];
         $insertTrMeter = [];
@@ -1074,154 +1118,138 @@ class ContractController extends Controller
         $month = date('m');
 
         $companyData = MsCompany::first();
-        $ppjuData = MsConfig::where('name','ppju')->get();
         $contractData = TrContract::find($contr_id);
 
+        $date_start = !empty($contractData->contr_terminate_date) ? $contractData->contr_terminate_date : $contractData->contr_enddate;
+        $date_start = date('Y-m-01', strtotime($date_start));
+        $contractLib = new Contract($date_start,$date_end);
+        $contractLib->setContract($contr_id);
+        $contractOwner = $contractLib->getOwnerContract();
+        if(!$contractOwner) return response()->json(['error'=>true, 'message'=>'Contract Owner of this Unit not Found, Please Create New Contract of Unit Owner first']);
+
+        $invoice = new Invoice;
+        $invoice->setPeriod(date('m',strtotime($date_end)),date('Y',strtotime($date_end)));
+        $invoice->setContract($contr_id);
+
+        $tempCtrInv = [];
+
         // GENERATE INVOICE METER
-        if(count($meter_units) > 0){
-            // jika bukan owner, cari contract owner
+        $invoice->setInvoiceType(1);
+        $cost_details = $contractLib->getCostItems(1);
+        // generate cost meter details
+        $tempDetails = [];
+        foreach ($cost_details as $costdt) {
+            // echo $costdt.",";
+            $cost = new CostCreator;
+            $cost->setCostItem($costdt);
+            $cost->setInvType(1);
+            $cost->setContract($contr_id);
+            $cost->setInvStartDate($invoice->getInvStartDate());
+            $cost->setPeriod($date_start,$date_end);
+            // panggil class buat itung tipe meter
+            $calculator = $cost->getCalc();
+            $key = array_search ($costdt, $meter_costdids);
+            $calculator->setValue([
+                    'meter_unit' => @$meter_units[$key],
+                    'meter_start' => @$meter_start[$key],
+                    'meter_end' => @$meter_end[$key],
+                    'meter_rate' => @$meter_rate[$key],
+                    'meter_burden' => @$meter_burden[$key],
+                    'meter_admin' => @$meter_admin[$key],
+                    'daya' => @$daya[$key],
+                    'value_type' => @$value_type[$key],
+                    'percentage'=> @$percentage[$key],
+                    'grossup' => @$grossup[$key],
+                    'close_date' => @$date_end
+                ]);
+            $calculator->setCostDetail($costdt);
+            $calculator->setContract($contr_id);
+            $total = $calculator->calculate();
+            $newmeter = $calculator->insertToMeter();
+            $cutoffmeter = $calculator->insertToCutoffMeter();
+            $cost->setCustomAmount($total);
+            $cost->setMeter($newmeter);
+            $detail = $cost->defineOutput($calculator->customNote($date_start, $date_end));
+            // var_dump($detail);
+            if(!empty($detail)){
+                $tempDetails[] = $detail;
+            }
+
+            // jika tenant/penyewa, costdt pindahin ke owner
             if(!empty($cutoffStatus)){
-                $owner = MsUnitOwner::where('unit_id', $nonmeter_unit_id[0])->first();
-                if(empty($owner)) return response()->json(['error'=>true, 'message'=>'Unit Owner not Found, Please Create New Contract of Unit Owner first']);
-                // kalau owner punya, cari contract nya owner
-                $contractOwner = TrContract::where('tenan_id',$owner->tenan_id)->where('unit_id',$nonmeter_unit_id[0])->where('contr_status','confirmed')->whereNull('contr_terminate_date')->first();
-                if(empty($contractOwner)) return response()->json(['error'=>true, 'message'=>'Contract Owner of this Unit not Found, Please Create New Contract of Unit Owner first']);
+                $contrInv = TrContractInvoice::where('contr_id',$contr_id)->where('invtp_id',1)->where('costd_id',$costdt)->first();
+                $tempCtrInv[] = $contrInv->replicate();
             }
-
-            $insertInvDetail = [];
-            $proRateMeterRatio = date('d') / date('t');
-            // grouping by Invoice Type
-            $groupsInv = TrContractInvoice::select('invtp_id')->join('ms_invoice_type','tr_contract_invoice.invtp_id','=','ms_invoice_type.id')
-                ->join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
-                ->where('contr_id',$contr_id)->where('costd_ismeter',1)->groupBy('invtp_id')->get();
-
-            $groups = [];
-            // SETIAP INV TYPE BIKIN 1 INVOICE
-            foreach ($groupsInv as $grp) {
-                $contrInv = TrContractInvoice::join('ms_invoice_type','tr_contract_invoice.invtp_id','=','ms_invoice_type.id')
-                        ->where('contr_id',$contr_id)->where('invtp_id',$grp->invtp_id)->get();
-                foreach ($contrInv as $cinv) {
-                    $groups[$grp->invtp_id][] = $cinv->costd_id;
-                }
-            }
-            foreach($groups as $keygrp => $grp){
-                $totalAmount = 0;
-                foreach($meter_units as $key => $unit) {
-                    if(in_array($meter_costdids[$key], $grp)){
-                        // input ke cutoff meter
-                        $insertCutoff[$keygrp][] = ['unit_id'=>$unit, 'costd_id'=>$meter_costdids[$key], 'meter_start' => $meter_start[$key], 'meter_end'=>$meter_end[$key], 'close_date'=>date('Y-m-d')];
-                        // input ke tr meter(optional)
-                        $tempMeterUsed = $meter_end[$key] - $meter_start[$key];
-                        $tempMeterCost = ($tempMeterUsed * $meter_rate[$key]) + $meter_burden[$key] + $meter_admin[$key];
-                        if($meter_costdids[$key] == 4){
-                            //AIR tanpa PPJU
-                            $ppju = 0;
-                        }else{
-                            //LISTRIK yang ada PPJU
-                            $ppju = $ppjuData[0]->value/100 * $tempMeterCost;
-                        }
-                        $totalMeter = $tempMeterCost + $ppju;
-                        $totalAmount+=$totalMeter;
-                        $insertTrMeter[$keygrp][] = ['meter_start' => $meter_start[$key], 'meter_end'=>$meter_end[$key], 'meter_used'=>$tempMeterUsed, 'meter_cost' => $tempMeterCost, 'meter_burden' => $meter_burden[$key], 'meter_admin' => $meter_admin[$key], 'costd_id' => $meter_costdids[$key], 'prdmet_id' => 0, 'contr_id' => $contr_id, 'unit_id'=>$unit,'other_cost'=>$ppju, 'total'=>$totalAmount ];
-
-                        // buat inv detail
-                        $tempCostdt = MsCostDetail::find($meter_costdids[$key]);
-                        $insertInvDetail[$keygrp][] = ['invdt_amount' => $totalMeter, 'invdt_note' => $tempCostdt->costd_name." Periode ".date('01-m-Y')." s/d ".date('d-m-Y')." (Closed)",
-                                                'costd_id'=>$meter_costdids[$key]];
-                    }
-                }
-                if($totalAmount <= $companyData->comp_materai1_amount){
-                    $insertInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai1, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
-                    $totalInv = $totalAmount + $companyData->comp_materai1;
-                }else {
-                    $insertInvDetail[$keygrp][] = ['invdt_amount' => $companyData->comp_materai2, 'invdt_note' => 'Stamp Duty', 'costd_id'=> 0];
-                    $totalInv = $totalAmount + $companyData->comp_materai2;
-                }
-                $invoiceType = MsInvoiceType::find($keygrp);
-                $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like','CL-'.str_replace(" ", "", $invoiceType->invtp_prefix).'-'.substr($year, -2).$month.'-%')->orderBy('id','desc')->first();
-                if($lastInvoiceofMonth){
-                    $lastPrefix = explode('-', $lastInvoiceofMonth->inv_number);
-                    $lastPrefix = (int) $lastPrefix[2];
-                }else{
-                    $lastPrefix = 0;
-                }
-                $newPrefix = $lastPrefix + 1;
-                $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
-                $invNo = "CL-".str_replace(" ", "", $invoiceType->invtp_prefix)."-".substr($year, -2).$month."-".$newPrefix;
-
-                // generate invoice meter
-                $insertInvMeter[$keygrp] = [
-                                    'tenan_id'=>$tenan_id, 'inv_number'=>$invNo, 'inv_date'=>date('Y-m-d'),
-                                    'inv_duedate'=>date('Y-m-d', strtotime('+1 month')), 'inv_amount'=>$totalInv,
-                                    'inv_ppn'=>0.1, 'inv_ppn_amount'=> 1.1*$totalInv, 'inv_outstanding'=>$totalInv, 'inv_faktur_no' => $invNo,
-                                    'inv_faktur_date'=>date('Y-m-d'), 'invtp_id' => $keygrp, 'contr_id' => $contr_id, 'created_by' => Auth::id(), 'updated_by' => Auth::id()
-                                ];
-                $newPrefix = $lastPrefix + 1;
-                $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
-                $invNo = "CL-".str_replace(" ", "", $invoiceType->invtp_prefix)."-".substr($year, -2).$month."-".$newPrefix;
-
-                if(!empty($cutoffStatus)){
-                    // Oper Cost detail ID ke contract owner
-                    // cari next period dari contract owner sekarang
-                    $contrInvOwner = TrContractInvoice::where('contr_id',$contractOwner->id)->where('invtp_id',$keygrp)->where('costd_id',$grp[$key])->first();
-                    $contrInv = TrContractInvoice::where('contr_id',$contr_id)->where('invtp_id',$keygrp)->where('costd_id',$grp[$key])->first();
-                }
-            }
-            DB::transaction(function () use($insertCutoff, $insertTrMeter, $insertInvMeter, $insertInvDetail, $cutoffStatus, $groups) {
-                foreach($groups as $keygrp => $grp){
-                    $meterIds = [];
-                    $invoice = TrInvoice::create($insertInvMeter[$keygrp]);
-                    // Kalo Cutoff itu true (alias dia tenant sewa) generate Invoice buat owner next periode nya hrs simpan di history
-                    if(!empty($cutoffStatus)){
-                        foreach ($insertCutoff[$keygrp] as $coff) {
-                            CutoffHistory::create($coff);
-                        }
-                    }
-                    foreach ($insertTrMeter[$keygrp] as $mtr) {
-                        $meterIds[] = TrMeter::create($mtr);
-                    }
-                    foreach ($insertInvDetail[$keygrp] as $key => $invDt) {
-                        $invDt['inv_id'] = $invoice->id;
-                        if(isset($meterIds[$key])) $invDt['meter_id'] = $meterIds[$key]->id;
-                        TrInvoiceDetail::create($invDt);
-                    }
-                }
-            });
         }
-        
-        $status_kepemilikan = MsTenant::where('id',$tenan_id)->first();
-        if($status_kepemilikan->tent_id == 1){
-            //JIKA OWNER
-            $update_unit = ['unit_isavailable'=>'t'];
-            MsUnit::where('id',$contractData->unit_id)->update($update_unit);
-            $update_tenan_type = ['tent_id'=>'4'];
-            MsTenant::where('id',$contractData->tenan_id)->update($update_tenan_type);
-            MsUnitOwner::where('unit_id',$contractData->unit_id)->where('tenan_id',$contractData->tenan_id)->delete();
-        }else if($status_kepemilikan->tent_id == 2){
-            //PINDAH COST DETAIL TENANT KE OWNER
-            $contract_detail = TrContractInvoice::where('contr_id',$contr_id)->get();
-            if(count($contract_detail) >0){
-               $owner_unit = MsUnitOwner::where('unit_id',$contractData->unit_id)->get();
-               $ctr_owner = TrContract::where('tenan_id',$owner_unit[0]->tenan_id)->where('unit_id',$owner_unit[0]->unit_id)->get();
-               for($i=0; $i<count($contract_detail); $i++){
-                     $inputContractInv = [
-                                'continv_amount' => $contract_detail[$i]->continv_amount,
-                                'continv_period' => $contract_detail[$i]->continv_period,
-                                'continv_start_inv' => $contract_detail[$i]->continv_start_inv,
-                                'continv_next_inv' => $contract_detail[$i]->continv_next_inv,
-                                'contr_id' => $ctr_owner[0]->id,
-                                'invtp_id' => $contract_detail[$i]->invtp_id,
-                                'costd_id' => $contract_detail[$i]->costd_id,
-                                'order' => $contract_detail[$i]->order,
-                            ];
-                            TrContractInvoice::create($inputContractInv);
-               }
+
+        foreach ($tempDetails as $dt) {
+            $invoice->addChild($dt);
+        }
+        $invoice->addDenda();
+        $invoice->addPPN();
+        $invoice->addMaterai();
+        $invoice->create();
+
+        // GENERATE NON METER
+        $invTypes = TrContractInvoice::join('ms_cost_detail','tr_contract_invoice.costd_id','=','ms_cost_detail.id')
+                ->where('contr_id',$contr_id)->where('costd_ismeter',0)->groupBy('invtp_id')->pluck('invtp_id');
+        // loop invoice type selain yg menggunakan meter
+        foreach ($invTypes as $invtp_id) {
+            $invoice->setInvoiceType($invtp_id);
+            $cost_details = $contractLib->getCostItems($invtp_id);
+            $tempDetails = [];
+            foreach ($cost_details as $costdt) {
+                $cost = new CostCreator;
+                $cost->setCostItem($costdt);
+                $cost->setInvType($invtp_id);
+                $cost->setContract($contr_id);
+                $cost->setInvStartDate($invoice->getInvStartDate());
+                $cost->setPeriod($date_start,$date_end);
+                $detail = $cost->generateCutoffNonMeter();
+                if(!empty($detail)){
+                    $tempDetails[] = $detail;
+                }
+
+                // jika tenant/penyewa, costdt pindahin ke owner
+                if(!empty($cutoffStatus)){
+                    $contrInv = TrContractInvoice::where('contr_id',$contr_id)->where('invtp_id',$invtp_id)->where('costd_id',$costdt)->first();
+                    $tempCtrInv[] = $contrInv->replicate();
+                }
             }
+            // generate invoice
+            foreach ($tempDetails as $dt) {
+                $invoice->addChild($dt);
+            }
+            $invoice->addDenda();
+            $invoice->addPPN();
+            $invoice->addMaterai();
+            $invoice->create();
+        }
+
+        if(!empty($cutoffStatus)){
+            // add semua contract invoice dr tenant ke owner
+            foreach ($tempCtrInv as $ctrinv) {
+                $ctrinv->contr_id = $contractOwner->id;
+                $ctrinv->save();
+            }
+        }else{
+            // if owner, change status owner to tenant, unit jadi available
+            $unit = MsUnit::find($contractOwner->unit_id);
+            $unit->unit_isavailable = true;
+            $unit->save();
+            // update status tidak sebagai owner lg
+            $tenan_notowner = MsTenantType::where('tent_isowner',false)->first();
+            $unitowner = MsTenant::find($contractOwner->tenan_id);
+            $unitowner->tent_id = $tenan_notowner->id;
+            $unitowner->save();
+            // delete ownership
+            MsUnitOwner::where('unit_id',$unit->id)->where('tenan_id',$unitowner->id)->delete();
         }
 
         //UPDATE STATUS KE CLOSED
-        $update_contract = ['contr_status'=>'closed'];
-        TrContract::where('id',$contr_id)->update($update_contract);
+        $currentcontract = TrContract::find($contr_id);
+        $currentcontract->contr_status = 'closed';
+        $currentcontract->save();
         return response()->json(['success'=>true, 'message'=>'Invoice Generated for this Closed Contract']);
     }
 

@@ -18,10 +18,9 @@
 					<tr><td><strong>Tenant Code</strong></td><td>:</td><td>{{$fetch['tenan_code']}}</td></tr>
 					<tr><td><strong>Tenant Name</strong></td><td>:</td><td>{{$fetch['tenan_name']}}</td></tr>
 					<tr><td><strong>Tenant Id No</strong></td><td>:</td><td>{{$fetch['tenan_idno']}}</td></tr>
-					<tr><td><strong>Agent Code</strong></td><td>:</td><td>{{$fetch['mark_code']}}</td></tr>
-					<tr><td><strong>Agent Name</strong></td><td>:</td><td>{{$fetch['mark_name']}}</td></tr>
 
-					<tr><td><strong>Virtual Account</strong></td><td>:</td><td>{{$fetch['virtual_account']}}</td></tr>
+					<tr><td><strong>VA Utilities</strong></td><td>:</td><td>{{$fetch['va_utilities']}}</td></tr>
+          <tr><td><strong>VA Maintenance</strong></td><td>:</td><td>{{$fetch['va_maintenance']}}</td></tr>
 					<tr><td><strong>Billing Info Status</strong></td><td>:</td><td>{{$fetch['contr_status']}}</td></tr>
 					<tr><td><strong>Unit Code</strong></td><td>:</td><td>{{$fetch['unit_code']}}</td></tr>
 					<tr><td><strong>Unit Name</strong></td><td>:</td><td>{{$fetch['unit_name']}}</td></tr>

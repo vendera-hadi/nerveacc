@@ -102,7 +102,7 @@ class Invoice {
     // add PPN, posisi harus diletakkan belakangan
     public function addPPN()
     {
-        if($this->usingPPN()){
+        if($this->usingPPN() && $this->grandTotal > 0){
             $coaPPN = @MsConfig::where('name','coa_ppn')->first()->value;
             $totalTax = round(0.1 * $this->grandTotal);
             $this->taxPPN = $totalTax;
@@ -186,7 +186,7 @@ class Invoice {
         // return json_encode($this->children);
         // save details
         $newInvoice->TrInvoiceDetail()->saveMany($this->children);
-
+        $this->children = [];
         return $newInvoice;
     }
 
@@ -281,10 +281,20 @@ class Invoice {
                   ->where(DB::raw('EXTRACT(YEAR FROM inv_date)'), date('Y',strtotime($this->periodStart)))
                   ->where('inv_post', 1)
                   ->get();
+
         // strtotime($this->periodStart." -1 month")
 
         $totalDenda = $hariTelat = 0;
         foreach ($invoices as $key => $inv) {
+            // IF PPN sblm nya hanya ada PPN dan denda skip aja
+            $count = 0;
+            foreach ($inv->TrInvoiceDetail as $detail) {
+                if($detail->invdt_note == "PPN" || strpos($detail->invdt_note, 'Late Payment Charges') !== false){
+                    $count++;
+                }
+            }
+            if($inv->TrInvoiceDetail->count() <= 2) return 0;
+
             // cek last payment of invoice
             $paydate = null;
             $paytotal = 0;

@@ -106,36 +106,36 @@
                     <th field="inv_number" width="70" sortable="true">No.Invoice</th>
                     <!-- <th field="contr_no" width="100" sortable="true">No Kontrak</th> -->
                     <th field="tenan_name" width="180" sortable="true">Nama Tenant</th>
-                    <th field="unit" width="45" sortable="true">Unit</th>  
+                    <th field="unit" width="45" sortable="true">Unit</th>
                     <th field="inv_date" width="60" sortable="true">Tgl Invoice</th>
                     <th field="inv_duedate" width="60" sortable="true">Jatuh Tempo</th>
                     <th field="inv_amount" width="70" sortable="true" align="right">Amount</th>
                     <!-- <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th>  -->
                     <th field="invtp_name" width="90" sortable="true">Jenis Invoice</th>
-                    <th field="inv_post" width="40" sortable="true">Posted</th>       
+                    <th field="inv_post" width="40" sortable="true">Posted</th>
                 <th field="action_button" width="80" sortable="true">action</th>
                 </tr>
             </thead>
         </table>
         <!-- end table -->
-        
+
         <!-- icon2 atas table -->
         <div id="toolbar" class="datagrid-toolbar">
             <label style="margin-left:10px; margin-right:5px"><input type="checkbox" name="checkall" style="vertical-align: top;margin-right: 6px;"><span style="vertical-align: middle; font-weight:400">Check All</span></label>
             @if(Session::get('role')==1 || in_array(60,Session::get('permissions')))
-            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Invoice Lain Lain</span></a>                    
+            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="addInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-plus"></i>&nbsp;Invoice Lain Lain</span></a>
             @endif
             @if(Session::get('role')==1 || in_array(61,Session::get('permissions')))
             <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Invoice</span></a>
             @endif
             @if(Session::get('role')==1 || in_array(62,Session::get('permissions')))
-            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="cancelInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-ban"></i>&nbsp;Cancel Invoice</span></a>           
+            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="cancelInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-ban"></i>&nbsp;Cancel Invoice</span></a>
             @endif
             <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="printInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-print"></i>&nbsp;Print</span></a>
             <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="editFooter()" group="" id=""><span class="l-btn-text"><i class="fa fa-font"></i>&nbsp;Edit Footer/Label</span></a>
         </div>
         <!-- end icon -->
-    
+
         <!-- hidden form buat create edit -->
         <div id="dlg" class="easyui-dialog" style="width:60%"
                 closed="true" buttons="#dlg-buttons">
@@ -195,7 +195,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <input type="hidden" name="invtp_id" value="3">
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>Invoice Due Date</label>
@@ -212,17 +211,30 @@
                                 <div class="form-group">
                                     <label>Tenant</label>
                                     <div class="input-group">
-                                        <input type="hidden" name="contr_id" id="txtContrId" required>
+                                        <input type="hidden" name="tenan_id" id="txtContrId" required>
                                         <input type="text" class="form-control" id="txtContr" disabled>
                                         <span class="input-group-btn">
-                                            <button class="btn btn-info" type="button" id="chooseContractButton">Choose Billing Info</button>
+                                            <button class="btn btn-info" type="button" id="chooseContractButton">Choose Tenant</button>
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
+                            <div class="col-xs-6">
+                                <div class="form-group">
+                                    <label>Invoice Type</label>
+                                    <select name="invtp_id" class="form-control">
+                                        @foreach($inv_type as $invtp)
+                                        @if($invtp->id != 1)
+                                        <option value="{{$invtp->id}}">{{$invtp->invtp_name}} ({{$invtp->invtp_prefix}}), COA: {{$invtp->invtp_coa_ar}}</option>
+                                        @endif
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-sm-offset-8 col-sm-4">
                                 <button class="pull-right" type="button" id="clickCostItemEdit">Tambah Detail Biaya</button>
@@ -251,7 +263,7 @@
                                         <td><input type="number" class="form-control amount" name="invdt_amount[]" value="0" required></td>
                                         <td></td>
                                     </tr>
-                                    
+
                                   </table>
                                     <table width="50%">
                                         <input type="hidden" name="amount">
@@ -267,7 +279,7 @@
                                 <button class="btn btn-info pull-right">Submit</button>
                             </div>
                         </div>
-                        
+
                     </form>
                     <!-- end form -->
               </div>
@@ -310,15 +322,15 @@
                                   </div>
                                 </div>
                             </div>
-                            
+
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-sm-3 col-sm-offset-9">
                                 <button class="btn btn-info pull-right">Submit</button>
                             </div>
                         </div>
-                        
+
                     </form>
                     <!-- end form -->
               </div>
@@ -338,7 +350,7 @@
 
             <!-- Modal content-->
             <div class="modal-content">
-              
+
               <div class="modal-body" id="tenanModalContent">
               </div>
               <div class="modal-footer">
@@ -357,7 +369,7 @@
 
             <!-- Modal content-->
             <div class="modal-content">
-              
+
               <div class="modal-body" id="contractModalContent">
               </div>
               <div class="modal-footer">
@@ -456,7 +468,7 @@ function editFooter(){
     $('#footer_label_inv').html('<textarea class="textarea" name="footer_label_inv" class="form-control" style="width: 100%;" required></textarea>');
     $.post('{{route('invoice.ajaxgetfooter')}}', {id: row.id}, function(data){
         console.log(data);
-        if(data.errMsg){ 
+        if(data.errMsg){
             $.messager.alert('Warning',data.errMsg);
         }else{
             $('#formEditFooter input[name=id]').val(row.id);
@@ -501,7 +513,7 @@ function printInv(){
 }
 
 $('input[name=checkall]').change(function() {
-        if($(this).is(':checked')){ 
+        if($(this).is(':checked')){
             $('input[name=check]').each(function(){
                 $(this).prop('checked',true);
             });
@@ -604,12 +616,17 @@ $(function(){
         }
     });
 
-    var currenturl; 
+    var currenturl;
     $('#chooseContractButton').click(function(){
-        $('#contractModal').modal("show");
-        currenturl = '{{route('contract.popup')}}';
-        $.post(currenturl, null, function(data){
-            $('#contractModalContent').html(data);
+        // $('#contractModal').modal("show");
+        // currenturl = '{{route('contract.popup')}}';
+        // $.post(currenturl, null, function(data){
+        //     $('#contractModalContent').html(data);
+        // });
+        $('#tenanModal').modal("show");
+        currenturl = '{{route('tenant.popup')}}';
+        $.post(currenturl,null, function(data){
+            $('#tenanModalContent').html(data);
         });
     });
 
@@ -631,22 +648,22 @@ $(function(){
     });
 
     // paging
-    // $(document).delegate('.pagination li a','click',function(e){
-    //     e.preventDefault();
-    //     currenturl = $(this).attr('href');
-    //     $.post(currenturl, null, function(data){
-    //         $('#tenanModalContent').html(data);
-    //     });
-    // });
-
-    // paging
     $(document).delegate('.pagination li a','click',function(e){
         e.preventDefault();
         currenturl = $(this).attr('href');
         $.post(currenturl, null, function(data){
-            $('#contractModalContent').html(data);
+            $('#tenanModalContent').html(data);
         });
     });
+
+    // paging
+    // $(document).delegate('.pagination li a','click',function(e){
+    //     e.preventDefault();
+    //     currenturl = $(this).attr('href');
+    //     $.post(currenturl, null, function(data){
+    //         $('#contractModalContent').html(data);
+    //     });
+    // });
 
     $(document).delegate('#chooseTenant','click',function(e){
         e.preventDefault();
@@ -654,6 +671,8 @@ $(function(){
         var tenanname = $('input[name="tenant"]:checked').data('name');
         $('#txtTenanId').val(tenanid);
         $('#txtTenan').val(tenanname);
+        $('input[name=tenan_id]').val(tenanid);
+        $('#txtContr').val(tenanname);
         $('#tenanModalContent').text('');
         $('#tenanModal').modal("hide");
     });
@@ -686,12 +705,12 @@ $(function(){
 
     $(document).delegate('.amount','change',function(){
         if($(this).val() < 0) $(this).val(0);
-        updateTotal(); 
+        updateTotal();
     });
 
     $(document).delegate('.deleteRow','click',function(){
         $(this).parents('tr').remove();
-        updateTotal(); 
+        updateTotal();
     });
 
     $('#formEditFooter').submit(function(e){
@@ -741,19 +760,19 @@ $(function(){
     var print_window = function(){
         $('.print-window').off('click');
         $('.print-window').click(function(){
-            var self = $(this); 
+            var self = $(this);
             var url = self.attr('href');
             var title = self.attr('title');
             var w = self.attr('data-width');
             var h = self.attr('data-height');
-            
+
             openWindow(url, title, w, h);
 
             return false;
         });
     };
 
-});        
+});
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 <!-- datepicker -->

@@ -945,28 +945,30 @@ class InvoiceController extends Controller
         $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$invtp->invtp_prefix.'-'.substr($inv_date[0], -2).$inv_date[1].'-%')->orderBy('id','desc')->first();
         if($lastInvoiceofMonth){
             $lastPrefix = explode('-', $lastInvoiceofMonth->inv_number);
-            $lastPrefix = (int) $lastPrefix[2];
+            $lastPrefix = (int) @$lastPrefix[2];
         }else{
             $lastPrefix = 0;
         }
         $newPrefix = $lastPrefix + 1;
         $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
-        // $tenanId = $request->tenan_id;
-        $contract = TrContract::find($request->contr_id);
-        $contractId = $contract->id;
+        $tenanId = $request->tenan_id;
+        $tenant = MsTenant::find($tenanId);
+        $contractId = 0;
+        // $contract = TrContract::find($request->contr_id);
+        // $contractId = $contract->id;
         // $contract = TrContract::where('tenan_id',$tenanId)->where('contr_status','confirmed')->first();
         // if($contract) $contractId = $contract->id;
         // else $contractId = 0;
 
         $invHeader = [
-            'tenan_id' => $contract->tenan_id,
-            'inv_number' => $invtp->invtp_prefix."-".substr($inv_date[0], -2).$inv_date[1]."-".$newPrefix,
-            'inv_faktur_no' => $invtp->invtp_prefix."-".substr($inv_date[0], -2).$inv_date[1]."-".$newPrefix,
+            'tenan_id' => $tenanId,
+            'inv_number' => $invtp->invtp_prefix."-".substr(@$inv_date[0], -2).@$inv_date[1]."-".$newPrefix,
+            'inv_faktur_no' => $invtp->invtp_prefix."-".substr(@$inv_date[0], -2).@$inv_date[1]."-".$newPrefix,
             'inv_faktur_date' => $request->inv_date,
             'inv_date' => $request->inv_date,
             'inv_duedate' => $request->inv_duedate,
             'inv_amount' => $request->amount,
-            'inv_ppn' => 0.1,
+            'inv_ppn' => 0,
             'inv_outstanding' => $request->amount,
             'inv_ppn_amount' => $request->amount, // sementara begini dulu, ikutin cara di foto invoice
             'inv_post' => 0,
@@ -1002,7 +1004,7 @@ class InvoiceController extends Controller
                     $indt['inv_id'] = $insertInvoice->id;
                     TrInvoiceDetail::create($indt);
 
-                    TrContractInvoice::where('invtp_id',$request->invtp_id)->where('contr_id',$request->contr_id)->where('costd_id',$indt['costd_id'])->update($updateCtrInv[$key]);
+                    // TrContractInvoice::where('invtp_id',$request->invtp_id)->where('contr_id',$request->contr_id)->where('costd_id',$indt['costd_id'])->update($updateCtrInv[$key]);
                 }
             // });
         }catch(\Exception $e){
