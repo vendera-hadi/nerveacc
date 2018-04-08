@@ -4,6 +4,7 @@
   <p>Status : <strong>{{$cutoffFlag ? "Penyewa" : "Owner"}}</strong></p>
 </center>
 
+@if(!$direct_close)
 <form method="POST" id="formEditMeter">
 @if(count($contInvMeter) > 0)
 <h3>Meter Cost Item</h3>
@@ -90,6 +91,12 @@
 <button class="btn btn-info" id="generateInv">Generate Invoices</button>
 </center>
 </form>
+@else
+<form method="POST" action="{{route('contract.close')}}">
+  <input type="hidden" name="contr_id" value="{{$contract->id}}">
+  <button class="btn btn-info">Close Contract</button>
+</form>
+@endif
 
 <script type="text/javascript">
 $('#formEditMeter').submit(function(e){

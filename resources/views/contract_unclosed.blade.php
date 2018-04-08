@@ -41,6 +41,12 @@
 @section('main-content')
     <div class="row">
         <div class="col-md-12">
+            @if(Session::get('success'))
+                <div class="alert alert-success">
+                  <strong>Success</strong> {{ Session::get('success') }}
+                </div>
+            @endif
+
             <!-- template tabel -->
             <table id="dg" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                 <!-- kolom -->
@@ -86,7 +92,7 @@
 
                 <!-- Modal content-->
                 <div class="modal-content" style="width: 850px;">
-                  
+
                   <div class="modal-body text-center" id="closeCtrModalContent">
                   </div>
                   <div class="modal-footer">
@@ -99,7 +105,7 @@
 
         <!-- content -->
         </div>
-    </div>    
+    </div>
 @endsection
 
 @section('footer-scripts')
@@ -186,7 +192,7 @@
             console.log(id);
             $.post('{{route('contract.closeCtrModal')}}',{id:id}, function(data){
                 $('#closeCtrModalContent').html(data);
-            }); 
-        });       
+            });
+        });
 </script>
 @endsection

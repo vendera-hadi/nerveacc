@@ -224,9 +224,8 @@ class ContractController extends Controller
 
     public function getdetail(Request $request){
         $contractId = $request->id;
-        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_marketing_agent.mark_code','ms_marketing_agent.mark_name','ms_unit.virtual_account','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
+        $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_code','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_unit.va_utilities','ms_unit.va_maintenance','ms_unit.unit_code','ms_unit.unit_name','ms_unit.unit_isactive')
         ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
-        ->leftJoin('ms_marketing_agent','ms_marketing_agent.id',"=",'tr_contract.mark_id')
         // ->join('ms_virtual_account','ms_virtual_account.id',"=",'tr_contract.viracc_id')
         ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
         ->where('tr_contract.id',$contractId)->first();
@@ -911,10 +910,13 @@ class ContractController extends Controller
             //  2. Contract yg bakal Expired dalam minggu2 ini
             $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name')
                     ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')->where(function($query){
-                        $query->where('contr_terminate_date','<=', date("Y-m-d", strtotime("+1 week")))->where('contr_status','confirmed');
-                    })->orWhere(function($query){
                         $query->where('contr_enddate','<=', date("Y-m-d", strtotime("+1 week")))->whereNull('contr_terminate_date')->where('contr_status','confirmed');
+                    })->orWhere(function($query){
+                        $query->whereNotNull('contr_terminate_date')->where('contr_status','confirmed');
                     });
+                    /*->where(function($query){
+                        $query->where('contr_terminate_date','<=', date("Y-m-d", strtotime("+1 week")))->where('contr_status','confirmed');
+                    })*/
             // pake ini utk list yg semingguan
             // whereBetween('contr_terminate_date', [date('Y-m-d'), date("Y-m-d", strtotime("+1 week"))])
 
@@ -986,6 +988,15 @@ class ContractController extends Controller
         }
     }
 
+    public function close(Request $request)
+    {
+        $id = $request->contr_id;
+        $contract = TrContract::find($id);
+        $contract->contr_status = 'closed';
+        $contract->save();
+        return redirect()->back()->with('success', 'Contract closed');
+    }
+
     public function closeCtrModal(Request $request){
         $id = $request->id;
         $contract = TrContract::find($id);
@@ -1010,6 +1021,12 @@ class ContractController extends Controller
                                 ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                 ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                                 ->where('contr_id',$id)->where('costd_ismeter',0)->get();
+        $data['direct_close'] = false;
+        if(empty(count($data['contInvMeter'])) && empty(count($data['contInvNoMeter'])) ){
+            // jika sama sekali tidak punya contract invoice arahin utk close lgsg
+            $data['direct_close'] = true;
+            return view('modal.closecontract', $data);
+        }
         $data['contr_id'] = $id;
         $data['tenan_id'] = $contract->tenan_id;
         $data['bpju'] = @MsConfig::where('name','ppju')->first()->value;
