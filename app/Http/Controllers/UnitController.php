@@ -340,10 +340,10 @@ class UnitController extends Controller
                         // ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id');
 
         // KOMEN INI BIAR KELUAR SEMUA
-        $cek_tenan = MsTenant::where('id',$tenan_id)->get();
-        if($cek_tenan[0]->tent_id == 1){
+        $cek_tenan = MsTenant::find($tenan_id);
+        if($cek_tenan && @$cek_tenan->tent_id == 1){
             $fetch = $fetch->where('unit_isavailable',1);
-        }                
+        }
         //if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
         if(!empty($tenan_id)){
             // get owned unit

@@ -54,7 +54,7 @@
               </td>
               <td>{{$cdt->meter_used}}</td>
               <td>{{number_format($cdt->meter_cost)}}</td>
-              <td>{{number_format($cdt->other_cost)}}</td>
+              <td>@if($cdt->cost_id == 1){{$ppju." %"}}@else{{'-'}}@endif</td>
               <td>{{number_format($cdt->total)}}</td>
             </tr>
             @endforeach

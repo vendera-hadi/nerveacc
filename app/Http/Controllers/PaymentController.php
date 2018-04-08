@@ -165,15 +165,16 @@ class PaymentController extends Controller
     }
 
     public function get_invoice(Request $request){
-        $contract_id = @$request->contract_id;
+        $tenan_id = @$request->tenan_id;
 
         $invoice_data = TrInvoice::select('tr_invoice.id', 'tr_invoice.inv_number', 'tr_invoice.inv_date', 'tr_invoice.inv_duedate', 'tr_invoice.inv_outstanding', 'ms_unit.unit_name', 'ms_floor.floor_name')
-        ->join('tr_contract', 'tr_contract.id',"=",'tr_invoice.contr_id')
-        ->join('ms_unit', 'tr_contract.unit_id',"=",'ms_unit.id')
-        ->join('ms_floor', 'ms_unit.floor_id',"=",'ms_floor.id')
-        ->where('tr_invoice.contr_id', '=',$contract_id)
+        ->leftJoin('tr_contract', 'tr_contract.id',"=",'tr_invoice.contr_id')
+        ->leftJoin('ms_unit', 'tr_contract.unit_id',"=",'ms_unit.id')
+        ->leftJoin('ms_floor', 'ms_unit.floor_id',"=",'ms_floor.id')
+        ->where('tr_invoice.tenan_id', '=',$tenan_id)
         ->where('tr_invoice.inv_outstanding', '>', 0)
         ->where('tr_invoice.inv_post', 1)
+        ->where('tr_invoice.inv_iscancel', 0)
         ->get();
 
         if(!empty($invoice_data)){

@@ -186,7 +186,7 @@ class Invoice {
         // return json_encode($this->children);
         // save details
         $newInvoice->TrInvoiceDetail()->saveMany($this->children);
-
+        $this->children = [];
         return $newInvoice;
     }
 

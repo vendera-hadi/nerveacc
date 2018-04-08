@@ -122,11 +122,11 @@
                             <label>Berita Acara Serah Terima By</label>
                             <input type="text" name="contr_bast_by" required="required" class="form-control">
                         </div>
-                        <!--  
+                        <!--
                         <div class="form-group">
                             <label>Note (optional)</label>
                             <textarea name="contr_note" class="form-control"></textarea>
-                        </div> 
+                        </div>
                         -->
                         <div class="row">
                             <div class="col-xs-6">
@@ -166,7 +166,7 @@
                             @foreach($cost_items as $key => $citm)
                             @if($citm->cost_name != $tempGroup && $key > 0){!!'</optgroup>'!!}@endif
                             @if($citm->cost_name != $tempGroup){!!'<optgroup label="'.$citm->cost_name.' ('.$citm->cost_code.')">'!!}@endif
-                            <option value="{{$citm->id}}">{{$citm->costd_name}}</option>
+                            <option value="{{$citm->id}}" data-costid="{{$citm->cost_id}}">{{$citm->costd_name}}</option>
                             @endforeach
                             </select>
                         </div>
@@ -235,11 +235,11 @@
                         <label>Berita Acara Serah Terima By</label>
                         <input type="text" name="contr_bast_by" required="required" class="form-control" >
                     </div>
-                    <!-- 
+                    <!--
                     <div class="form-group">
                         <label>Note (optional)</label>
                         <textarea name="contr_note" class="form-control" ></textarea>
-                    </div> 
+                    </div>
                     -->
                     <div class="row">
                         <div class="col-xs-6">
@@ -445,14 +445,22 @@
             $('#contractStep2').hide();
         });
 
-        var costItem, unit;
+        var costItem, unit, invtypeSelection;
         var invoiceTypes = '{!!$invoice_types!!}';
+        var invutility = '{{$invoice_utility}}';
         var choices = [];
         $('#clickCostItem').click(function(){
             var flag = false;
             $('#tableCost').show();
             costDetail = $('#selectCostItem').val();
             costDetailName = $('#selectCostItem option:selected').text();
+            costId = $('#selectCostItem option:selected').data('costid');
+            // lock invoice type is parent is electric or water
+            if(costId == 1 || costId == 2){
+                invtypeSelection = '<input type="hidden" name="inv_type[]" value="1"><span>'+invutility+'</span>';
+            }else{
+                invtypeSelection = '<select name="inv_type[]" class="form-control">'+invoiceTypes+'</select>';
+            }
             $('.costdid').each(function(){
                 if($(this).val() == costDetail){
                   $.messager.alert('Warning', "Component Billing already exist in the list below");
@@ -461,7 +469,7 @@
             });
             if(!flag){
               $.post('{{route('cost_item.getDetail')}}', {id: costDetail}, function(result){
-                  $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" class="costdid" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td><select name="inv_type[]" class="form-control">'+invoiceTypes+'</select></td><td><select name="period[]" class="form-control"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="4">4 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></td><td><input type="number" name="order[]" class="order" value="0" style="width:60px"></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
+                  $('#tableCost').append('<tr class="text-center"><input type="hidden" name="costd_is[]" class="costdid" value="'+result.id+'"><td>'+result.costitem.cost_name+'</td><td>'+result.costd_name+'</td><td>-</td><td>'+result.costd_rate+'</td><td>'+result.costd_burden+'</td><td>'+result.costd_admin+'</td><td>'+result.costd_ismeter+'</td><td>'+invtypeSelection+'</td><td><select name="period[]" class="form-control"><option value="1">1 Month</option><option value="2">2 Months</option><option value="3">3 Months</option><option value="4">4 Months</option><option value="6">6 Months</option><option value="12">12 Months</option></select></td><td><input type="number" name="order[]" class="order" value="0" style="width:60px"></td><td><a href="#" class="removeCost"><i class="fa fa-times text-danger"></i></a></td></tr>');
               });
             }
         });

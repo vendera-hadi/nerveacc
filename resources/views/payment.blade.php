@@ -319,7 +319,7 @@
         var url = "{{route('payment.get_invoice')}}";
         var val = $(this).val();
 
-        url = url+"?contract_id="+val;
+        url = url+"?tenan_id="+val;
 
         $.ajax({
             url: url,

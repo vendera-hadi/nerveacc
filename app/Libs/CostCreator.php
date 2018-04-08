@@ -10,6 +10,9 @@ use App\Models\MsInvoiceType;
 use App\Models\MsUnit;
 use App\Models\MsConfig;
 use App\Models\MsCompany;
+use App\Libs\ElectricityCalc;
+use App\Libs\WaterCalc;
+use App\Libs\GeneralCalc;
 
 class CostCreator {
 
@@ -64,6 +67,16 @@ class CostCreator {
         return false;
     }
 
+    public function setMeter($meter)
+    {
+        $this->meter = $meter;
+    }
+
+    public function setCustomAmount($amount)
+    {
+        $this->detailAmount = $amount;
+    }
+
     // GETTER
     public function generateDetail()
     {
@@ -74,6 +87,22 @@ class CostCreator {
                 return $this->generateNonMeter();
             }
         }
+    }
+
+    public function generateCutoffNonMeter()
+    {
+        if($this->validate()){
+            if($this->costDetail->costitem->is_service_charge){
+                return $this->generateCutoffServiceCharge();
+            }else if($this->costDetail->costitem->is_sinking_fund){
+                return $this->generateCutoffSinkingFund();
+            }else if($this->costDetail->costitem->is_insurance){
+                return $this->generateInsurance();
+            }else{
+                return $this->generateOtherNonMeter();
+            }
+        }
+        return false;
     }
 
     public function generateMeter()
@@ -107,6 +136,11 @@ class CostCreator {
         return false;
     }
 
+    public function getCostItem()
+    {
+        return $this->costDetail;
+    }
+
     private function generateServiceCharge()
     {
         if(!$this->checkLastInvoicePeriodRumus()) return false;
@@ -133,6 +167,28 @@ class CostCreator {
         return $this->defineOutput($note);
     }
 
+    private function generateCutoffServiceCharge()
+    {
+        $currUnit = MsUnit::find($this->contract->unit_id);
+        $alias = @MsConfig::where('name','service_charge_alias')->first()->value;
+
+        $start = new \DateTime($this->periodStart);
+        $end = new \DateTime($this->periodEnd);
+        $diff = $start->diff($end);
+
+        $kelebihanHari = $diff->format('%d');
+        $totalDayOfMonth = date('t',strtotime($this->periodEnd));
+        $amountPerMonth = $currUnit->unit_sqrt * $this->costDetail->costd_rate;
+        $proRateAmount = $kelebihanHari / $totalDayOfMonth * $amountPerMonth;
+
+        $note = $alias." ".date('d F Y',strtotime($this->periodStart))." s/d ".date('d F Y',strtotime($this->periodEnd));
+        $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." ".$diff->format('%d')." / $totalDayOfMonth days)";
+
+        $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
+        $this->detailAmount = round($amount);
+        return $this->defineOutput($note);
+    }
+
     private function generateSinkingFund()
     {
         if(!$this->checkLastInvoicePeriodRumus()) return false;
@@ -155,6 +211,27 @@ class CostCreator {
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
             $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
         }
+        $this->detailAmount = round($amount);
+        return $this->defineOutput($note);
+    }
+
+    private function generateCutoffSinkingFund()
+    {
+        $currUnit = MsUnit::find($this->contract->unit_id);
+
+        $start = new \DateTime($this->periodStart);
+        $end = new \DateTime($this->periodEnd);
+        $diff = $start->diff($end);
+
+        $kelebihanHari = $diff->format('%d');
+        $totalDayOfMonth = date('t',strtotime($this->periodEnd));
+        $amountPerMonth = $currUnit->unit_sqrt * $this->costDetail->costd_rate;
+        $proRateAmount = $kelebihanHari / $totalDayOfMonth * $amountPerMonth;
+
+        $note = $this->costDetail->costd_name." (SF)  ".date('d F Y',strtotime($this->periodStart))." s/d ".date('d F Y',strtotime($this->periodEnd));
+        $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." $kelebihanHari / $totalDayOfMonth days)";
+
+        $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
@@ -192,10 +269,10 @@ class CostCreator {
         $result = false;
         if(!empty($this->contract->contr_terminate_date) && ($this->periodEnd > $this->contract->contr_terminate_date)){
             // JIKA CONTRACT TERMINATE DATE BERAKHIR BULAN INI
-            echo "<br>Contract  terminated at ".date('d/m/Y',strtotime($this->contract->contr_terminate_date)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here</a>";
+            echo "<br>Contract  terminated at ".date('d/m/Y',strtotime($this->contract->contr_terminate_date)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here</a><br>";
         }else if($this->periodEnd > $this->contract->contr_enddate){
             // JIKA CONTRACT SUDAH BERAKHIR
-            echo "<br>Contract  expired at ".date('d/m/Y',strtotime($this->contract->contr_enddate)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here</a>";
+            echo "<br>Contract  expired at ".date('d/m/Y',strtotime($this->contract->contr_enddate)).", Please CLOSE this Contract <a href=\"".route('contract.unclosed')."\">Here</a><br>";
         }else{
             $result = true;
         }
@@ -222,7 +299,7 @@ class CostCreator {
         return $this->defineOutput($note);
     }
 
-    private function defineOutput($note)
+    public function defineOutput($note)
     {
         return [
                 'invdt_amount' => $this->detailAmount,
@@ -333,5 +410,15 @@ class CostCreator {
         $endOfMonth = date('t',strtotime($this->contract->contr_startdate));
         $selisih = $endOfMonth - $dayOfStartContract;
         return !empty($selisih) ? $selisih : 1;
+    }
+
+    public function getCalc()
+    {
+        if($this->costDetail->cost_id == 1){
+            return new ElectricityCalc();
+        }else if($this->costDetail->cost_id == 2){
+            return new WaterCalc();
+        }
+        return new GeneralCalc();
     }
 }

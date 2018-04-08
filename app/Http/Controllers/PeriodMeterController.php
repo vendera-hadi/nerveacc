@@ -126,55 +126,62 @@ class PeriodMeterController extends Controller
                     // ada maupun tidak asalkan blum approved tetap create baru
                     $newPeriodMeter =  TrPeriodMeter::create($input);
                     // get semua confirmed contract yg available dan buat meteran
-                    $confirmedContract = TrContract::where('contr_status','confirmed')->where('contr_enddate', '>=', date('Y-m-d H:i:s'))->get();
+                    $confirmedContract = TrContract::where('contr_status','confirmed')
+                            ->where('contr_startdate','<=',$prdend)
+                            ->where('contr_enddate','>=',$prdstart)
+                            ->get();
                     // last month valid period meter
                     $last_month_date = strtotime("last month", strtotime($request->input('prd_billing_date')));
-                    $prd_last = TrPeriodMeter::where('status', true)
-                                ->where(DB::raw("EXTRACT(MONTH FROM prd_billing_date)"), date("m",$last_month_date))
+                    // where status true dihide dlu karna bs jadi input mereka massal, baru posting massal
+                    $prd_last = TrPeriodMeter::where(DB::raw("EXTRACT(MONTH FROM prd_billing_date)"), date("m",$last_month_date))
                                 ->where(DB::raw("EXTRACT(YEAR FROM prd_billing_date)"), date("Y",$last_month_date))
                                 ->orderBy('created_at', 'desc')
                                 ->first();
                     foreach ($confirmedContract as $ctr) {
                         // every contract invoice nya ctr yg punya invtp 1 dibuatkan meteran nya
                         foreach($ctr->contractInv->where('invtp_id',1) as $ctrInv){
-                                // extract last meter value
-                                $meter_last = false;
-                                if($prd_last){
-                                    $meter_last = TrMeter::select('meter_end','costd_id','unit_id')
+                                // filter electric dan water
+                                if(in_array($ctrInv->costdetail->cost_id, [1,2])){
+                                    // extract last meter value
+                                    $meter_last = false;
+                                    if($prd_last){
+                                        $meter_last = TrMeter::select('meter_end','costd_id','unit_id')
+                                            ->where('unit_id',$ctr->unit_id)
+                                            ->where('costd_id',$ctrInv->costd_id)
+                                            ->where('prdmet_id',$prd_last->id)
+                                            ->first();
+                                    }
+
+                                    $m_end = 0;
+                                    if($meter_last) $m_end = $meter_last->meter_end;
+                                    $meterInput = [
+                                            'meter_start'=> $m_end,
+                                            'meter_end'=> 0,
+                                            'meter_used'=> 0,
+                                            'meter_cost'=> 0,
+                                            'meter_burden'=> $ctrInv->costdetail->costd_burden,
+                                            'meter_admin'=> $ctrInv->costdetail->costd_admin,
+                                            'costd_id'=>  $ctrInv->costd_id,
+                                            'contr_id'=> $ctr->id,
+                                            'prdmet_id'=> $newPeriodMeter->id,
+                                            'unit_id'=>$ctr->unit_id
+                                        ];
+                                    $newMeter = TrMeter::create($meterInput);
+
+                                    // Jika contract tenant diputus dlm jangka waktu prd meter saat ini ambil akhir meter sebelumnya dr tabel cutoff utk dijadikan meter start di next meternya
+                                    $ct_meter = CutoffHistory::select('unit_id','costd_id','meter_end')
+                                        ->where('close_date', '>=', $input['prdmet_start_date'])
+                                        ->where('close_date', '<=', $input['prdmet_end_date'])
                                         ->where('unit_id',$ctr->unit_id)
                                         ->where('costd_id',$ctrInv->costd_id)
-                                        ->where('prdmet_id',$prd_last->id)
+                                        ->orderBy('created_at','desc')
                                         ->first();
-                                }
-
-                                $m_end = 0;
-                                if($meter_last) $m_end = $meter_last->meter_end;
-                                $meterInput = [
-                                        'meter_start'=> $m_end,
-                                        'meter_end'=> 0,
-                                        'meter_used'=> 0,
-                                        'meter_cost'=> 0,
-                                        'meter_burden'=> $ctrInv->costdetail->costd_burden,
-                                        'meter_admin'=> $ctrInv->costdetail->costd_admin,
-                                        'costd_id'=>  $ctrInv->costd_id,
-                                        'contr_id'=> $ctr->id,
-                                        'prdmet_id'=> $newPeriodMeter->id,
-                                        'unit_id'=>$ctr->unit_id
-                                    ];
-                                $newMeter = TrMeter::create($meterInput);
-
-                                // Jika contract tenant diputus dlm jangka waktu prd meter saat ini ambil akhir meter sebelumnya dr tabel cutoff utk dijadikan meter start di next meternya
-                                $ct_meter = CutoffHistory::select('unit_id','costd_id','meter_end')
-                                    ->where('close_date', '>=', $input['prdmet_start_date'])
-                                    ->where('close_date', '<=', $input['prdmet_end_date'])
-                                    ->where('unit_id',$ctr->unit_id)
-                                    ->where('costd_id',$ctrInv->costd_id)
-                                    ->orderBy('created_at','desc')
-                                    ->first();
-                                if($ct_meter){
-                                    $newMeter->meter_start = $ct_meter->meter_end;
-                                    $newMeter->save();
-                                }
+                                    if($ct_meter){
+                                        $newMeter->meter_start = $ct_meter->meter_end;
+                                        $newMeter->save();
+                                    }
+                            }
+                            // end
                         }
                     }
 
@@ -201,6 +208,7 @@ class PeriodMeterController extends Controller
                     ->where('ms_cost_detail.cost_id',1)
                     ->where('tr_contract.contr_startdate','<=',$currentPrd->prdmet_end_date)
                     ->where('tr_contract.contr_status','confirmed')
+                    ->where('tr_contract.contr_iscancel',false)
                     ->orderBy('ms_unit.unit_code','asc')
                     ->orderBy('ms_cost_detail.costd_name','asc')
                     ->get();
@@ -212,11 +220,13 @@ class PeriodMeterController extends Controller
                     ->where('ms_cost_detail.cost_id',2)
                     ->where('tr_contract.contr_startdate','<=',$currentPrd->prdmet_end_date)
                     ->where('tr_contract.contr_status','confirmed')
+                    ->where('tr_contract.contr_iscancel',false)
                     ->orderBy('ms_unit.unit_code','asc')
                     ->orderBy('ms_cost_detail.costd_name','asc')
                     ->get();
+            $ppju = @MsConfig::where('name','ppju')->first()->value;
 
-            return view('modal.editmeter', ['listrik' => $electric,'air' => $water,'st'=>$currentPrd, 'prd'=>$id]);
+            return view('modal.editmeter', ['listrik' => $electric,'air' => $water,'st'=>$currentPrd, 'ppju' => $ppju, 'prd'=>$id]);
         }catch(\Exception $e){
              return response()->json(['errorMsg' => $e->getMessage()]);
         }
