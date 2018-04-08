@@ -8,6 +8,7 @@
         <th style="text-align: center;">Saldo Akhir</th> 
     </tr>
     <tbody>
+        <?php $total_saldo_awal = 0; $total_debet = 0; $total_kredit = 0; $total_saldo_akhir = 0;  ?>
         @foreach($invoices as $invoice)
             <tr>
               <td>{{$invoice['coa_code']}}</td>
@@ -17,6 +18,20 @@
               <td style="text-align: right">{{($invoice['credit'] >= 0 ? number_format($invoice['credit'],2)  : '('.number_format(abs($invoice['credit']),2).')')}}</td>
               <td style="text-align: right">{{($invoice['saldo_akhir'] >= 0 ? number_format($invoice['saldo_akhir'],2)  : '('.number_format(abs($invoice['saldo_akhir']),2).')')}}</td>
             </tr>
-        @endforeach   
+            <?php
+              $total_saldo_awal = $total_saldo_awal + $invoice['saldo_awal'];
+              $total_debet = $total_debet + $invoice['debet'];
+              $total_kredit = $total_kredit + $invoice['credit'];
+              $total_saldo_akhir = $total_saldo_akhir + $invoice['saldo_akhir'];
+            ?>
+        @endforeach
+            <tr>
+              <td>&nbsp;</td>
+              <td>TOTAL</td>
+              <td style="text-align: right">{{ number_format($total_saldo_awal,2) }}</td>
+              <td style="text-align: right">{{ number_format($total_debet,2) }}</td>
+              <td style="text-align: right">{{ number_format($total_kredit,2) }}</td>
+              <td style="text-align: right">{{ number_format($total_saldo_akhir,2) }}</td>
+            </tr>
     </tbody>
 </table>

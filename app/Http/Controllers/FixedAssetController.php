@@ -15,6 +15,8 @@ use App\Models\MsGroupAktivaAsset;
 
 use Auth;
 use DB;
+use Excel;
+use PDF;
 
 class FixedAssetController extends Controller
 {
@@ -403,9 +405,131 @@ class FixedAssetController extends Controller
         return response()->json(['success'=>true]);
     }
 
-    public function report()
+    public function report(Request $request)
     {
+        $excel = @$request->excel;
+        $data = [];
+        $type = MsAssetType::all();
+        if(count($type) > 0){
+            for($i=0; $i<count($type); $i++){
+                $detail = MsAsset::select('ms_assets.name','depreciation_type','date','price','ms_group_aktiva_asset.code','ms_group_aktiva_asset.name AS grpname','spl_name','po_no','kode_induk','cabang','lokasi','area','departemen','user','kondisi','keterangan')
+                ->join('ms_group_aktiva_asset','ms_assets.group_account_id','=','ms_group_aktiva_asset.id')
+                ->leftjoin('ms_supplier',\DB::raw('ms_supplier.id::integer'),'=',\DB::raw('ms_assets.supplier_id::integer'))
+                ->where('ms_asset_type_id',$type[$i]->id)->get();
+                $dtl = array();
+                if(count($detail) > 0){
+                    for($k=0; $k<count($detail); $k++){
+                        $dtl[] = array(
+                            'name' => $detail[$k]->name,
+                            'depreciation_type' => $detail[$k]->depreciation_type,
+                            'date' => date('d/m/Y',strtotime($detail[$k]->date)),
+                            'price' => $detail[$k]->price,
+                            'supplier' => $detail[$k]->spl_name,
+                            'po_no' => $detail[$k]->po_no,
+                            'kode_induk' => $detail[$k]->kode_induk,
+                            'cabang' => $detail[$k]->cabang,
+                            'lokasi' => $detail[$k]->lokasi,
+                            'area' => $detail[$k]->area,
+                            'departemen' => $detail[$k]->departemen,
+                            'user' => $detail[$k]->user,
+                            'kondisi' => $detail[$k]->kondisi,
+                            'keterangan' => $detail[$k]->keterangan,
+                        );
+                    }
+                }
+            
+                $isi[] = array(
+                    'jenis_harta' => $type[$i]->jenis_harta,
+                    'kelompok_harta' => $type[$i]->kelompok_harta,
+                    'masa_manfaat' => $type[$i]->masa_manfaat,
+                    'detail' => $dtl
+                );
 
+                $excel_data[] = array($type[$i]->jenis_harta,NULL,NULL,NULL,NULL,$type[$i]->kelompok_harta,NULL,NULL,NULL,NULL,$type[$i]->masa_manfaat.' Tahun',NULL,NULL,NULL,NULL);
+                if(count($detail) > 0){
+                    $excel_data[] = array(
+                        'No',
+                        'Name',
+                        'Depresiasi',
+                        'Tanggal',
+                        'Harga',
+                        'Supplier',
+                        'No.PO',
+                        'No.Aktiva',
+                        'Cabang',
+                        'Lokasi',
+                        'Area',
+                        'Dept',
+                        'User',
+                        'Kondisi',
+                        'Keterangan'
+                    );
+                    $start = 1;
+                    for($p=0; $p<count($detail); $p++){
+                        $excel_data[] = array(
+                            $start,
+                            $detail[$p]->name,
+                            $detail[$p]->depreciation_type,
+                            date('d/m/Y',strtotime($detail[$p]->date)),
+                            $detail[$p]->price,
+                            $detail[$p]->spl_name,
+                            $detail[$p]->po_no,
+                            $detail[$p]->kode_induk,
+                            $detail[$p]->cabang,
+                            $detail[$p]->lokasi,
+                            $detail[$p]->area,
+                            $detail[$p]->departemen,
+                            $detail[$p]->user,
+                            $detail[$p]->kondisi,
+                            $detail[$p]->keterangan
+                        ); 
+                        $start ++;
+                    }
+                }
+            }
+
+        }
+        if($excel){
+            $border = 'A1:O';
+            $tp = 'xls';
+            return Excel::create('Fixed Assets Report', function($excel) use ($excel_data,$border) {
+                $excel->sheet('Fixed Assets Report', function($sheet) use ($excel_data,$border)
+                { 
+                    $sheet->row(1, array(
+                        'JENIS HARTA',NULL,NULL,NULL,NULL,'KELOMPOK HARTA',NULL,NULL,NULL,NULL,'MASA MANFAAT'
+                    ));
+                    $sheet->mergeCells('A1:E1');
+                    $sheet->mergeCells('F1:J1');
+                    $sheet->mergeCells('K1:O1');
+
+                    $sheet->cells('A1:O1', function($cells) {
+                        $cells->setFontWeight('bold');
+                        $cells->setFontSize(12);
+                        $cells->setAlignment('center');
+                    });
+                    $sheet->fromArray($excel_data, null, 'A2', false, false);
+                    $start_cell = 2;
+                    $total = count($excel_data);
+                    for($i=0; $i<$total; $i++){
+                        if($excel_data[$i][1] == NULL){
+                            $sheet->mergeCells('A'.$start_cell.':E'.$start_cell);
+                            $sheet->mergeCells('F'.$start_cell.':J'.$start_cell);
+                            $sheet->mergeCells('K'.$start_cell.':O'.$start_cell);
+
+                            $sheet->cells('A'.$start_cell.':O'.$start_cell, function($cells) {
+                                $cells->setFontWeight('bold');
+                                $cells->setAlignment('center');
+                            });
+                        }
+                        $start_cell++;
+                    }
+                    $sheet->setBorder($border.($total+1), 'thin');
+                });
+            })->download($tp);
+        }else{
+            $data['report_isi'] = $isi;
+            return view('assets-report',$data);
+        }
     }
 
 }

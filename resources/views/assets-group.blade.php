@@ -31,6 +31,7 @@
       <ul class="nav nav-tabs">
         <li ><a href="{{route('fixed_asset.index')}}" >List Harta</a></li>
         <li class="active"><a href="#tab_1">Kelompok Harta</a></li>
+        <li><a href="{{route('fixed_asset.report')}}">Report</a></li>
       </ul>
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">

@@ -208,6 +208,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('contract/confirm','ContractController@confirm')->name('contract.confirm');
 	Route::post('contract/inputed','ContractController@inputed')->name('contract.inputed');
 	Route::post('contract/terminate','ContractController@terminate')->name('contract.terminate');
+	Route::post('contract/delete_terminate', 'ContractController@delete_terminate')->name('contract.delete_terminate');
 	Route::post('contract/renew','ContractController@renew')->name('contract.renew');
 	Route::post('contract/popup','ContractController@getPopupOptions')->name('contract.popup');
 

@@ -494,6 +494,18 @@
             }
         });
 
+        $(document).delegate('.remove_terminate','click',function(){
+            var r = confirm("Are you sure want to cancel Terminate Contract ?");
+            if(r == true){
+                var id = $(this).data('id');
+                $.post('{{route('contract.delete_terminate')}}',{id:id},function(result){
+                    if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
+                    if(result.success) location.reload();
+                });
+                // location.reload();
+            }
+        });
+
         $(document).delegate('.removeCost','click',function(){
             if(confirm('Are you sure want to remove this Component Billing?')){
                 $(this).parent().parent().remove();

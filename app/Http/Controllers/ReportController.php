@@ -1290,6 +1290,10 @@ class ReportController extends Controller
             $data['type'] = 'excel';
             $data_ori = $data['invoices'];
             $data = array();
+            $total_saldo_awal = 0; 
+            $total_debet = 0; 
+            $total_kredit = 0; 
+            $total_saldo_akhir = 0;
             for($i=0; $i<count($data_ori); $i++){
                 $data[$i]=array(
                     'Account Code' =>$data_ori[$i]['coa_code'],
@@ -1299,7 +1303,12 @@ class ReportController extends Controller
                     'Kredit' =>number_format($data_ori[$i]['credit'],2),
                     'Saldo Akhir' =>number_format($data_ori[$i]['saldo_akhir'],2)
                     );
+                $total_saldo_awal = $total_saldo_awal + $data_ori[$i]['saldo_awal'];
+                $total_debet = $total_debet + $data_ori[$i]['debet'];
+                $total_kredit = $total_kredit + $data_ori[$i]['credit'];
+                $total_saldo_akhir = $total_saldo_akhir + $data_ori[$i]['saldo_akhir'];
             }
+            $data[$i] = array(NULL,'TOTAL',$total_saldo_awal,$total_debet,$total_kredit,$total_saldo_akhir);
             $border = 'A1:F';
             $tp = 'xls';
             return Excel::create('Trial Balance Report', function($excel) use ($data,$border) {
