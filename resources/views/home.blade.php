@@ -96,7 +96,7 @@ Dashboard
 			<!-- BAR CHART -->
 			<div class="box box-success">
 				<div class="box-header with-border">
-				  <h3 class="box-title">Outstanding and Payment {{ Request::input('year', date('Y')) }} </h3>
+				  <h3 class="box-title">Outstanding and Payment {{ Request::input('year', date('Y')) }} (dalam ribuan rupiah)</h3>
 
 				  <div class="box-tools pull-right">
 				    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -148,13 +148,13 @@ Dashboard
         <div class="box-footer no-border">
           <div class="row">
             <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
-              <label>Outstanding</label>
+              <label>Outstanding (dalam ribuan rupiah)</label>
               <div style="background-color:#f56954; width: 50px; margin-left: auto; margin-right: auto;">&nbsp;</div>
               <div class="knob-label">{{ number_format($hutang_vs,2) }}</div>
             </div>
             <!-- ./col -->
             <div class="col-xs-6 text-center" style="border-right: 1px solid #f4f4f4">
-              <label>Payment</label>
+              <label>Payment (dalam ribuan rupiah)</label>
               <div style="background-color:#00a65a; width: 50px; margin-left: auto; margin-right: auto;">&nbsp;</div>
               <div class="knob-label">{{ number_format($bayar_vs,2) }}</div>
             </div>
@@ -311,7 +311,7 @@ Dashboard
       labels  : ['January', 'February', 'March', 'April', 'May', 'June', 'July',"Aug", "Sep", "Oct", "Nov", "Des"],
       datasets: [
         {
-          label               : 'Listrik (kwh)',
+          label               : 'Listrik (kWh)',
           fillColor           : 'rgba(210, 214, 222, 1)',
           strokeColor         : 'rgba(210, 214, 222, 1)',
           pointColor          : 'rgba(210, 214, 222, 1)',
@@ -346,7 +346,7 @@ Dashboard
     barChartData2.datasets[0].strokeColor = "#e0e00d";
     barChartData2.datasets[0].pointColor = "#e0e00d";
     barChartOptions.tooltipTemplate = function(valueObj) {
-        return formatNumber(valueObj.value, 0, ',',  '.') + 'KwH';
+        return formatNumber(valueObj.value, 2, ',',  '.') + 'kWh';
       }
     var barChartOptions2                  = barChartOptions;
 
@@ -360,7 +360,7 @@ Dashboard
     barChartData3.datasets[0].strokeColor = "#1c73ff";
     barChartData3.datasets[0].pointColor = "#1c73ff";
     barChartOptions.tooltipTemplate = function(valueObj) {
-        return formatNumber(valueObj.value, 0, ',',  '.') + 'm3';
+        return formatNumber(valueObj.value, 2, ',',  '.') + 'm3';
       }
     var barChartOptions3                  = barChartOptions;
 

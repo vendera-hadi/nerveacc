@@ -95,6 +95,11 @@
                                   <input type="number" min="1" max="31" name="ppju" class="form-control" value="{{$ppju}}" placeholder="Percentage">
                                 </div>
 
+                                <div class="form-group">
+                                  <label>Variabel denda</label>
+                                  <input type="text" name="denda_variable" class="form-control" value="{{$denda_variable}}" placeholder="Variabel Denda">
+                                </div>
+
                                 @if(!empty($signature))
                                 <div class="form-group">
                                   <label>Current Signature</label><br>

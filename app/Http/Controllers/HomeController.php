@@ -106,8 +106,9 @@ class HomeController extends Controller
 
         $total_all = $fetch[0]['total'] + $fetch2[0]['total'];
 
-        $data['hutang_vs'] = (float)$fetch[0]['total'];
-        $data['bayar_vs'] = (float)$fetch2[0]['total'];
+        $data['hutang_vs'] = (float)round($fetch[0]['total']/1000);
+        $data['bayar_vs'] = (float)round($fetch2[0]['total']/1000);
+
         if($total_all == 0){
             $data['hutang_persen'] = 'N/A';
             $data['bayar_persen'] = 'N/A';

@@ -33,6 +33,7 @@ class CompanyController extends Controller
         $data['footer_po'] = @MsConfig::where('name','footer_po')->first()->value;
         $data['label_po'] = @MsConfig::where('name','footer_label_po')->first()->value;
         $data['po_prefix'] = @MsConfig::where('name','po_prefix')->first()->value;
+        $data['denda_variable'] = @MsConfig::where('name','denda_variable')->first()->value;
         $data['footer_signature_name'] = @MsConfig::where('name','footer_signature_name')->first()->value;
         $data['footer_signature_position'] = @MsConfig::where('name','footer_signature_position')->first()->value;
         $data['coa_laba_rugi'] = @MsConfig::where('name','coa_laba_rugi')->first()->value;
