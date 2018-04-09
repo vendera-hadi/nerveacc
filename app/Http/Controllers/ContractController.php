@@ -120,13 +120,9 @@ class ContractController extends Controller
                 $temp['contr_status'] = $status;
                 $temp['contr_terminate_date'] = !empty($value->contr_terminate_date) ? date('d/m/Y',strtotime($value->contr_terminate_date)) : '';
                 if($value->contr_status == 'inputed' && empty($value->contr_terminate_date)){
-                    /*
                     $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                         &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>
                         &nbsp;<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
-                    */
-                    $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-                        &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a></center>';
                 }else if($value->contr_status == 'inputed' && !empty($value->contr_terminate_date)){
                     $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                         &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>
@@ -140,7 +136,7 @@ class ContractController extends Controller
                     $confirmed = '</center>';
                 }
 
-                if($value->contr_status != 'cancelled') 
+                if($value->contr_status != 'cancelled')
                     $temp['action'] = '<center><a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>&nbsp; '.$confirmed;
                 else $temp['action'] = '';
                 $result['rows'][] = $temp;
@@ -212,13 +208,10 @@ class ContractController extends Controller
                 $temp['contr_status'] = $status;
                 $temp['contr_terminate_date'] = !empty($value->contr_terminate_date) ? date('d/m/Y',strtotime($value->contr_terminate_date)) : '';
                 if($value->contr_status == 'inputed' && empty($value->contr_terminate_date)){
-                    /*
+
                     $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                         &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>
                         &nbsp;<a href="#" title="Cancel Contract" data-id="'.$value->id.'" class="remove"><i class="fa fa-times" aria-hidden="true"></i></a>';
-                    */
-                    $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
-                        &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a></center>';
                 }else if($value->contr_status == 'inputed' && !empty($value->contr_terminate_date)){
                     $confirmed = '<a href="#" title="Edit Contract" data-id="'.$value->id.'" class="editctr"><i class="fa fa-pencil" aria-hidden="true"></i></a>
                         &nbsp;<a href="#" title="Edit Cost Item" data-id="'.$value->id.'" class="editcitm"><i class="fa fa-dollar" aria-hidden="true"></i></a>
@@ -230,9 +223,9 @@ class ContractController extends Controller
                     $confirmed = '<a href="#" title="Cancel Terminate Date" data-id="'.$value->id.'" class="remove_terminate"><i class="fa fa-calendar-times-o" aria-hidden="true"></i></a></center>';
                 }else{
                     $confirmed = '';
-                } 
+                }
 
-                if($value->contr_status != 'cancelled') 
+                if($value->contr_status != 'cancelled')
                     $temp['action'] = '<center><a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>&nbsp; '.$confirmed;
                 else $temp['action'] = '';
                 $result['rows'][] = $temp;
@@ -401,11 +394,7 @@ class ContractController extends Controller
         try{
             // check owner
             $unitOwner = MsUnitOwner::where('unit_id',$request->input('unit_id'))->first();
-            if(!empty($unitOwner)){
-                $checkUnitOwner = TrContract::where('tenan_id',$unitOwner->tenan_id)->where('unit_id',$request->input('unit_id'))->where('contr_status','confirmed')->first();
-                if(!$checkUnitOwner)
-                    return ['status' => 0, 'message' => 'Contract Pemilik harus dibuat dan diconfirm terlebih dahulu sebelum membuat contract tenant'];
-            }else{
+            if(!$unitOwner){
                 return ['status' => 0, 'message' => 'Unit harus mempunyai owner dahulu'];
             }
 

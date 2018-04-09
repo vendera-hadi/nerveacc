@@ -327,17 +327,28 @@ class UnitController extends Controller
         $edit = $request->input('edit');
         $getAll = @$request->input('all');
         $tenan_id = @$request->tenan;
-        // $isowner = $request->input('isowner', 0);
+
+        $owned_units = [];
+        if(!empty($tenan_id)){
+            // get owned unit
+            $owned_units = MsUnitOwner::where('tenan_id',$tenan_id)->pluck('unit_id')->toArray();
+        }
+
         // get unit yg available plus bs select unit dia sendiri
         if($keyword) $fetch = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
-                                    // ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id')
                                     ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id')
                                     ->where(function($query) use($keyword){
                                         $query->where(DB::raw('LOWER(unit_code)'),'ilike','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'ilike','%'.$keyword.'%');
                                     });
         else $fetch = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
                         ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id');
-                        // ->join('ms_virtual_account','ms_unit.unit_virtual_accn','=','ms_virtual_account.id');
+
+        // filter owned unit
+        if(count($owned_units) > 0){
+            $fetch = $fetch->orWhere(function($query) use($owned_units){
+                    $query->whereIn('ms_unit.id',$owned_units)->where('unit_isavailable',1);
+                });
+        }
 
         // KOMEN INI BIAR KELUAR SEMUA
         $cek_tenan = MsTenant::find($tenan_id);
@@ -345,14 +356,7 @@ class UnitController extends Controller
             $fetch = $fetch->where('unit_isavailable',1);
         }
         //if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
-        if(!empty($tenan_id)){
-            // get owned unit
-            $owned_units = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
-                        ->join('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id')
-                        ->where('ms_unit_owner.tenan_id',$tenan_id)->get();
-        }else{
-            $owned_units = [];
-        }
+
         // $fetch = $fetch->orWhere('ms_unit_owner.tenan_id','=',$tenan_id);
         $fetch = $fetch->paginate(10);
         return view('modal.popupunit', ['units'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit, 'owned_units' => $owned_units, 'tenan_id' => $tenan_id]);
