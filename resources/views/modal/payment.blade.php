@@ -7,11 +7,10 @@
 	  <div class="tab-pane active" id="modaltab_1">
 	    	<!-- information -->
 	    	<table width="100%">
-			<tr><td width="40%"><strong>Tenant Name</strong></td><td>:</td><td>{{$invoice['ms_tenant']['tenan_name']}}</td></tr>
-			<tr><td width="40%"><strong>Payment Code</strong></td><td>:</td><td>{{$invoice['invpayh_checkno']}}</td></tr>
-			<tr><td><strong>Billing Info Code</strong></td><td>:</td><td>{{$invoice['tr_contract']['contr_no']}}</td></tr>
-			<tr><td><strong>Payment Date</strong></td><td>:</td><td>{{date('d/m/Y', strtotime($invoice['invpayh_date']))}}</td></tr>
-			<tr><td><strong>Payment Total</strong></td><td>:</td><td>{{'Rp. '.number_format($invoice['invpayh_amount'])}}</td></tr>
+			<tr><td width="40%"><strong>Tenant Name</strong></td><td>:</td><td>{{$header->tenant->tenan_name}}</td></tr>
+			<tr><td width="40%"><strong>Payment Code</strong></td><td>:</td><td>{{$header->invpayh_checkno}}</td></tr>
+			<tr><td><strong>Payment Date</strong></td><td>:</td><td>{{date('d/m/Y', strtotime($header->invpayh_date))}}</td></tr>
+			<tr><td><strong>Payment Total</strong></td><td>:</td><td>{{'Rp. '.number_format($header->invpayh_amount)}}</td></tr>
 			</table>
 	    	<!-- end information -->
 	  </div>
@@ -21,22 +20,26 @@
 			<thead>
 			    <tr>
 			        <th width="100">No.Invoice</th>
-			        <th width="80">Amount</th> 
+			        <th width="80">Unit</th>
+			        <th width="80">Contract</th>
+			        <th width="80">Amount</th>
 			    </tr>
 			</thead>
-			@if(count($invoice['tr_invoice_paymdtl']) > 0)
+			@if($header->TrInvoicePaymdtl->count() > 0)
 			<tbody>
-			    @foreach($invoice['tr_invoice_paymdtl'] as $value)
+			    @foreach($header->TrInvoicePaymdtl as $value)
 			    <tr>
-			        <td>{{!empty(@$value['inv_number']) ? $value['inv_number'] : '(Deleted Invoice)' }}</td>
-			        <td>{{'Rp. '.number_format($value['invpayd_amount'])}}</td>
+			        <td>{{!empty(@$value->TrInvoice->inv_number) ? $value->TrInvoice->inv_number : '(Deleted Invoice)' }}</td>
+			        <td>{{@$value->TrInvoice->TrContract->MsUnit->unit_code}}</td>
+			        <td>{{@$value->TrInvoice->TrContract->contr_no}}</td>
+			        <td>{{'Rp. '.number_format($value->invpayd_amount)}}</td>
 			    </tr>
 			    @endforeach
 			</tbody>
 			@endif
 			</table>
 	  </div>
-	  
+
 	</div>
 	<!-- /.tab-content -->
 </div>

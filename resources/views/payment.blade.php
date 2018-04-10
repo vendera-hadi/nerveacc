@@ -100,7 +100,7 @@
                         <form method="POST" id="formPayment">
                             <div class="form-group">
                                 <label>Tenant Name</label>
-                                <select class="form-control contrId choose-contract" name="contr_id" style="width:100%"></select>
+                                <select class="form-control contrId choose-contract" name="tenan_id" style="width:100%"></select>
                             </div>
                             <div class="form-group">
                                 <label>No Giro</label>

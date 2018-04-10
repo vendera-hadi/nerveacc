@@ -76,12 +76,9 @@ class PaymentController extends Controller
 
             // olah data
             $count = TrInvoicePaymhdr::count();
-            $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.*', 'ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_code','ms_floor.floor_name', 'ms_payment_type.paymtp_name')
+            $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.*', 'ms_tenant.tenan_name', 'ms_payment_type.paymtp_name')
                     ->join('ms_payment_type',   'ms_payment_type.id',"=",'tr_invoice_paymhdr.paymtp_code')
-                    ->join('tr_contract',       'tr_contract.id',"=",'tr_invoice_paymhdr.contr_id')
-                    ->join('ms_unit',           'tr_contract.unit_id',"=",'ms_unit.id')
-                    ->join('ms_floor',          'ms_unit.floor_id',"=",'ms_floor.id')
-                    ->join('ms_tenant',         'ms_tenant.id',"=",'tr_contract.tenan_id')
+                    ->join('ms_tenant', 'ms_tenant.id',"=",'tr_invoice_paymhdr.tenan_id')
                     ->where('status_void', '=', false);
 
             if(!empty($filters) && count($filters) > 0){
@@ -108,7 +105,7 @@ class PaymentController extends Controller
             }
             // jika ada keyword
             if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
-                                        $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("invpayh_checkno"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'like','%'.$keyword.'%');
+                                        $query->where(\DB::raw('lower(trim("invpayh_checkno"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'like','%'.$keyword.'%');
                                     });
             // jika ada date from
             if(!empty($datefrom)) $fetch = $fetch->where('tr_invoice_paymhdr.invpayh_date','>=',$datefrom);
@@ -123,13 +120,16 @@ class PaymentController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['unit_code'] = $value->unit_code;
-                $temp['unit'] = $value->unit_name." (".$value->floor_name.")";
                 $temp['paymtp_name'] = $value->paymtp_name;
+                $temp['unit_code'] = "";
+                if(count($value->TrInvoicePaymdtl) > 0){
+                    foreach ($value->TrInvoicePaymdtl as $paydt) {
+                        if(!empty(@$paydt->TrInvoice->TrContract->MsUnit)) $temp['unit_code'] .= $paydt->TrInvoice->TrContract->MsUnit->unit_code."<br>";
+                    }
+                }
                 $temp['invpayh_date'] = date('d/m/Y',strtotime($value->invpayh_date));
                 $temp['invpayh_amount'] = "Rp. ".number_format($value->invpayh_amount);
                 $temp['invtp_name'] = $value->invtp_name;
-                $temp['contr_id'] = $value->contr_id;
                 $temp['tenan_name'] = $value->tenan_name;
                 $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'">';
                 $invpayh_post = $temp['invpayh_post'] = !empty($value->invpayh_post) ? 'yes' : 'no';
@@ -188,46 +188,21 @@ class PaymentController extends Controller
 
     public function getdetail(Request $request){
         $id = $request->id;
+        $paymHdr = TrInvoicePaymhdr::find($id);
 
-        $invoice = TrInvoicePaymhdr::where('id', $id)->with('TrInvoicePaymdtl', 'TrContract')->get()->first();
-
-        if(!empty($invoice)){
-            $invoice = $invoice->toArray();
-
-            if(!empty($invoice['tr_invoice_paymdtl'])){
-                foreach ($invoice['tr_invoice_paymdtl'] as $key => $value) {
-                    $inv_id = !empty($value['inv_id']) ? $value['inv_id'] : false;
-
-                    $invoice_data = TrInvoice::where('id', $inv_id)->get()->first();
-
-                    if(!empty($invoice_data)){
-                        $invoice['tr_invoice_paymdtl'][$key] = array_merge($invoice['tr_invoice_paymdtl'][$key], $invoice_data->toArray());
-                    }
-                }
-            }
-
-            if(!empty($invoice['tr_contract']['tenan_id'])){
-                $ms_tenant = MsTenant::where('id', $invoice['tr_contract']['tenan_id'])->get()->first();
-
-                if(!empty($ms_tenant)){
-                    $invoice['ms_tenant'] = $ms_tenant->toArray();
-                }
-            }
-        }
-
-        return view('modal.payment', ['invoice' => $invoice]);
+        return view('modal.payment', ['header' => $paymHdr]);
     }
 
     public function insert(Request $request){
         $messages = [
-            'contr_id.required' => 'Tenan name is required',
+            'tenan_id.required' => 'Tenan name is required',
             'cashbk_id.required' => 'Bank is required',
             'paymtp_code.required' => 'Payment Type is required',
             'invpayh_date.required' => 'Payment Date is required',
         ];
 
         $validator = Validator::make($request->all(), [
-            'contr_id' => 'required:tr_invoice_paymhdr',
+            'tenan_id' => 'required:tr_invoice_paymhdr',
             'cashbk_id' => 'required:tr_invoice_paymhdr',
             'paymtp_code' => 'required:tr_invoice_paymhdr',
             'invpayh_date' => 'required:tr_invoice_paymhdr'
@@ -299,7 +274,8 @@ class PaymentController extends Controller
                     $action->invpayh_post = !empty($request->input('invpayh_post')) ? true : false;
                     $action->paymtp_code = $request->input('paymtp_code');
                     $action->cashbk_id = $request->input('cashbk_id');
-                    $action->contr_id = $request->input('contr_id');
+                    // $action->contr_id = $request->input('contr_id');
+                    $action->tenan_id = $request->input('tenan_id');
                     $action->invpayh_settlamt = 1;
                     $action->invpayh_adjustamt = 1;
                     $action->invpayh_amount = $total;
@@ -553,7 +529,7 @@ class PaymentController extends Controller
                     $checkDebitLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('ledg_credit',0)->first();
                     $checkCreditLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('coa_code',$checkDebitLedger->coa_code)->where('ledg_debit',0)->first();
                     // blum ada lawanan & outstanding suda 0, insert
-                    if(empty($checkCreditLedger)){
+                    // if(empty($checkCreditLedger)){
                         $debitLedger = TrLedger::where('ledg_refno',$dtl->inv_number)->where('ledg_credit',0)->get();
                         // echo "Masuk :<br>";
                         // echo $debitLedger."<br><br>";
@@ -646,7 +622,7 @@ class PaymentController extends Controller
                         $successIds[] = $id;
                         $piutangIds[] = $dtl->inv_number;
                         // }
-                    }
+                    // }
 
                 }
             }catch(\Exception $e){
