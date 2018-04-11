@@ -97,6 +97,7 @@ class PermissionSeeder extends Seeder
           ["id" => 81, "name" => "Add Fixed Asset"],
           ["id" => 82, "name" => "Edit Fixed Asset"],
           ["id" => 83, "name" => "Delete Fixed Asset"],
+          ["id" => 84, "name" => "Unposting Invoice"],
         ]);
     }
 }

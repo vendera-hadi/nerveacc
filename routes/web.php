@@ -331,6 +331,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('invoice/print_kwitansi', 'InvoiceController@print_kwitansi');
 	Route::get('invoice/receipt', 'InvoiceController@kuitansi');
 	Route::post('invoice/posting','InvoiceController@posting')->name('invoice.posting');
+	Route::post('invoice/unposting','InvoiceController@unposting')->name('invoice.unposting');
 	Route::post('invoice/insert','InvoiceController@insert')->name('invoice.insert');
 	Route::post('invoice/cancel','InvoiceController@cancel')->name('invoice.cancel');
 	Route::post('invoice/ajax-get-footer','InvoiceController@ajaxGetFooter')->name('invoice.ajaxgetfooter');

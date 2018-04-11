@@ -28,19 +28,19 @@
 				<table class="table table-stripped table-condensed">
 					<?php for($i=0; $i<$total; $i++){ ?>
 					<tr>
-						<?php 
+						<?php
 							if(isset($detail1[$i])){
 								if($detail1[$i]->hide != '0'){
 									$desc = str_replace(' ','&nbsp;',$detail1[$i]->desc);
 									if(!empty($detail1[$i]->header)) $desc = '<b>'.$desc.'</b>';
-									echo '<td>'.$desc.'</td>'; 
+									echo '<td>'.$desc.'</td>';
 								}else{
 									echo '<td>&nbsp;</td>';
 								}
-							}else{ 
+							}else{
 								echo '<td>&nbsp;</td>';
 							}
-						
+
 							if(isset($detail1[$i])){
 
 								$detail1[$i]->setDate($from, $to);
@@ -51,32 +51,33 @@
 								if($detail1[$i]->hide != '0'){
 									if(!empty($detail1[$i]->coa_code) || !empty($detail1[$i]->formula)){
 										if(trim($detail1[$i]->underline) == '1'){
-											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.format_report_numeric($calculate).'</td>'; 
+											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.format_report_numeric($calculate).'</td>';
 										}else{
 											echo '<td style="text-align:right">'.format_report_numeric($calculate).'</td>';
 										}
 									}else{
-										echo '<td>&nbsp;</td>';
+										$underline = trim($detail1[$i]->underline) == '1' ? 'style="border-bottom: 1px solid black;"' : '';
+										echo "<td $underline>&nbsp;</td>";
 									}
 								}else{
 										echo '<td>&nbsp;</td>';
 									}
-							}else{ 
+							}else{
 								echo '<td>&nbsp;</td>';
 							}
-							
+
 							if(isset($detail2[$i])){
 								if($detail2[$i]->hide != '0'){
-									$desc = str_replace(' ','&nbsp;',$detail2[$i]->desc); 
+									$desc = str_replace(' ','&nbsp;',$detail2[$i]->desc);
 									if(!empty($detail2[$i]->header)) $desc = '<b>'.$desc.'</b>';
-									echo '<td>'.$desc.'</td>'; 
+									echo '<td>'.$desc.'</td>';
 								}else{
 									echo '<td>&nbsp;</td>';
 								}
-							}else{ 
+							}else{
 								echo '<td>&nbsp;</td>';
 							}
-						
+
 							if(isset($detail2[$i])){
 
 								$detail2[$i]->setDate($from, $to);
@@ -87,17 +88,18 @@
 								if($detail2[$i]->hide != '0'){
 									if(!empty($detail2[$i]->coa_code) || !empty($detail2[$i]->formula)){
 										if(trim($detail2[$i]->underline) == '1'){
-											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.format_report_numeric($calculate).'</td>'; 
+											echo '<td style="border-bottom: 1px solid black; text-align:right;">'.format_report_numeric($calculate).'</td>';
 										}else{
 											echo '<td style="text-align:right">'.format_report_numeric($calculate).'</td>';
 										}
 									}else{
-										echo '<td>&nbsp;</td>';
+										$underline = trim($detail2[$i]->underline) == '1' ? 'style="border-bottom: 1px solid black;"' : '';
+										echo "<td $underline>&nbsp;</td>";
 									}
 								}else{
 										echo '<td>&nbsp;</td>';
 									}
-							}else{ 
+							}else{
 								echo '<td>&nbsp;</td>';
 							}
 							?>

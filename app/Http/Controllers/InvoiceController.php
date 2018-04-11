@@ -1257,4 +1257,32 @@ class InvoiceController extends Controller
         // \Mail::to($inv->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($inv));
     }
 
+    public function unposting(Request $request)
+    {
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+
+        $success = 0;
+        foreach ($ids as $id) {
+            $invoiceHd = TrInvoice::find($id);
+            if($invoiceHd->inv_iscancel) break;
+
+            // check apa suda ada payment?
+            $payment = TrInvoicePaymhdr::whereHas('TrInvoicePaymdtl', function($query) use($id){
+                $query->where('inv_id',$id);
+            })->where('status_void',0)->first();
+            if($payment) return response()->json(['error'=>1, 'message'=> 'Invoice tidak dapat diunpost jika sudah ada pembayaran terhadap invoice ini']);
+            // cari di trledger
+            $check = TrLedger::where('ledg_refno', $invoiceHd->inv_number)->orderBy('id')->first();
+            if($check){
+                $date = $check->ledg_date;
+                TrLedger::where('ledg_refno', $invoiceHd->inv_number)->where('ledg_date', $date)->delete();
+            }
+            $invoiceHd->inv_post = false;
+            $invoiceHd->save();
+            $success++;
+        }
+        return response()->json(['success'=>1, 'message'=>$success.' Invoice unposted Successfully']);
+    }
+
 }

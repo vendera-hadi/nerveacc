@@ -134,6 +134,10 @@
             @endif
             <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="printInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-print"></i>&nbsp;Print</span></a>
             <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="editFooter()" group="" id=""><span class="l-btn-text"><i class="fa fa-font"></i>&nbsp;Edit Footer/Label</span></a>
+
+            @if(Session::get('role')==1 || in_array(84,Session::get('permissions')))
+            <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="unpost()" group="" id=""><span class="l-btn-text"><i class="fa fa-undo"></i>&nbsp;Unposting Invoice</span></a>
+            @endif
         </div>
         <!-- end icon -->
 
@@ -464,6 +468,33 @@ function postingInv(){
     // }else{
     //     $.messager.alert('Warning', 'You can\'t post invoice that already posted');
     // }
+}
+
+function unpost(){
+    var ids = [];
+    $('input[name=check]:checked').each(function() {
+       if($(this).data('posting') == 1) ids.push($(this).val());
+    });
+
+    if(ids.length > 0){
+        $.messager.confirm('Confirm','Are you sure you want to unpost this '+ids.length+' posted Invoice ?',function(r){
+            if (r){
+                $('.loadingScreen').show();
+                // posting invoice
+                $.post('{{route('invoice.unposting')}}',{id:ids},function(result){
+                    console.log(result);
+                    $('.loadingScreen').hide();
+                    if(result.error){
+                        $.messager.alert('Warning',result.message);
+                    }
+                    if(result.success){
+                        $.messager.alert('Success',result.message);
+                        $('#dg').datagrid('reload');
+                    }
+                },'json');
+            }
+        });
+    }
 }
 
 function addInv(){

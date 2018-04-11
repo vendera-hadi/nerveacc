@@ -1291,9 +1291,9 @@ class ReportController extends Controller
             $data['type'] = 'excel';
             $data_ori = $data['invoices'];
             $data = array();
-            $total_saldo_awal = 0; 
-            $total_debet = 0; 
-            $total_kredit = 0; 
+            $total_saldo_awal = 0;
+            $total_debet = 0;
+            $total_kredit = 0;
             $total_saldo_akhir = 0;
             for($i=0; $i<count($data_ori); $i++){
                 $data[$i]=array(
@@ -1352,6 +1352,11 @@ class ReportController extends Controller
                 'variables' => []
             ];
         //dd($detail1);
+        $pdf = @$request->pdf;
+        if(!empty($pdf)){
+            $pdf = PDF::loadView('report_neraca', $data)->setPaper('a4');
+            return $pdf->download('NERACA.pdf');
+        }
         return view('report_neraca', $data);
     }
 
@@ -1834,7 +1839,7 @@ class ReportController extends Controller
                     ->orderBy('ms_supplier.spl_code', 'asc');
                 if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
                 $bayar = $bayar->get();
-                
+
                 $hasil_nl = array();
                 if(count($belum) > 0){
                     for($i=0; $i<count($belum); $i++){
@@ -1916,17 +1921,17 @@ class ReportController extends Controller
                 $fetch = $hasil_nl;
             }
         }
-        
+
         $data['invoices'] = $fetch;
 
         if($pdf){
             $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
             return $pdf->download('POList_Summary.pdf');
-            
+
         }else if($excel){
             $data['type'] = 'excel';
-            
+
         }else{
             return view('layouts.report_template2', $data);
         }
@@ -2019,7 +2024,7 @@ class ReportController extends Controller
                     ->orderBy('ms_supplier.spl_code', 'asc');
                 if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
                 $bayar = $bayar->get();
-                
+
                 $hasil_nl = array();
                 if(count($belum) > 0){
                     for($i=0; $i<count($belum); $i++){
@@ -2101,17 +2106,17 @@ class ReportController extends Controller
                 $fetch = $hasil_nl;
             }
         }
-        
+
         $data['invoices'] = $fetch;
 
         if($pdf){
             $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
             return $pdf->download('NONPOList_Summary.pdf');
-            
+
         }else if($excel){
             $data['type'] = 'excel';
-            
+
         }else{
             return view('layouts.report_template2', $data);
         }
@@ -2127,7 +2132,7 @@ class ReportController extends Controller
         $data['name'] = MsCompany::first()->comp_name;
         $data['title'] = "Purchase History";
         $data['logo'] = MsCompany::first()->comp_image;
-      
+
         $data['template'] = 'report_phistory';
         $data['title_r'] = 'Purchase History';
 
@@ -2178,17 +2183,17 @@ class ReportController extends Controller
             }
         }
         $fetch = $hasil_nl;
-        
+
         $data['invoices'] = $fetch;
 
         if($pdf){
             $data['type'] = 'pdf';
             $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
             return $pdf->download('NONPOList_Summary.pdf');
-            
+
         }else if($excel){
             $data['type'] = 'excel';
-            
+
         }else{
             return view('layouts.report_template2', $data);
         }
