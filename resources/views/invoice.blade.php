@@ -18,6 +18,7 @@
     <!-- datepicker -->
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/datepicker/datepicker3.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css') }}">
+     <link rel="stylesheet" type="text/css" href="{{ asset('plugins/select2/select2.min.css') }}">
     <style type="text/css">
         .loadingScreen{
             position: absolute;
@@ -220,6 +221,19 @@
                                 </div>
                             </div>
 
+                             <div class="col-xs-6">
+                                <div class="form-group">
+                                    <label>Unit</label>
+                                    <div class="input-group">
+                                        <input type="hidden" name="unit_id" id="txtUnitId" required>
+                                        <input type="text" class="form-control" id="txtUnit" disabled>
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-info" type="button" id="chooseUnitButton">Choose Unit</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="col-xs-6">
                                 <div class="form-group">
                                     <label>Invoice Type</label>
@@ -252,12 +266,12 @@
                                     </tr>
 
                                     <tr class="text-center">
-                                        <td id="coalist">
-                                            <select class="form-control" name="coa_code[]">
-                                                @foreach($coa as $code)
-                                                    <option value="{{$code->coa_code}}">{{ trim($code->coa_code).' - '.trim($code->coa_name) }}</option>
-                                                @endforeach
-                                            </select>
+                                        <td>
+                                        <select style="width: 200px" class="form-control select2" name="coa_code[]">
+                                            @foreach($coa as $code)
+                                                <option value="{{$code->coa_code}}">{{ trim($code->coa_code).' - '.trim($code->coa_name) }}</option>
+                                            @endforeach
+                                        </select>
                                         </td>
                                         <td><input type="text" class="form-control" name="invdt_note[]" required></td>
                                         <td><input type="number" class="form-control amount" name="invdt_amount[]" value="0" required></td>
@@ -344,7 +358,7 @@
 
         <!-- End Modal -->
 
-        <!-- Modal select contract -->
+        <!-- Modal select tenan -->
         <div id="tenanModal" class="modal fade" role="dialog">
           <div class="modal-dialog">
 
@@ -359,6 +373,20 @@
             </div>
 
           </div>
+        </div>
+        <!-- End Modal -->
+
+        <!-- Modal select unit -->
+        <div id="unitModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-body" id="unitModalContent"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- End Modal -->
 
@@ -392,6 +420,7 @@
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-detailview.js') }}"></script>
+<script type="text/javascript" src="{{ asset('plugins/select2/select2.min.js') }}"></script>
 <!-- datepicker -->
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 <script type="text/javascript" src="{{asset('plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js')}}"></script>
@@ -403,6 +432,7 @@ var get_url2 = "{{route('invoice.getdetail')}}";
 $('.datepicker').datepicker({
             autoclose: true
         });
+ $('.select2').select2();
 
 function postingInv(){
     // var row = $('#dg').datagrid('getSelected');
@@ -625,16 +655,27 @@ $(function(){
         // });
         $('#tenanModal').modal("show");
         currenturl = '{{route('tenant.popup')}}';
+        currentModal = 'tenanModalContent';
         $.post(currenturl,null, function(data){
             $('#tenanModalContent').html(data);
         });
     });
 
+    var currentModal;
     $('#chooseTenanButton').click(function(){
         $('#tenanModal').modal("show");
         currenturl = '{{route('tenant.popup')}}';
         $.post(currenturl,null, function(data){
             $('#tenanModalContent').html(data);
+        });
+    });
+
+    $('#chooseUnitButton').click(function(){
+        $('#unitModal').modal("show");
+        currenturl = '{{route('unit.popup')}}';
+        currentModal = 'unitModalContent';
+        $.post(currenturl, {}, function(data){
+            $('#unitModalContent').html(data);
         });
     });
 
@@ -651,8 +692,9 @@ $(function(){
     $(document).delegate('.pagination li a','click',function(e){
         e.preventDefault();
         currenturl = $(this).attr('href');
+        console.log(currentModal);
         $.post(currenturl, null, function(data){
-            $('#tenanModalContent').html(data);
+            $('#'+currentModal).html(data);
         });
     });
 
@@ -677,14 +719,47 @@ $(function(){
         $('#tenanModal').modal("hide");
     });
 
-    $(document).delegate('#searchContract','submit',function(e){
+    // popup unit
+    $(document).delegate('#chooseUnit','click',function(e){
         e.preventDefault();
-        var data = $('#searchContract').serialize();
-        currenturl = '{{route('contract.popup')}}';
-        $.post(currenturl, data, function(data){
-            $('#contractModalContent').html(data);
-        });
+        var unitid = $('input[name="unit"]:checked').val();
+        var unitname = $('input[name="unit"]:checked').data('name');
+        $('#txtUnitId').val(unitid);
+        $('#txtUnit').val(unitname);
+        var unitvaccount = $('input[name="unit"]:checked').data('vaccount');
+        var unitvaccountid = $('input[name="unit"]:checked').data('vaccount-id');
+        $('#txtVA').val(unitvaccount);
+        // $('#txtVAId').val(unitvaccountid);
+        $('#unitModalContent').text('');
+        $('#unitModal').modal("hide");
     });
+
+    // $(document).delegate('#searchContract','submit',function(e){
+    //     e.preventDefault();
+    //     var data = $('#searchContract').serialize();
+    //     currenturl = '{{route('contract.popup')}}';
+    //     $.post(currenturl, data, function(data){
+    //         $('#contractModalContent').html(data);
+    //     });
+    // });
+
+    $(document).delegate('#searchUnit','submit',function(e){
+            e.preventDefault();
+            var data = $('#searchUnit').serialize();
+            currenturl = '{{route('unit.popup')}}';
+            $.post(currenturl, data, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
+
+    $(document).delegate('#searchTenant','submit',function(e){
+            e.preventDefault();
+            var data = $('#searchTenant').serialize();
+            currenturl = '{{route('tenant.popup')}}';
+            $.post(currenturl, data, function(data){
+                $('#unitModalContent').html(data);
+            });
+        });
 
      $(document).delegate('#chooseContract','click',function(e){
         e.preventDefault();
@@ -699,8 +774,14 @@ $(function(){
     $('#clickCostItemEdit').click(function(){
           var flag = false;
           var subtotal = 0;
-          var coa_clone = $('#coalist').html();
+          // var coa_clone = $('#coalist').html();
+          var coa_clone = '<select style="width: 200px" class="form-control select2" name="coa_code[]">';
+          @foreach($coa as $code)
+          coa_clone = coa_clone + '<option value="{{$code->coa_code}}">{{ trim($code->coa_code).' - '.trim($code->coa_name) }}</option>';
+          @endforeach
+          coa_clone = coa_clone + '</select>';
           $('#tableCost').append('<tr class="text-center"><td>'+coa_clone+'</td><td><input type="text" class="form-control" name="invdt_note[]" required></td><td><input type="number" class="form-control amount" name="invdt_amount[]" value="0" required></td><td><a class="deleteRow" style="cursor:pointer"><i class="fa fa-times"></i></a></td></tr>');
+          $('.select2').select2();
     });
 
     $(document).delegate('.amount','change',function(){
@@ -775,6 +856,4 @@ $(function(){
 });
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
-<!-- datepicker -->
-<script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 @endsection

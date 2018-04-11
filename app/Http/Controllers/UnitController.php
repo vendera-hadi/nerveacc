@@ -351,9 +351,11 @@ class UnitController extends Controller
         }
 
         // KOMEN INI BIAR KELUAR SEMUA
-        $cek_tenan = MsTenant::find($tenan_id);
-        if($cek_tenan && @$cek_tenan->tent_id == 1){
-            $fetch = $fetch->where('unit_isavailable',1);
+        if($tenan_id){
+            $cek_tenan = MsTenant::find($tenan_id);
+            if($cek_tenan && @$cek_tenan->tent_id == 1){
+                $fetch = $fetch->where('unit_isavailable',1);
+            }
         }
         //if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
 

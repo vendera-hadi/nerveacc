@@ -96,7 +96,13 @@ class CostItemController extends Controller
 
     public function update(Request $request){
         try{
+            // exception stamp
+            $exceptions = [];
+            $stamp = MsCostItem::where('cost_code','STAMP')->first();
+            if($stamp) $exceptions[] = $stamp->id;
+
             $id = $request->id;
+            if(in_array($id, $exceptions)) return response()->json(['errorMsg'=>'Sorry STAMP is default on system and cannot be edited']);
             $input['updated_by'] = Auth::id();
             $input = $request->all();
             MsCostItem::find($id)->update($input);
@@ -110,8 +116,11 @@ class CostItemController extends Controller
         try{
             $id = $request->id;
             $exceptions = [1,2,4,5,6,9,10];
+            // tambahin stamp
+            $stamp = MsCostItem::where('cost_code','STAMP')->first();
+            if($stamp) $exceptions[] = $stamp->id;
             if(in_array($id, $exceptions)){
-                return response()->json(['errorMsg'=>'Sorry This Item Cannot be Deleted']);
+                return response()->json(['errorMsg'=>'Sorry this Cost Item is default on system and cannot be deleted']);
             }else{
                 MsCostItem::destroy($id);
                 return response()->json(['success'=>true]);

@@ -49,7 +49,7 @@ class ElectricityCalc extends Meter {
                 $total += $grossup_total;
             }
               // echo "Grandtotal $total<br>";
-            return round($total);
+            return round($total,2);
         }catch(Exception $e){
             return false;
         }
@@ -57,7 +57,7 @@ class ElectricityCalc extends Meter {
 
     public function customNote($date_start, $date_end)
     {
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end))."<br>Meter Awal : ".number_format($this->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->getMeterUsed(),2)."<br>BPJU ".@$this->bpju."% :".$this->bpju_cost;
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end))."<br>Meter Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->getMeterUsed(),2)."<br>BPJU ".@$this->bpju."% :".$this->bpju_cost;
         return $note;
     }
 

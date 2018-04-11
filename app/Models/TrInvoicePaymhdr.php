@@ -20,4 +20,9 @@ class TrInvoicePaymhdr extends Model
    public function tenant(){
          return $this->belongsTo('App\Models\MsTenant','tenan_id');
    }
+
+   public function paymentType()
+   {
+         return $this->belongsTo('App\Models\MsPaymentType','paymtp_code');
+   }
 }

@@ -76,8 +76,7 @@ class PaymentController extends Controller
 
             // olah data
             $count = TrInvoicePaymhdr::count();
-            $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.*', 'ms_tenant.tenan_name', 'ms_payment_type.paymtp_name')
-                    ->join('ms_payment_type',   'ms_payment_type.id',"=",'tr_invoice_paymhdr.paymtp_code')
+            $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.*', 'ms_tenant.tenan_name')
                     ->join('ms_tenant', 'ms_tenant.id',"=",'tr_invoice_paymhdr.tenan_id')
                     ->where('status_void', '=', false);
 
@@ -120,7 +119,7 @@ class PaymentController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['paymtp_name'] = $value->paymtp_name;
+                $temp['paymtp_name'] = $value->paymentType->paymtp_name;
                 $temp['unit_code'] = "";
                 if(count($value->TrInvoicePaymdtl) > 0){
                     foreach ($value->TrInvoicePaymdtl as $paydt) {
@@ -167,7 +166,7 @@ class PaymentController extends Controller
     public function get_invoice(Request $request){
         $tenan_id = @$request->tenan_id;
 
-        $invoice_data = TrInvoice::select('tr_invoice.id', 'tr_invoice.inv_number', 'tr_invoice.inv_date', 'tr_invoice.inv_duedate', 'tr_invoice.inv_outstanding', 'ms_unit.unit_name', 'ms_floor.floor_name')
+        $invoice_data = TrInvoice::select('tr_invoice.id', 'tr_invoice.inv_number', 'tr_invoice.inv_date', 'tr_invoice.unit_id', 'tr_invoice.inv_duedate', 'tr_invoice.inv_outstanding', 'ms_unit.unit_name', 'ms_floor.floor_name')
         ->leftJoin('tr_contract', 'tr_contract.id',"=",'tr_invoice.contr_id')
         ->leftJoin('ms_unit', 'tr_contract.unit_id',"=",'ms_unit.id')
         ->leftJoin('ms_floor', 'ms_unit.floor_id',"=",'ms_floor.id')
@@ -176,10 +175,6 @@ class PaymentController extends Controller
         ->where('tr_invoice.inv_post', 1)
         ->where('tr_invoice.inv_iscancel', 0)
         ->get();
-
-        if(!empty($invoice_data)){
-            $invoice_data = $invoice_data->toArray();
-        }
 
         return view('get_invoice', array(
             'invoice_data' => $invoice_data

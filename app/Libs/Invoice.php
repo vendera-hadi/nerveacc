@@ -165,6 +165,7 @@ class Invoice {
         // save header
         $newInvoice = new TrInvoice;
         $newInvoice->tenan_id = $this->contract->tenan_id;
+        $newInvoice->unit_id = $this->contract->unit_id;
         $newInvoice->inv_number = $this->newInvoiceNumber();
         $newInvoice->inv_faktur_no = $newInvoice->inv_number;
         $newInvoice->inv_faktur_date = $this->invStartDate;
