@@ -104,17 +104,55 @@
               <td>{{$rt->MsTenant->tenan_email}}</td>
               <td>{{$rt->MsTenant->tenan_address}}</td>
               <td>{{$rt->MsTenant->tenan_npwp}}</td>
-              <td>{{$rt->contr_startdate}}</td>
-              <td>{{$rt->contr_enddate}}</td>
-              <td>{{$rt->contr_status}}</td>
+              <td>{{date('d F Y', strtotime($rt->contr_startdate))}}</td>
+              <td>{{date('d F Y', strtotime($rt->contr_enddate))}}</td>
+              <td>{{date('d F Y', strtotime($rt->contr_status))}}</td>
             </tr>
             @endforeach
             @else
             <tr class="text-center">
-              <td colspan="9">No renter</th>
+              <td colspan="10">No renter</th>
             </tr>
             @endif
         </table>
     	</div>
+    </div>
+</div>
+
+<div class="row" style="margin-top:40px">
+    <div class="col-sm-12">
+      <h3>History Pemilik</h3>
+      <div class="table-responsive">
+        <table style="80%" class="table table-bordered" >
+            <tr class="text-center">
+              <th>Name</th>
+              <th>KTP</th>
+              <th>Phone</th>
+              <th>Fax</th>
+              <th>Email</th>
+              <th>Address</th>
+              <th>NPWP</th>
+              <th>Owned since</th>
+            </tr>
+            @if(count($prevowner) > 0)
+            @foreach($prevowner as $pown)
+            <tr>
+              <td>{{$pown->tenant->tenan_name}}</td>
+              <td>{{$pown->tenant->tenan_idno}}</td>
+              <td>{{$pown->tenant->tenan_phone}}</td>
+              <td>{{$pown->tenant->tenan_fax}}</td>
+              <td>{{$pown->tenant->tenan_email}}</td>
+              <td>{{$pown->tenant->tenan_address}}</td>
+              <td>{{$pown->tenant->tenan_npwp}}</td>
+              <td>{{date('d F Y', strtotime($pown->unitow_start_date))}}</td>
+            </tr>
+            @endforeach
+            @else
+            <tr class="text-center">
+              <td colspan="8">No previous owner</th>
+            </tr>
+            @endif
+        </table>
+      </div>
     </div>
 </div>

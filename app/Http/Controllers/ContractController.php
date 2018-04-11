@@ -1015,6 +1015,22 @@ class ContractController extends Controller
     {
         $id = $request->contr_id;
         $contract = TrContract::find($id);
+
+        $check = MsUnitOwner::where('unit_id',$contract->unit_id)->where('tenan_id',$contract->tenan_id)->first();
+        if($check){
+            // if owner, change status owner to tenant, unit jadi available
+            $unit = MsUnit::find($contract->unit_id);
+            $unit->unit_isavailable = true;
+            $unit->save();
+            // update status tidak sebagai owner lg
+            $tenan_notowner = MsTenantType::where('tent_isowner',false)->first();
+            $unitowner = MsTenant::find($contract->tenan_id);
+            $unitowner->tent_id = $tenan_notowner->id;
+            $unitowner->save();
+            // delete ownership
+            MsUnitOwner::where('unit_id',$contract->unit_id)->where('tenan_id',$contract->tenan_id)->delete();
+        }
+
         $contract->contr_status = 'closed';
         $contract->save();
         return redirect()->back()->with('success', 'Contract closed');
