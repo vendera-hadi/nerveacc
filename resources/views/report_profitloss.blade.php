@@ -17,7 +17,8 @@
                     <h4>
                         {{$company->comp_name}}<br>
                         <b>{{Request::get('title')}}</b><br>       
-                        {{$datetxt}}
+                        {{$datetxt}}<br>
+                        Dalam Rupiah (Rp)
                     </h4>
                 </center>
             </div>
@@ -25,10 +26,6 @@
         <div class="row">
             <div class="col-md-12">
                 <table class="table table-stripped table-condensed">
-                    <tr>
-                        <th style="text-align: center;font-weight: bold;background-color:#E2DDD9;">KETERANGAN</th>
-                        <th style="text-align: center;font-weight: bold;background-color:#E2DDD9;">Rp.</th>
-                    </tr>
                     @foreach($detail as $dt)
                     @php
                         $desc = str_replace(' ','&nbsp;',$dt->desc);

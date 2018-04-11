@@ -42,6 +42,9 @@
                 <div class="form-group">
                     <select id="type" name="type" class="form-control">
                         <option value="apaging">Aged Payable</option>
+                        <option value="polist">PO List</option>
+                        <option value="nonpolist">NON PO List</option>
+                        <option value="phistory">Purchase History</option>
                     </select>
                 </div>
                 <div class="row history">
@@ -49,7 +52,7 @@
                         <div class="form-group">
                             <select class="form-control choose-unit" name="unit3" style="width: 100%;"></select>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group phis">
                             <select class="form-control" name="jenist" id="tyt">
                                 <option value="1">SUMMARY</option>
                                 <option value="2">DETAIL</option>
@@ -57,35 +60,38 @@
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="col-sm-3" style="padding-left: 0px;">
-                            <div class="form-group">
-                             <input type="text" name="ag30" class="form-control" value="30" />
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                             <input type="text" name="ag60" class="form-control" value="60" />
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="form-group">
-                             <input type="text" name="ag90" class="form-control" value="90" />
-                            </div>
-                        </div>
-                        <div class="col-sm-3" style="padding-right: 0px;">
-                            <div class="form-group">
-                             <input type="text" name="ag180" class="form-control" value="180" />
-                            </div>
-                        </div>
-                        <div class="form-group">
+                        <div class="form-group phis">
                             <select class="form-control" name="jenis" id="ty">
                                 <option value="1">NOT PAID</option>
                                 <option value="2">PAID</option>
                                 <option value="3">ALL</option>
                             </select>
                         </div>
+                        <div class="age">
+                            <div class="col-sm-3" style="padding-left: 0px;">
+                                <div class="form-group">
+                                 <input type="text" name="ag30" class="form-control" value="30" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                 <input type="text" name="ag60" class="form-control" value="60" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                 <input type="text" name="ag90" class="form-control" value="90" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3" style="padding-right: 0px;">
+                                <div class="form-group">
+                                 <input type="text" name="ag180" class="form-control" value="180" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
           <!-- /.box-body -->
 
@@ -111,7 +117,7 @@
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12">
                     <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Pdf</button>
-                    <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
+                    <!--<button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>!-->
                     <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
                     <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:400px"></iframe>
                 </div>
@@ -206,6 +212,23 @@
           },
           escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
           minimumInputLength: 1
+    });
+
+    $('#type').on('change', function() {
+      var hasil = this.value;
+      if(hasil == "apaging"){
+        $( ".history" ).show();
+        $( ".age" ).show();
+        $( ".phis" ).show();
+      }else if(hasil == "phistory"){
+        $( ".history" ).show();
+        $( ".age" ).hide();
+        $( ".phis" ).hide();
+      }else{
+        $( ".history" ).show();
+        $( ".age" ).hide();
+        $( ".phis" ).show();
+      }
     });
 </script>
 @endsection

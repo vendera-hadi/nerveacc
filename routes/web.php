@@ -521,6 +521,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('asset-type/get', 'FixedAssetController@getTypes')->name('fixed_asset.type.get');
 	Route::get('fixed-asset-report', 'FixedAssetController@report')->name('fixed_asset.report');
 
+	Route::get('report/polist','ReportController@polist')->name('report.polist');
+	Route::get('report/nonpolist','ReportController@nonpolist')->name('report.nonpolist');
+	Route::get('report/phistory','ReportController@phistory')->name('report.phistory');
+
 });
 
 Route::get('membership', 'Auth\AuthController@membership');
