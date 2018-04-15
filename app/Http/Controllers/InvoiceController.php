@@ -69,7 +69,7 @@ class InvoiceController extends Controller
 
             // olah data
             $count = TrInvoice::count();
-            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_iscancel','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name','ms_unit.unit_code')
+            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_iscancel','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','tr_invoice.unit_id','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name','ms_unit.unit_code')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->leftJoin('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                     ->leftJoin('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
@@ -127,7 +127,7 @@ class InvoiceController extends Controller
                 $temp = [];
                 $temp['id'] = $value->id;
                 $temp['contr_no'] = $value->contr_no;
-                $temp['unit'] = $value->unit_code;
+                $temp['unit'] = !empty($value->unit) ? @$value->unit->unit_code : @$value->unit_code;
                 $temp['inv_number'] = $value->inv_number;
                 $temp['inv_date'] = date('d-m-y',strtotime($value->inv_date));
                 $temp['inv_duedate'] = date('d-m-Y',strtotime($value->inv_duedate));
@@ -179,7 +179,7 @@ class InvoiceController extends Controller
                 $result[$key]->meter_used = !empty($value->meter_used) ? (int)$value->meter_used." ".$value->costd_unit : (int)$value->meter_used;
                 // get order
                 $ctrInv = TrContractInvoice::where('contr_id',$invoiceHd->contr_id)->where('costd_id',$value->costd_id)->first();
-                $result[$key]->order = !empty(@$ctrInv->order) ? $ctrInv->order : 255;
+                $result[$key]->order = !empty(@$ctrInv->order) ? $ctrInv->order : $value->id;
             }
             $result = $result->toArray();
             usort($result, function($a, $b) {
@@ -652,8 +652,8 @@ class InvoiceController extends Controller
             $type = $request->type;
 
             $invoice_data = TrInvoice::select('tr_invoice.*', 'ms_unit.unit_code', 'ms_unit.va_utilities', 'ms_unit.va_maintenance')
-                                    ->join('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
-                                    ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                                    ->leftJoin('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
+                                    ->leftJoin('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                     ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant','InvoiceType')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
                 $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_invoice_detail.costd_id','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
@@ -666,7 +666,7 @@ class InvoiceController extends Controller
                 // jabarin detail dan sisipkan order
                 foreach ($result as $key2 => $detail) {
                     $ctrInv = TrContractInvoice::where('contr_id',$inv['contr_id'])->where('costd_id',$detail['costd_id'])->first();
-                    $result[$key2]['order'] = !empty(@$ctrInv->order) ? $ctrInv->order : 255;
+                    $result[$key2]['order'] = !empty(@$ctrInv->order) ? $ctrInv->order : $detail['id'];
                 }
                 usort($result, function($a, $b) {
                     return $a['order'] - $b['order'];
@@ -940,6 +940,9 @@ class InvoiceController extends Controller
     }
 
     public function insert(Request $request){
+        $tenanId = @$request->tenan_id;
+        if(empty($tenanId)) return response()->json(['error' => 1, 'message' => 'Tenant id is required']);
+
         $inv_date = explode('-',$request->inv_date);
         $invtp = MsInvoiceType::find($request->invtp_id);
         $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$invtp->invtp_prefix.'-'.substr($inv_date[0], -2).$inv_date[1].'-%')->orderBy('id','desc')->first();
@@ -951,7 +954,7 @@ class InvoiceController extends Controller
         }
         $newPrefix = $lastPrefix + 1;
         $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
-        $tenanId = $request->tenan_id;
+
         $tenant = MsTenant::find($tenanId);
         $contractId = 0;
         // $contract = TrContract::find($request->contr_id);
@@ -976,8 +979,11 @@ class InvoiceController extends Controller
             // 'contr_id' => $request->contr_id,
             'contr_id' => $contractId,
             'created_by' => Auth::id(),
-            'updated_by' => Auth::id()
+            'updated_by' => Auth::id(),
+            'footer' => @MsConfig::where('name','footer_invoice')->first()->value,
+            'label' => @MsConfig::where('name','footer_label_inv')->first()->value
         ];
+        if(!empty(@$request->unit_id)) $invHeader['unit_id'] = $request->unit_id;
 
         $coa_codes = $request->coa_code;
         $invdt_notes = $request->invdt_note;
@@ -1032,8 +1038,8 @@ class InvoiceController extends Controller
             $type = $request->type;
 
             $invoice_data = TrInvoice::select('tr_invoice.*', 'ms_unit.unit_code')
-                                    ->join('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
-                                    ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                                    ->leftJoin('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
+                                    ->leftJoin('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                     ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
                 $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.costd_id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')
@@ -1249,6 +1255,34 @@ class InvoiceController extends Controller
 
         // $inv = TrInvoice::findOrFail(12342);
         // \Mail::to($inv->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($inv));
+    }
+
+    public function unposting(Request $request)
+    {
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+
+        $success = 0;
+        foreach ($ids as $id) {
+            $invoiceHd = TrInvoice::find($id);
+            if($invoiceHd->inv_iscancel) break;
+
+            // check apa suda ada payment?
+            $payment = TrInvoicePaymhdr::whereHas('TrInvoicePaymdtl', function($query) use($id){
+                $query->where('inv_id',$id);
+            })->where('status_void',0)->first();
+            if($payment) return response()->json(['error'=>1, 'message'=> 'Invoice tidak dapat diunpost jika sudah ada pembayaran terhadap invoice ini']);
+            // cari di trledger
+            $check = TrLedger::where('ledg_refno', $invoiceHd->inv_number)->orderBy('id')->first();
+            if($check){
+                $date = $check->ledg_date;
+                TrLedger::where('ledg_refno', $invoiceHd->inv_number)->where('ledg_date', $date)->delete();
+            }
+            $invoiceHd->inv_post = false;
+            $invoiceHd->save();
+            $success++;
+        }
+        return response()->json(['success'=>1, 'message'=>$success.' Invoice unposted Successfully']);
     }
 
 }

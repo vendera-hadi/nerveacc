@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TrInvoice extends Model
 {
    protected $table ='tr_invoice';
-   protected $fillable =['tenan_id','inv_number','inv_date','inv_duedate','inv_amount','inv_ppn','inv_ppn_amount','inv_outstanding','inv_faktur_no','inv_faktur_date','inv_iscancel','inv_post','invtp_id','contr_id','created_by','updated_by','footer','label'];
+   protected $fillable =['tenan_id','inv_number','inv_date','inv_duedate','inv_amount','inv_ppn','inv_ppn_amount','inv_outstanding','inv_faktur_no','inv_faktur_date','inv_iscancel','inv_post','invtp_id','contr_id','created_by','updated_by','footer','label','unit_id'];
 
    public function MsTenant(){
    		return $this->belongsTo('App\Models\MsTenant','tenan_id');
@@ -24,6 +24,10 @@ class TrInvoice extends Model
    public function paymentdtl()
    {
       return $this->hasMany('App\Models\TrInvoicePaymdtl','inv_id');
+   }
+
+   public function unit(){
+         return $this->belongsTo('App\Models\MsUnit','unit_id');
    }
 
 }

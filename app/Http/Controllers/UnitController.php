@@ -41,7 +41,8 @@ class UnitController extends Controller
             $count = MsUnit::count();
             $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name','ms_tenant.tenan_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))->join('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'))
                     ->leftJoin('ms_unit_owner', 'ms_unit.id','=','ms_unit_owner.unit_id')
-                    ->leftJoin('ms_tenant', 'ms_tenant.id', '=', 'ms_unit_owner.tenan_id');
+                    ->leftJoin('ms_tenant', 'ms_tenant.id', '=', 'ms_unit_owner.tenan_id')
+                    ->whereNull('ms_unit_owner.deleted_at');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -351,9 +352,11 @@ class UnitController extends Controller
         }
 
         // KOMEN INI BIAR KELUAR SEMUA
-        $cek_tenan = MsTenant::find($tenan_id);
-        if($cek_tenan && @$cek_tenan->tent_id == 1){
-            $fetch = $fetch->where('unit_isavailable',1);
+        if($tenan_id){
+            $cek_tenan = MsTenant::find($tenan_id);
+            if($cek_tenan && @$cek_tenan->tent_id == 1){
+                $fetch = $fetch->where('unit_isavailable',1);
+            }
         }
         //if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
 
@@ -414,11 +417,17 @@ class UnitController extends Controller
             }else{
                 $tenant = null;
             }
+
+            // history owner
+            $prevowner = MsUnitOwner::onlyTrashed()->where('unit_id',$id)->orderBy('unitow_start_date');
+            $prevownerIds = $prevowner->pluck('tenan_id');
+
             $renter = TrContract::where('unit_id',$id);
             if($unitowner) $renter = $renter->where('tenan_id','!=',$tenant->id);
+            if(count($prevownerIds) > 0) $renter = $renter->whereNotIn('tenan_id', $prevownerIds);
             $renter = $renter->with('MsTenant')->get();
 
-            return view('modal.detailunit', ['unit' => $unit, 'unitowner' => $unitowner, 'tenant' => $tenant, 'renter' => $renter]);
+            return view('modal.detailunit', ['unit' => $unit, 'unitowner' => $unitowner, 'tenant' => $tenant, 'renter' => $renter, 'prevowner' => $prevowner->get()]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }

@@ -54,7 +54,7 @@ class CostCreator {
         if($this->lastPeriodMeter){
             $this->meter = $this->lastPeriodMeter->meter->where('costd_id',$this->costDetail->id)->where('contr_id',$this->contract->id)->first();
             if($this->meter){
-                $this->detailAmount = (float) round($this->meter->total);
+                $this->detailAmount = (float) round($this->meter->total,2);
                 return true;
             }else{
                 // meter dont exist
@@ -163,7 +163,7 @@ class CostCreator {
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
             $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
         }
-        $this->detailAmount = round($amount);
+        $this->detailAmount = round($amount,2);
         return $this->defineOutput($note);
     }
 
@@ -185,7 +185,7 @@ class CostCreator {
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." ".$diff->format('%d')." / $totalDayOfMonth days)";
 
         $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
-        $this->detailAmount = round($amount);
+        $this->detailAmount = round($amount,2);
         return $this->defineOutput($note);
     }
 
@@ -211,7 +211,7 @@ class CostCreator {
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
             $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
         }
-        $this->detailAmount = round($amount);
+        $this->detailAmount = round($amount,2);
         return $this->defineOutput($note);
     }
 
@@ -232,7 +232,7 @@ class CostCreator {
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." $kelebihanHari / $totalDayOfMonth days)";
 
         $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
-        $this->detailAmount = round($amount);
+        $this->detailAmount = round($amount,2);
         return $this->defineOutput($note);
     }
 
@@ -282,20 +282,20 @@ class CostCreator {
     private function generateElectricity()
     {
         // electricity
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Meter Awal : ".number_format($this->meter->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->meter->meter_used,2);
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Meter Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->meter->meter_used,2);
         return $this->defineOutput($note);
     }
 
     private function generateWater()
     {
         // water
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Meter Awal : ".number_format($this->meter->meter_start,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter->meter_end,0)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->meter->meter_used,0)."<br>Biaya Pemakaian : ".number_format($this->meter->meter_used,0);
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Meter Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->meter->meter_used,2);
         return $this->defineOutput($note);
     }
 
     private function generateOtherMeter()
     {
-        $note = $this->costDetail->costd_name."<br>Konsumsi : ".number_format($this->meter->meter_used,0)." ".$this->costDetail->costd_unit." Per ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date));
+        $note = $this->costDetail->costd_name."<br>Konsumsi : ".number_format($this->meter->meter_used,2)." ".$this->costDetail->costd_unit." Per ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date));
         return $this->defineOutput($note);
     }
 

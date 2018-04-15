@@ -13,7 +13,7 @@ class GeneralCalc extends Meter {
         try{
             $this->meter_cost = $this->getMeterUsed() * $this->meter_rate;
             $this->total = $this->meter_cost + $this->meter_burden + $this->meter_admin;
-            return round($this->total);
+            return round($this->total,2);
         }catch(Exception $e){
             return false;
         }
@@ -21,7 +21,7 @@ class GeneralCalc extends Meter {
 
     public function customNote($date_start, $date_end)
     {
-        $note = $this->costDetail->costd_name."<br>Konsumsi : ".number_format($this->getMeterUsed(),0)." ".$this->costDetail->costd_unit." Per ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end));
+        $note = $this->costDetail->costd_name."<br>Konsumsi : ".number_format($this->getMeterUsed(),2)." ".$this->costDetail->costd_unit." Per ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end));
         return $note;
     }
 

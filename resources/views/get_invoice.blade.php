@@ -16,9 +16,9 @@
             @if(!empty($invoice_data))
                 @foreach ($invoice_data as $key => $value)
                     <?php
-                        $inv_duedate = strtotime($value['inv_duedate']);
-                        $inv_date = strtotime($value['inv_date']);
-                        $inv_id = $value['id'];
+                        $inv_duedate = strtotime($value->inv_duedate);
+                        $inv_date = strtotime($value->inv_date);
+                        $inv_id = $value->id;
 
                         $now_time = strtotime(date('Y-m-d'));
 
@@ -28,13 +28,13 @@
                         }
                     ?>
                 <tr class="<?php echo $class;?>">
-                    <td><input type="checkbox" name="data_payment[invpayd_amount][<?php echo $inv_id;?>]" value="<?php echo $value['inv_outstanding'];?>" class="paid-check"></td>
-                    <td><?php echo $value['inv_number'];?></td>
-                    <td><?php echo $value['unit_name']; ?></td>
+                    <td><input type="checkbox" name="data_payment[invpayd_amount][<?php echo $inv_id;?>]" value="<?php echo $value->inv_outstanding;?>" class="paid-check"></td>
+                    <td><?php echo $value->inv_number;?></td>
+                    <td>{{ !empty(@$value->unit) ? $value->unit->unit_code : @$value->unit_name }}</td>
                     <td><?php echo date('d/m/y', $inv_date);?></td>
                     <td><?php echo date('d/m/y', $inv_duedate);?></td>
-                    <td><?php echo 'Rp. '.number_format($value['inv_outstanding']);?></td>
-                    <td><input type="number" name="data_payment[totalpay][{{$inv_id}}]" value="{{floor($value['inv_outstanding'])}}"  min="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
+                    <td><?php echo 'Rp. '.number_format($value->inv_outstanding);?></td>
+                    <td><input type="number" name="data_payment[totalpay][{{$inv_id}}]" value="{{floor($value->inv_outstanding)}}"  min="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
                 </tr>
                 @endforeach
             @else
