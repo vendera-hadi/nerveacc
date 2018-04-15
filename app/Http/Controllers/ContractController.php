@@ -37,14 +37,13 @@ class ContractController extends Controller
 {
     public function index(){
         $total_unit = MsUnit::count();
-        $total_contract = TrContract::join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
-        ->where('contr_iscancel','f')
-        ->where('contr_status','confirmed')
-        ->where('tent_id',1)
-        ->where('ms_tenant.deleted_at',NULL)
-        ->count();
+        $total_contract_owner = DB::select('select "tr_contract".* from "tr_contract" inner join "ms_unit_owner" on tr_contract.tenan_id::integer = ms_unit_owner.tenan_id::integer where "contr_status" = \'confirmed\' group by "tr_contract"."id"');
+        $total_contract_tenant = TrContract::leftJoin('ms_unit_owner', \DB::raw('tr_contract.tenan_id::integer'), '=', \DB::raw('ms_unit_owner.tenan_id::integer'))->whereNull('ms_unit_owner.id')->where('contr_status','confirmed')->count();
+
+        $data['total_contract'] = count($total_contract_owner);
+        $data['total_contract_tenant'] = $total_contract_tenant;
+
         $data['total_unit'] = $total_unit;
-        $data['total_contract'] = $total_contract;
         $data['cost_items'] = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name', 'ms_cost_detail.cost_id')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
         $invoice_types = MsInvoiceType::all();
         $data['marketing_agents'] = MsMarketingAgent::all();
@@ -148,7 +147,7 @@ class ContractController extends Controller
     }
 
     public function getOwner(Request $request){
-        // try{
+        try{
             // params
             $page = $request->page;
             $perPage = $request->rows;
@@ -231,9 +230,9 @@ class ContractController extends Controller
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
-        // }catch(\Exception $e){
-        //     return response()->json(['errorMsg' => $e->getMessage()]);
-        // }
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
     }
 
     public function getdetail(Request $request){
