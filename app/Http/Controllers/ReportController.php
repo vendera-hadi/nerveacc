@@ -1978,7 +1978,6 @@ class ReportController extends Controller
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->where('tr_ap_invoice_hdr.posting','t')
                     ->where('tr_ap_invoice_hdr.po_id',NULL)
-                    ->where('payment_code',NULL)
                     ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
                     ->orderBy('ms_supplier.spl_code', 'asc');
                 if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
@@ -2125,11 +2124,11 @@ class ReportController extends Controller
 
         $data['tahun'] = 'Periode Sampai : '.date('M Y');
         $data['name'] = MsCompany::first()->comp_name;
-        $data['title'] = "Purchase History";
+        $data['title'] = "AP Payment History";
         $data['logo'] = MsCompany::first()->comp_image;
       
         $data['template'] = 'report_phistory';
-        $data['title_r'] = 'Purchase History';
+        $data['title_r'] = 'AP Payment History';
 
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','total')

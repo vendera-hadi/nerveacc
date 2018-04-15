@@ -9,6 +9,7 @@ use Auth;
 use App\Models\MsSupplier;
 use App\Models\MsMasterCoa;
 use App\Models\User;
+use Excel;
 
 class SupplierController extends Controller
 {
@@ -137,6 +138,37 @@ class SupplierController extends Controller
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }    
+    }
+
+    public function downloadSupplierExcel()
+    {
+        $data_ori = MsSupplier::select('spl_code','spl_name','spl_address','spl_city','spl_postal_code','spl_phone','spl_fax','spl_cperson','spl_npwp','spl_isactive')
+                ->get()->toArray();
+        $data = array();
+        for($i=0; $i<count($data_ori); $i++){
+            $data[$i]=array(
+                'Supplier Code'=>trim($data_ori[$i]['spl_code']),
+                'Nama Supplier'=>trim($data_ori[$i]['spl_name']),
+                'Alamat'=>trim($data_ori[$i]['spl_address']),
+                'Kota'=>trim($data_ori[$i]['spl_city']),
+                'Postal Code'=>trim($data_ori[$i]['spl_postal_code']),
+                'Phone'=>trim($data_ori[$i]['spl_phone']),
+                'Fax'=>trim($data_ori[$i]['spl_fax']),
+                'Contact Person'=>trim($data_ori[$i]['spl_cperson']),
+                'NPWP'=>trim($data_ori[$i]['spl_npwp']),
+                'Status'=>($data_ori[$i]['spl_isactive'] == 't' ? 'YES' : 'NO')
+            );
+        }
+        $border = 'A1:J';
+        $tp = 'xls';
+        return Excel::create('report_supplier', function($excel) use ($data,$border) {
+            $excel->sheet('mySheet', function($sheet) use ($data,$border)
+            {
+                $total = count($data)+1;
+                $sheet->setBorder($border.$total, 'thin');
+                $sheet->fromArray($data);
+            });
+        })->download($tp);
     }
 
 }

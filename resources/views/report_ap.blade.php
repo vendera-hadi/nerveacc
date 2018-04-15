@@ -43,8 +43,8 @@
                     <select id="type" name="type" class="form-control">
                         <option value="apaging">Aged Payable</option>
                         <option value="polist">PO List</option>
-                        <option value="nonpolist">NON PO List</option>
-                        <option value="phistory">Purchase History</option>
+                        <option value="nonpolist">Non PO List</option>
+                        <option value="phistory">AP Payment History</option>
                     </select>
                 </div>
                 <div class="row history">

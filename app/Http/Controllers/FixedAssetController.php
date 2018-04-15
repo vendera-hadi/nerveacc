@@ -471,7 +471,7 @@ class FixedAssetController extends Controller
                             $detail[$p]->name,
                             $detail[$p]->depreciation_type,
                             date('d/m/Y',strtotime($detail[$p]->date)),
-                            $detail[$p]->price,
+                            (float)$detail[$p]->price,
                             $detail[$p]->spl_name,
                             $detail[$p]->po_no,
                             $detail[$p]->kode_induk,
@@ -495,6 +495,7 @@ class FixedAssetController extends Controller
             return Excel::create('Fixed Assets Report', function($excel) use ($excel_data,$border) {
                 $excel->sheet('Fixed Assets Report', function($sheet) use ($excel_data,$border)
                 { 
+                    $sheet->setColumnFormat(array('E' => '#,##0.00'));
                     $sheet->row(1, array(
                         'JENIS HARTA',NULL,NULL,NULL,NULL,'KELOMPOK HARTA',NULL,NULL,NULL,NULL,'MASA MANFAAT'
                     ));
@@ -508,6 +509,7 @@ class FixedAssetController extends Controller
                         $cells->setAlignment('center');
                     });
                     $sheet->fromArray($excel_data, null, 'A2', false, false);
+
                     $start_cell = 2;
                     $total = count($excel_data);
                     for($i=0; $i<$total; $i++){
@@ -521,8 +523,10 @@ class FixedAssetController extends Controller
                                 $cells->setAlignment('center');
                             });
                         }
+                        
                         $start_cell++;
                     }
+
                     $sheet->setBorder($border.($total+1), 'thin');
                 });
             })->download($tp);

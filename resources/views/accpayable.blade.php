@@ -58,7 +58,35 @@
 
       <div class="tab-content">
         <div class="tab-pane active" id="tab_1">
-            <!-- template tabel -->
+          <form id="search">
+            <div class="row">
+              <div class="col-sm-5">
+                  <div class="form-group">
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" id="startDate" name="date_from" placeholder="From" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                      </div>
+                  </div>
+                </div>
+                <div class="col-sm-5">
+                  <div class="form-group">
+                      <div class="input-group date">
+                        <div class="input-group-addon">
+                          <i class="fa fa-calendar"></i>
+                        </div>
+                        <input type="text" id="startDate" name="date_to" placeholder="To" class="form-control pull-right datepicker" data-date-format="yyyy-mm-dd">
+                      </div>
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <button class="btn btn-flat btn-info btn-block pull-left">Cari</button>
+                    </div>
+                </div>
+            </div>
+          </form>
           <table id="dg" title="Account Payable" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
               <!-- kolom -->
               <thead>
@@ -176,6 +204,37 @@
             });
         });
 
+    });
+
+    var query, invtype, from, to, outstanding;
+    $('#search').submit(function(e){
+        e.preventDefault();
+
+        datefrom = $(this).find('input[name=date_from]').val();
+        dateto = $(this).find('input[name=date_to]').val();
+
+        if((datefrom == "" && dateto !="") || (datefrom!="" && dateto=="")){
+            alert('Isi kedua tanggal From dan To untuk melakukan filter tanggal');
+        }else{
+
+            if(datefrom!="" && dateto!=""){
+                var dateFirst = datefrom.split('-');
+                var dateSecond = dateto.split('-');
+                var from = new Date(dateFirst[2], dateFirst[1], dateFirst[0]); //Year, Month, Date
+                var to = new Date(dateSecond[2], dateSecond[1], dateSecond[0]);
+
+                if(to<=from){
+                    alert('Tanggal To harus lebih lama dari Tanggal From');
+                    return false;
+                }
+            }
+
+            $('#dg').datagrid('load', {
+                datefrom: datefrom,
+                dateto: dateto
+            });
+            $('#dg').datagrid('reload');
+        }
     });
 
     $('.datepicker').datepicker({

@@ -524,6 +524,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/polist','ReportController@polist')->name('report.polist');
 	Route::get('report/nonpolist','ReportController@nonpolist')->name('report.nonpolist');
 	Route::get('report/phistory','ReportController@phistory')->name('report.phistory');
+	Route::get('supplier/downloadSupplierExcel', 'SupplierController@downloadSupplierExcel');
 
 });
 

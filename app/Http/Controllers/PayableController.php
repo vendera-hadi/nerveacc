@@ -37,6 +37,8 @@ class PayableController extends Controller
             // @ -> isset(var) ? var : null
             $sort = @$request->sort;
             $order = @$request->order;
+            $datefrom = @$request->datefrom;
+            $dateto = @$request->dateto;
             $filters = @$request->filterRules;
             if(!empty($filters)) $filters = json_decode($filters);
 
@@ -67,6 +69,10 @@ class PayableController extends Controller
                     else $fetch = $fetch->where($filter->field, $op, $filter->value);
                 }
             }
+             // jika ada date from
+            if(!empty($datefrom)) $fetch = $fetch->where('tr_ap_invoice_hdr.invoice_date','>=',$datefrom);
+            // jika ada date to
+            if(!empty($dateto)) $fetch = $fetch->where('tr_ap_invoice_hdr.invoice_date','<=',$dateto);
 
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
