@@ -1862,7 +1862,7 @@ class ReportController extends Controller
             if($ty == 1){
                 //BELUM BAYAR
                 $data['all'] = 2;
-                $fetch = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','po_number','tr_ap_invoice_hdr.note','invoice_date','payment_code','total')
+                $fetch = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','po_number','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
                     ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
@@ -1886,7 +1886,7 @@ class ReportController extends Controller
                     $fetch = $fetch->get();
             }else{
                 //ALL
-                $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','po_number','tr_ap_invoice_hdr.note','invoice_date','payment_code','total')
+                $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','po_number','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
                     ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
@@ -2046,7 +2046,7 @@ class ReportController extends Controller
             if($ty == 1){
                 //BELUM BAYAR
                 $data['all'] = 2;
-                $fetch = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','total')
+                $fetch = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
                     ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
@@ -2070,7 +2070,7 @@ class ReportController extends Controller
                     $fetch = $fetch->get();
             }else{
                 //ALL
-                $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','total')
+                $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
                     ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
@@ -2136,7 +2136,7 @@ class ReportController extends Controller
         $data['title_r'] = 'AP Payment History';
 
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
-        $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','total')
+        $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
                     ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
