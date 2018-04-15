@@ -148,7 +148,7 @@ class ContractController extends Controller
     }
 
     public function getOwner(Request $request){
-        try{
+        // try{
             // params
             $page = $request->page;
             $perPage = $request->rows;
@@ -195,7 +195,7 @@ class ContractController extends Controller
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['unit_code'] = $value->MsUnit->unit_code;
+                $temp['unit_code'] = @$value->MsUnit->unit_code;
                 $temp['contr_code'] = $value->contr_code;
                 $temp['contr_no'] = $value->contr_no;
                 $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
@@ -231,9 +231,9 @@ class ContractController extends Controller
                 $result['rows'][] = $temp;
             }
             return response()->json($result);
-        }catch(\Exception $e){
-            return response()->json(['errorMsg' => $e->getMessage()]);
-        }
+        // }catch(\Exception $e){
+        //     return response()->json(['errorMsg' => $e->getMessage()]);
+        // }
     }
 
     public function getdetail(Request $request){
@@ -1072,8 +1072,9 @@ class ContractController extends Controller
         // LAST MONTH PERIOD METER
         $tempTimeStart = date("Y-m-01", strtotime("-1 months"));
         $tempTimeEnd = date("Y-m-t", strtotime($tempTimeStart));
-        // $lastMonthPeriod = TrPeriodMeter::where('prdmet_start_date','>=',$tempTimeStart)->where('prdmet_end_date','<=',$tempTimeEnd)->where('status',1)->orderBy('id','desc')->first();
-        $lastMonthPeriod = TrPeriodMeter::where('status',1)->orderBy('id','desc')->first();
+
+        // $lastMonthPeriod = TrPeriodMeter::where('status',1)->orderBy('id','desc')->first();
+        $lastMonthPeriod = TrMeter::select('tr_period_meter.id')->join('tr_period_meter','tr_period_meter.id','=','tr_meter.prdmet_id')->where('contr_id',$id)->orderBy('prdmet_start_date','desc')->first();
 
         // kalau last month period ketemu, tampung meter start nya adalah meter end dari period kmaren
         $lastMeterLog = [];

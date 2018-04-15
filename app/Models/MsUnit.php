@@ -16,4 +16,9 @@ class MsUnit extends Model
    public function UnitType(){
    		return $this->belongsTo('App\Models\MsUnitType', 'untype_id');
    }
+
+   public function owner()
+   {
+      return $this->hasOne('App\Models\MsUnitOwner', 'unit_id');
+   }
 }

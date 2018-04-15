@@ -54,8 +54,8 @@
                         </div>
                         <div class="form-group phis">
                             <select class="form-control" name="jenist" id="tyt">
-                                <option value="1">SUMMARY</option>
-                                <option value="2">DETAIL</option>
+                                <option value="2">SUMMARY</option>
+                                <option value="1">DETAIL</option>
                             </select>
                         </div>
                     </div>
@@ -90,6 +90,28 @@
                             </div>
                         </div>
                     </div>
+                    <!-- datepicker -->
+                    <div class="col-md-6 paymhistory" style="display: none">
+                        <div class="form-group">
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control datepicker" name="from" placeholder="Date From" data-date-format="yyyy-mm-dd">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 paymhistory" style="display: none">
+                        <div class="form-group">
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control datepicker" name="to" placeholder="Date To" data-date-format="yyyy-mm-dd">
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>
@@ -149,8 +171,8 @@
         var type = $('#type').val();
         var report_url = '{!! url('/') !!}/report/';
         var from = $('input[name=from]').val();
-        var to = $('input[name=to]').val(); 
-        
+        var to = $('input[name=to]').val();
+
         var queryString = $(this).serialize();
         current_url = report_url+type+'?'+queryString;
         $('#frame').attr('src', current_url);
@@ -190,7 +212,7 @@
         var title = 'PRINT REPORT';
         var w = 640;
         var h = 660;
-        
+
         openWindow(url, title, w, h);
         return false;
     });
@@ -220,14 +242,17 @@
         $( ".history" ).show();
         $( ".age" ).show();
         $( ".phis" ).show();
+        $(".paymhistory").hide();
       }else if(hasil == "phistory"){
         $( ".history" ).show();
         $( ".age" ).hide();
         $( ".phis" ).hide();
+        $(".paymhistory").show();
       }else{
         $( ".history" ).show();
         $( ".age" ).hide();
         $( ".phis" ).show();
+        $(".paymhistory").hide();
       }
     });
 </script>

@@ -29,7 +29,7 @@ function saveUser(){
                     msg: result.errorMsg
                 });
             } else {
-                $.messager.alert('Success','Data saved'); 
+                $.messager.alert('Success','Data saved');
                 $('#dlg').dialog('close');      // close the dialog
                 $('#dg').datagrid('reload');    // reload the user data
             }
@@ -48,6 +48,9 @@ function destroyUser(){
             if (r){
                 $.post(delete_url,{id:row.id},function(result){
                     if (result.success){
+                        if(result.message){
+                            $.messager.alert('Warning',result.message);
+                        }
                         $('#dg').datagrid('reload');    // reload the user data
                     } else {
                         // $.messager.show({   // show error message

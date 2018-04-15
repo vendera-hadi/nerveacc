@@ -25,7 +25,7 @@
         </tr>
     </tbody>
     <tfoot>
-        
+
     </tfoot>
 </table>
 @else
@@ -48,9 +48,9 @@
             <td>{{$inv['spl_code']}}</td>
             <td>{{$inv['spl_name']}}</td>
             <td style="text-align: right">{{number_format($inv['npaid'])}}</td>
-            <td style="text-align: right">{{number_format($inv['paid'])}}</td>
+            <td style="text-align: right">{{number_format($inv['npaid'] - $inv['outstanding'])}}</td>
         </tr>
-        <?php $total_bayar_npaid += $inv['npaid']; $total_bayar_paid += $inv['paid']; ?>
+        <?php $total_bayar_npaid += $inv['npaid']; $total_bayar_paid += $inv['npaid'] - $inv['outstanding']; ?>
         @endforeach
         <tr>
             <td colspan="2" style="text-align: center;font-weight: bold;">TOTAL</td>
@@ -59,7 +59,7 @@
         </tr>
     </tbody>
     <tfoot>
-        
+
     </tfoot>
 </table>
 @endif

@@ -1411,23 +1411,23 @@ class ReportController extends Controller
         $data['unit'] = MsSupplier::where('id',$sup_id)->get();
         $data['tyt'] = $tyt;
         $data['ty'] = $ty;
-        if($tyt == 1){
+        if($tyt != 1){
             $data['template'] = 'report_ap_aging';
         }else{
             $data['template'] = 'report_ap_aging_detail';
         }
 
-        if($ty == 1 && $tyt == 1){
+        if($ty == 1 && $tyt == 2){
             $data['title_r'] = 'Summary Outstanding Ap';
-        }else if($ty == 1 && $tyt == 2){
+        }else if($ty == 1 && $tyt == 1){
             $data['title_r'] = 'Detail Outstanding Ap';
-        }else if($ty == 2 && $tyt == 1){
-            $data['title_r'] = 'Summary Paid Ap';
         }else if($ty == 2 && $tyt == 2){
+            $data['title_r'] = 'Summary Paid Ap';
+        }else if($ty == 2 && $tyt == 1){
             $data['title_r'] = 'Detail Paid Ap';
-        }else if($ty == 3 && $tyt == 1){
-            $data['title_r'] = 'Summary All Ap';
         }else if($ty == 3 && $tyt == 2){
+            $data['title_r'] = 'Summary All Ap';
+        }else if($ty == 3 && $tyt == 1){
             $data['title_r'] = 'Detail All Ap';
         }else{
             $data['title_r'] = '';
@@ -1458,7 +1458,7 @@ class ReportController extends Controller
                 ->groupBy('tr_ap_payment_hdr.spl_id','ms_supplier.spl_code','ms_supplier.spl_name')
                 ->orderBy('spl_code', 'asc');
         }else{
-            if($tyt == 2){
+            if($tyt != 2){
                 $fetch = MsSupplier::select('*')
                     ->orderBy('spl_code', 'asc');
             }else{
@@ -1481,7 +1481,7 @@ class ReportController extends Controller
         $fetch = $fetch->get();
         $data['invoices'] = $fetch;
 
-        if($tyt == 2){
+        if($tyt != 2){
             $data['invoices'] = [];
             if($ty == 1){
                 foreach ($fetch as $inv) {
@@ -1768,7 +1768,7 @@ class ReportController extends Controller
         $data['unit'] = MsSupplier::where('id',$sup_id)->get();
         $data['tyt'] = $tyt;
         $data['ty'] = $ty;
-        if($tyt == 1){
+        if($tyt != 1){
             $data['template'] = 'report_po_list';
         }else{
             $data['template'] = 'report_po_detail';
@@ -1795,129 +1795,91 @@ class ReportController extends Controller
             //SUMMARY
             if($ty == 1){
                 //BELUM BAYAR
-                $fetch = TrApHeader::select('ms_supplier.spl_code','ms_supplier.spl_name',DB::raw("SUM(outstanding) AS total"))
+                $fetch = TrApHeader::select('tr_ap_invoice_hdr.id','tr_ap_invoice_hdr.invoice_no','tr_ap_invoice_hdr.invoice_date','ms_supplier.spl_name','outstanding','total','po_number')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
+                    ->where('outstanding','>',0)
                     ->where('tr_ap_invoice_hdr.posting','t')
-                    ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
                     ->orderBy('ms_supplier.spl_code', 'asc');
                 if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
                 $fetch = $fetch->get();
             }else if($ty == 2){
                 //BAYAR
-                $fetch = TrApHeader::select('ms_supplier.spl_code','ms_supplier.spl_name',DB::raw("SUM(tr_ap_payment_dtl.amount) AS total"))
+                $fetch = TrApHeader::select('tr_ap_invoice_hdr.id','tr_ap_invoice_hdr.invoice_no','tr_ap_invoice_hdr.invoice_date','ms_supplier.spl_name','outstanding','total','po_number')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
+                    ->where('outstanding','<=',0)
                     ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('tr_ap_payment_hdr.posting','t')
-                    ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
                     ->orderBy('ms_supplier.spl_code', 'asc');
                     if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
                     $fetch = $fetch->get();
             }else{
                 //ALL
                 $data['all'] = 1;
-                $belum = TrApHeader::select('ms_supplier.spl_code','ms_supplier.spl_name',DB::raw("SUM(outstanding) AS total"))
+                $allap = TrApHeader::select('tr_ap_invoice_hdr.id','tr_ap_invoice_hdr.invoice_no','tr_ap_invoice_hdr.invoice_date','ms_supplier.spl_name','outstanding','total','po_number')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
                     ->where('tr_ap_invoice_hdr.posting','t')
-                    ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
                     ->orderBy('ms_supplier.spl_code', 'asc');
-                if($sup_id) $fetch = $belum->where('ms_supplier.id','=',$sup_id);
-                $belum = $belum->get();
-
-                $bayar = TrApHeader::select('ms_supplier.spl_code','ms_supplier.spl_name',DB::raw("SUM(tr_ap_payment_dtl.amount) AS total"))
-                    ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
-                    ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                    ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('tr_ap_payment_hdr.posting','t')
-                    ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
-                    ->orderBy('ms_supplier.spl_code', 'asc');
-                if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
-                $bayar = $bayar->get();
-
-                $hasil_nl = array();
-                if(count($belum) > 0){
-                    for($i=0; $i<count($belum); $i++){
-                        if(count($bayar) > 0){
-                            $nl = array('spl_code'=>$belum[$i]->spl_code,'spl_name'=>$belum[$i]->spl_name,'npaid'=>$belum[$i]->total,'paid'=>0);
-                            for($k=0; $k<count($bayar); $k++){
-                                if($belum[$i]->spl_code == $bayar[$k]->spl_code){
-                                    $nl['paid'] = $bayar[$k]->total;
-                                    break;
-                                }
-                            }
-                        }
-                        $hasil_nl[] = $nl;
-                    }
-                }
-                $fetch = $hasil_nl;
+                if($sup_id) $fetch = $allap->where('ms_supplier.id','=',$sup_id);
+                $fetch = $allap->get();
             }
         }else{
             //DETAIL
             if($ty == 1){
                 //BELUM BAYAR
                 $data['all'] = 2;
-                $fetch = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','po_number','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
+                $fetch = TrApHeader::select('tr_ap_invoice_hdr.id','ms_supplier.spl_code','ms_supplier.id','ms_supplier.spl_name',DB::raw('SUM(tr_ap_invoice_hdr.total) AS npaid'), DB::raw('SUM(tr_ap_invoice_hdr.outstanding) AS outstanding'))
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                    ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('payment_code',NULL)
-                    ->orderBy('invoice_no', 'asc');
-                    if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
-                    $fetch = $fetch->get();
+                    ->where('outstanding','>',0)
+                    ->where('posting','t')
+                    ->groupBy('tr_ap_invoice_hdr.id','ms_supplier.spl_code','ms_supplier.id','ms_supplier.spl_name')
+                    ->orderBy('ms_supplier.spl_code');
+                if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
+                $fetch = $fetch->get();
             }else if($ty == 2){
                 //BAYAR
                 $data['all'] = 3;
-                $fetch = TrApHeader::select('ms_supplier.spl_name','invoice_no','payment_code','payment_date','tr_ap_payment_dtl.amount','tr_ap_payment_hdr.note')
+                $fetch = TrApHeader::select('tr_ap_invoice_hdr.id','ms_supplier.spl_code','ms_supplier.id','ms_supplier.spl_name',DB::raw('SUM(tr_ap_invoice_hdr.total) AS npaid'), DB::raw('SUM(tr_ap_invoice_hdr.outstanding) AS outstanding'))
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                    ->where('tr_ap_payment_hdr.posting','t')
-                    ->orderBy('payment_date', 'asc');
-                    if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
-                    $fetch = $fetch->get();
+                    ->where('outstanding','<=',0)
+                    ->where('posting','t')
+                    ->groupBy('tr_ap_invoice_hdr.id','ms_supplier.spl_code','ms_supplier.id','ms_supplier.spl_name')
+                    ->orderBy('ms_supplier.spl_code');
+                if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
+                $fetch = $fetch->get();
             }else{
                 //ALL
-                $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','po_number','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
+                $belum = TrApHeader::select('tr_ap_invoice_hdr.id','ms_supplier.spl_code','ms_supplier.id','ms_supplier.spl_name',DB::raw('SUM(tr_ap_invoice_hdr.total) AS total'))
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                    ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('payment_code',NULL)
-                    ->orderBy('invoice_no', 'asc');
-                    if($sup_id) $belum = $belum->where('ms_supplier.id','=',$sup_id);
-                    $belum = $belum->get();
+                    ->where('outstanding','>',0)
+                    ->where('posting','t')
+                    ->groupBy('tr_ap_invoice_hdr.id','ms_supplier.spl_code','ms_supplier.id','ms_supplier.spl_name')
+                    ->orderBy('ms_supplier.spl_code');
+                if($sup_id) $belum = $belum->where('ms_supplier.id','=',$sup_id);
+                $belum = $belum->get();
 
-                $bayar = TrApHeader::select('ms_supplier.spl_name','invoice_no','payment_code','payment_date','tr_ap_payment_dtl.amount','tr_ap_payment_hdr.note')
+                $bayar = TrApHeader::select('tr_ap_invoice_hdr.id','ms_supplier.spl_code','ms_supplier.id','ms_supplier.spl_name',DB::raw('SUM(tr_ap_invoice_hdr.total) AS total'))
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->join('tr_purchase_order_hdr','tr_purchase_order_hdr.id',"=",'tr_ap_invoice_hdr.po_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                    ->where('tr_ap_payment_hdr.posting','t')
-                    ->orderBy('payment_date', 'asc');
-                    if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
-                    $bayar = $bayar->get();
+                    ->where('outstanding',0)
+                    ->where('posting','t')
+                    ->groupBy('tr_ap_invoice_hdr.id','ms_supplier.spl_code','ms_supplier.id','ms_supplier.spl_name')
+                    ->orderBy('ms_supplier.spl_code');
+                if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
+                $bayar = $bayar->get();
 
                 $hasil_nl = array();
-                if(count($belum) > 0){
-                    for($i=0; $i<count($belum); $i++){
-                        $hasil_nl[] = array('spl_name'=>$belum[$i]->spl_name,'kode'=>$belum[$i]->invoice_no,'amt'=>$belum[$i]->total);
-                    }
+                foreach($belum as $ap){
+                    $hasil_nl[] = $ap;
                 }
-                if(count($bayar) > 0){
-                    for($p=0; $p<count($bayar); $p++){
-                        $hasil_nl[] = array('spl_name'=>$bayar[$p]->spl_name,'kode'=>$bayar[$p]->payment_code,'amt'=>$bayar[$p]->amount);
-                    }
+                foreach($bayar as $ap){
+                    $hasil_nl[] = $ap;
                 }
+                // var_dump($hasil_nl); die();
                 $fetch = $hasil_nl;
             }
         }
@@ -1953,7 +1915,7 @@ class ReportController extends Controller
         $data['tyt'] = $tyt;
         $data['ty'] = $ty;
         if($tyt == 1){
-            $data['template'] = 'report_po_list';
+            $data['template'] = 'report_po_detail';
         }else{
             $data['template'] = 'report_nonpo_detail';
         }
@@ -1976,70 +1938,39 @@ class ReportController extends Controller
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $data['all'] = 0;
         if($tyt == 1){
-            //SUMMARY
+            $data['no_po'] = true;
+            //DETAIL
             if($ty == 1){
                 //BELUM BAYAR
-                $fetch = TrApHeader::select('ms_supplier.spl_code','ms_supplier.spl_name',DB::raw("SUM(outstanding) AS total"))
+                $fetch = TrApHeader::select('tr_ap_invoice_hdr.id','tr_ap_invoice_hdr.invoice_no','tr_ap_invoice_hdr.invoice_date','ms_supplier.spl_name','outstanding','total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
+                    ->whereNull('po_id')
+                    ->where('outstanding','>',0)
                     ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('tr_ap_invoice_hdr.po_id',NULL)
-                    ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
                     ->orderBy('ms_supplier.spl_code', 'asc');
                 if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
                 $fetch = $fetch->get();
             }else if($ty == 2){
                 //BAYAR
-                $fetch = TrApHeader::select('ms_supplier.spl_code','ms_supplier.spl_name',DB::raw("SUM(tr_ap_payment_dtl.amount) AS total"))
+                $fetch = TrApHeader::select('tr_ap_invoice_hdr.id','tr_ap_invoice_hdr.invoice_no','tr_ap_invoice_hdr.invoice_date','ms_supplier.spl_name','outstanding','total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                    ->where('tr_ap_invoice_hdr.po_id',NULL)
+                    ->whereNull('po_id')
+                    ->where('outstanding','<=',0)
                     ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('tr_ap_payment_hdr.posting','t')
-                    ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
                     ->orderBy('ms_supplier.spl_code', 'asc');
-                    if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
-                    $fetch = $fetch->get();
+                if($sup_id) $fetch = $fetch->where('ms_supplier.id','=',$sup_id);
+                $fetch = $fetch->get();
             }else{
                 //ALL
                 $data['all'] = 1;
-                $belum = TrApHeader::select('ms_supplier.spl_code','ms_supplier.spl_name',DB::raw("SUM(outstanding) AS total"))
+                $allap = TrApHeader::select('tr_ap_invoice_hdr.id','tr_ap_invoice_hdr.invoice_no','tr_ap_invoice_hdr.invoice_date','ms_supplier.spl_name','outstanding','total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
+                    ->whereNull('po_id')
                     ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('tr_ap_invoice_hdr.po_id',NULL)
-                    ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
                     ->orderBy('ms_supplier.spl_code', 'asc');
-                if($sup_id) $fetch = $belum->where('ms_supplier.id','=',$sup_id);
-                $belum = $belum->get();
+                if($sup_id) $fetch = $allap->where('ms_supplier.id','=',$sup_id);
+                $fetch = $allap->get();
 
-                $bayar = TrApHeader::select('ms_supplier.spl_code','ms_supplier.spl_name',DB::raw("SUM(tr_ap_payment_dtl.amount) AS total"))
-                    ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                    ->where('tr_ap_invoice_hdr.po_id',NULL)
-                    ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('tr_ap_payment_hdr.posting','t')
-                    ->groupBy('ms_supplier.spl_code','ms_supplier.spl_name')
-                    ->orderBy('ms_supplier.spl_code', 'asc');
-                if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
-                $bayar = $bayar->get();
-
-                $hasil_nl = array();
-                if(count($belum) > 0){
-                    for($i=0; $i<count($belum); $i++){
-                        if(count($bayar) > 0){
-                            $nl = array('spl_code'=>$belum[$i]->spl_code,'spl_name'=>$belum[$i]->spl_name,'npaid'=>$belum[$i]->total,'paid'=>0);
-                            for($k=0; $k<count($bayar); $k++){
-                                if($belum[$i]->spl_code == $bayar[$k]->spl_code){
-                                    $nl['paid'] = $bayar[$k]->total;
-                                    break;
-                                }
-                            }
-                        }
-                        $hasil_nl[] = $nl;
-                    }
-                }
-                $fetch = $hasil_nl;
             }
         }else{
             //DETAIL
@@ -2070,7 +2001,7 @@ class ReportController extends Controller
                     $fetch = $fetch->get();
             }else{
                 //ALL
-                $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
+                $belum = TrApHeader::select('tr_ap_invoice_hdr.id','ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
                     ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
@@ -2078,35 +2009,42 @@ class ReportController extends Controller
                     ->where('tr_ap_invoice_hdr.po_id',NULL)
                     ->where('payment_code',NULL)
                     ->orderBy('invoice_no', 'asc');
-                    if($sup_id) $belum = $belum->where('ms_supplier.id','=',$sup_id);
-                    $belum = $belum->get();
+                if($sup_id) $belum = $belum->where('ms_supplier.id','=',$sup_id);
+                $belum = $belum->get();
 
-                $bayar = TrApHeader::select('ms_supplier.spl_name','invoice_no','payment_code','payment_date','tr_ap_payment_dtl.amount','tr_ap_payment_hdr.note')
+                $bayar = TrApHeader::select('tr_ap_invoice_hdr.id','ms_supplier.spl_name','invoice_no','payment_code','payment_date','tr_ap_payment_dtl.amount','tr_ap_payment_hdr.note')
                     ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
                     ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
                     ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
                     ->where('tr_ap_payment_hdr.posting','t')
                     ->where('tr_ap_invoice_hdr.po_id',NULL)
                     ->orderBy('payment_date', 'asc');
-                    if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
-                    $bayar = $bayar->get();
+                if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
+                $bayar = $bayar->get();
 
                 $hasil_nl = array();
-                if(count($belum) > 0){
-                    for($i=0; $i<count($belum); $i++){
-                        $hasil_nl[] = array('spl_name'=>$belum[$i]->spl_name,'kode'=>$belum[$i]->invoice_no,'amt'=>$belum[$i]->total);
-                    }
+                foreach($belum as $ap){
+                    $hasil_nl[] = array('spl_name'=>$ap->spl_name,'kode'=>$ap->invoice_no,'amt'=>$ap->total, 'detail' => $ap->detail);
                 }
-                if(count($bayar) > 0){
-                    for($p=0; $p<count($bayar); $p++){
-                        $hasil_nl[] = array('spl_name'=>$bayar[$p]->spl_name,'kode'=>$bayar[$p]->payment_code,'amt'=>$bayar[$p]->amount);
+
+                foreach($bayar as $ap){
+                    if($ap->payment->count() > 0){
+                        $paid = 0;
+                        foreach($ap->payment as $apbyr){
+                            if(!empty(@$apbyr->header->posting)){
+                                $paid += $apbyr->amount;
+                                // break;
+                            }
+                        }
                     }
+                    $hasil_nl[] = array('spl_name'=>$ap->spl_name, 'kode'=>$ap->payment_code,'amt'=> $ap->amount,'paid' => $paid,'detail' => $ap->detail);
                 }
                 $fetch = $hasil_nl;
             }
         }
 
         $data['invoices'] = $fetch;
+        // var_dump($data['invoices']); die();
 
         if($pdf){
             $data['type'] = 'pdf';
@@ -2126,6 +2064,8 @@ class ReportController extends Controller
         $excel = @$request->excel;
         $print = @$request->print;
         $sup_id = @$request->unit3;
+        $from = @$request->from;
+        $to = @$request->to;
 
         $data['tahun'] = 'Periode Sampai : '.date('M Y');
         $data['name'] = MsCompany::first()->comp_name;
@@ -2136,17 +2076,24 @@ class ReportController extends Controller
         $data['title_r'] = 'AP Payment History';
 
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
-        $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
-                    ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
-                    ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
-                    ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                    ->where('tr_ap_invoice_hdr.posting','t')
-                    ->where('payment_code',NULL)
-                    ->orderBy('invoice_no', 'asc');
-                    if($sup_id) $belum = $belum->where('ms_supplier.id','=',$sup_id);
-                    $belum = $belum->get();
+        // $belum = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_date','invoice_duedate','tr_ap_invoice_hdr.note','invoice_date','payment_code','outstanding AS total')
+        //             ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
+        //             ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
+        //             ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
+        //             ->where('tr_ap_invoice_hdr.posting','t')
+        //             ->where('payment_code',NULL)
+        //             ->orderBy('invoice_no', 'asc');
+        // if($from) $belum = $belum->where('tr_ap_payment_hdr.payment_date','>=',$from);
+        // if($to) $belum = $belum->where('tr_ap_payment_hdr.payment_date','<=',$to);
+        // if($sup_id) $belum = $belum->where('ms_supplier.id','=',$sup_id);
+        // $belum = $belum->get();
 
-        $bayar = TrApHeader::select('ms_supplier.spl_name','invoice_no','payment_code','payment_date','tr_ap_payment_dtl.amount','tr_ap_payment_hdr.note','cashbk_name')
+        // $hasil_nl = [];
+        // foreach ($belum as $ap) {
+        //     $hasil_nl[] = $ap;
+        // }
+
+        $bayar = TrApHeader::select('ms_supplier.spl_name','invoice_no','invoice_date','payment_code','payment_date','tr_ap_payment_dtl.amount','tr_ap_payment_hdr.note','cashbk_name','tr_ap_payment_dtl.amount')
             ->join('ms_supplier','ms_supplier.id',"=",'tr_ap_invoice_hdr.spl_id')
             ->leftjoin('tr_ap_payment_dtl','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
             ->leftjoin('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
@@ -2154,33 +2101,37 @@ class ReportController extends Controller
             ->where('tr_ap_payment_hdr.posting','t')
             ->orderBy('payment_date', 'asc');
             if($sup_id) $bayar = $bayar->where('ms_supplier.id','=',$sup_id);
-            $bayar = $bayar->get();
+        $bayar = $bayar->get();
 
-        $hasil_nl = array();
-        if(count($belum) > 0){
-            for($i=0; $i<count($belum); $i++){
-                $hasil_nl[] = array(
-                    'kode'=>$belum[$i]->invoice_no,
-                    'tgl'=>$belum[$i]->invoice_date,
-                    'spl_name'=>$belum[$i]->spl_name,
-                    'bank'=>NULL,
-                    'debet'=>$belum[$i]->total,
-                    'kredit'=>0
-                );
-            }
+        foreach ($bayar as $ap) {
+            $hasil_nl[] = $ap;
         }
-        if(count($bayar) > 0){
-            for($p=0; $p<count($bayar); $p++){
-                $hasil_nl[] = array(
-                    'kode'=>$bayar[$p]->payment_code,
-                    'tgl'=>$bayar[$p]->payment_date,
-                    'spl_name'=>$bayar[$p]->spl_name,
-                    'bank'=>$bayar[$p]->cashbk_name,
-                    'debet'=>0,
-                    'kredit'=>$bayar[$p]->amount
-                );
-            }
-        }
+
+        // $hasil_nl = array();
+        // if(count($belum) > 0){
+        //     for($i=0; $i<count($belum); $i++){
+        //         $hasil_nl[] = array(
+        //             'kode'=>$belum[$i]->invoice_no,
+        //             'tgl'=>$belum[$i]->invoice_date,
+        //             'spl_name'=>$belum[$i]->spl_name,
+        //             'bank'=>NULL,
+        //             'debet'=>$belum[$i]->total,
+        //             'kredit'=>0
+        //         );
+        //     }
+        // }
+        // if(count($bayar) > 0){
+        //     for($p=0; $p<count($bayar); $p++){
+        //         $hasil_nl[] = array(
+        //             'kode'=>$bayar[$p]->payment_code,
+        //             'tgl'=>$bayar[$p]->payment_date,
+        //             'spl_name'=>$bayar[$p]->spl_name,
+        //             'bank'=>$bayar[$p]->cashbk_name,
+        //             'debet'=>0,
+        //             'kredit'=>$bayar[$p]->amount
+        //         );
+        //     }
+        // }
         $fetch = $hasil_nl;
 
         $data['invoices'] = $fetch;

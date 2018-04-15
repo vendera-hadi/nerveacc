@@ -72,10 +72,10 @@
                 </div>
                 <div style="margin-bottom:10px">
                     <input id="cc" class="easyui-combobox" required="true" name="unit_virtual_accn" style="width:100%" label="Unit Virtual Account:" data-options="valueField:'id',textField:'text',url:'{{route('unit.option2')}}'">
-                </div> 
+                </div>
                 <div style="margin-bottom:10px">
                     <input id="cc" class="easyui-combobox" required="true" name="floor_id" style="width:100%" label="Unit Floor:" data-options="valueField:'id',textField:'text',url:'{{route('unit.fopt')}}'">
-                </div> 
+                </div>
                 <div style="margin-bottom:10px">
                     <input id="cc" class="easyui-combobox" required="true" name="untype_id" style="width:100%" label="Unit Type:" data-options="valueField:'id',textField:'text',url:'{{route('unit.options')}}'">
                 </div>
@@ -84,7 +84,7 @@
                         <option value="true">yes</option>
                         <option value="false">no</option>
                     </select>
-                </div>  
+                </div>
             </form>
         </div>
         <div id="dlg-buttons">
@@ -186,7 +186,7 @@
                                       <input type="hidden" name="tenan_id" id="txtTenanId" required>
                                       <input type="text" class="form-control" id="txtTenan" disabled>
                                       <span class="input-group-btn">
-                                        <button class="btn btn-info" type="button" id="chooseTenanButton">Choose Tenant</button>
+                                        <button class="btn btn-info chooseTenanButton" type="button" >Choose Tenant</button>
                                       </span>
                                     </div>
                                 </div>
@@ -257,7 +257,7 @@
                             <!-- <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>PKP</label>
-                                    &nbsp;&nbsp;<input type="checkbox" name="tenan_ispkp" value="1" > 
+                                    &nbsp;&nbsp;<input type="checkbox" name="tenan_ispkp" value="1" >
                                 </div>
                             </div> -->
                         </div>
@@ -361,75 +361,21 @@
                         </div>
                         <!-- END UNIT -->
                         <div class="col-sm-12 text-center" style="margin-bottom: 20px;">
-                            <h4><strong>Owner Details</strong></h4>
+                            <h4><strong>Owner</strong></h4>
                         </div>
                         <!-- OWNER -->
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label>Name</label>
-                                <input type="text" class="form-control tenan_name" name="tenan_name" placeholder="Owner Name" required>
-                            </div>
+                                    <label>Tenant</label>
+                                    <div class="input-group">
+                                      <input type="hidden" name="tenan_id" id="txtTenanIdEdit" required>
+                                      <input type="text" class="form-control tenan_name" id="txtTenanEdit" disabled="">
+                                      <span class="input-group-btn">
+                                        <button class="btn btn-info chooseTenanButton" type="button" >Choose Tenant</button>
+                                      </span>
+                                    </div>
+                                </div>
                         </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>KTP</label>
-                                <input type="text" class="form-control tenan_idno" name="tenan_idno" placeholder="Owner KTP" required>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Phone</label>
-                                <input type="text" class="form-control tenan_phone" name="tenan_phone" placeholder="Owner Phone Number" required>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>FAX</label>
-                                <input type="text" class="form-control tenan_fax" name="tenan_fax" placeholder="Owner Fax Number">
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="text" class="form-control tenan_email" name="tenan_email" placeholder="Owner Email Address" required>
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Address</label>
-                                <input type="text" class="form-control tenan_address" name="tenan_address" placeholder="Owner Address">
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>NPWP</label>
-                                <input type="text" class="form-control tenan_npwp" name="tenan_npwp" placeholder="Owner NPWP Number">
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Tax Name (Nama NPWP)</label>
-                                <input type="text" class="form-control tenan_taxname" name="tenan_taxname" placeholder="Owner NPWP Name">
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>Tax Address (Alamat NPWP)</label>
-                                <input type="text" class="form-control tenan_tax_address" name="tenan_tax_address" placeholder="Owner NPWP Address">
-                            </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="form-group">
-                                <label>PPN</label>
-                                &nbsp;&nbsp;<input type="checkbox" name="tenan_isppn" class="tenan_isppn" value="1" >
-                            </div>
-                        </div>
-                        <!-- div class="col-sm-6">
-                            <div class="form-group">
-                                <label>PKP</label>
-                                &nbsp;&nbsp;<input type="checkbox" name="tenan_ispkp" class="tenan_ispkp" value="1" > 
-                            </div>
-                        </div> -->
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Own Unit Since</label>
@@ -522,11 +468,11 @@
         }
 
         function detail(){
-            var row = $('#dg').datagrid('getSelected');   
+            var row = $('#dg').datagrid('getSelected');
             $.post('{{route('unit.modaldetail')}}', {id:row.id}, function(result){
                 if(result.errorMsg) $.messager.alert('Warning',result.message);
                 else{
-                    $('#detailUnitModalContent').html(result);     
+                    $('#detailUnitModalContent').html(result);
                     $('#detailModal').modal("show");
                 }
             });
@@ -534,6 +480,7 @@
 
         function editUnit(){
             var row = $('#dg').datagrid('getSelected');
+            $('.tenan_name').val('');
             $.post('{{route('unit.ajaxdetail')}}', {id:row.id}, function(result){
                 if(result.errorMsg) $.messager.alert('Warning',result.message);
                 else{
@@ -548,16 +495,16 @@
                     $('.meter_air').val(result.meter_air);
                     if(result.tenant){
                         $('.tenan_name').val(result.tenant.tenan_name);
-                        $('.tenan_idno').val(result.tenant.tenan_idno);
-                        $('.tenan_phone').val(result.tenant.tenan_phone);
-                        $('.tenan_fax').val(result.tenant.tenan_fax);
-                        $('.tenan_email').val(result.tenant.tenan_email);
-                        $('.tenan_address').val(result.tenant.tenan_address);
-                        $('.tenan_npwp').val(result.tenant.tenan_npwp);
-                        $('.tenan_taxname').val(result.tenant.tenan_taxname);
-                        $('.tenan_tax_address').val(result.tenant.tenan_tax_address);
-                        if(result.tenant.tenan_ispkp) $('.tenan_ispkp').prop('checked', true);
-                        if(result.tenant.tenan_isppn) $('.tenan_isppn').prop('checked', true);
+                        // $('.tenan_idno').val(result.tenant.tenan_idno);
+                        // $('.tenan_phone').val(result.tenant.tenan_phone);
+                        // $('.tenan_fax').val(result.tenant.tenan_fax);
+                        // $('.tenan_email').val(result.tenant.tenan_email);
+                        // $('.tenan_address').val(result.tenant.tenan_address);
+                        // $('.tenan_npwp').val(result.tenant.tenan_npwp);
+                        // $('.tenan_taxname').val(result.tenant.tenan_taxname);
+                        // $('.tenan_tax_address').val(result.tenant.tenan_tax_address);
+                        // if(result.tenant.tenan_ispkp) $('.tenan_ispkp').prop('checked', true);
+                        // if(result.tenant.tenan_isppn) $('.tenan_isppn').prop('checked', true);
                         $('.unitow_start_date').val(result.unitow_start_date);
                     }
                     $('#editUnitModal').modal("show");
@@ -568,7 +515,7 @@
         $('#formAddUnit').submit(function(e){
             e.preventDefault();
             if($('input[name=owner]:checked').val() == 1){
-                if($('input[name=tenan_id]').val() == ''){ 
+                if($('input[name=tenan_id]').val() == ''){
                     $.messager.alert('Warning','Please Choose Tenan first');
                     return false;
                 }
@@ -589,7 +536,7 @@
             e.preventDefault();
             $.post('{{route('unit.update')}}', $(this).serialize(), function(result){
                 // console.log(result);
-                if(result.errorMsg) $.messager.alert('Warning',result.message);
+                if(result.errorMsg) $.messager.alert('Warning',result.errorMsg);
                 if(result.success){
                     $.messager.alert('Success',result.message);
                     $('#editUnitModal').modal("hide");
@@ -617,7 +564,7 @@
         });
 
         // tenan
-        $('#chooseTenanButton').click(function(){
+        $('.chooseTenanButton').click(function(){
             $('#tenanModal').modal("show");
             currenturl = '{{route('tenant.popup')}}';
             $.post(currenturl,null, function(data){
@@ -647,11 +594,11 @@
             e.preventDefault();
             var tenanid = $('input[name="tenant"]:checked').val();
             var tenanname = $('input[name="tenant"]:checked').data('name');
-            $('#txtTenanId').val(tenanid);
-            $('#txtTenan').val(tenanname);
+            $('#txtTenanId, #txtTenanIdEdit').val(tenanid);
+            $('#txtTenan, #txtTenanEdit').val(tenanname);
             $('#tenanModalContent').text('');
             $('#tenanModal').modal("hide");
-            
+
             $('input[name=tenan_name]').removeAttr('disabled');
                 $('input[name=tenan_idno]').removeAttr('disabled');
                 $('input[name=tenan_phone]').removeAttr('disabled');

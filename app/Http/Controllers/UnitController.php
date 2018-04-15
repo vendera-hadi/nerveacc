@@ -39,10 +39,8 @@ class UnitController extends Controller
 
             // olah data
             $count = MsUnit::count();
-            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name','ms_tenant.tenan_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))->join('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'))
-                    ->leftJoin('ms_unit_owner', 'ms_unit.id','=','ms_unit_owner.unit_id')
-                    ->leftJoin('ms_tenant', 'ms_tenant.id', '=', 'ms_unit_owner.tenan_id')
-                    ->whereNull('ms_unit_owner.deleted_at');
+            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))
+                    ->join('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'));
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -87,7 +85,7 @@ class UnitController extends Controller
                 $temp['floor_name'] = $value->floor_name;
                 $temp['floor_id'] = $value->floor_id;
                 $temp['untype_id'] = $value->untype_id;
-                $temp['tenan_name'] = $value->tenan_name;
+                $temp['tenan_name'] = @$value->owner->tenant->tenan_name ?: '-';
                 $temp['va_utilities'] = $value->va_utilities;
                 $temp['va_maintenance'] = $value->va_maintenance;
                 $temp['unit_isactive'] = !empty($value->unit_isactive) ? 'yes' : 'no';
@@ -237,44 +235,49 @@ class UnitController extends Controller
 
             $unitowner = MsUnitOwner::where('unit_id',$id)->first();
             if($unitowner){
+                // bole ganti unit owner asalkan tidak ada contract confirmed atas unit itu
+                $checkContract = TrContract::where('contr_status','confirmed')->where('unit_id',$id)->first();
+                if($checkContract) return response()->json(['errorMsg' => 'Cannot change unit owner after close all contract of this unit first']);
+
+                if(@$request->tenan_id) $unitowner->tenan_id = $request->tenan_id;
                 $unitowner->unitow_start_date = $request->unitow_start_date;
                 $unitowner->save();
 
-                $updateTenant = [
-                        'tenan_name' => @$request->tenan_name,
-                        'tenan_email' => @$request->tenan_email,
-                        'tenan_idno' => @$request->tenan_idno,
-                        'tenan_phone' => @$request->tenan_phone,
-                        'tenan_fax' => @$request->tenan_fax,
-                        'tenan_address' => @$request->tenan_address,
-                        'tenan_npwp' => @$request->tenan_npwp,
-                        'tenan_taxname' => @$request->tenan_taxname,
-                        'tenan_tax_address' => @$request->tenan_tax_address,
-                        'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
-                        'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
-                        'updated_by' => Auth::id()
-                    ];
-                MsTenant::find($unitowner->tenan_id)->update($updateTenant);
+                // $updateTenant = [
+                //         'tenan_name' => @$request->tenan_name,
+                //         'tenan_email' => @$request->tenan_email,
+                //         'tenan_idno' => @$request->tenan_idno,
+                //         'tenan_phone' => @$request->tenan_phone,
+                //         'tenan_fax' => @$request->tenan_fax,
+                //         'tenan_address' => @$request->tenan_address,
+                //         'tenan_npwp' => @$request->tenan_npwp,
+                //         'tenan_taxname' => @$request->tenan_taxname,
+                //         'tenan_tax_address' => @$request->tenan_tax_address,
+                //         'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
+                //         'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
+                //         'updated_by' => Auth::id()
+                //     ];
+                // MsTenant::find($unitowner->tenan_id)->update($updateTenant);
             }else{
                 // create new
-                $tenant = MsTenant::create([
-                        'tenan_code' => "TN".date('ymdhis'),
-                        'tenan_name' => @$request->tenan_name,
-                        'tenan_email' => @$request->tenan_email,
-                        'tenan_idno' => @$request->tenan_idno,
-                        'tenan_phone' => @$request->tenan_phone,
-                        'tenan_fax' => @$request->tenan_fax,
-                        'tenan_address' => @$request->tenan_address,
-                        'tenan_npwp' => @$request->tenan_npwp,
-                        'tenan_taxname' => @$request->tenan_taxname,
-                        'tenan_tax_address' => @$request->tenan_tax_address,
-                        'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
-                        'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
-                        'tent_id' => 1,
-                        'created_by' => Auth::id(),
-                        'updated_by' => Auth::id()
-                    ]);
-                MsUnitOwner::create(['unit_id'=>$unit->id, 'tenan_id'=>$tenant->id, 'unitow_start_date' => @$request->unitow_start_date]);
+                // $tenant = MsTenant::create([
+                //         'tenan_code' => "TN".date('ymdhis'),
+                //         'tenan_name' => @$request->tenan_name,
+                //         'tenan_email' => @$request->tenan_email,
+                //         'tenan_idno' => @$request->tenan_idno,
+                //         'tenan_phone' => @$request->tenan_phone,
+                //         'tenan_fax' => @$request->tenan_fax,
+                //         'tenan_address' => @$request->tenan_address,
+                //         'tenan_npwp' => @$request->tenan_npwp,
+                //         'tenan_taxname' => @$request->tenan_taxname,
+                //         'tenan_tax_address' => @$request->tenan_tax_address,
+                //         'tenan_isppn' => !empty(@$request->tenan_isppn) ? 1 : 0,
+                //         'tenan_ispkp' => !empty(@$request->tenan_ispkp) ? 1 : 0,
+                //         'tent_id' => 1,
+                //         'created_by' => Auth::id(),
+                //         'updated_by' => Auth::id()
+                //     ]);
+                MsUnitOwner::create(['unit_id'=>$id, 'tenan_id'=>$request->tenan_id, 'unitow_start_date' => @$request->unitow_start_date]);
             }
             return response()->json(['success'=>true, 'message'=>'Update Unit Success']);
         }catch(\Exception $e){
@@ -298,12 +301,16 @@ class UnitController extends Controller
         try{
             $id = $request->id;
             // cek unit tidak boleh di delete kalo ada contract sedang berjalan
-            $checkContract = TrContract::where('contr_status','confirmed')->where('contr_enddate', '>', date('Y-m-d H:i:s'))->whereNull('contr_terminate_date')->first();
+            $checkContract = TrContract::where('contr_status','confirmed')
+                                        ->where('unit_id', $id)
+                                        ->first();
             if($checkContract){
                 return response()->json(['errorMsg' => 'Tidak bisa delete Unit karna ada contract yang sedang berjalan untuk unit ini']);
             }else{
                 MsUnit::destroy($id);
-                return response()->json(['success'=>true]);
+                // delete msunit owner
+                MsUnitOwner::where('unit_id', $id)->delete();
+                return response()->json(['success'=>true, 'message'=>'Delete Unit Success']);
             }
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -344,13 +351,6 @@ class UnitController extends Controller
         else $fetch = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
                         ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id');
 
-        // filter owned unit
-        if(count($owned_units) > 0){
-            $fetch = $fetch->orWhere(function($query) use($owned_units){
-                    $query->whereIn('ms_unit.id',$owned_units)->where('unit_isavailable',1);
-                });
-        }
-
         // KOMEN INI BIAR KELUAR SEMUA
         if($tenan_id){
             $cek_tenan = MsTenant::find($tenan_id);
@@ -358,6 +358,14 @@ class UnitController extends Controller
                 $fetch = $fetch->where('unit_isavailable',1);
             }
         }
+
+        // filter owned unit
+        if(count($owned_units) > 0){
+            $fetch = $fetch->orWhere(function($query) use($owned_units){
+                    $query->whereIn('ms_unit.id',$owned_units)->where('unit_isavailable',1);
+                });
+        }
+        // echo $fetch->toSql(); die();
         //if(empty($getAll)) $fetch = $fetch->where('unit_isavailable',1);
 
         // $fetch = $fetch->orWhere('ms_unit_owner.tenan_id','=',$tenan_id);

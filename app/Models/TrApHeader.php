@@ -26,4 +26,9 @@ class TrApHeader extends Model
       {
          return $this->belongsTo('App\Models\TrPOHeader','po_id');
       }
+
+      public function payment()
+       {
+         return $this->hasMany('App\Models\TrApPaymentDetail', 'aphdr_id');
+       }
 }

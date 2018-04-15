@@ -1,12 +1,12 @@
 <table class="table table-bordered" width="100%">
     <thead>
       <tr>
-        <th style="text-align: center;">No Invoice / No Kwitansi</th>
-        <th style="text-align: center;">Tgl Invoice /  Tgl Kwitansi</th>
+        <th style="text-align: center;">No Invoice / Tgl Invoice</th>
+        <th style="text-align: center;">No. Kwitansi /  Tgl Kwitansi</th>
         <th style="text-align: center;">Supplier</th>
         <th style="text-align: center;">Bank</th>
-        <th style="text-align: center;">Debet (Rp)</th>
-        <th style="text-align: center;">Kredit (Rp)</th>
+        <th style="text-align: center;">Total (Rp)</th>
+        <!-- <th style="text-align: center;">Kredit (Rp)</th> -->
       </tr>
     </thead>
     <tbody>
@@ -16,22 +16,20 @@
         ?>
         @foreach($invoices as $inv)
         <tr>
-            <td>{{$inv['kode']}}</td>
-            <td>{{date('d/m/Y',strtotime($inv['tgl']))}}</td>
-            <td>{{$inv['spl_name']}}</td>
-            <td>{{$inv['bank']}}</td>
-            <td style="text-align: right">{{number_format($inv['debet'])}}</td>
-            <td style="text-align: right">{{number_format($inv['kredit'])}}</td>
+            <td>{{$inv->invoice_no."  (".date('d/m/Y',strtotime($inv->invoice_date)).")"}}</td>
+            <td>{{$inv->payment_code."  (".date('d/m/Y',strtotime($inv->payment_date)).")"}}</td>
+            <td>{{$inv->spl_name}}</td>
+            <td>{{@$inv->cashbk_name ?: "CASH"}}</td>
+            <td style="text-align: right">{{number_format($inv->amount)}}</td>
         </tr>
-        <?php $total_debet += $inv['debet']; $total_kredit += $inv['kredit']; ?>
+        <?php $total_debet += $inv->amount; ?>
         @endforeach
         <tr>
             <td colspan="4" style="text-align: center;font-weight: bold;">TOTAL</td>
             <td style="text-align: right">{{number_format($total_debet)}}</td>
-            <td style="text-align: right">{{number_format($total_kredit)}}</td>
         </tr>
     </tbody>
     <tfoot>
-        
+
     </tfoot>
 </table>
