@@ -40,7 +40,7 @@ class UnitController extends Controller
             // olah data
             $count = MsUnit::count();
             $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))
-                    ->join('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'));
+                    ->leftJoin('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'));
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -345,11 +345,13 @@ class UnitController extends Controller
         // get unit yg available plus bs select unit dia sendiri
         if($keyword) $fetch = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
                                     ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id')
+                                    ->whereNull('ms_unit_owner.deleted_at')
                                     ->where(function($query) use($keyword){
                                         $query->where(DB::raw('LOWER(unit_code)'),'ilike','%'.$keyword.'%')->orWhere(DB::raw('LOWER(unit_name)'),'ilike','%'.$keyword.'%');
                                     });
         else $fetch = MsUnit::select('ms_unit.*','ms_unit_owner.tenan_id')
-                        ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id');
+                        ->leftJoin('ms_unit_owner','ms_unit.id','=','ms_unit_owner.unit_id')
+                        ->whereNull('ms_unit_owner.deleted_at');
 
         // KOMEN INI BIAR KELUAR SEMUA
         if($tenan_id){

@@ -71,11 +71,7 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract yg bukan milik owner unit. tenan yg gada di ms_owner_list dimasukkan disini
-            $fetch = TrContract::select('tr_contract.*','ms_tenant.tenan_name', 'ms_unit.unit_code')
-            		->join('ms_tenant',\DB::raw('ms_tenant.id::integer'),"=",\DB::raw('tr_contract.tenan_id::integer'))
-                    ->join('ms_unit', \DB::raw('ms_unit.id::integer'), '=', \DB::raw('tr_contract.unit_id::integer'))
-                    ->leftJoin('ms_unit_owner', \DB::raw('tr_contract.tenan_id::integer'), '=', \DB::raw('ms_unit_owner.tenan_id::integer'))
-                    ->whereNull('ms_unit_owner.tenan_id');
+            $fetch = TrContract::select('tr_contract.*',DB::raw('COUNT(tr_contract_invoice.id) as total'))->leftJoin('tr_contract_invoice', 'tr_contract.id', '=', 'tr_contract_invoice.contr_id')->groupBy('tr_contract.id')->havingRaw('COUNT(tr_contract_invoice.id) > 0');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -93,26 +89,39 @@ class ContractController extends Controller
                         default:
                             break;
                     }
+
+                    if($op == 'like'){
+                        if($filter->field == 'unit_code'){
+                            $fetch = $fetch->whereHas('MsUnit', function($query) use($filter){
+                                $query->where(\DB::raw('lower(trim(unit_code::varchar))'),'like','%'.$filter->value.'%');
+                            });
+                        }else if($filter->field == 'tenan_name'){
+                            $fetch = $fetch->whereHas('MsTenant', function($query) use($filter){
+                                $query->where(\DB::raw('lower(trim(tenan_name::varchar))'),'like','%'.$filter->value.'%');
+                            });
+                        }else{
+                            $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                        }
+                    }else{
+                        $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    }
                 }
-                if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
-                else $fetch = $fetch->where($filter->field, $op, $filter->value);
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
-            else $fetch->orderBy('ms_unit.unit_code');
 
             $fetch = $fetch->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
             foreach ($fetch as $key => $value) {
                 $temp = [];
                 $temp['id'] = $value->id;
-                $temp['unit_code'] = $value->unit_code;
+                $temp['unit_code'] = @$value->MsUnit->unit_code;
                 $temp['contr_code'] = $value->contr_code;
                 $temp['contr_no'] = $value->contr_no;
                 $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
                 $temp['contr_enddate'] = date('d/m/Y',strtotime($value->contr_enddate));
                 if($temp['contr_enddate'] == '31/12/2030') $temp['contr_enddate'] = '-';
-                $temp['tenan_name'] = $value->tenan_name;
+                $temp['tenan_name'] = @$value->MsTenant->tenan_name;
                 if($value->contr_status == 'confirmed') $status = '<strong class="text-success">'.$value->contr_status.'</strong>';
                 else if($value->contr_status == 'cancelled' || $value->contr_status == 'closed') $status = '<strong class="text-danger">'.$value->contr_status.'</strong>';
                 else $status = '<strong>'.$value->contr_status.'</strong>';
@@ -162,7 +171,7 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract disini adalah contract yg dimiliki oleh si owner. join dgn unit owner using tenan_id
-            $fetch = TrContract::select('tr_contract.*')->join('ms_unit_owner', \DB::raw('tr_contract.tenan_id::integer'), '=', \DB::raw('ms_unit_owner.tenan_id::integer'))->groupBy('tr_contract.id');
+            $fetch = TrContract::select('tr_contract.*',DB::raw('COUNT(tr_contract_invoice.id) as total'))->leftJoin('tr_contract_invoice', 'tr_contract.id', '=', 'tr_contract_invoice.contr_id')->groupBy('tr_contract.id')->havingRaw('COUNT(tr_contract_invoice.id) = 0');
 
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -181,13 +190,28 @@ class ContractController extends Controller
                         default:
                             break;
                     }
+
+                    if($op == 'like'){
+                        if($filter->field == 'unit_code'){
+                            $fetch = $fetch->whereHas('MsUnit', function($query) use($filter){
+                                $query->where(\DB::raw('lower(trim(unit_code::varchar))'),'like','%'.$filter->value.'%');
+                            });
+                        }else if($filter->field == 'tenan_name'){
+                            $fetch = $fetch->whereHas('MsTenant', function($query) use($filter){
+                                $query->where(\DB::raw('lower(trim(tenan_name::varchar))'),'like','%'.$filter->value.'%');
+                            });
+                        }else{
+                            $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                        }
+                    }else{
+                        $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    }
                 }
-                if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
-                else $fetch = $fetch->where($filter->field, $op, $filter->value);
+
             }
             $count = $fetch->count();
             if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
-            // else $fetch->orderBy('ms_unit.unit_code');
+
 
             $fetch = $fetch->skip($offset)->take($perPage)->get();
             $result = ['total' => $count, 'rows' => []];
@@ -200,7 +224,7 @@ class ContractController extends Controller
                 $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
                 $temp['contr_enddate'] = date('d/m/Y',strtotime($value->contr_enddate));
                 if($temp['contr_enddate'] == '31/12/2030') $temp['contr_enddate'] = '-';
-                $temp['tenan_name'] = $value->MsTenant->tenan_name;
+                $temp['tenan_name'] = @$value->MsTenant->tenan_name;
                 if($value->contr_status == 'confirmed') $status = '<strong class="text-success">'.$value->contr_status.'</strong>';
                 else if($value->contr_status == 'cancelled' || $value->contr_status == 'closed') $status = '<strong class="text-danger">'.$value->contr_status.'</strong>';
                 else $status = '<strong>'.$value->contr_status.'</strong>';
@@ -615,8 +639,10 @@ class ContractController extends Controller
             $contract = TrContract::find($id);
             // balikin unit
             $unit = MsUnit::find($contract->unit_id);
-            $unit->unit_isavailable = true;
-            $unit->save();
+            if($unit){
+                $unit->unit_isavailable = true;
+                $unit->save();
+            }
             // TrContract::destroy($id);
             TrContract::where('id',$id)->update(['contr_iscancel' => true,'contr_cancel_date' => date('Y-m-d'), 'contr_status' => 'cancelled']);
             return response()->json(['success'=>true]);
@@ -1133,13 +1159,13 @@ class ContractController extends Controller
         if(!$contractOwner) return response()->json(['error'=>true, 'message'=>'Contract Owner of this Unit not Found, Please Create New Contract of Unit Owner first']);
 
         $invoice = new Invoice;
-        $invoice->setPeriod(date('m',strtotime($date_end)),date('Y',strtotime($date_end)));
+        $invoice->setInvoiceType(1);
         $invoice->setContract($contr_id);
+        $invoice->setPeriod(date('m',strtotime($date_end)),date('Y',strtotime($date_end)));
 
         $tempCtrInv = [];
 
         // GENERATE INVOICE METER
-        $invoice->setInvoiceType(1);
         $cost_details = $contractLib->getCostItems(1);
         // generate cost meter details
         $tempDetails = [];
@@ -1201,6 +1227,7 @@ class ContractController extends Controller
         // loop invoice type selain yg menggunakan meter
         foreach ($invTypes as $invtp_id) {
             $invoice->setInvoiceType($invtp_id);
+            $invoice->setPeriod(date('m',strtotime($date_end)),date('Y',strtotime($date_end)));
             $cost_details = $contractLib->getCostItems($invtp_id);
             $tempDetails = [];
             foreach ($cost_details as $costdt) {

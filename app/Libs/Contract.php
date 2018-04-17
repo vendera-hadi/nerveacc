@@ -32,8 +32,8 @@ class Contract {
                     ->whereHas('contractInv', function($q){
                         $q->where('invtp_id', $this->invtp_id);
                       })
-                    ->where('contr_startdate','<=',$this->periodStart)
-                    ->where('contr_enddate','>=',$this->periodEnd)->count();
+                    ->where('contr_startdate','<=',$this->periodEnd)
+                    ->where('contr_enddate','>=',$this->periodStart)->count();
     }
 
     public function getAvailable()

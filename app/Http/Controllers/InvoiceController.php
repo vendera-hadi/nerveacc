@@ -540,9 +540,9 @@ class InvoiceController extends Controller
         foreach ($schedules as $sch) {
             // call class invoice
             $invoice = new Invoice;
-            $invoice->setPeriod(date('m',strtotime($sch->period_start)), date('Y',strtotime($sch->period_end)));
             $invoice->setInvoiceType($sch->invtp_id);
             $invoice->setContract($sch->contract_id);
+            $invoice->setPeriod(date('m',strtotime($sch->period_start)), date('Y',strtotime($sch->period_end)));
 
             $contract = $invoice->getContract();
             echo "<br><b>Contract # ".$contract->contr_no."</b> ";

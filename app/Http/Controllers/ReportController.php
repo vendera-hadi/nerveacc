@@ -850,12 +850,13 @@ class ReportController extends Controller
         $data['name'] = MsCompany::first()->comp_name;
         $data['template'] = 'report_unit';
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
-        $fetch = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.virtual_account','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
+        $units = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.va_utilities','ms_unit.va_maintenance','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
                 ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                 ->leftjoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
                 ->leftjoin('ms_tenant','ms_tenant.id',"=",'ms_unit_owner.tenan_id')
+                ->whereNull('ms_unit_owner.deleted_at')
                 ->orderBy('ms_unit.unit_code');
-        $fetch = $fetch->get();
+        $fetch = $units->get();
         $data['invoices'] = $fetch;
         if($pdf){
             $data['type'] = 'pdf';
@@ -863,13 +864,8 @@ class ReportController extends Controller
             return $pdf->download('Report_Unit.pdf');
         }else if($excel){
             $data['type'] = 'excel';
-            $data = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.virtual_account','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
-                ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
-                ->leftjoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
-                ->leftjoin('ms_tenant','ms_tenant.id',"=",'ms_unit_owner.tenan_id')
-                ->orderBy('ms_unit.unit_code')
-                ->get()->toArray();
-            $border = 'A1:M';
+            $data = $units->get()->toArray();
+            $border = 'A1:N';
             $tp = 'xls';
             return Excel::create('Unit Report', function($excel) use ($data,$border) {
                 $excel->sheet('Unit Report', function($sheet) use ($data,$border)

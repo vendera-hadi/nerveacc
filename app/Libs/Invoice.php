@@ -231,17 +231,24 @@ class Invoice {
     // set invoice start date
     private function setInvStartDate(){
         $config = @MsConfig::where('name','invoice_startdate')->first()->value;
+        $variabelmonth = 0;
+        if(@$this->invoiceType->id == 1) $variabelmonth = 1;
         try{
           if(!empty($config)){
               $config = str_pad($config, 2,'0',STR_PAD_LEFT);
-              $startdate = date('Y-m-'.$config, strtotime($this->periodStart." +1 month"));
+              $startdate = date('Y-m-'.$config, strtotime($this->periodStart." +$variabelmonth month"));
           }else{
-              $startdate = date('Y-m-01', strtotime($this->periodStart." +1 month"));
+              $startdate = date('Y-m-01', strtotime($this->periodStart." +$variabelmonth month"));
           }
         } catch(\Exception $e) {
-            $startdate = date('Y-m-01', strtotime($this->periodStart." +1 month"));
+            $startdate = date('Y-m-01', strtotime($this->periodStart." +$variabelmonth month"));
         }
         $this->invStartDate = $startdate;
+
+        if(date('Y-m-01',strtotime(@$this->contract->contr_startdate)) == $this->periodStart && @$this->invoiceType->id != 1){
+            // jika contract maintenance / others dan masih di bulan yg sama dgn start contract date, tgl inv date jadiin tgl contract startdate
+                $this->invStartDate = @$this->contract->contr_startdate;
+        }
     }
 
     // set invoice end date

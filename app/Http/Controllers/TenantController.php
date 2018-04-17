@@ -118,17 +118,10 @@ class TenantController extends Controller
         $keyword = $request->input('keyword');
         $edit = $request->input('edit');
         // $isowner = $request->input('isowner', 0);
-        $fetch = MsTenant::select('ms_tenant.*','ms_tenant_type.tent_name')
-                                    ->join('ms_tenant_type','ms_tenant.tent_id','=','ms_tenant_type.id');
-        if($keyword) $fetch = $fetch->where(function($query) use($keyword){
-                                        $query->where(\DB::raw('LOWER(tenan_name)'),'like','%'.$keyword.'%')->orWhere(\DB::raw('LOWER(tenan_code)'),'like','%'.$keyword.'%');
-                                    });
+        $fetch = MsTenant::query();
+        if($keyword) $fetch = $fetch->where(\DB::raw('LOWER(tenan_name)'),'like','%'.$keyword.'%')->orWhere(\DB::raw('LOWER(tenan_code)'),'like','%'.$keyword.'%');
         $fetch = $fetch->paginate(10);
-        // else $fetch = MsTenant::select('ms_tenant.*','ms_tenant_type.tent_name','ms_tenant_type.tent_isowner','ms_unit_owner.unit_id as ownedunit')
-        //                         ->join('ms_tenant_type','ms_tenant.tent_id','=','ms_tenant_type.id')
-        //                         ->leftJoin('ms_unit_owner','ms_tenant.id','=','ms_unit_owner.tenan_id')
-        //                         ->groupBy('ms_tenant.*')
-        //                         ->get();
+
         return view('modal.popuptenant', ['tenants'=>$fetch, 'keyword'=>$keyword, 'edit'=>$edit]);
     }
 
