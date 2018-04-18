@@ -22,4 +22,7 @@ class TrContract extends Model
    public function contractInv(){
          return $this->hasMany('App\Models\TrContractInvoice','contr_id');
    }
+   public function unitowner(){
+         return $this->belongsTo('App\Models\MsUnitOwner','unit_id','unit_id');
+   }
 }

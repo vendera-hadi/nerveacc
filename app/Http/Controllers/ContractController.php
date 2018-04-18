@@ -37,11 +37,11 @@ class ContractController extends Controller
 {
     public function index(){
         $total_unit = MsUnit::count();
-        $total_contract_owner = DB::select('select "tr_contract".* from "tr_contract" inner join "ms_unit_owner" on tr_contract.tenan_id::integer = ms_unit_owner.tenan_id::integer where "contr_status" = \'confirmed\' group by "tr_contract"."id"');
-        $total_contract_tenant = TrContract::leftJoin('ms_unit_owner', \DB::raw('tr_contract.tenan_id::integer'), '=', \DB::raw('ms_unit_owner.tenan_id::integer'))->whereNull('ms_unit_owner.id')->where('contr_status','confirmed')->count();
-
-        $data['total_contract'] = count($total_contract_owner);
-        $data['total_contract_tenant'] = $total_contract_tenant;
+        $total_contract_owner = TrContract::join('ms_unit_owner', function($join){
+                            $join->on('ms_unit_owner.unit_id', '=', 'tr_contract.unit_id');
+                            $join->on('ms_unit_owner.tenan_id', '=', 'tr_contract.tenan_id');
+                        })->whereNull('ms_unit_owner.deleted_at')->where('contr_status','confirmed')->count();
+        $data['total_contract'] = $total_contract_owner;
 
         $data['total_unit'] = $total_unit;
         $data['cost_items'] = MsCostDetail::select('ms_cost_detail.id','ms_cost_item.cost_name','ms_cost_item.cost_code','ms_cost_detail.costd_name', 'ms_cost_detail.cost_id')->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')->get();
@@ -71,7 +71,10 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract yg bukan milik owner unit. tenan yg gada di ms_owner_list dimasukkan disini
-            $fetch = TrContract::select('tr_contract.*',DB::raw('COUNT(tr_contract_invoice.id) as total'))->leftJoin('tr_contract_invoice', 'tr_contract.id', '=', 'tr_contract_invoice.contr_id')->groupBy('tr_contract.id')->havingRaw('COUNT(tr_contract_invoice.id) > 0');
+            $fetch = TrContract::join('ms_unit_owner', function($join){
+                            $join->on('ms_unit_owner.unit_id', '=', 'tr_contract.unit_id');
+                            $join->on('ms_unit_owner.tenan_id', '!=', 'tr_contract.tenan_id');
+                        })->whereNull('ms_unit_owner.deleted_at');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -171,7 +174,10 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract disini adalah contract yg dimiliki oleh si owner. join dgn unit owner using tenan_id
-            $fetch = TrContract::select('tr_contract.*',DB::raw('COUNT(tr_contract_invoice.id) as total'))->leftJoin('tr_contract_invoice', 'tr_contract.id', '=', 'tr_contract_invoice.contr_id')->groupBy('tr_contract.id')->havingRaw('COUNT(tr_contract_invoice.id) = 0');
+            $fetch = TrContract::join('ms_unit_owner', function($join){
+                            $join->on('ms_unit_owner.unit_id', '=', 'tr_contract.unit_id');
+                            $join->on('ms_unit_owner.tenan_id', '=', 'tr_contract.tenan_id');
+                        })->whereNull('ms_unit_owner.deleted_at');
 
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
