@@ -97,7 +97,7 @@ if(count($unit) > 0){ echo '<br>Supplier '.$unit[0]->unit_code; } ?></h4>
                         <td style="text-align: right;"><?php echo str_replace(',','.',number_format($detail['ags180'],2)) ?></td>
                     </tr>
                     <?php
-                        $total = $total + $detail['inv_amount'];
+                        $total = $total + $detail['inv_outstanding'];
                         $total_30 = $total_30 + $detail['ags30'];
                         $total_60 = $total_60 + $detail['ags60'];
                         $total_90 = $total_90 + $detail['ags90'];

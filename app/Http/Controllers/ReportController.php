@@ -1534,7 +1534,7 @@ class ReportController extends Controller
                     $result = TrApPaymentDetail::select('tr_ap_payment_dtl.amount','tr_ap_invoice_hdr.invoice_no',
                                 DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"),
                                 DB::raw("to_char(tr_ap_invoice_hdr.invoice_duedate, 'DD/MM/YYYY') AS tanggaldue"))
-                            ->join('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
+                            ->join('tr_ap_payment_hdr','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_payment_hdr.id')
                             ->join('tr_ap_invoice_hdr','tr_ap_invoice_hdr.id',"=",'tr_ap_payment_dtl.aphdr_id')
                             ->where('tr_ap_invoice_hdr.spl_id',$inv->spl_id)
                             ->where('tr_ap_payment_hdr.posting',TRUE)
@@ -1593,7 +1593,7 @@ class ReportController extends Controller
                     $result2 = TrApPaymentDetail::select('tr_ap_payment_dtl.amount','tr_ap_invoice_hdr.invoice_no',
                                 DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"),
                                 DB::raw("to_char(tr_ap_invoice_hdr.invoice_duedate, 'DD/MM/YYYY') AS tanggaldue"))
-                            ->join('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
+                            ->join('tr_ap_payment_hdr','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_payment_hdr.id')
                             ->join('tr_ap_invoice_hdr','tr_ap_invoice_hdr.id',"=",'tr_ap_payment_dtl.aphdr_id')
                             ->where('tr_ap_invoice_hdr.spl_id',$inv->spl_id)
                             ->where('tr_ap_payment_hdr.posting',TRUE)
