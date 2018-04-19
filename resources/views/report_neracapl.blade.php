@@ -102,7 +102,7 @@
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12">
                     <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Pdf</button>
-                    <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
+                    <!--<button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>!-->
                     <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
                     <iframe id="frame" style="width:100%; border: 1px solid #f1ebeb; height:400px"></iframe>
                 </div>

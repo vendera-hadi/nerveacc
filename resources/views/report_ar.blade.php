@@ -282,8 +282,8 @@
         $( ".dates,.unit,.payment,.unit2" ).hide();
         $( ".history" ).show();
       }else if(hasil == 'outinv'){
-        $( ".unit,.dates,.unit2" ).show();
-        $( ".history,.payment" ).hide();
+        $( ".unit,.dates" ).show();
+        $( ".history,.payment,unit2" ).hide();
       }else if(hasil == 'payment'){
         $( ".dates,.payment" ).show();
         $( ".history,.unit,.unit2" ).hide();

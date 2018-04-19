@@ -1,7 +1,7 @@
 <table class="table table-striped" style="font-size: 10pt !important;"> 
     <thead>
       <tr>
-        <th style="text-align: center;">Nama Tenan</th>
+        <th style="text-align: center;">Nama Tenant</th>
         <th style="text-align: center;">No NIK</th>
         <th style="text-align: center;">Phone</th>
         <th style="text-align: center;">Fax</th>  

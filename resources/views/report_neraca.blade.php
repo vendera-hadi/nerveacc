@@ -111,3 +111,8 @@
 	</div>
 </body>
 </html>
+<?php if($jenis == 'print'){ ?>
+    <script type="text/javascript">
+        window.print();
+    </script>
+<?php } ?>

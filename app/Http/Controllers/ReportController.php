@@ -301,7 +301,7 @@ class ReportController extends Controller
                     ->orderBy('unit_code', 'asc');
             }else{
                 //sama kyk not paid
-               $fetch = TrInvoice::select('tr_invoice.tenan_id','tr_contract.id as contr_id','ms_unit.unit_code','ms_tenant.tenan_name',
+               $fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
                     DB::raw("SUM(inv_outstanding) AS total"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >= -1 AND (current_date::date - inv_date::date) <=".$ag30." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag30." AND (current_date::date - inv_date::date)<=".$ag60." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
@@ -379,7 +379,7 @@ class ReportController extends Controller
                             ->join('tr_invoice_paymhdr','tr_invoice_paymhdr.id',"=",'tr_invoice_paymdtl.invpayh_id')
                             ->join('tr_invoice','tr_invoice_paymdtl.inv_id',"=",'tr_invoice.id')
                             ->where('tr_invoice.tenan_id',$inv->tenan_id)
-                            ->where('tr_invoice_paymhdr.contr_id',$inv->contr_id)
+                            ->where('tr_invoice_paymhdr.tenan_id',$inv->tenan_id)
                             ->where('invpayh_post',TRUE)
                         ->get();
                     foreach ($result as $key => $value) {
@@ -433,7 +433,7 @@ class ReportController extends Controller
                                 DB::raw("to_char(tr_invoice_paymhdr.invpayh_date, 'DD/MM/YYYY') AS tanggal"))
                             ->join('tr_invoice_paymhdr','tr_invoice_paymhdr.id',"=",'tr_invoice_paymdtl.invpayh_id')
                             ->join('tr_invoice','tr_invoice_paymdtl.inv_id',"=",'tr_invoice.id')
-                            ->where('tr_invoice_paymhdr.contr_id',$inv->contr_id)
+                            ->where('tr_invoice_paymhdr.tenan_id',$inv->tenan_id)
                             ->where('invpayh_post',TRUE)
                         ->get();
                     foreach ($result2 as $key => $value) {
@@ -1334,6 +1334,7 @@ class ReportController extends Controller
         $id = $request->format;
         $from = $request->from;
         $to = $request->to;
+        $print = @$request->print;
         $company = MsCompany::first();
         $detail1 = MsDetailFormat::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
         $detail2 = MsDetailFormat::where('formathd_id',$id)->where('column',2)->orderBy('order','ASC')->get();
@@ -1348,9 +1349,10 @@ class ReportController extends Controller
                 'total' =>$total,
                 'variables' => []
             ];
-        //dd($detail1);
+        if($print == 1){ $data['jenis'] = 'print'; }else{ $data['jenis'] = 'none'; }
         $pdf = @$request->pdf;
         if(!empty($pdf)){
+            $data['jenis'] = 'pdf';
             $pdf = PDF::loadView('report_neraca', $data)->setPaper('a4');
             return $pdf->download('NERACA.pdf');
         }
@@ -1369,6 +1371,7 @@ class ReportController extends Controller
         $id = $request->format;
         $from = $request->from;
         $to = $request->to;
+        $print = @$request->print;
         $company = MsCompany::first();
         $detail = MsDetailFormat::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
         $data = [
@@ -1379,6 +1382,14 @@ class ReportController extends Controller
                 'to' => $to,
                 'variables' => []
             ];
+        if($print == 1){ $data['jenis'] = 'print'; }else{ $data['jenis'] = 'none'; }
+        $pdf = @$request->pdf;
+        if(!empty($pdf)){
+            $data['jenis'] = 'pdf';
+            $pdf = PDF::loadView('report_profitloss', $data)->setPaper('a4');
+            return $pdf->download('PROFITLOSS.pdf');
+        }
+
         return view('report_profitloss', $data);
     }
 
