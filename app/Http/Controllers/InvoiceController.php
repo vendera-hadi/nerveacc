@@ -69,7 +69,7 @@ class InvoiceController extends Controller
 
             // olah data
             $count = TrInvoice::count();
-            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_iscancel','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','tr_invoice.unit_id','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name','ms_unit.unit_code')
+            $fetch = TrInvoice::select('tr_invoice.id','tr_invoice.inv_iscancel','tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_amount','tr_invoice.inv_outstanding','tr_invoice.inv_ppn','tr_invoice.inv_ppn_amount','tr_invoice.inv_post','tr_invoice.unit_id','ms_invoice_type.invtp_name','ms_tenant.tenan_name','tr_contract.contr_no', 'ms_unit.unit_name','ms_floor.floor_name','ms_unit.unit_code','tr_invoice.tenan_id')
                     ->join('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
                     ->leftJoin('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
                     ->leftJoin('ms_unit','tr_contract.unit_id',"=",'ms_unit.id')
@@ -145,7 +145,7 @@ class InvoiceController extends Controller
                 if(!$value->inv_iscancel){
                     $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Receipt</a>';
 
-                    if(!empty((int)number_format($value->inv_outstanding))) $temp['action_button'] .= ' | <a href="'.url('invoice/sendreminder?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Send Reminder</a>';
+                    /*if(!empty((int)number_format($value->inv_outstanding))) $temp['action_button'] .= ' | <a href="'.url('invoice/sendreminder?id='.$value->tenan_id).'" class="print-window" data-width="640" data-height="660">Send Reminder</a>';*/
                 }
 
                 $temp['inv_iscancel'] = $value->inv_iscancel;
@@ -915,8 +915,8 @@ class InvoiceController extends Controller
 
         // INSERT DATABASE
         try{
-            $sendMailFlag = @MsConfig::where('name','send_inv_email')->first()->value;
             DB::transaction(function () use($successIds, $invJournal, $journal){
+                $sendMailFlag = @MsConfig::where('name','send_inv_email')->first()->value;
                 // insert journal
                 TrLedger::insert($journal);
                 // insert invoice journal
