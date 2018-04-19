@@ -278,18 +278,19 @@ class ReportController extends Controller
                 ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_contract.id')
                 ->orderBy('unit_code', 'asc');
         }else if ($ty == 2){
-            $fetch = TrInvoicePaymhdr::select('ms_tenant.id AS tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','contr_id',
+            $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.tenan_id','ms_tenant.tenan_name','ms_unit.unit_code',
                     DB::raw("SUM(invpayh_amount) AS total"),
                     DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) >= -1 AND (current_date::date - invpayh_date::date) <=".$ag30." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) > ".$ag30." AND (current_date::date - invpayh_date::date)<=".$ag60." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) >".$ag60." AND (current_date::date - invpayh_date::date)<=".$ag90." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS ag90"),
                     DB::raw("SUM((CASE WHEN (current_date::date - invpayh_date::date) > ".$ag180." THEN tr_invoice_paymhdr.invpayh_amount ELSE 0 END)) AS agl180"))
-                ->join('tr_contract','tr_contract.id',"=",'tr_invoice_paymhdr.contr_id')
-                ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
-                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->join('tr_invoice_paymdtl','tr_invoice_paymhdr.id',"=",'tr_invoice_paymdtl.invpayh_id')
+                ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice_paymhdr.tenan_id')
+                ->join('tr_invoice','tr_invoice.id','=','tr_invoice_paymdtl.inv_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_invoice.unit_id')
                 ->where('invpayh_post','=',TRUE)
-                ->groupBy('ms_tenant.id','ms_unit.unit_code','ms_tenant.tenan_name','contr_id','ms_tenant.id')
-                ->orderBy('unit_code', 'asc');
+                ->groupBy('tr_invoice_paymhdr.tenan_id','ms_tenant.tenan_name','ms_unit.unit_code')
+                ->orderBy('ms_unit.unit_code', 'asc');
         }else{
             if($tyt == 2){
                 $fetch = TrContract::select('tr_contract.id AS contr_id','ms_unit.unit_code','ms_tenant.tenan_name')
@@ -470,7 +471,7 @@ class ReportController extends Controller
                 $name3 = $ag60.'-'.$ag90.' Days';
                 $name4 = 'OVER '.$ag180.' Days';
                 $data[$i]=array(
-                    'Unit Code' =>$data_ori[$i]['unit_code'],
+                    'Unit Code' =>@$data_ori[$i]['unit_code'],
                     'Nama Tenant' =>$data_ori[$i]['tenan_name'],
                     'Total' =>number_format($data_ori[$i]['total']),
                     $name1 =>number_format($data_ori[$i]['ag30']),

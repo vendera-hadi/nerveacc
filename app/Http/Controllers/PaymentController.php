@@ -333,52 +333,56 @@ class PaymentController extends Controller
 
     private function saveToTrBank($action, $invoice, $total)
     {
-        if($action->paymtp_code == 2){
-            $header = new TrBank;
-            $header->trbank_no = "BM".date('YmdHis').$action->no_kwitansi;
-            $header->trbank_date = $action->invpayh_date;
-            $header->trbank_recipient = MsCashBank::find($action->cashbk_id)->cashbk_name;
-            $header->trbank_in = $total;
-            $header->trbank_group = 'BM';
-            if(!empty($header->trbank_girodate)) $header->trbank_girodate = $action->invpayh_date;
-            $header->trbank_girono = $action->invpayh_giro;
-            $header->cashbk_id = $action->cashbk_id;
-            $header->coa_code = MsCashBank::find($action->cashbk_id)->coa_code;
-            $header->paymtp_id = 2;
-            $header->trbank_note = $action->invpayh_note;
-            $header->created_by = \Auth::id();
-            $header->updated_by = \Auth::id();
-            $header->kurs_id = 1;
-            $header->currency_val = $action->invpayh_amount;
-            $header->trbank_post = true;
-            $header->posting_at = date('Y-m-d H:i:s');
+        try{
+            if($action->paymtp_code == 2){
+                $header = new TrBank;
+                $header->trbank_no = "BM".str_random(5).$action->no_kwitansi;
+                $header->trbank_date = $action->invpayh_date;
+                $header->trbank_recipient = MsCashBank::find($action->cashbk_id)->cashbk_name;
+                $header->trbank_in = $total;
+                $header->trbank_group = 'BM';
+                if(!empty($header->trbank_girodate)) $header->trbank_girodate = $action->invpayh_date;
+                $header->trbank_girono = $action->invpayh_giro;
+                $header->cashbk_id = $action->cashbk_id;
+                $header->coa_code = MsCashBank::find($action->cashbk_id)->coa_code;
+                $header->paymtp_id = 2;
+                $header->trbank_note = $action->invpayh_note;
+                $header->created_by = \Auth::id();
+                $header->updated_by = \Auth::id();
+                $header->kurs_id = 1;
+                $header->currency_val = $action->invpayh_amount;
+                $header->trbank_post = true;
+                $header->posting_at = date('Y-m-d H:i:s');
 
-            // payment DEBIT
-            $detail = new TrBankJv;
-            $detail->coa_code = $header->coa_code;
-            $detail->debit = $action->invpayh_amount;
-            $detail->credit = 0;
-            $detail->note = $invoice->MsTenant->tenan_name." - ".$invoice->inv_number;
-            $detail->dept_id = 3;
-            $details[] = $detail;
+                // payment DEBIT
+                $detail = new TrBankJv;
+                $detail->coa_code = $header->coa_code;
+                $detail->debit = $action->invpayh_amount;
+                $detail->credit = 0;
+                $detail->note = $invoice->MsTenant->tenan_name." - ".$invoice->inv_number;
+                $detail->dept_id = 3;
+                $details[] = $detail;
 
-            // lawanan piutang KREDIT
-            $debitLedger = TrLedger::where('ledg_refno',$invoice->inv_number)->where('ledg_credit',0)->get();
-            $paymentPercentage = $action->invpayh_amount / $invoice->inv_amount;
-            if($debitLedger){
-                 foreach($debitLedger as $dbt){
-                    $detail = new TrBankJv;
-                    $detail->coa_code = $dbt->coa_code;
-                    $detail->debit = 0;
-                    $detail->credit = $paymentPercentage * $dbt->ledg_debit;
-                    $detail->note = $dbt->ledg_description;
-                    $detail->dept_id = $dbt->dept_id;
-                    $details[] = $detail;
+                // lawanan piutang KREDIT
+                $debitLedger = TrLedger::where('ledg_refno',$invoice->inv_number)->where('ledg_credit',0)->get();
+                $paymentPercentage = $action->invpayh_amount / $invoice->inv_amount;
+                if($debitLedger){
+                     foreach($debitLedger as $dbt){
+                        $detail = new TrBankJv;
+                        $detail->coa_code = $dbt->coa_code;
+                        $detail->debit = 0;
+                        $detail->credit = $paymentPercentage * $dbt->ledg_debit;
+                        $detail->note = $dbt->ledg_description;
+                        $detail->dept_id = $dbt->dept_id;
+                        $details[] = $detail;
+                    }
                 }
-            }
 
-            $header->save();
-            $header->detail()->saveMany($details);
+                $header->save();
+                $header->detail()->saveMany($details);
+            }
+        }catch(\Exception $e){
+            // do nothing
         }
     }
 

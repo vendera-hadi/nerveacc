@@ -1,18 +1,18 @@
-<h4 style="font-size: 14px;"><?php 
-echo $title_r; 
+<h4 style="font-size: 14px;"><?php
+echo $title_r;
 if(count($unit) > 0){ echo '<br>Supplier '.$unit[0]->unit_code; } ?></h4>
-@if($tyt == 1)
-<table class="table table-bordered" width="100%"> 
+@if($ty == 1)
+<table class="table table-bordered" width="100%">
     <thead>
       <tr>
         <th style="text-align: center;">No Invoice</th>
         <th style="text-align: center;">Invoice Date</th>
         <th style="text-align: center;">Due Date</th>
-        <th style="text-align: center;">Total</th>   
+        <th style="text-align: center;">Total</th>
         <th style="text-align: center;">{{$label[0]}}</th>
-        <th style="text-align: center;">{{$label[1]}}</th> 
+        <th style="text-align: center;">{{$label[1]}}</th>
         <th style="text-align: center;">{{$label[2]}}</th>
-        <th style="text-align: center;">{{$label[3]}}</th>     
+        <th style="text-align: center;">{{$label[3]}}</th>
       </tr>
     </thead>
     <tbody>
@@ -69,16 +69,16 @@ if(count($unit) > 0){ echo '<br>Supplier '.$unit[0]->unit_code; } ?></h4>
 </table>
 @else
     @if($ty == 3)
-        <table class="table table-bordered" width="100%"> 
+        <table class="table table-bordered" width="100%">
             <thead>
               <tr>
                 <th style="text-align: center;">No Invoice</th>
                 <th style="text-align: center;">Invoice Date</th>
-                <th style="text-align: center;">Type</th>   
+                <th style="text-align: center;">Type</th>
                 <th style="text-align: center;">{{$label[0]}}</th>
-                <th style="text-align: center;">{{$label[1]}}</th> 
+                <th style="text-align: center;">{{$label[1]}}</th>
                 <th style="text-align: center;">{{$label[2]}}</th>
-                <th style="text-align: center;">{{$label[3]}}</th>     
+                <th style="text-align: center;">{{$label[3]}}</th>
               </tr>
             </thead>
             <tbody>
@@ -133,16 +133,16 @@ if(count($unit) > 0){ echo '<br>Supplier '.$unit[0]->unit_code; } ?></h4>
             </tbody>
         </table>
     @else
-        <table class="table table-bordered" width="100%"> 
+        <table class="table table-bordered" width="100%">
             <thead>
               <tr>
                 <th style="text-align: center;">No Invoice</th>
                 <th style="text-align: center;">Invoice Date</th>
-                <th style="text-align: center;">Total</th>   
+                <th style="text-align: center;">Total</th>
                 <th style="text-align: center;">{{$label[0]}}</th>
-                <th style="text-align: center;">{{$label[1]}}</th> 
+                <th style="text-align: center;">{{$label[1]}}</th>
                 <th style="text-align: center;">{{$label[2]}}</th>
-                <th style="text-align: center;">{{$label[3]}}</th>     
+                <th style="text-align: center;">{{$label[3]}}</th>
               </tr>
             </thead>
             <tbody>

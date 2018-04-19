@@ -71,7 +71,7 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract yg bukan milik owner unit. tenan yg gada di ms_owner_list dimasukkan disini
-            $fetch = TrContract::join('ms_unit_owner', function($join){
+            $fetch = TrContract::select('tr_contract.*')->join('ms_unit_owner', function($join){
                             $join->on('ms_unit_owner.unit_id', '=', 'tr_contract.unit_id');
                             $join->on('ms_unit_owner.tenan_id', '!=', 'tr_contract.tenan_id');
                         })->whereNull('ms_unit_owner.deleted_at');
@@ -174,7 +174,7 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract disini adalah contract yg dimiliki oleh si owner. join dgn unit owner using tenan_id
-            $fetch = TrContract::join('ms_unit_owner', function($join){
+            $fetch = TrContract::select('tr_contract.*')->join('ms_unit_owner', function($join){
                             $join->on('ms_unit_owner.unit_id', '=', 'tr_contract.unit_id');
                             $join->on('ms_unit_owner.tenan_id', '=', 'tr_contract.tenan_id');
                         })->whereNull('ms_unit_owner.deleted_at');
