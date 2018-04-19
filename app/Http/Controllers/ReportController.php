@@ -1532,8 +1532,8 @@ class ReportController extends Controller
                     $tempInv['details'] = [];
                     $result = TrApPaymentDetail::select('tr_ap_payment_dtl.amount','tr_ap_invoice_hdr.invoice_no',
                                 DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"))
-                            ->join('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                            ->join('tr_ap_invoice_hdr','tr_ap_payment_dtl.aphdr_id',"=",'tr_invoice_paymhdr.id')
+                            ->join('tr_ap_payment_hdr','tr_ap_payment_dtl.appaym_id',"=",'tr_ap_payment_hdr.id')
+                            ->join('tr_ap_invoice_hdr','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
                             ->where('tr_ap_invoice_hdr.spl_id',$inv->spl_id)
                             ->where('tr_ap_payment_hdr.posting',TRUE)
                         ->get();
@@ -1884,7 +1884,7 @@ class ReportController extends Controller
 
         if($pdf){
             $data['type'] = 'pdf';
-            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'portrait');
             return $pdf->download('POList_Summary.pdf');
 
         }else if($excel){
@@ -2044,7 +2044,7 @@ class ReportController extends Controller
 
         if($pdf){
             $data['type'] = 'pdf';
-            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'portrait');
             return $pdf->download('NONPOList_Summary.pdf');
 
         }else if($excel){
@@ -2134,7 +2134,7 @@ class ReportController extends Controller
 
         if($pdf){
             $data['type'] = 'pdf';
-            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'portrait');
             return $pdf->download('NONPOList_Summary.pdf');
 
         }else if($excel){
