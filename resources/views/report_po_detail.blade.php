@@ -107,8 +107,8 @@
             @foreach($inv->detail as $dtl)
             <tr>
                 <td></td>
-                <td colspan="2">({{$dtl->coa_type}}) {{$dtl->note}}</td>
-                <td colspan="2">{{number_format($dtl->amount)}}</td>
+                <td colspan="2">{{$dtl->note}}</td>
+                <td colspan="2" style="text-align: right">{{number_format($dtl->amount)}}</td>
             </tr>
             @endforeach
         @endforeach

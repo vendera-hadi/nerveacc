@@ -1531,9 +1531,10 @@ class ReportController extends Controller
                     ];
                     $tempInv['details'] = [];
                     $result = TrApPaymentDetail::select('tr_ap_payment_dtl.amount','tr_ap_invoice_hdr.invoice_no',
-                                DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"))
+                                DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"),
+                                DB::raw("to_char(tr_ap_invoice_hdr.invoice_duedate, 'DD/MM/YYYY') AS tanggaldue"))
                             ->join('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                            ->join('tr_ap_invoice_hdr','tr_ap_payment_dtl.aphdr_id',"=",'tr_invoice_paymhdr.id')
+                            ->join('tr_ap_invoice_hdr','tr_ap_invoice_hdr.id',"=",'tr_ap_payment_dtl.aphdr_id')
                             ->where('tr_ap_invoice_hdr.spl_id',$inv->spl_id)
                             ->where('tr_ap_payment_hdr.posting',TRUE)
                         ->get();
@@ -1546,7 +1547,8 @@ class ReportController extends Controller
                         $tempInv['details'][] = [
                             'inv_number' => $value->invoice_no,
                             'tanggal' => $value->tanggal,
-                            'inv_amount' => $value->amount,
+                            'tanggaldue' => $value->tanggaldue,
+                            'inv_outstanding' => $value->amount,
                             'ags30' => ($difference >= -1 && $difference <= $ag30 ? $value->amount : 0),
                             'ags60' => ($difference > $ag30 && $difference <= $ag60 ? $value->amount : 0),
                             'ags90' => ($difference > $ag60 && $difference <= $ag90 ? $value->amount : 0),
@@ -1563,7 +1565,8 @@ class ReportController extends Controller
                     ];
                     $tempInv['details'] = [];
                     $result = TrApHeader::select('tr_ap_invoice_hdr.*',
-                                DB::raw("to_char(invoice_date, 'DD/MM/YYYY') AS tanggal"))
+                                DB::raw("to_char(invoice_date, 'DD/MM/YYYY') AS tanggal"),
+                                DB::raw("to_char(invoice_duedate, 'DD/MM/YYYY') AS tanggaldue"))
                             ->where('tr_ap_invoice_hdr.spl_id',$inv->id)
                             ->where('posting',TRUE)
                         ->get();
@@ -1576,7 +1579,8 @@ class ReportController extends Controller
                         $tempInv['details'][] = [
                             'inv_number' => $value->invoice_no,
                             'tanggal' => $value->tanggal,
-                            'inv_amount' => $value->total,
+                            'tanggaldue' => $value->tanggaldue,
+                            'inv_outstanding' => $value->total,
                             'inv_tp' => 'INVOICE AP',
                             'ags30' => ($difference >= -1 && $difference <= $ag30 ? $value->total : 0),
                             'ags60' => ($difference > $ag30 && $difference <= $ag60 ? $value->total : 0),
@@ -1586,9 +1590,10 @@ class ReportController extends Controller
                     }
 
                     $result2 = TrApPaymentDetail::select('tr_ap_payment_dtl.amount','tr_ap_invoice_hdr.invoice_no',
-                                DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"))
+                                DB::raw("to_char(tr_ap_payment_hdr.payment_date, 'DD/MM/YYYY') AS tanggal"),
+                                DB::raw("to_char(tr_ap_invoice_hdr.invoice_duedate, 'DD/MM/YYYY') AS tanggaldue"))
                             ->join('tr_ap_payment_hdr','tr_ap_payment_hdr.id',"=",'tr_ap_payment_dtl.appaym_id')
-                            ->join('tr_ap_invoice_hdr','tr_ap_payment_dtl.aphdr_id',"=",'tr_ap_invoice_hdr.id')
+                            ->join('tr_ap_invoice_hdr','tr_ap_invoice_hdr.id',"=",'tr_ap_payment_dtl.aphdr_id')
                             ->where('tr_ap_invoice_hdr.spl_id',$inv->spl_id)
                             ->where('tr_ap_payment_hdr.posting',TRUE)
                         ->get();
@@ -1601,7 +1606,8 @@ class ReportController extends Controller
                         $tempInv['details'][] = [
                             'inv_number' => $value->invoice_no,
                             'tanggal' => $value->tanggal,
-                            'inv_amount' => ($value->amount * -1),
+                            'tanggaldue' => $value->tanggaldue,
+                            'inv_outstanding' => ($value->amount * -1),
                             'inv_tp' => 'PAYMENT',
                             'ags30' => ($difference >= -1 && $difference <= $ag30 ? ($value->amount * -1) : 0),
                             'ags60' => ($difference > $ag30 && $difference <= $ag60 ? ($value->amount * -1) : 0),
@@ -1884,7 +1890,7 @@ class ReportController extends Controller
 
         if($pdf){
             $data['type'] = 'pdf';
-            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'portrait');
             return $pdf->download('POList_Summary.pdf');
 
         }else if($excel){
@@ -2044,7 +2050,7 @@ class ReportController extends Controller
 
         if($pdf){
             $data['type'] = 'pdf';
-            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'portrait');
             return $pdf->download('NONPOList_Summary.pdf');
 
         }else if($excel){
@@ -2134,7 +2140,7 @@ class ReportController extends Controller
 
         if($pdf){
             $data['type'] = 'pdf';
-            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'potrait');
+            $pdf = PDF::loadView('layouts.report_template2', $data)->setPaper('a4', 'portrait');
             return $pdf->download('NONPOList_Summary.pdf');
 
         }else if($excel){
