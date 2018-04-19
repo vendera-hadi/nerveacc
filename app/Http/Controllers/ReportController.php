@@ -264,18 +264,17 @@ class ReportController extends Controller
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $data['label'] = explode('~', '1 - '.$ag30.'~'.$ag30.' - '.$ag60.'~'.$ag60.' - '.$ag90.'~'.'OVER '.$ag180);
         if($ty == 1){
-            $fetch = TrInvoice::select('tr_invoice.tenan_id','tr_contract.id as contr_id','ms_unit.unit_code','ms_tenant.tenan_name',
+            $fetch = TrInvoice::select('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name',
                     DB::raw("SUM(inv_outstanding) AS total"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >= -1 AND (current_date::date - inv_date::date) <=".$ag30." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag30"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag30." AND (current_date::date - inv_date::date)<=".$ag60." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag60"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >".$ag60." AND (current_date::date - inv_date::date)<=".$ag90." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag180." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
-                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
-                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_invoice.unit_id')
                 ->where('tr_invoice.inv_post','=',TRUE)
                 ->where('tr_invoice.inv_outstanding','>',0)
-                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_contract.id')
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name')
                 ->orderBy('unit_code', 'asc');
         }else if ($ty == 2){
             $fetch = TrInvoicePaymhdr::select('tr_invoice_paymhdr.tenan_id','ms_tenant.tenan_name','ms_unit.unit_code',
@@ -308,11 +307,10 @@ class ReportController extends Controller
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) >".$ag60." AND (current_date::date - inv_date::date)<=".$ag90." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS ag90"),
                     DB::raw("SUM((CASE WHEN (current_date::date - inv_date::date) > ".$ag180." THEN tr_invoice.inv_outstanding ELSE 0 END)) AS agl180"))
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
-                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
-                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->join('ms_unit','ms_unit.id',"=",'tr_invoice.unit_id')
                 ->where('tr_invoice.inv_post','=',TRUE)
                 ->where('tr_invoice.inv_outstanding','>',0)
-                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name','tr_contract.id')
+                ->groupBy('tr_invoice.tenan_id','ms_unit.unit_code','ms_tenant.tenan_name')
                 ->orderBy('unit_code', 'asc');
             }
         }
