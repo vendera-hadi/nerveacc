@@ -13,8 +13,10 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        Commands\QueuingSP::class,
-        Commands\ExecuteMailSP::class
+        // Commands\QueuingSP::class,
+        // Commands\ExecuteMailSP::class
+        Commands\SendSP1::class,
+        Commands\SendSP2::class
     ];
 
     /**

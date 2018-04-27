@@ -145,7 +145,7 @@ class InvoiceController extends Controller
                 if(!$value->inv_iscancel){
                     $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Receipt</a>';
 
-                    /*if(!empty((int)number_format($value->inv_outstanding))) $temp['action_button'] .= ' | <a href="'.url('invoice/sendreminder?id='.$value->tenan_id).'" class="print-window" data-width="640" data-height="660">Send Reminder</a>';*/
+                    // if(!empty((int)number_format($value->inv_outstanding))) $temp['action_button'] .= ' | <a href="'.url('invoice/sendreminder?id='.$value->tenan_id).'" class="print-window" data-width="640" data-height="660">Send Reminder</a>';
                 }
 
                 $temp['inv_iscancel'] = $value->inv_iscancel;
@@ -708,9 +708,7 @@ class InvoiceController extends Controller
         $company = MsCompany::with('MsCashbank')->first()->toArray();
         // $signature = @MsConfig::where('name','digital_signature')->first()->value;
         $paymentHeader = TrInvoicePaymhdr::find($request->id);
-        $contract = TrContract::select('ms_tenant.tenan_name','ms_unit.unit_code')->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
-                            ->join('ms_tenant','tr_contract.tenan_id','=','ms_tenant.id')
-                            ->where('tr_contract.id',$paymentHeader->contr_id)->first();
+        $contract = TrContract::where('tr_contract.tenan_id',$paymentHeader->tenan_id)->first();
         $paymentDetails = TrInvoicePaymdtl::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount')
                                 ->join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
                                 ->where('tr_invoice_paymdtl.invpayh_id',$request->id)->get();
@@ -749,8 +747,8 @@ class InvoiceController extends Controller
                 'header' => $paymentHeader,
                 'details' => $paymentDetails,
                 'terbilang' => $terbilang,
-                'tenan' => @$contract->tenan_name,
-                'unit' => @$contract->unit_code
+                'tenan' => @$contract->MsTenant->tenan_name,
+                'unit' => @$contract->MsUnit->unit_code
             );
 
         return view('print_payment', $set_data);
@@ -1227,31 +1225,19 @@ class InvoiceController extends Controller
 
     public function test()
     {
-        $currentMonth = date('m');
-        $currentYear = date('Y');
-        // list tenant yg masi ngutang
-        $list = TrInvoice::select('tenan_id','tenan_name','contr_id',\DB::raw('COUNT(tr_invoice.id) as totalinv'))
-                ->join('ms_tenant','ms_tenant.id','=','tr_invoice.tenan_id')
-                ->where('inv_outstanding', '>', 0)
-                ->where('inv_duedate', '<=', DB::raw('NOW()'))
-                ->groupBy('tenan_id','tenan_name','contr_id')
-                ->orderBy('tenan_name')->get();
-        if($list->count() > 0){
-            // check periode by bulan dan tahun ini
-            $logs = Autoreminder::whereIn('tenan_id',$list->pluck('tenan_id'))->where('month',$currentMonth)->where('year',$currentYear)->get();
-            $willbeinserted = collect($list->pluck('tenan_id'))->diff($logs->pluck('tenan_id'));
-            // yg blum ada di list difilter, nanti by tenant di loop insert
-            $insert_list = $list->whereIn('tenan_id',$willbeinserted);
-            foreach ($insert_list as $tenant) {
-                // insert to autoreminder
-                $log = new Autoreminder;
-                $log->tenan_id = $tenant->tenan_id;
-                $log->contract_id = $tenant->contr_id;
-                $log->month = $currentMonth;
-                $log->year = $currentYear;
-                $log->save();
-            }
+        $list = TrInvoice::where('inv_outstanding','>',0)->where('inv_post',1)->where('inv_iscancel',0)->whereRaw("NOW()::date =  (inv_duedate + interval '7 day')::date")->get();
+        foreach ($list as $invoice) {
+            // masukin invoice dalam antrean
+            // try{
+                \Mail::to(@$invoice->MsTenant->tenan_email)
+                        // ->cc($moreUsers)
+                        ->send(new \App\Mail\SuratPeringatan('sp1', $invoice));
+                $this->info("Sending Email to ".@$invoice->MsTenant->tenan_email);
+            // }catch(\Exception $e){
+            //     // do nothing or inform to admin sending sp gagal
+            // }
         }
+
 
         // $inv = TrInvoice::findOrFail(12342);
         // \Mail::to($inv->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($inv));
