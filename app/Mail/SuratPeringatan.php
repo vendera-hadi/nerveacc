@@ -52,6 +52,10 @@ class SuratPeringatan extends Mailable implements ShouldQueue
                 $data['emailtpl'] = MsEmailTemplate::where('name','SP2')->first();
                 $view = 'emails.sp2';
                 break;
+            case 'sp3':
+                $data['emailtpl'] = MsEmailTemplate::where('name','SP3')->first();
+                $view = 'emails.sp3';
+                break;
 
             default:
                 $data['emailtpl'] = MsEmailTemplate::where('name','SP1')->first();

@@ -1153,7 +1153,7 @@ class InvoiceController extends Controller
                 ->orderBy('tenan_name')
                 ->paginate(20);
         foreach ($list as $key => $val) {
-            $temp = TrInvoice::select('inv_number','inv_outstanding')->where('tenan_id',$val->tenan_id)->where('inv_outstanding', '>', 0)->where('inv_duedate', '<=', $now)->where('inv_iscancel',0);
+            $temp = TrInvoice::select('inv_number','inv_outstanding', 'inv_duedate')->where('tenan_id',$val->tenan_id)->where('inv_outstanding', '>', 0)->where('inv_duedate', '<=', $now)->where('inv_iscancel',0);
             if(!empty($request->start) && !empty($request->end))
                 $temp = $temp->where('inv_date','>=',$request->start." 00:00:00")->where('inv_date','<=',$request->end.' 23:59:59');
             $list[$key]->invoices = $temp->get();
@@ -1162,6 +1162,7 @@ class InvoiceController extends Controller
 
         $data['sp1'] = MsEmailTemplate::where('name','SP1')->first();
         $data['sp2'] = MsEmailTemplate::where('name','SP2')->first();
+        $data['sp3'] = MsEmailTemplate::where('name','SP3')->first();
 
         return view('reminder_list',$data);
     }
@@ -1177,6 +1178,11 @@ class InvoiceController extends Controller
         $sp2->title = $request->sp2_title;
         $sp2->content = $request->sp2_content;
         $sp2->save();
+
+        $sp3 = MsEmailTemplate::where('name','SP3')->first();
+        $sp3->title = $request->sp3_title;
+        $sp3->content = $request->sp3_content;
+        $sp3->save();
 
         $request->session()->flash('success', 'Update email template success');
         return redirect()->back();
@@ -1221,6 +1227,34 @@ class InvoiceController extends Controller
         // trigger mail
         \Mail::to($invoice_data[0]->MsTenant->tenan_email)->send(new \App\Mail\CustomReminderMail($set_data));
         return view('print_reminder2', $set_data);
+    }
+
+    public function sendSP(Request $request)
+    {
+        $tenan_id = @$request->id;
+        $sp = @$request->sp;
+        $invoice = TrInvoice::where('inv_outstanding','>',0)->where('inv_post',1)->where('inv_iscancel',0)->where('tenan_id',$tenan_id)->orderBy('inv_date','desc')->first();
+        if($invoice){
+            try{
+                $email = @MsCompany::first()->email;
+                \Mail::to(@$invoice->MsTenant->tenan_email)
+                        ->cc([$email])
+                        ->send(new \App\Mail\SuratPeringatan('sp'.$sp, $invoice));
+                return response()->json(['success' => 1]);
+            }catch(\Exception $e){
+                return response()->json(['success' => 0]);
+            }
+        }
+    }
+
+    public function printSP3(Request $request)
+    {
+        $tenan_id = @$request->id;
+        $data['invoice'] = TrInvoice::where('inv_outstanding','>',0)->where('inv_post',1)->where('inv_iscancel',0)->where('tenan_id',$tenan_id)->orderBy('inv_date','desc')->first();
+        $data['company'] = MsCompany::with('MsCashbank')->first();
+        $data['emailtpl'] = MsEmailTemplate::where('name','SP3')->first();
+        $data['print'] = 1;
+        return view('emails.sp3', $data);
     }
 
     public function test()

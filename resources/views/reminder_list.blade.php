@@ -112,16 +112,38 @@
                                         <td>{{$inv->tenan_name}}</td>
                                         <td>
                                             {{$inv->totalinv}} invoice(s)<br>
+                                            <?php
+                                                $now = new \DateTime();
+                                                $countsp1 = $countsp2 = $countsp3 = 0;
+                                            ?>
                                             @if(!empty($inv->invoices))
                                             @foreach($inv->invoices as $invoice)
+                                                <?php
+                                                $duedate = new \DateTime($invoice->inv_duedate);
+                                                $interval = $now->diff($duedate);
+                                                $days = $interval->format('%a');
+                                                if($days >= 7) $countsp1++;
+                                                if($days >= 14) $countsp2++;
+                                                if($days > 14) $countsp3++;
+                                                ?>
+
                                                 {{$invoice->inv_number}} : IDR {{number_format($invoice->inv_outstanding,0)}} <br>
                                             @endforeach
                                             @endif
                                         </td>
                                         <td>
                                             @if(Session::get('role')==1 || in_array(79,Session::get('permissions')))
-                                            <button type="button" class="sendReminderCustom" data-id="{{$inv->tenan_id}}"><i class="fa fa-envelope"></i> Message Khusus
+                                            <button type="button" class="btn btn-default sendReminderCustom" data-id="{{$inv->tenan_id}}"><i class="fa fa-envelope"></i> Message Khusus
                                             </button>
+                                                <!-- <button type="button" class="btn btn-default sendSP1" data-id="{{$inv->tenan_id}}" onclick="sendSP(1,{{$inv->tenan_id}})"><i class="fa fa-exclamation-triangle" style="color:red"></i> Kirim SP1
+                                                </button>
+                                                <button type="button" class="btn btn-default sendSP2" data-id="{{$inv->tenan_id}}" onclick="sendSP(2,{{$inv->tenan_id}})"><i class="fa fa-exclamation-triangle" style="color:red"></i> Kirim SP2
+                                                </button> -->
+                                                @if(!empty($countsp3))
+                                                <button type="button" class="btn btn-default sendSP3" data-id="{{$inv->tenan_id}}" onclick="sendSP(3,{{$inv->tenan_id}})"><i class="fa fa-exclamation-triangle" style="color:red"></i> Kirim SP3
+                                                </button>
+                                                <a href="{{route('invoice.printsp3',['id' => $inv->tenan_id])}}"  class="btn btn-default printSP3" data-id="{{$inv->tenan_id}}" target="_blank"><i class="fa fa-print"></i> Print SP3</a>
+                                                @endif
                                             @endif
                                         </td>
                                     </tr>
@@ -158,6 +180,16 @@
                         <div class="form-group">
                           <label>SP2 Content</label>
                           <textarea class="textarea" name="sp2_content" class='form-control' style="width: 100%;" required>{{$sp2->content}}</textarea>
+                        </div>
+
+                        <div class="form-group">
+                          <label>SP3 title</label>
+                          <input type="text" name="sp3_title" class="form-control" value="{{$sp3->title}}">
+                        </div>
+
+                        <div class="form-group">
+                          <label>SP3 Content</label>
+                          <textarea class="textarea" name="sp3_content" class='form-control' style="width: 100%;" required>{{$sp3->content}}</textarea>
                         </div>
 
                         <button type="submit" class="btn btn-flat btn-primary">Submit</button>
@@ -245,5 +277,19 @@ $("#customReminderForm").submit(function(e){
         w.document.close();
     });
 });
+
+function sendSP(i, tenanid){
+    var confirmation = confirm("Are you sure want to send SP "+i);
+    if(confirmation){
+        $.post("{{route('invoice.sendsp')}}", {id:tenanid, sp:i}, function(data){
+            console.log(data);
+            if(data.success == 1){
+                alert('Email terkirim');
+            }else{
+                alert('Error occured when sending email');
+            }
+        });
+    }
+}
 </script>
 @endsection

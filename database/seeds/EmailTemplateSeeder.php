@@ -11,15 +11,21 @@ class EmailTemplateSeeder extends Seeder {
         DB::table('ms_email_templates')->insert([
           [
             'name' => 'SP1',
-            'view' => 'print_reminder2',
+            'view' => 'emails.sp1',
             'title' => 'Surat SP1',
             'content' => 'template isi SP1'
           ],
           [
             'name' => 'SP2',
-            'view' => 'print_reminder2',
+            'view' => 'emails.sp2',
             'title' => 'Surat SP2',
             'content' => 'template isi SP2'
+          ],
+          [
+            'name' => 'SP3',
+            'view' => 'emails.sp3',
+            'title' => 'Surat SP3',
+            'content' => 'template isi SP3'
           ]
         ]);
     }
