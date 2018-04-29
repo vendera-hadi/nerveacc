@@ -323,6 +323,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('invoice/customreminder','InvoiceController@reminderPrintout2')->name('invoice.reminder.custom');
 	Route::get('invoice/reminder','InvoiceController@reminder')->name('invoice.reminder');
 	Route::post('invoice/reminder','InvoiceController@updateReminder')->name('invoice.reminder.updatetemplate');
+	Route::post('invoice/sendsp','InvoiceController@sendSP')->name('invoice.sendsp');
+	Route::get('invoice/printsp3','InvoiceController@printSP3')->name('invoice.printsp3');
+
+	Route::get('invoice/test','InvoiceController@test');
 
 	Route::get('generateinvoice','InvoiceController@generateInvoice');
 	Route::post('progressgenerate','InvoiceController@progressGenerate');
