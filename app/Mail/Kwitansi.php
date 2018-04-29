@@ -7,6 +7,9 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
+use App\Models\TrInvoice;
+use App\Models\TrInvoiceDetail;
+use App\Models\TrContractInvoice;
 use App\Models\TrInvoicePaymhdr;
 use App\Models\TrInvoicePaymdtl;
 use App\Models\MsCompany;
@@ -74,7 +77,7 @@ class Kwitansi extends Mailable implements ShouldQueue
 
         $view = 'print_payment';
         $pdf = PDF::loadView($view, $set_data)->setPaper('a4')->output();
-        return $this->view($view, $set_data)->subject("Kwitansi Invoice - ".$company->comp_name)->attachData($pdf, "Kwitansi Invoice - ".$company->comp_name.'.pdf', [
+        return $this->view($view, $set_data)->subject("Kwitansi Invoice")->attachData($pdf, "Kwitansi Invoice.pdf", [
                         'mime' => 'application/pdf',
                     ]);
     }
