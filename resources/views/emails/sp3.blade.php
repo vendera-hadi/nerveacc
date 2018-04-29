@@ -74,7 +74,7 @@ table tr td{font-size:9pt;}
                                 <td><strong>Yth. Bapak/Ibu Pemilik/Penghuni </strong></td>
                             </tr>
                             <tr>
-                                <td><strong>{{$invoice->MsTenant->tenan_name}} (Unit {{$invoice->unit->unit_name}})</strong></td>
+                                <td><strong>{{$invoice->MsTenant->tenan_name}} @if(!empty(@$invoice->unit)) (Unit {{$invoice->unit->unit_name}}) @endif</strong></td>
                             </tr>
                             <tr>
                                 <td><strong>Apartemen {{@$company->title}}</strong></td>

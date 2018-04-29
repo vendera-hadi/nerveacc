@@ -705,6 +705,7 @@ class InvoiceController extends Controller
     }
 
     public function print_kwitansi(Request $request){
+        $sendKwitansi = @$request->send;
         $company = MsCompany::with('MsCashbank')->first()->toArray();
         // $signature = @MsConfig::where('name','digital_signature')->first()->value;
         $paymentHeader = TrInvoicePaymhdr::find($request->id);
@@ -751,6 +752,10 @@ class InvoiceController extends Controller
                 'unit' => @$contract->MsUnit->unit_code
             );
 
+        if(!empty($sendKwitansi)){
+            \Mail::to($paymentHeader->tenant->tenan_email)->send(new \App\Mail\Kwitansi($paymentHeader));
+            return 'Success! Email sent to '.$paymentHeader->tenant->tenan_email;
+        }
         return view('print_payment', $set_data);
     }
 

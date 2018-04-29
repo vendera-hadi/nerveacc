@@ -151,6 +151,7 @@ class PaymentController extends Controller
                     }
                 }
                 $action_button .= ' | <a href="'.url('invoice/print_kwitansi?id='.$value->id).'" class="print-window" data-width="640" data-height="660"><i class="fa fa-file"></i></a>';
+                $action_button .= ' | <a href="'.url('invoice/print_kwitansi?id='.$value->id.'&send=1').'" class="print-window" data-width="640" data-height="300"><i class="fa fa-paper-plane"></i></a>';
 
                 $temp['action_button'] = $action_button;
 
