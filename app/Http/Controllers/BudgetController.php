@@ -7,7 +7,7 @@ use App\Http\Requests;
 use Auth;
 use Input;
 // load model
-use App\Models\trBudgetHdr;
+use App\Models\TrBudgetHdr;
 use App\Models\User;
 use App\Models\TrBudgetDtl;
 use App\Models\MsMasterCoa;
@@ -35,8 +35,8 @@ class BudgetController extends Controller
             if(!empty($filters)) $filters = json_decode($filters);
 
             // olah data
-            $count = trBudgetHdr::count();
-            $fetch = trBudgetHdr::query();
+            $count = TrBudgetHdr::count();
+            $fetch = TrBudgetHdr::query();
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -88,11 +88,11 @@ class BudgetController extends Controller
             $input['tahun'] = $request->tahun;
             $input['created_by'] = Auth::id();
             $input['updated_by'] = Auth::id();
-            $budgetExist = trBudgetHdr::where('tahun', $request->tahun)->first();
+            $budgetExist = TrBudgetHdr::where('tahun', $request->tahun)->first();
             if($budgetExist){
                 return response()->json(['errorMsg' => 'Budget Sudah Pernah dibuat']);
             }else{
-                $newBudget =  trBudgetHdr::create($input);
+                $newBudget =  TrBudgetHdr::create($input);
                 $coa = MsMasterCoa::where('coa_year',date('Y'))
                             ->where('coa_code', 'like', '4%%')
                             ->orwhere('coa_code', 'like', '5%%')
@@ -119,7 +119,7 @@ class BudgetController extends Controller
             $input = $request->all();
             $input['tahun'] = $request->tahun;
             $input['updated_by'] = Auth::id();
-            trBudgetHdr::find($id)->update($input);
+            TrBudgetHdr::find($id)->update($input);
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
@@ -129,7 +129,7 @@ class BudgetController extends Controller
     public function delete(Request $request){
         try{
             $id = $request->id;
-            trBudgetHdr::destroy($id);
+            TrBudgetHdr::destroy($id);
             TrBudgetDtl::where('budget_id', $id)->delete();
             return response()->json(['success'=>true]);
         }catch(\Exception $e){
@@ -140,7 +140,7 @@ class BudgetController extends Controller
     public function editModal(Request $request){
         try{
             $id = $request->id;
-            $currentBudget = trBudgetHdr::find($id);
+            $currentBudget = TrBudgetHdr::find($id);
             $budget = TrBudgetDtl::select('tr_budget_dtl.*','ms_master_coa.coa_name')
                     ->leftJoin('ms_master_coa','ms_master_coa.coa_code',"=",'tr_budget_dtl.coa_code')
                     ->where('budget_id',$id)
