@@ -106,7 +106,7 @@ table tr td{font-size:9pt;}
             <table style="margin-top: 70px">
                 <tr>
                     <td>
-                        <p>Dengan Hormat<br>Bersama ini kami mengingatkan kembali kerjasamanya, bahwa tagihan listrik/air, service charges/sinking fund dan asuransi Bapak/Ibu sampai dengan bulan <b>{{date('F Y', strtotime($invoice_data[0]->inv_date))}}</b> sudah jatuh tempo per tanggal <b>{{date('d F Y', strtotime($invoice_data[0]->inv_duedate))}}</b>. Bagi Bapak/Ibu yang belum melakukan pembayaran tagihan sampai bulan Oktober, kami berikan tenggang waktu sampai dengan tanggal <b>{{date('d F Y', strtotime($invoice_data[0]->inv_duedate))}}.</b> Apabila sampai dengan tanggal tersebut belum melunasi tagihan tersebut, maka dengan sangat terpaksa pihak Building Management akan melakukan penonaktifan kartu akses dan pemutusan aliran listrik/air ke unit Bapak/Ibu per tanggal <b>{{date('d F Y', strtotime('+1 day',strtotime($invoice_data[0]->inv_duedate)))}}</b><br><br>
+                        <p>Dengan Hormat<br>Bersama ini kami mengingatkan kembali kerjasamanya, bahwa tagihan listrik/air, service charges/sinking fund dan asuransi Bapak/Ibu sampai dengan bulan <b>{{date('F Y', strtotime($invoice_data[0]->inv_date))}}</b> sudah jatuh tempo per tanggal <b>{{date('d F Y', strtotime($invoice_data[0]->inv_duedate))}}</b>. Bagi Bapak/Ibu yang belum melakukan pembayaran tagihan sampai bulan {{date('F', strtotime($invoice_data[0]->inv_duedate))}}, kami berikan tenggang waktu sampai dengan tanggal <b>{{date('d F Y', strtotime($invoice_data[0]->inv_duedate))}}.</b> Apabila sampai dengan tanggal tersebut belum melunasi tagihan tersebut, maka dengan sangat terpaksa pihak Building Management akan melakukan penonaktifan kartu akses dan pemutusan aliran listrik/air ke unit Bapak/Ibu per tanggal <b>{{date('d F Y', strtotime('+1 day',strtotime($invoice_data[0]->inv_duedate)))}}</b><br><br>
                             Invoice yang harus dibayarkan:<br>
                             <ol>
                                 @foreach($invoice_data as $val)
@@ -146,7 +146,7 @@ table tr td{font-size:9pt;}
                     </td>
                     <td width="40%">
                         <table width="100%">
-                            <tr>
+                            <tr>{{date('d F Y', strtotime($invoice_data[0]->inv_duedate))}}
                                 <td><b>REMINDER</b></td>
                             </tr>
                         </table>

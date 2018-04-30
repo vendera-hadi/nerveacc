@@ -44,7 +44,7 @@
                         <div class="col-sm-6" style="padding-left: 0px;">
                             <div class="form-group">
                                 <select name="monthfrom" class="form-control" required>
-                                    <option value="">Start Month</option> 
+                                    <option value="">Start Month</option>
                                     @for($i=1; $i<=12; $i++)
                                     <option value="{{$i}}" @if(Request::input('monthfrom') == $i){{'selected="selected"'}}@endif>{{date('M',strtotime(date('Y').'-'.$i.'-01'))}}</option>
                                     @endfor
@@ -54,7 +54,7 @@
                         <div class="col-sm-6" style="padding-right: 0px;">
                             <div class="form-group">
                                 <select name="yearfrom" class="form-control" required>
-                                    <option value="">Start Month</option> 
+                                    <option value="">Start Year</option>
                                     @for($i=2016; $i<=date('Y'); $i++)
                                     <option value="{{$i}}" @if(Request::input('yearfrom') == $i){{'selected="selected"'}}@endif>{{$i}}</option>
                                     @endfor
@@ -66,7 +66,7 @@
                         <div class="col-sm-6" style="padding-left: 0px;">
                             <div class="form-group">
                                 <select name="monthto" class="form-control" required>
-                                    <option value="">End Month</option> 
+                                    <option value="">End Month</option>
                                     @for($i=1; $i<=12; $i++)
                                     <option value="{{$i}}" @if(Request::input('monthto') == $i){{'selected="selected"'}}@endif>{{date('M',strtotime(date('Y').'-'.$i.'-01'))}}</option>
                                     @endfor
@@ -76,7 +76,7 @@
                         <div class="col-sm-6" style="padding-right: 0px;">
                             <div class="form-group">
                                 <select name="yearto" class="form-control" required>
-                                    <option value="">Start Month</option> 
+                                    <option value="">End Year</option>
                                     @for($i=2016; $i<=date('Y'); $i++)
                                     <option value="{{$i}}" @if(Request::input('yearfrom') == $i){{'selected="selected"'}}@endif>{{$i}}</option>
                                     @endfor
@@ -84,7 +84,7 @@
                             </div>
                         </div>
                     </div>
-                </div>   
+                </div>
             </div>
           <!-- /.box-body -->
 
@@ -119,7 +119,7 @@
       </div>
       <!-- /.box -->
     </div>
-</div>  	
+</div>
 @endsection
 
 @section('footer-scripts')
@@ -176,7 +176,7 @@
         var title = 'PRINT REPORT';
         var w = 640;
         var h = 660;
-        
+
         openWindow(url, title, w, h);
         return false;
     });

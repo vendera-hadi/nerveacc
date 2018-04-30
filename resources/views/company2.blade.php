@@ -71,6 +71,11 @@
 		            </div>
 
 		            <div class="form-group">
+		              <label>Company Email</label>
+		              <input type="email" value="{{$company->email}}" name="email" class="form-control" id="compEmail" placeholder="Company Email" required>
+		            </div>
+
+		            <div class="form-group">
 		              <label>Company Phone</label>
 		              <input type="text" value="{{$company->comp_phone}}" name="comp_phone" class="form-control" id="compPhone" placeholder="Company Phone" required>
 		            </div>

@@ -233,6 +233,7 @@
             cache: true
           },
           escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+          // minimumInputLength: 1
     });
 
     $('#type').on('change', function() {
