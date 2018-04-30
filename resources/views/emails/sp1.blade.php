@@ -114,7 +114,7 @@ telah diperhitungkan sebelum tanggal <b>{{date('d M Y', strtotime('+14 day',strt
                                         @endforeach
                                     </ol>
                                     <br><br>
-                                    <b>No. Virtual Account Invoice Utilities: {{$val->unit->va_utilities}}</b>
+                                    <b>No. Virtual Account Invoice Utilities: {{@$val->unit->va_utilities}}</b>
                                 </td>
                                 @endif
                                 @if(count($maintenance_invoices) > 0)
@@ -126,7 +126,7 @@ telah diperhitungkan sebelum tanggal <b>{{date('d M Y', strtotime('+14 day',strt
                                         @endforeach
                                     </ol>
                                     <br><br>
-                                    <b>No. Virtual Account Invoice Maintenance: {{$val->unit->va_maintenance}}</b>
+                                    <b>No. Virtual Account Invoice Maintenance: {{@$val->unit->va_maintenance}}</b>
                                 </td>
                                 @endif
                             </tr>
