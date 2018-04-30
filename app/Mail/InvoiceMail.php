@@ -13,7 +13,7 @@ use App\Models\MsCompany;
 use App\Models\MsConfig;
 use PDF;
 
-class InvoiceMail extends Mailable
+class InvoiceMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
