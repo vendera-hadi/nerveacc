@@ -527,6 +527,18 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/phistory','ReportController@phistory')->name('report.phistory');
 	Route::get('supplier/downloadSupplierExcel', 'SupplierController@downloadSupplierExcel');
 
+	Route::get('budget','BudgetController@index');
+	Route::post('budget/get','BudgetController@get')->name('budget.get');
+	Route::post('budget/insert','BudgetController@insert')->name('budget.insert');
+	Route::post('budget/update','BudgetController@update')->name('budget.update');
+	Route::post('budget/delete','BudgetController@delete')->name('budget.delete');
+	Route::post('budget/editModal','BudgetController@editModal')->name('budget.detail');
+	Route::post('budget/cdtupdate', 'BudgetController@budgetdetailUpdate')->name('budget.cdtupdate');
+	Route::get('budget/downloadExcel/{prd}','BudgetController@downloadExcel');
+	Route::post('budget/importExcel','BudgetController@importExcel')->name('budget.importExcel');
+	Route::get('report/budget-report','ReportController@budgetreport')->name('report.budgetreport');
+	Route::get('report/budgettpl','ReportController@budgettpl')->name('report.budgettpl');
+
 });
 
 Route::get('membership', 'Auth\AuthController@membership');

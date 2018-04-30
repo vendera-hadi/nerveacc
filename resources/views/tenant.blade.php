@@ -322,6 +322,8 @@
                     if(data.tenan_isppn) $('input[name=tenan_isppn]').prop('checked', true);
                     if(data.tenan_ispkp) $('input[name=tenan_ispkp]').prop('checked', true);
                     $('#tentype').val(data.tent_id);
+                    $('input[name=unit_id]').val(data.unit_id);
+
                     // if(data.unit_id){
                     //     $('#unitView').val(data.unit_code+" "+data.unit_name);
                     //     $('input[name=unit_id]').val(data.unit_id);

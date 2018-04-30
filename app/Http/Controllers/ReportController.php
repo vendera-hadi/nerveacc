@@ -28,6 +28,9 @@ use App\Models\TrApPaymentHeader;
 use App\Models\TrApPaymentDetail;
 use App\Models\TrPOHeader;
 use App\Models\ViewInv;
+use App\Models\TrBudgetHdr;
+use App\Models\TrBudgetDtl;
+use App\Models\TrBudgetDetail;
 use PDF;
 use DB;
 use Excel;
@@ -2159,6 +2162,49 @@ class ReportController extends Controller
         }else{
             return view('layouts.report_template2', $data);
         }
+    }
+
+    public function budgetreport(){
+        $data['page'] = 'Budget';
+        $data['formats'] = MsHeaderFormat::where('type',1)->where('name','Budget')->get();
+        $data['tahun'] = TrBudgetHdr::all();
+        return view('report_budget',$data);
+    }
+
+    public function budgettpl(Request $request)
+    {
+        $id = $request->format;
+        $tahun = $request->tahun;
+        $print = @$request->print;
+        $company = MsCompany::first();
+        $detail = TrBudgetDetail::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
+        $data = [
+                'company' => $company,
+                'detail' => $detail,
+                'tahun' => $tahun,
+                'variables' => [],
+                'v_jan' => [],
+                'v_feb' => [],
+                'v_mar' => [],
+                'v_apr' => [],
+                'v_may' => [],
+                'v_jun' => [],
+                'v_jul' => [],
+                'v_aug' => [],
+                'v_sep' => [],
+                'v_okt' => [],
+                'v_nov' => [],
+                'v_des' => []
+            ];
+        if($print == 1){ $data['jenis'] = 'print'; }else{ $data['jenis'] = 'none'; }
+        $pdf = @$request->pdf;
+        if(!empty($pdf)){
+            $data['jenis'] = 'pdf';
+            $pdf = PDF::loadView('budget_view', $data)->setPaper('a4');
+            return $pdf->download('BUDGET.pdf');
+        }
+
+        return view('budget_view', $data);
     }
 
     public function terbilang ($angka) {
