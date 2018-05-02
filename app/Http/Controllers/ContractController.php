@@ -1265,6 +1265,8 @@ class ContractController extends Controller
         }
 
         if(!empty($cutoffStatus)){
+            // hapus semua contract invoice owner dlu
+            TrContractInvoice::where('contr_id',$contractOwner->id)->delete();
             // add semua contract invoice dr tenant ke owner
             foreach ($tempCtrInv as $ctrinv) {
                 $ctrinv->contr_id = $contractOwner->id;

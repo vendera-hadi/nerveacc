@@ -97,7 +97,7 @@ table tr td{font-size:9pt;}
             </table>
             <table style="margin-top: 70px">
                 <tr>
-                    <td>
+                    <td style="text-align: justify;">
                        <p>Dengan Hormat,<br><br>Bersama ini kami mengingatkan kembali kerjasamanya, bahwa tagihan listrik/air, service charges/sinking fund dan asuransi Bapak/Ibu sampai dengan bulan <b>{{date('M Y', strtotime($invoice->inv_date))}}</b> sudah jatuh tempo per tanggal <b>{{date('d M Y', strtotime($invoice->inv_duedate))}}</b>. Bagi Bapak/Ibu yang belum melakukan pembayaran tagihan sampai bulan {{convertbulan(date('m', strtotime($invoice->inv_duedate)))}}, kami berikan tenggang waktu sampai dengan tanggal <b>{{date('d M Y', strtotime($invoice->inv_duedate))}}.</b> Guna menghindari denda
 keterlambatan yang semakin besar, maka kami sarankan kepada Bapak/Ibu untuk dapat segera
 menyelesaikan kewajiban atas tagihan yang telah jatuh tempo maupun denda keterlambatan yang
