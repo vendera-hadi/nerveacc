@@ -1243,7 +1243,7 @@ class InvoiceController extends Controller
             try{
                 $email = @MsCompany::first()->email;
                 \Mail::to(@$invoice->MsTenant->tenan_email)
-                        ->cc([$email])
+                        // ->cc([$email])
                         ->send(new \App\Mail\SuratPeringatan('sp'.$sp, $invoice));
                 return response()->json(['success' => 1]);
             }catch(\Exception $e){

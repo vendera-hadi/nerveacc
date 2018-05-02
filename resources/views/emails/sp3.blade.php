@@ -97,7 +97,7 @@ table tr td{font-size:9pt;}
             </table>
             <table style="margin-top: 70px">
                 <tr>
-                    <td>
+                    <td style="text-align: justify;">
                         <!-- custom message -->
                         {!!$emailtpl->content!!}
                         <br><br>
