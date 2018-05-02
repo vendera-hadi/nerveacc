@@ -160,7 +160,7 @@
 
             <?php
               $arUrls = [route('invoice.generate'), route('invoice.index'), route('aging.index'), route('report.arview'), route('payment.index'),url('period_meter'), route('invoice.reminder')];
-              $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view'),route('report.neraca'),route('report.profitloss'),route('report.budgetreport')];
+              $glUrls = [route('journal.index'), route('genledger.index'),route('trentry.index'),route('clentry.index'),route('report.glview'),route('report.ytd'),route('report.ledger_view'),route('report.tb_view'),route('report.neraca'),route('report.profitloss'),route('report.budgetreport'),route('report.cashflow'),route('report.realisasi')];
               $glSetupUrls = [route('coa.index'),url('department'),url('layouts'),url('department'),url('groupaccount'),url('kurs'),url('budget')];
               $bbUrls = [route('cash_bank.index'),route('bankbook.index'),route('bankbook.transfer'),route('bankbook.deposit'),route('bankbook.withdraw'),route('reconcile.index')];
               $tenancyUrls = [route('contract.index'), route('contract.confirmation'), route('contract.addendum'), route('contract.renewal'), route('contract.termination'), route('contract.unclosed')];
@@ -334,6 +334,12 @@
                             @endif
                             @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
                             <li @if(Request::url() == route('report.budgetreport')) class="active" @endif><a href="{{route('report.budgetreport')}}"><i class="fa fa-circle-o"></i> Budget Report</a></li>
+                            @endif
+                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            <li @if(Request::url() == route('report.cashflow')) class="active" @endif><a href="{{route('report.cashflow')}}"><i class="fa fa-circle-o"></i> Cashflow Report</a></li>
+                            @endif
+                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            <li @if(Request::url() == route('report.realisasi')) class="active" @endif><a href="{{route('report.realisasi')}}"><i class="fa fa-circle-o"></i> Budget Vs Realisasi</a></li>
                             @endif
                           </ul>
 

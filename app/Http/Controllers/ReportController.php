@@ -31,6 +31,8 @@ use App\Models\ViewInv;
 use App\Models\TrBudgetHdr;
 use App\Models\TrBudgetDtl;
 use App\Models\TrBudgetDetail;
+use App\Models\Cashflow;
+use App\Models\Realisasi;
 use PDF;
 use DB;
 use Excel;
@@ -2205,6 +2207,104 @@ class ReportController extends Controller
         }
 
         return view('budget_view', $data);
+    }
+
+    public function cashflow(){
+        $data['page'] = 'Cashflow';
+        $data['formats'] = MsHeaderFormat::where('type',1)->where('name','Cashflow')->get();
+        $data['tahun'] = TrBudgetHdr::all();
+        return view('report_budget',$data);
+    }
+
+    public function cashflowtpl(Request $request)
+    {
+        $id = $request->format;
+        $tahun = $request->tahun;
+        $print = @$request->print;
+        $company = MsCompany::first();
+        $detail = Cashflow::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
+        $data = [
+                'company' => $company,
+                'detail' => $detail,
+                'tahun' => $tahun,
+                'variables' => [],
+                'v_jan' => [],
+                'v_feb' => [],
+                'v_mar' => [],
+                'v_apr' => [],
+                'v_may' => [],
+                'v_jun' => [],
+                'v_jul' => [],
+                'v_aug' => [],
+                'v_sep' => [],
+                'v_okt' => [],
+                'v_nov' => [],
+                'v_des' => []
+            ];
+        if($print == 1){ $data['jenis'] = 'print'; }else{ $data['jenis'] = 'none'; }
+        $pdf = @$request->pdf;
+        if(!empty($pdf)){
+            $data['jenis'] = 'pdf';
+            $pdf = PDF::loadView('cashflow_view', $data)->setPaper('a4');
+            return $pdf->download('CASHFLOW.pdf');
+        }
+
+        return view('cashflow_view', $data);
+    }
+
+    public function realisasi(){
+        $data['page'] = 'Realisasi';
+        $data['formats'] = MsHeaderFormat::where('type',1)->where('name','Budget Vs Realisasi')->get();
+        $data['tahun'] = TrBudgetHdr::all();
+        return view('report_budget',$data);
+    }
+
+    public function realisasitpl(Request $request)
+    {
+        $id = $request->format;
+        $tahun = $request->tahun;
+        $print = @$request->print;
+        $company = MsCompany::first();
+        $detail = Realisasi::where('formathd_id',$id)->where('column',1)->orderBy('order','ASC')->get();
+        $data = [
+                'company' => $company,
+                'detail' => $detail,
+                'tahun' => $tahun,
+                'variables' => [],
+                'v_jan' => [],
+                'v_feb' => [],
+                'v_mar' => [],
+                'v_apr' => [],
+                'v_may' => [],
+                'v_jun' => [],
+                'v_jul' => [],
+                'v_aug' => [],
+                'v_sep' => [],
+                'v_okt' => [],
+                'v_nov' => [],
+                'v_des' => [],
+                'j_jan' => [],
+                'j_feb' => [],
+                'j_mar' => [],
+                'j_apr' => [],
+                'j_may' => [],
+                'j_jun' => [],
+                'j_jul' => [],
+                'j_aug' => [],
+                'j_sep' => [],
+                'j_okt' => [],
+                'j_nov' => [],
+                'j_des' => []
+            ];
+        if($print == 1){ $data['jenis'] = 'print'; }else{ $data['jenis'] = 'none'; }
+        $pdf = @$request->pdf;
+        if(!empty($pdf)){
+            $data['jenis'] = 'pdf';
+            $pdf = PDF::loadView('realisasi_view', $data)->setPaper('a4');
+            return $pdf->download('BUDGET VS REALISASI.pdf');
+        }
+
+        return view('realisasi_view', $data);
     }
 
     public function terbilang ($angka) {

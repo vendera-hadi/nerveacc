@@ -143,8 +143,9 @@ class BudgetController extends Controller
             $currentBudget = TrBudgetHdr::find($id);
             $budget = TrBudgetDtl::select('tr_budget_dtl.*','ms_master_coa.coa_name')
                     ->leftJoin('ms_master_coa','ms_master_coa.coa_code',"=",'tr_budget_dtl.coa_code')
+                    ->leftJoin('tr_budget_hdr','tr_budget_hdr.id',"=",'tr_budget_dtl.budget_id')
                     ->where('budget_id',$id)
-                    ->where('ms_master_coa.coa_year',$currentBudget->tahun)
+                    ->where('tr_budget_hdr.tahun',$currentBudget->tahun)
                     ->orderBy('tr_budget_dtl.coa_code','desc')
                     ->get();
             return view('modal.editbudget', ['budget' => $budget,'prd'=>$id]);

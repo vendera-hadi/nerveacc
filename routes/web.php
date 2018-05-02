@@ -542,7 +542,10 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('budget/importExcel','BudgetController@importExcel')->name('budget.importExcel');
 	Route::get('report/budget-report','ReportController@budgetreport')->name('report.budgetreport');
 	Route::get('report/budgettpl','ReportController@budgettpl')->name('report.budgettpl');
-
+	Route::get('report/cashflow','ReportController@cashflow')->name('report.cashflow');
+	Route::get('report/cashflowtpl','ReportController@cashflowtpl')->name('report.cashflowtpl');
+	Route::get('report/realisasi','ReportController@realisasi')->name('report.realisasi');
+	Route::get('report/realisasitpl','ReportController@realisasitpl')->name('report.realisasitpl');
 });
 
 Route::get('membership', 'Auth\AuthController@membership');

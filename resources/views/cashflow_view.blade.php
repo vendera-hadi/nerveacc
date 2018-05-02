@@ -20,11 +20,10 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg-12 col-md-12 col-xs-12" >
+        <div class="col-md-12">
             <table class="table table-bordered table-condensed table-responsive tb">
                 <tr>
                     <th>&nbsp;</th>
-                    <th style="text-align: center; min-width: 100px;">TOTAL {{$tahun -1}}</th>
                     <th style="text-align: center;">JANUARI</th>
                     <th style="text-align: center;">FEBRUARI</th>
                     <th style="text-align: center;">MARET</th>
@@ -37,7 +36,6 @@
                     <th style="text-align: center;">OKTOBER</th>
                     <th style="text-align: center;">NOVEMBER</th>
                     <th style="text-align: center;">DESEMBER</th>
-                    <th style="text-align: center; min-width: 120px;">BUDGET {{$tahun}}</th>
                 </tr>
                 @foreach($detail as $dt)
                     @php
@@ -57,22 +55,20 @@
                         $dt->setVariables('okt',$v_okt);
                         $dt->setVariables('nov',$v_nov);
                         $dt->setVariables('des',$v_des);
-                        $jan = $dt->budgetCalculate('jan',$tahun);
-                        $feb = $dt->budgetCalculate('feb',$tahun);
-                        $mar = $dt->budgetCalculate('mar',$tahun);
-                        $apr = $dt->budgetCalculate('apr',$tahun);
-                        $may = $dt->budgetCalculate('may',$tahun);
-                        $jun = $dt->budgetCalculate('jun',$tahun);
-                        $jul = $dt->budgetCalculate('jul',$tahun);
-                        $aug = $dt->budgetCalculate('aug',$tahun);
-                        $sep = $dt->budgetCalculate('sep',$tahun);
-                        $okt = $dt->budgetCalculate('okt',$tahun);
-                        $nov = $dt->budgetCalculate('nov',$tahun);
-                        $des = $dt->budgetCalculate('des',$tahun);
-                        $total = $jan+$feb+$mar+$apr+$may+$jun+$jul+$aug+$sep+$okt+$nov+$des;
-                        $calculate = $dt->calculateAccount();
+                        $jan = $dt->cashflowCalculate('1',$tahun);
+                        $feb = $dt->cashflowCalculate('2',$tahun);
+                        $mar = $dt->cashflowCalculate('3',$tahun);
+                        $apr = $dt->cashflowCalculate('4',$tahun);
+                        $may = $dt->cashflowCalculate('5',$tahun);
+                        $jun = $dt->cashflowCalculate('6',$tahun);
+                        $jul = $dt->cashflowCalculate('7',$tahun);
+                        $aug = $dt->cashflowCalculate('8',$tahun);
+                        $sep = $dt->cashflowCalculate('9',$tahun);
+                        $okt = $dt->cashflowCalculate('10',$tahun);
+                        $nov = $dt->cashflowCalculate('11',$tahun);
+                        $des = $dt->cashflowCalculate('12',$tahun);
+                        $total = $jan+$feb+$mar+$apr+$may+$jun+$jul+$aug+$sep+$okt+$nov+$des;           
                         if(!empty($dt->variable)) 
-                        $variables[$dt->variable] = $calculate;
                         $v_jan[$dt->variable] = $jan;
                         $v_feb[$dt->variable] = $feb;
                         $v_mar[$dt->variable] = $mar;
@@ -90,7 +86,6 @@
                     @if($dt->hide == 0)
                         <tr>
                         <td>{!!$desc!!}</b></td>
-                        <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($calculate) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($jan) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($feb) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($mar) }}@endif</td>
@@ -103,7 +98,6 @@
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($okt) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($nov) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($des) }}@endif</td>
-                        <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($total) }}@endif</td>
                     @if($dt->linespace > 0)
                     @for($i=0; $i<count($dt->linespace); $i++)
                     <tr>
@@ -116,7 +110,6 @@
             </table>
         </div>
     </div>
-
 </body>
 </html>
 

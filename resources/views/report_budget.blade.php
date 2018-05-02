@@ -114,7 +114,7 @@
     $('#filter').submit(function(e){
         e.preventDefault();
         var type = $('#type').val();
-        var report_url = '@if($page=='Neraca'){{route('report.neracatpl')}}@else{{route('report.budgettpl')}}@endif';
+        var report_url = '@if($page=='Cashflow'){{route('report.cashflowtpl')}}@elseif($page=='Realisasi'){{route('report.realisasitpl')}}@else{{route('report.budgettpl')}}@endif';
         var from = $('input[name=from]').val();
         var to = $('input[name=to]').val(); 
         
