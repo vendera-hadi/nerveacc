@@ -36,6 +36,7 @@
                     <th style="text-align: center;">OKTOBER</th>
                     <th style="text-align: center;">NOVEMBER</th>
                     <th style="text-align: center;">DESEMBER</th>
+                    <th style="text-align: center;">TOTAL {{$tahun}}</th>
                 </tr>
                 @foreach($detail as $dt)
                     @php
@@ -98,6 +99,7 @@
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($okt) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($nov) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($des) }}@endif</td>
+                        <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($total) }}@endif</td>
                     @if($dt->linespace > 0)
                     @for($i=0; $i<count($dt->linespace); $i++)
                     <tr>

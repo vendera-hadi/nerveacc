@@ -36,9 +36,12 @@
                     <th style="text-align: center;" colspan="2">OKTOBER</th>
                     <th style="text-align: center;" colspan="2">NOVEMBER</th>
                     <th style="text-align: center;" colspan="2">DESEMBER</th>
+                    <th style="text-align: center;" colspan="2">TOTAL {{$tahun}}</th>
                 </tr>
                 <tr>
                     <th>&nbsp;</th>
+                    <th style="text-align: center;">Budget</th>
+                    <th style="text-align: center;">Realisasi</th>
                     <th style="text-align: center;">Budget</th>
                     <th style="text-align: center;">Realisasi</th>
                     <th style="text-align: center;">Budget</th>
@@ -188,6 +191,9 @@
 
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($des_budget) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($des) }}@endif</td>
+
+                        <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($total_budget) }}@endif</td>
+                        <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($total) }}@endif</td>
 
                     @if($dt->linespace > 0)
                     @for($i=0; $i<count($dt->linespace); $i++)
