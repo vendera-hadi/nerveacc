@@ -142,6 +142,7 @@ class BudgetController extends Controller
             $id = $request->id;
             $currentBudget = TrBudgetHdr::find($id);
             $budget = TrBudgetDtl::select('tr_budget_dtl.*','ms_master_coa.coa_name')
+                    ->leftJoin('ms_master_coa','ms_master_coa.coa_code',"=",'tr_budget_dtl.coa_code')
                     ->leftJoin('tr_budget_hdr','tr_budget_hdr.id',"=",'tr_budget_dtl.budget_id')
                     ->where('budget_id',$id)
                     ->where('tr_budget_hdr.tahun',$currentBudget->tahun)
@@ -211,7 +212,7 @@ class BudgetController extends Controller
         }
         return ['status' => 1, 'message' => 'Update Success'];
     }
-
+    
     public function importExcel(Request $request)
     {
         if(Input::hasFile('import_file')){
