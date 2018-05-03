@@ -81,7 +81,7 @@ class Cashflow extends Model
     {
         // jika berupa coa code
         if(is_numeric($this->attributes['coa_code'])){
-            $total = $this->getTotalFromLedgerStartYeartoFrom($this->attributes['coa_code'],$bulan) + $this->getTotalFromLedger($this->attributes['coa_code'],$bulan);   
+            $total =  $this->getTotalFromLedger($this->attributes['coa_code'],$bulan);   
         }else if(substr($this->attributes['coa_code'], 0, 1) === '@'){
             // kalau group account
             $key = str_replace('@', '', $this->attributes['coa_code']);
@@ -89,7 +89,7 @@ class Cashflow extends Model
             if($group){
                 $total = 0;
                 foreach ($group->detail as $dt) {
-                    $total += $this->getTotalFromLedgerStartYeartoFrom($dt->coa_code) + $this->getTotalFromLedger($dt->coa_code);
+                    $total += $this->getTotalFromLedger($dt->coa_code);
                 }
             }else{
                 $total = 0;
@@ -155,47 +155,46 @@ class Cashflow extends Model
             $vars[] = $temp;
 
             switch ($bulan) {
-                case 'jan':
+                case '1':
                     $isi = $this->v_jan;
                     break;
-                case 'feb':
+                case '2':
                     $isi = $this->v_feb;
                     break;
-                case 'mar':
+                case '3':
                     $isi = $this->v_mar;
                     break;
-                case 'apr':
+                case '4':
                     $isi = $this->v_apr;
                     break;
-                case 'may':
+                case '5':
                     $isi = $this->v_may;
                     break;
-                case 'jun':
+                case '6':
                     $isi = $this->v_jun;
                     break;
-                case 'jul':
+                case '7':
                     $isi = $this->v_jul;
                     break;
-                case 'aug':
+                case '8':
                     $isi = $this->v_aug;
                     break;
-                case 'sep':
+                case '9':
                     $isi = $this->v_sep;
                     break;
-                case 'okt':
+                case '10':
                     $isi = $this->v_okt;
                     break;
-                case 'nov':
+                case '11':
                     $isi = $this->v_nov;
                     break;
-                case 'des':
+                case '12':
                     $isi = $this->v_des;
                     break;
                 default:
                      $isi = $this->variables;
                     break;
             }
-        
             return $this->countFormula($vars, $operators,$isi);
         }catch(\Exception $e){
             return 0;
