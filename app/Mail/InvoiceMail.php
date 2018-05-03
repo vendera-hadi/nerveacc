@@ -17,6 +17,8 @@ class InvoiceMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+
+    protected $invoice;
     /**
      * Create a new message instance.
      *

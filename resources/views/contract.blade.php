@@ -728,7 +728,7 @@
                     // form.find('input[name=contr_no]').val(data.contr_no);
                     form.find('input[name=contr_startdate]').val(data.contr_startdate);
 
-                    form.find('input[name=contr_bast_date]').val(data.contr_enddate);
+                    form.find('input[name=contr_bast_date]').val(data.contr_bast_date);
                     form.find('input[name=contr_bast_by]').val(data.contr_bast_by);
                     form.find('textarea[name=contr_note]').val(data.contr_note);
                     form.find('input[name=tenan_id]').val(data.tenan_id);

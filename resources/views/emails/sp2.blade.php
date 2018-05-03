@@ -164,10 +164,10 @@ telah diperhitungkan sebelum tanggal <b>{{date('d', strtotime('+14 day',strtotim
                     <td width="40%">
                         <table width="100%">
                             <tr>
-                                <td>Managed By:</td>
+                                <td style="padding-top: 90px;font-size: 10px;">Managed By: PT. Jakarta Land Management</td>
                             </tr>
                             <tr>
-                                <td>Jakarta Land Management</td>
+                                <td></td>
                             </tr>
                             <tr><td></td></tr>
                         </table>
