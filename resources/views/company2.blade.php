@@ -96,7 +96,7 @@
 		            </div>
 
 		            <div class="form-group">
-		              <label>Company Building Area Size (square foot)</label>
+		              <label>Company Building Area Size (square metres)</label>
 		              <input type="text" value="{{number_format($company->comp_sqrt,0,',','')}}" name="comp_sqrt" class="form-control" id="compSize" placeholder="Company Building Area Size" required>
 		            </div>
 
