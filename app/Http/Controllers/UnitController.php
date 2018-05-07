@@ -39,10 +39,7 @@ class UnitController extends Controller
 
             // olah data
             $count = MsUnit::count();
-            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name','ms_tenant.tenan_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))
-                    ->leftJoin('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'))
-                   ->leftJoin('ms_unit_owner', 'ms_unit.id', '=', 'ms_unit_owner.unit_id')
-                   ->leftJoin('ms_tenant', 'ms_tenant.id', '=', 'ms_unit_owner.tenan_id');
+            $fetch = MsUnit::query();
 
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -67,8 +64,14 @@ class UnitController extends Controller
                         else $filter->value = "false";
                     }
                     // end special condition
-                    if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
-                    else $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    if(@$filter->field == 'tenan_name'){
+                        $fetch = $fetch->whereHas('owner.tenant', function($query) use($filter){
+                            $query->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),'ilike','%'.$filter->value.'%');
+                        });
+                    }else{
+                        if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                        else $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    }
                 }
             }
             $count = $fetch->count();
@@ -82,10 +85,9 @@ class UnitController extends Controller
                 $temp['unit_code'] = $value->unit_code;
                 $temp['unit_name'] = $value->unit_name;
                 $temp['unit_sqrt'] = $value->unit_sqrt." m2";
-                $temp['unit_virtual_accn'] = $value->virtual_account;
                 $temp['unit_isactive'] = $value->unit_isactive;
-                $temp['untype_name'] = $value->untype_name;
-                $temp['floor_name'] = $value->floor_name;
+                $temp['untype_name'] = $value->UnitType->untype_name;
+                $temp['floor_name'] = $value->MsFloor->floor_name;
                 $temp['floor_id'] = $value->floor_id;
                 $temp['untype_id'] = $value->untype_id;
                 $temp['tenan_name'] = @$value->owner->tenant->tenan_name ?: '-';
