@@ -578,8 +578,8 @@ class ReportController extends Controller
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
         $fetch = TrInvoice::select('tr_invoice.inv_number','tr_invoice.inv_date','tr_invoice.inv_duedate','ms_unit.unit_name','ms_tenant.tenan_name','tr_invoice.inv_outstanding')
                 ->join('ms_tenant','ms_tenant.id',"=",'tr_invoice.tenan_id')
-                ->join('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
-                ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
+                ->leftJoin('tr_contract','tr_contract.id',"=",'tr_invoice.contr_id')
+                ->leftJoin('ms_unit','ms_unit.id',"=",'tr_invoice.unit_id')
                 ->where('tr_invoice.inv_outstanding','>',0)
                 ->where('tr_invoice.inv_post','=',TRUE)
                 ->groupBy('tr_invoice.inv_number','ms_unit.unit_name','ms_tenant.tenan_name','tr_invoice.inv_date','tr_invoice.inv_duedate','tr_invoice.inv_outstanding')

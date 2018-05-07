@@ -39,8 +39,11 @@ class UnitController extends Controller
 
             // olah data
             $count = MsUnit::count();
-            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))
-                    ->leftJoin('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'));
+            $fetch = MsUnit::select('ms_unit.*','ms_unit_type.untype_name','ms_floor.floor_name','ms_tenant.tenan_name')->join('ms_unit_type',\DB::raw('ms_unit.untype_id::integer'),"=",\DB::raw('ms_unit_type.id::integer'))
++                    ->leftJoin('ms_floor',\DB::raw('ms_unit.floor_id::integer'),"=",\DB::raw('ms_floor.id::integer'))
++                   ->leftJoin('ms_unit_owner', 'ms_unit.id', '=', 'ms_unit_owner.unit_id')
++                   ->leftJoin('ms_tenant', 'ms_tenant.id', '=', 'ms_unit_owner.tenan_id');
+
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
