@@ -16,6 +16,9 @@ class TrContract extends Model
    public function MsTenant(){
    		return $this->belongsTo('App\Models\MsTenant','tenan_id');
    }
+   public function MsTenantWT(){
+                return $this->belongsTo('App\Models\MsTenant','tenan_id')->withTrashed();
+   }
    public function MsUnit(){
    		return $this->belongsTo('App\Models\MsUnit','unit_id');
    }
