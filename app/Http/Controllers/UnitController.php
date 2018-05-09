@@ -437,7 +437,7 @@ class UnitController extends Controller
             $prevowner = MsUnitOwner::onlyTrashed()->where('unit_id',$id)->orderBy('unitow_start_date');
             $prevownerIds = $prevowner->pluck('tenan_id');
 
-            $renter = TrContract::where('unit_id',$id);
+            $renter = TrContract::where('unit_id',$id)->where('contr_status','confirmed');
             if($unitowner) $renter = $renter->where('tenan_id','!=',$tenant->id);
             if(count($prevownerIds) > 0) $renter = $renter->whereNotIn('tenan_id', $prevownerIds);
             $renter = $renter->with('MsTenant')->get();

@@ -18,4 +18,9 @@ class MsUnitOwner extends Model
    {
       return $this->belongsTo('App\Models\MsTenant','tenan_id');
    }
+
+   public function tenantWT()
+   {
+      return $this->belongsTo('App\Models\MsTenant','tenan_id')->withTrashed();
+   }
 }

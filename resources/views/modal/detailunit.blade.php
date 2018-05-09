@@ -97,13 +97,13 @@
             @if(count($renter) > 0)
             @foreach($renter as $rt)
             <tr>
-              <td>{{$rt->MsTenant->tenan_name}}</td>
-              <td>{{$rt->MsTenant->tenan_idno}}</td>
-              <td>{{$rt->MsTenant->tenan_phone}}</td>
-              <td>{{$rt->MsTenant->tenan_fax}}</td>
-              <td>{{$rt->MsTenant->tenan_email}}</td>
-              <td>{{$rt->MsTenant->tenan_address}}</td>
-              <td>{{$rt->MsTenant->tenan_npwp}}</td>
+              <td>{{$rt->MsTenantWT->tenan_name}}</td>
+              <td>{{$rt->MsTenantWT->tenan_idno}}</td>
+              <td>{{$rt->MsTenantWT->tenan_phone}}</td>
+              <td>{{$rt->MsTenantWT->tenan_fax}}</td>
+              <td>{{$rt->MsTenantWT->tenan_email}}</td>
+              <td>{{$rt->MsTenantWT->tenan_address}}</td>
+              <td>{{$rt->MsTenantWT->tenan_npwp}}</td>
               <td>{{date('d F Y', strtotime($rt->contr_startdate))}}</td>
               <td>{{date('d F Y', strtotime($rt->contr_enddate))}}</td>
               <td>{{date('d F Y', strtotime($rt->contr_status))}}</td>
@@ -137,13 +137,13 @@
             @if(count($prevowner) > 0)
             @foreach($prevowner as $pown)
             <tr>
-              <td>{{$pown->tenant->tenan_name}}</td>
-              <td>{{$pown->tenant->tenan_idno}}</td>
-              <td>{{$pown->tenant->tenan_phone}}</td>
-              <td>{{$pown->tenant->tenan_fax}}</td>
-              <td>{{$pown->tenant->tenan_email}}</td>
-              <td>{{$pown->tenant->tenan_address}}</td>
-              <td>{{$pown->tenant->tenan_npwp}}</td>
+              <td>{{$pown->tenantWT->tenan_name}}</td>
+              <td>{{$pown->tenantWT->tenan_idno}}</td>
+              <td>{{$pown->tenantWT->tenan_phone}}</td>
+              <td>{{$pown->tenantWT->tenan_fax}}</td>
+              <td>{{$pown->tenantWT->tenan_email}}</td>
+              <td>{{$pown->tenantWT->tenan_address}}</td>
+              <td>{{$pown->tenantWT->tenan_npwp}}</td>
               <td>{{date('d F Y', strtotime($pown->unitow_start_date))}}</td>
             </tr>
             @endforeach
