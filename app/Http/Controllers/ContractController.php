@@ -71,10 +71,13 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract yg bukan milik owner unit. tenan yg gada di ms_owner_list dimasukkan disini
-            $fetch = TrContract::select('tr_contract.*')->join('ms_unit_owner', function($join){
+            $fetch = TrContract::select('tr_contract.*','ms_unit.unit_code','ms_tenant.tenan_name')->join('ms_unit_owner', function($join){
                             $join->on('ms_unit_owner.unit_id', '=', 'tr_contract.unit_id');
                             $join->on('ms_unit_owner.tenan_id', '!=', 'tr_contract.tenan_id');
-                        })->whereNull('ms_unit_owner.deleted_at');
+                        })->leftJoin('ms_unit','ms_unit.id','=','tr_contract.unit_id')
+                        ->leftJoin('ms_tenant','ms_tenant.id','=','tr_contract.tenan_id')
+                        ->whereNull('ms_unit_owner.deleted_at')
+                        ->where('tr_contract.contr_status', '!=', 'cancelled');
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
                     $op = "like";
@@ -174,10 +177,13 @@ class ContractController extends Controller
             // olah data
             $count = TrContract::count();
             // contract disini adalah contract yg dimiliki oleh si owner. join dgn unit owner using tenan_id
-            $fetch = TrContract::select('tr_contract.*')->join('ms_unit_owner', function($join){
+            $fetch = TrContract::select('tr_contract.*','ms_unit.unit_code','ms_tenant.tenan_name')->join('ms_unit_owner', function($join){
                             $join->on('ms_unit_owner.unit_id', '=', 'tr_contract.unit_id');
                             $join->on('ms_unit_owner.tenan_id', '=', 'tr_contract.tenan_id');
-                        })->whereNull('ms_unit_owner.deleted_at');
+                        })->leftJoin('ms_unit','ms_unit.id','=','tr_contract.unit_id')
+                        ->leftJoin('ms_tenant','ms_tenant.id','=','tr_contract.tenan_id')
+                        ->whereNull('ms_unit_owner.deleted_at')
+                        ->where('tr_contract.contr_status', '!=', 'cancelled');
 
             if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -271,7 +277,7 @@ class ContractController extends Controller
         ->join('ms_tenant','ms_tenant.id',"=",'tr_contract.tenan_id')
         // ->join('ms_virtual_account','ms_virtual_account.id',"=",'tr_contract.viracc_id')
         ->join('ms_unit','ms_unit.id',"=",'tr_contract.unit_id')
-        ->where('tr_contract.id',$contractId)->first();
+        ->where('tr_contract.id',$contractId)->with('creator','updater')->first();
         $costdetail = TrContractInvoice::select('ms_invoice_type.invtp_name','ms_cost_detail.costd_name','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','ms_cost_detail.costd_ismeter')
                 ->join('ms_invoice_type','tr_contract_invoice.invtp_id',"=",'ms_invoice_type.id')
                 ->join('ms_cost_detail','tr_contract_invoice.costd_id',"=",'ms_cost_detail.id')
@@ -404,6 +410,7 @@ class ContractController extends Controller
             'viracc_id' => 0,
             'const_id' => $request->input('const_id',0),
             'unit_id' => $request->input('unit_id'),
+            'created_by' => Auth::id()
         ];
         $costd_ids = $request->input('costd_is');
         $inv_type = $request->input('inv_type');
@@ -522,7 +529,8 @@ class ContractController extends Controller
             'contr_enddate' => $request->input('contr_enddate','2030-12-31'),
             'contr_bast_date' => $request->input('contr_bast_date'),
             'contr_bast_by' => $request->input('contr_bast_by'),
-            'contr_note' => $request->input('contr_note')
+            'contr_note' => $request->input('contr_note'),
+            'updated_by' => Auth::id()
         ];
         if($request->input('tenan_id')) $update['tenan_id'] = $request->input('tenan_id');
         if($request->input('mark_id')) $update['mark_id'] = $request->input('mark_id');

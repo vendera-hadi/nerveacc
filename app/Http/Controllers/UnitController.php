@@ -99,6 +99,11 @@ class UnitController extends Controller
                 }catch(\Exception $e){
                     $temp['created_by'] = '-';
                 }
+                try{
+                    $temp['updated_by'] = User::findOrFail($value->updated_by)->name;
+                }catch(\Exception $e){
+                    $temp['created_by'] = '-';
+                }
                 $result['rows'][] = $temp;
             }
             return response()->json($result);

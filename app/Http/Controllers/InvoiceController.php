@@ -1024,12 +1024,16 @@ class InvoiceController extends Controller
 
     public function cancel(Request $request){
         try{
-            $id = $request->id;
-            $invoice = TrInvoice::find($id);
-            TrContractInvoice::where('invtp_id',$invoice->invtp_id)->where('contr_id',$invoice->contr_id)->update(['continv_next_inv'=>null]);
-            // TrInvoice::where('id',$id)->delete();
-            TrInvoice::where('id',$id)->update(['inv_iscancel'=>1]);
-            return response()->json(['success' => 1, 'message' => 'Cancel Invoice Success']);
+            $ids = $request->id;
+            if(!is_array($ids)) $ids = [$ids];
+
+            $invoices = TrInvoice::whereIn('id', $ids)->where('inv_post',0)->get();
+            foreach($invoices as $invoice){
+                TrContractInvoice::where('invtp_id',$invoice->invtp_id)->where('contr_id',$invoice->contr_id)->update(['continv_next_inv'=>null]);
+                // TrInvoice::where('id',$id)->delete();
+                TrInvoice::where('id',$invoice->id)->update(['inv_iscancel'=>1]);
+            }
+            return response()->json(['success' => 1, 'message' => 'Cancel '.@$invoices->count().' Invoice Success']);
         }catch(\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Error Occured']);
         }
@@ -1308,6 +1312,28 @@ class InvoiceController extends Controller
             $success++;
         }
         return response()->json(['success'=>1, 'message'=>$success.' Invoice unposted Successfully']);
+    }
+
+    public function reminderPreview(Request $request, $type)
+    {
+        $type = strtolower($type);
+        $data['company'] = MsCompany::with('MsCashbank')->first();
+        switch ($type) {
+            case 'sp1':
+                $data['emailtpl'] = MsEmailTemplate::where('name','SP1')->first();
+                $view = 'emails.preview_sp1';
+                break;
+            case 'sp2':
+                $data['emailtpl'] = MsEmailTemplate::where('name','SP2')->first();
+                $view = 'emails.preview_sp2';
+                break;
+
+            default:
+                $data['emailtpl'] = MsEmailTemplate::where('name','SP1')->first();
+                $view = 'emails.sp1';
+                break;
+        }
+        return view($view, $data);
     }
 
 }

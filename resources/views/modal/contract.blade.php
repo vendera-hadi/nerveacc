@@ -25,6 +25,8 @@
 					<tr><td><strong>Unit Code</strong></td><td>:</td><td>{{$fetch['unit_code']}}</td></tr>
 					<tr><td><strong>Unit Name</strong></td><td>:</td><td>{{$fetch['unit_name']}}</td></tr>
 					<tr><td><strong>Unit Active Status</strong></td><td>:</td><td>{{!empty($fetch['unit_isactive']) ? 'active' : 'not active'}}</td></tr>
+          <tr><td><strong>Created By</strong></td><td>:</td><td>{{@$fetch['creator']['name']}}</td></tr>
+          <tr><td><strong>Updated By</strong></td><td>:</td><td>{{@$fetch['updater']['name']}}</td></tr>
 					</table>
                 	<!-- end information -->
               </div>

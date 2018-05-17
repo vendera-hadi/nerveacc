@@ -503,11 +503,15 @@ function addInv(){
 }
 
 function cancelInv(){
-    var row = $('#dg').datagrid('getSelected');
-    if(row.inv_post == 'no'){
-        $.messager.confirm('Confirm','Are you sure you want to cancel this Invoice ?',function(r){
+    var ids = [];
+    $('input[name=check]:checked').each(function() {
+       if($(this).data('posting') == 0) ids.push($(this).val());
+    });
+
+    if(ids.length > 0){
+        $.messager.confirm('Confirm','Are you sure you want to cancel this '+ids.length+'Invoice(s) ?',function(r){
             if (r){
-                $.post('{{route('invoice.cancel')}}',{id:row.id},function(result){
+                $.post('{{route('invoice.cancel')}}',{id:ids},function(result){
                     if(result.error){
                         $.messager.alert('Warning',result.message);
                     }

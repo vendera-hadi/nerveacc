@@ -325,6 +325,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('invoice/reminder','InvoiceController@updateReminder')->name('invoice.reminder.updatetemplate');
 	Route::post('invoice/sendsp','InvoiceController@sendSP')->name('invoice.sendsp');
 	Route::get('invoice/printsp3','InvoiceController@printSP3')->name('invoice.printsp3');
+	Route::get('invoice/reminder/preview/{type}','InvoiceController@reminderPreview')->name('invoice.reminder.preview');
 
 	Route::get('invoice/test','InvoiceController@test');
 

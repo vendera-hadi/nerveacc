@@ -161,7 +161,7 @@
                 <div class="tab-pane" id="tab_2">
                     @if(Session::get('role')==1 || in_array(78,Session::get('permissions')))
                     <h3>Template</h3>
-                    <form action="{{route('invoice.reminder.updatetemplate')}}" method="post">
+                    <form id="formTemplate" action="{{route('invoice.reminder.updatetemplate')}}" method="post">
                         <div class="form-group">
                           <label>SP1 title</label>
                           <input type="text" name="sp1_title" class="form-control" value="{{$sp1->title}}">
@@ -170,6 +170,7 @@
                         <div class="form-group">
                           <label>SP1 Content</label>
                           <textarea class="textarea" name="sp1_content" class='form-control' style="width: 100%;" required>{{$sp1->content}}</textarea>
+                          <button type="button" class="btn btn-primary pull-right" onclick="showPreview('SP1')">SP1 Preview</button><br><br>
                         </div>
 
                         <div class="form-group">
@@ -180,6 +181,7 @@
                         <div class="form-group">
                           <label>SP2 Content</label>
                           <textarea class="textarea" name="sp2_content" class='form-control' style="width: 100%;" required>{{$sp2->content}}</textarea>
+                          <button type="button" class="btn btn-primary pull-right" onclick="showPreview('SP2')">SP2 Preview</button><br><br>
                         </div>
 
                         <div class="form-group">
@@ -290,6 +292,15 @@ function sendSP(i, tenanid){
             }
         });
     }
+}
+
+function showPreview(type)
+{
+    console.log(type);
+    var $form = $('#formTemplate');
+    $.post($form.attr('action'), $form.serialize(), function(){
+        var win = window.open('{{route('invoice.reminder.preview',"")}}/'+type, '_blank');
+    })
 }
 </script>
 @endsection

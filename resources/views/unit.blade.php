@@ -43,6 +43,7 @@
                     <th field="floor_name" width="120" sortable="true">Unit Floor</th>
                     <th field="unit_isactive" width="120" sortable="true">Unit Active</th>
                     <th field="created_by" width="120" sortable="true">Created By</th>
+                    <th field="updated_by" width="120" sortable="true">Updated By</th>
                 </tr>
             </thead>
         </table>
