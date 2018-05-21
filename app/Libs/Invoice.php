@@ -351,7 +351,14 @@ class Invoice {
     // hitung brp jml hari telat
     private function countTelat($invoice, $dateLunas = null)
     {
-        $duedate = date_create($invoice->inv_duedate);
+        // tambahkan start denda
+        $config = @MsConfig::where('name','start_denda')->first()->value;
+        if(!empty(@$config)){
+            $duedate = date_create(date('Y-m-d H:i:s', strtotime($invoice->inv_duedate." +$config days")));
+        }else{
+            $duedate = date_create($invoice->inv_duedate);
+        }
+
         $nextPeriodStartDate = date('Y-m-d', strtotime($invoice->inv_date." +1 month"));
         // jika tgl pelunasan sudah lebih dari next periode inv date. hitung sampe akhir periode nya aj
         if(!empty($dateLunas) && $dateLunas > $nextPeriodStartDate) $dateLunas = null;

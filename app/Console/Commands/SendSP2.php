@@ -38,7 +38,14 @@ class SendSP2 extends Command
      */
     public function handle()
     {
-        $list = TrInvoice::where('inv_outstanding','>',0)->where('inv_post',1)->where('inv_iscancel',0)->whereRaw("NOW()::date =  (inv_duedate + interval '14 day')::date")->get();
+        // get var from config
+        $config = @MsConfig::where('name','start_sp2')->first()->value;
+        if(!empty(@$config)){
+            $day = $config;
+        }else{
+            $day = 14;
+        }
+        $list = TrInvoice::where('inv_outstanding','>',0)->where('inv_post',1)->where('inv_iscancel',0)->whereRaw("NOW()::date =  (inv_duedate + interval '$day day')::date")->get();
         foreach ($list as $invoice) {
             // masukin invoice dalam antrean
             try{

@@ -40,6 +40,10 @@ class CompanyController extends Controller
         $data['coa_hutang_titipan'] = @MsConfig::where('name','coa_hutang_titipan')->first()->value;
         $data['ppju'] = @MsConfig::where('name','ppju')->first()->value;
 
+        $data['start_denda'] = @MsConfig::where('name','start_denda')->first()->value;
+        $data['start_sp1'] = @MsConfig::where('name','start_sp1')->first()->value;
+        $data['start_sp2'] = @MsConfig::where('name','start_sp2')->first()->value;
+
         $data['accounts'] = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',0)->orderBy('coa_type')->get();
         return view('config',$data);
     }

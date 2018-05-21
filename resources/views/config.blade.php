@@ -91,6 +91,21 @@
                                 </div>
 
                                 <div class="form-group">
+                                  <label>Start Denda (n day from due date)</label>
+                                  <input type="number" name="start_denda" class="form-control" value="{{$start_denda}}">
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Start SP1 (n day from due date)</label>
+                                  <input type="number" name="start_sp1" class="form-control" value="{{$start_sp1}}">
+                                </div>
+
+                                <div class="form-group">
+                                  <label>Start SP2 (n day from due date)</label>
+                                  <input type="number" name="start_sp2" class="form-control" value="{{$start_sp2}}">
+                                </div>
+
+                                <div class="form-group">
                                   <label>PPJU</label>
                                   <input type="number" min="1" max="31" name="ppju" class="form-control" value="{{$ppju}}" placeholder="Percentage">
                                 </div>
