@@ -929,7 +929,7 @@ class InvoiceController extends Controller
                     foreach ($successIds as $id) {
                         $invoice = TrInvoice::find($id);
                         $invoice->update(['inv_post'=>1]);
-
+                        // send email if flag send mail is active
                         if(!empty($sendMailFlag))
                             \Mail::to($invoice->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($invoice));
                     }
