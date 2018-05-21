@@ -98,8 +98,18 @@ class PaymentController extends Controller
                             break;
                     }
                     // end special condition
-                    if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
-                    else $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    if($op == 'like'){
+                        if($filter->field == 'inv_no'){
+                           $fetch = $fetch->whereHas('TrInvoicePaymdtl.TrInvoice', function($query) use($filter){
+                                $query->where('inv_number','ilike', "%$filter->value%");
+                           });
+                        }else{
+                           $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                        }
+                    }else{
+                        $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    }
+
                 }
             }
             // jika ada keyword
