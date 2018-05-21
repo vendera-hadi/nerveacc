@@ -30,6 +30,7 @@
 <div class="row">
 	<div class="col-md-12">
   		<!-- content -->
+        <div style="overflow: auto;">
         <div class="row">
             <div class="col-sm-4">
                 <table width="100%">
@@ -141,7 +142,7 @@
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
         </div>
         <!-- end form -->
-
+    </div>
 
          <!-- Modal select tenant -->
         <div id="unitModal" class="modal fade" role="dialog" style="z-index:9999">

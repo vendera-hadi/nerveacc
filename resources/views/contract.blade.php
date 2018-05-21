@@ -56,9 +56,10 @@
                 @endif
                 <li class="hidden"><a href="#tab_3" data-toggle="tab">Edit Billing Info</a></li>
                 <li class="hidden"><a href="#tab_4" data-toggle="tab">Edit Component Billing</a></li>
+                <li><a href="#tab_6" class="canceled_tab" data-toggle="tab">Canceled Contract</a></li>
             </ul>
             <div class="tab-content">
-                <div class="tab-pane active" id="tab_1">
+                <div class="tab-pane active" id="tab_1" style="overflow: auto;">
                     <table id="dg" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                         <thead>
                             <tr>
@@ -73,7 +74,7 @@
                         </thead>
                     </table>
                 </div>
-                <div class="tab-pane" id="tab_5">
+                <div class="tab-pane" id="tab_5" style="overflow: auto;">
                     <table id="dg2" class="hidden" title="Billing Info" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
                         <thead>
                             <tr>
@@ -272,6 +273,20 @@
                     </form>
                 </div>
                 <div class="tab-pane" id="tab_4"></div>
+                <div class="tab-pane" id="tab_6" style="overflow: auto;">
+                    <table id="dgc" title="Canceled Contract" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                        <thead>
+                            <tr>
+                                <th field="unit_code" width="120" sortable="true">Unit</th>
+                                <th field="tenan_name" width="120" sortable="true">Nama Pemilik</th>
+                                <th field="contr_startdate" width="120" sortable="true">Start Date</th>
+                                <th field="contr_enddate" width="120" sortable="true">End Date</th>
+                                <th field="contr_status" width="120" sortable="true">Status</th>
+                                <th field="contr_terminate_date" width="120" sortable="true">Terminated Date</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
             <!-- /.tab-content -->
         </div>
@@ -527,6 +542,7 @@
         var entity = "Contract"; // nama si tabel, ditampilin di dialog
         var get_url = "{{route('contract.get')}}";
         var get_url2 = "{{route('contract.get2')}}";
+        var get_url3 = "{{route('contract.get3')}}";
 
         $(function(){
             var dg = $('#dg').datagrid({
@@ -557,7 +573,24 @@
                   dg2.datagrid('enableFilter');
               },500);
               tenantableflag = 1;
-              console.log('test');
+            }
+        });
+
+        var Canceledtableflag = 0;
+        $('.canceled_tab').click(function(){
+            if(Canceledtableflag == 0){
+              setTimeout(function(){
+                  var dg2 = $('#dgc').datagrid({
+                        url: get_url3,
+                        pagination: true,
+                        remoteFilter: true,
+                        rownumbers: true,
+                        singleSelect: true,
+                        fitColumns: true
+                    });
+                  dg2.datagrid('enableFilter');
+              },500);
+              Canceledtableflag = 1;
             }
         });
 
