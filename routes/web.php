@@ -217,6 +217,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('contract/close', 'ContractController@close')->name('contract.close');
 	Route::post('contract/closeCtrModal', 'ContractController@closeCtrModal')->name('contract.closeCtrModal');
 	Route::post('contract/closeCtr', 'ContractController@closeCtrProcess')->name('contract.closectr');
+	Route::post('contract/get3', 'ContractController@getCanceled')->name('contract.get3');
 	// period meter
 
 	// tr meter

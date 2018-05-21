@@ -1317,4 +1317,86 @@ class ContractController extends Controller
         return view('modal.popupcontract', ['contracts'=>$fetch, 'keyword'=>$keyword, 'edit'=> null]);
     }
 
+    public function getCanceled(Request $request){
+        try{
+            $page = $request->page;
+            $perPage = $request->rows;
+            $page-=1;
+            $offset = $page * $perPage;
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+
+            $count = TrContract::count();
+            $fetch = TrContract::select('tr_contract.*','ms_unit.unit_code','ms_tenant.tenan_name')
+                        ->leftJoin('ms_unit','ms_unit.id','=','tr_contract.unit_id')
+                        ->leftJoin('ms_tenant','ms_tenant.id','=','tr_contract.tenan_id')
+                        ->where('tr_contract.contr_status', '=', 'cancelled');
+
+            if(!empty($filters) && count($filters) > 0){
+                foreach($filters as $filter){
+                    $op = "like";
+                    // tentuin operator
+                    switch ($filter->op) {
+                        case 'contains':
+                            $op = 'like';
+                            break;
+                        case 'less':
+                            $op = '<=';
+                            break;
+                        case 'greater':
+                            $op = '>=';
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if($op == 'like'){
+                        if($filter->field == 'unit_code'){
+                            $fetch = $fetch->whereHas('MsUnit', function($query) use($filter){
+                                $query->where(\DB::raw('lower(trim(unit_code::varchar))'),'like','%'.$filter->value.'%');
+                            });
+                        }else if($filter->field == 'tenan_name'){
+                            $fetch = $fetch->whereHas('MsTenant', function($query) use($filter){
+                                $query->where(\DB::raw('lower(trim(tenan_name::varchar))'),'like','%'.$filter->value.'%');
+                            });
+                        }else{
+                            $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                        }
+                    }else{
+                        $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    }
+                }
+
+            }
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+
+
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['unit_code'] = @$value->MsUnit->unit_code;
+                $temp['contr_code'] = $value->contr_code;
+                $temp['contr_no'] = $value->contr_no;
+                $temp['contr_startdate'] = date('d/m/Y',strtotime($value->contr_startdate));
+                $temp['contr_enddate'] = date('d/m/Y',strtotime($value->contr_enddate));
+                if($temp['contr_enddate'] == '31/12/2030') $temp['contr_enddate'] = '-';
+                $temp['tenan_name'] = @$value->MsTenant->tenan_name;
+                if($value->contr_status == 'confirmed') $status = '<strong class="text-success">'.$value->contr_status.'</strong>';
+                else if($value->contr_status == 'cancelled' || $value->contr_status == 'closed') $status = '<strong class="text-danger">'.$value->contr_status.'</strong>';
+                else $status = '<strong>'.$value->contr_status.'</strong>';
+                $temp['contr_status'] = $status;
+                $temp['contr_terminate_date'] = !empty($value->contr_terminate_date) ? date('d/m/Y',strtotime($value->contr_terminate_date)) : '';
+                $result['rows'][] = $temp;
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+    }
+
 }

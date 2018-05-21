@@ -29,24 +29,26 @@
 @section('main-content')
 <div class="row">
 	<div class="col-md-12">
-        <table id="dg" title="Master Unit" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
-            <thead>
-                <tr>
-                    <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                    <th field="unit_code" width="120" sortable="true">Unit Code</th>
-                    <th field="tenan_name" width="120" sortable="true">Owner</th>
-                    <!-- <th field="unit_name" width="120" sortable="true">Unit Name</th> -->
-                    <th field="unit_sqrt" width="120" sortable="true">Luas</th>
-                    <th field="va_utilities" width="120" sortable="true">VA Utilities</th>
-                    <th field="va_maintenance" width="120" sortable="true">VA Maintenance</th>
-                    <th field="untype_name" width="120" sortable="true">Unit Type</th>
-                    <th field="floor_name" width="120" sortable="true">Unit Floor</th>
-                    <th field="unit_isactive" width="120" sortable="true">Unit Active</th>
-                    <th field="created_by" width="120" sortable="true">Created By</th>
-                    <th field="updated_by" width="120" sortable="true">Updated By</th>
-                </tr>
-            </thead>
-        </table>
+        <div style="overflow: auto;">
+            <table id="dg" title="Master Unit" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+                <thead>
+                    <tr>
+                        <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
+                        <th field="unit_code" width="120" sortable="true">Unit Code</th>
+                        <th field="tenan_name" width="120" sortable="true">Owner</th>
+                        <!-- <th field="unit_name" width="120" sortable="true">Unit Name</th> -->
+                        <th field="unit_sqrt" width="120" sortable="true">Luas</th>
+                        <th field="va_utilities" width="120" sortable="true">VA Utilities</th>
+                        <th field="va_maintenance" width="120" sortable="true">VA Maintenance</th>
+                        <th field="untype_name" width="120" sortable="true">Unit Type</th>
+                        <th field="floor_name" width="120" sortable="true">Unit Floor</th>
+                        <th field="unit_isactive" width="120" sortable="true">Unit Active</th>
+                        <th field="created_by" width="120" sortable="true">Created By</th>
+                        <th field="updated_by" width="120" sortable="true">Updated By</th>
+                    </tr>
+                </thead>
+            </table>
+
         <div id="toolbar">
             @if(Session::get('role')==1 || in_array(16,Session::get('permissions')))
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="createNew()">New</a>
@@ -92,6 +94,7 @@
             <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveUser()" style="width:90px">Save</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
         </div>
+    </div>
     </div>
 </div>
 
