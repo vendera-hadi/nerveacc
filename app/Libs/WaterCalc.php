@@ -21,7 +21,7 @@ class WaterCalc extends Meter {
 
     public function customNote($date_start, $date_end)
     {
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end))."<br>Meter Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->getMeterUsed(),2)." x ".number_format($this->meter_rate,2)."<br>Biaya Beban Tetap Air : ".number_format($this->meter_burden,2)."<br>Biaya Pemeliharaan Meter : ".number_format($this->meter_admin,2);
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end))."<br>Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->getMeterUsed(),2)."&nbsp;&nbsp;&nbsp; Tarif (per M3) : ".number_format($this->meter_rate,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter_burden,2)."&nbsp;&nbsp;&nbsp;Adm : ".number_format($this->meter_admin,2);
         return $note;
     }
 

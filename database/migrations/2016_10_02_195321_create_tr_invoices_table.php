@@ -25,8 +25,8 @@ class CreateTrInvoicesTable extends Migration
             $table->decimal('inv_outstanding', 12, 2);
             $table->string('inv_faktur_no',25);
             $table->date('inv_faktur_date');
-            $table->boolean('inv_iscancel')->default(false);
-            $table->boolean('inv_post')->default(false);
+            $table->boolean('inv_iscancel')->default(false)->nullable();
+            $table->boolean('inv_post')->default(false)->nullable();
             $table->integer('invtp_id');
             $table->integer('contr_id');
             $table->integer('created_by');

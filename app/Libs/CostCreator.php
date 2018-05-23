@@ -282,14 +282,17 @@ class CostCreator {
     private function generateElectricity()
     {
         // electricity
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Meter Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->meter->meter_used,2);
+        $bpju = @MsConfig::where('name','ppju')->first()->value;
+        $public_area = @$this->costDetail->percentage;
+        if(@$this->costDetail->value_type == 'percent') $public_area = $public_area." %";
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->meter->meter_used,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter->meter_burden,2)."&nbsp;&nbsp;&nbsp;Tarif (/kWh): ".number_format($this->costDetail->costd_rate,2)."&nbsp;&nbsp;&nbsp;PPJU : ".$bpju."% &nbsp;&nbsp;&nbsp;Beban Bersama : ".$public_area;
         return $this->defineOutput($note);
     }
 
     private function generateWater()
     {
         // water
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Meter Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->meter->meter_used,2);
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->meter->meter_used,2)."&nbsp;&nbsp;&nbsp; Tarif (per M3) : ".number_format($this->costDetail->costd_rate,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter->meter_burden,2)."&nbsp;&nbsp;&nbsp;Adm : ".number_format($this->meter->meter_admin,2);
         return $this->defineOutput($note);
     }
 

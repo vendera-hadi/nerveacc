@@ -654,6 +654,7 @@ class InvoiceController extends Controller
             $invoice_data = TrInvoice::select('tr_invoice.*', 'ms_unit.unit_code', 'ms_unit.va_utilities', 'ms_unit.va_maintenance')
                                     ->leftJoin('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
                                     ->leftJoin('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                                    ->where('inv_iscancel','!=',1)
                                     ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant','InvoiceType')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
                 $result = TrInvoiceDetail::select('tr_invoice_detail.id','tr_invoice_detail.invdt_amount','tr_invoice_detail.invdt_note','tr_invoice_detail.costd_id','tr_period_meter.prdmet_id','tr_period_meter.prd_billing_date','tr_meter.meter_start','tr_meter.meter_end','tr_meter.meter_used','tr_meter.meter_cost','ms_cost_detail.costd_name')

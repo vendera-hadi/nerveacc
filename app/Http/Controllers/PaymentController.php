@@ -401,6 +401,11 @@ class PaymentController extends Controller
     	$ids = $request->id;
         if(!is_array($ids)) $ids = [$ids];
 
+        // tambahin checking id yg uda posted ga perlu posting lg (23mei18)
+        $ids = TrInvoicePaymhdr::where('invpayh_post',0)->whereIn('id', $ids)->pluck('id');
+        if(count($ids) < 1) return response()->json(['error'=>1, 'message'=> "0 Invoice Terposting"]);
+        // echo $checkIds; die();
+
     	$coayear = date('Y');
         $month = date('m');
         $journal = [];

@@ -283,7 +283,7 @@
         $( ".history" ).show();
       }else if(hasil == 'outinv'){
         $( ".unit,.dates" ).show();
-        $( ".history,.payment,unit2" ).hide();
+        $( ".history,.payment,.unit2" ).hide();
       }else if(hasil == 'payment'){
         $( ".dates,.payment" ).show();
         $( ".history,.unit,.unit2" ).hide();

@@ -57,7 +57,9 @@ class ElectricityCalc extends Meter {
 
     public function customNote($date_start, $date_end)
     {
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end))."<br>Meter Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Meter Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pemakaian : ".number_format($this->getMeterUsed(),2)."<br>BPJU ".@$this->bpju."% :".$this->bpju_cost;
+        $public_area = $this->percentage;
+        if($this->value_type == 'percent') $public_area = $this->percentage." %";
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end))."<br>Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->getMeterUsed(),2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter_burden,2)."&nbsp;&nbsp;&nbsp;Tarif (/kWh): ".number_format($this->meter_rate,2)."&nbsp;&nbsp;&nbsp;PPJU : ".@$this->bpju."% &nbsp;&nbsp;&nbsp;Beban Bersama : ".$public_area;
         return $note;
     }
 
