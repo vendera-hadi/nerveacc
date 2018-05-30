@@ -16,7 +16,7 @@ class CreateMsInvoiceTypesTable extends Migration
         Schema::create('ms_invoice_type', function (Blueprint $table) {
             $table->increments('id');
             $table->string('invtp_name',50);
-            $table->char('invtp_prefix',3);
+            $table->varchar('invtp_prefix',3);
             $table->char('invtp_coa_ar',10);
             $table->integer('created_by');
             $table->integer('updated_by');

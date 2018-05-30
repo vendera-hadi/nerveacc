@@ -198,7 +198,7 @@ class Invoice {
 
     public function getContract()
     {
-        return $this->contract;
+        return $this->contract ? $this->contract : false;
     }
 
     /* PRIVATE FUNCTIONS */

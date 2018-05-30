@@ -21,4 +21,14 @@ class MsUnit extends Model
    {
       return $this->hasOne('App\Models\MsUnitOwner', 'unit_id');
    }
+
+   public function createdBy()
+   {
+      return $this->belongsTo('App\Models\User', 'created_by');
+   }
+
+   public function updatedBy()
+   {
+      return $this->belongsTo('App\Models\User', 'created_by');
+   }
 }

@@ -13,7 +13,7 @@ class WaterCalc extends Meter {
         try{
             $this->meter_cost = $this->getMeterUsed() * $this->meter_rate;
             $this->total = $this->meter_cost + $this->meter_burden + $this->meter_admin;
-            return round($this->total,2);
+            return round($this->total);
         }catch(Exception $e){
             return false;
         }

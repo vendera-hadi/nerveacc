@@ -163,7 +163,7 @@ class CostCreator {
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
             $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
         }
-        $this->detailAmount = round($amount,2);
+        $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
 
@@ -185,7 +185,7 @@ class CostCreator {
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." ".$diff->format('%d')." / $totalDayOfMonth days)";
 
         $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
-        $this->detailAmount = round($amount,2);
+        $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
 
@@ -211,7 +211,7 @@ class CostCreator {
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
             $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
         }
-        $this->detailAmount = round($amount,2);
+        $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
 
@@ -232,7 +232,7 @@ class CostCreator {
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." $kelebihanHari / $totalDayOfMonth days)";
 
         $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
-        $this->detailAmount = round($amount,2);
+        $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
 
@@ -247,7 +247,7 @@ class CostCreator {
         $note = $this->costDetail->costd_name." (Rp. ".number_format($this->costDetail->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('F Y',strtotime($this->periodStart))." s/d ".date('F Y',strtotime($this->periodStart." +".$ctrInv->continv_period." months"));
         // rumus cost + burden + admin
         $amount = $this->costDetail->costd_rate / $npp_building * $npp_unit;
-        $this->detailAmount = round($amount,2);
+        $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
 
@@ -260,7 +260,7 @@ class CostCreator {
         if($this->monthGapNext > 1) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
         // rumus cost + burden + admin
         $amount = $this->costDetail->costd_rate + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
-        $this->detailAmount = round($amount,2);
+        $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
 

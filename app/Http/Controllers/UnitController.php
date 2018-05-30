@@ -68,6 +68,22 @@ class UnitController extends Controller
                         $fetch = $fetch->whereHas('owner.tenant', function($query) use($filter){
                             $query->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),'ilike','%'.$filter->value.'%');
                         });
+                    }else if(@$filter->field == 'untype_name'){
+                        $fetch = $fetch->whereHas('UnitType', function($query) use($filter){
+                            $query->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),'ilike','%'.$filter->value.'%');
+                        });
+                    }else if(@$filter->field == 'floor_name'){
+                        $fetch = $fetch->whereHas('MsFloor', function($query) use($filter){
+                            $query->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),'ilike','%'.$filter->value.'%');
+                        });
+                    }else if(@$filter->field == 'created_by'){
+                        $fetch = $fetch->whereHas('createdBy', function($query) use($filter){
+                            $query->where(\DB::raw('lower(trim(name))'),'ilike','%'.$filter->value.'%');
+                        });
+                    }else if(@$filter->field == 'updated_by'){
+                        $fetch = $fetch->whereHas('updatedBy', function($query) use($filter){
+                            $query->where(\DB::raw('lower(trim(name))'),'ilike','%'.$filter->value.'%');
+                        });
                     }else{
                         if($op == 'like') $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
                         else $fetch = $fetch->where($filter->field, $op, $filter->value);

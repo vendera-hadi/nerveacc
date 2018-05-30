@@ -106,22 +106,34 @@
                     <input name="costd_burden" class="easyui-textbox" label="Biaya Abodemen:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
                 </div>
                 <div style="margin-bottom:10px">
-                    <input name="costd_admin" class="easyui-textbox" label="Biaya Admin:" style="width:100%" data-options="required:true,validType:'length[0,9]'">
+                    <select class="easyui-combobox" required="true" name="costd_admin_type" label="Biaya Admin:" style="width:30%;">
+                        <option value="value" >Rp</option>
+                        <option value="percent">%</option>
+                    </select>
+                    <input name="costd_admin" class="easyui-textbox" label="" style="width:60%" data-options="required:true,validType:'length[0,9]'">
                 </div>
                 <div style="margin-bottom:10px">
                     <input name="costd_unit" class="easyui-textbox" label="Satuan:" style="width:100%" data-options="required:true,validType:'length[0,10]'">
                 </div>
                 <div style="margin-bottom:10px">
-                    <select id="cc" class="easyui-combobox" required="true" name="costd_ismeter" label="Komponen Ber-Meter:" style="width:300px;">
+                    <select id="ismeter" class="easyui-combobox" required="true" name="costd_ismeter" label="Komponen Ber-Meter:" style="width:300px;">
                         <option value="true" >yes</option>
                         <option value="false">no</option>
                     </select>
                 </div>
+                <div style="margin-bottom:10px" id="showdetail">
+                    <select class="easyui-combobox" required="true" name="costd_show_detail" label="Show Detail to Invoice:" style="width:300px;">
+                        <option value="true" >yes</option>
+                        <option value="false">no</option>
+                    </select>
+                </div>
+
+
                 <br><br>
                 <h5><b>Opsi untuk listrik, Hiraukan jika bukan</b></h5>
                 <br>
                 <div style="margin-bottom:10px">
-                    <select class="easyui-combobox" name="value_type" label="Use Percent" style="width:300px;">
+                    <select class="easyui-combobox" name="value_type" label="Use Percent (Public Area)" style="width:300px;">
                         <option value="value">no (default)</option>
                         <option value="percent" >yes</option>
                     </select>
@@ -260,6 +272,11 @@
             if (row){
                 $('#dlg2').dialog('open').dialog('center').dialog('setTitle','Edit '+entity2);
                 $('#fm2').form('load',row);
+                if(row.costd_ismeter == 'yes'){
+                    $('#showdetail').show();
+                }else{
+                    $('#showdetail').hide();
+                }
                 url = update_url2+'?id='+row.id;
             }
         }
@@ -314,6 +331,10 @@
                 });
             }
         }
+
+        $(document).ready(function(){
+            console.log($('#ismeter').val(), 'meterr');
+        });
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection

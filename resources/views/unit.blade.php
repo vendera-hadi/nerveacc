@@ -35,16 +35,16 @@
                     <tr>
                         <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
                         <th field="unit_code" width="120" sortable="true">Unit Code</th>
-                        <th field="tenan_name" width="120" sortable="true">Owner</th>
+                        <th field="tenan_name" width="120" >Owner</th>
                         <!-- <th field="unit_name" width="120" sortable="true">Unit Name</th> -->
                         <th field="unit_sqrt" width="120" sortable="true">Luas</th>
                         <th field="va_utilities" width="120" sortable="true">VA Utilities</th>
                         <th field="va_maintenance" width="120" sortable="true">VA Maintenance</th>
-                        <th field="untype_name" width="120" sortable="true">Unit Type</th>
-                        <th field="floor_name" width="120" sortable="true">Unit Floor</th>
-                        <th field="unit_isactive" width="120" sortable="true">Unit Active</th>
-                        <th field="created_by" width="120" sortable="true">Created By</th>
-                        <th field="updated_by" width="120" sortable="true">Updated By</th>
+                        <th field="untype_name" width="120" >Unit Type</th>
+                        <th field="floor_name" width="120" >Unit Floor</th>
+                        <th field="unit_isactive" width="120" >Unit Active</th>
+                        <th field="created_by" width="120" >Created By</th>
+                        <th field="updated_by" width="120" >Updated By</th>
                     </tr>
                 </thead>
             </table>

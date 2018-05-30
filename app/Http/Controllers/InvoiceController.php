@@ -545,6 +545,7 @@ class InvoiceController extends Controller
             $invoice->setPeriod(date('m',strtotime($sch->period_start)), date('Y',strtotime($sch->period_end)));
 
             $contract = $invoice->getContract();
+            if(!$contract) continue;
             echo "<br><b>Contract # ".$contract->contr_no."</b> ";
             if(!$invoice->exists()){
                 // generating cost details
@@ -1269,22 +1270,7 @@ class InvoiceController extends Controller
 
     public function test()
     {
-        $list = TrInvoice::where('inv_outstanding','>',0)->where('inv_post',1)->where('inv_iscancel',0)->whereRaw("NOW()::date =  (inv_duedate + interval '7 day')::date")->get();
-        foreach ($list as $invoice) {
-            // masukin invoice dalam antrean
-            // try{
-                \Mail::to(@$invoice->MsTenant->tenan_email)
-                        // ->cc($moreUsers)
-                        ->send(new \App\Mail\SuratPeringatan('sp1', $invoice));
-                $this->info("Sending Email to ".@$invoice->MsTenant->tenan_email);
-            // }catch(\Exception $e){
-            //     // do nothing or inform to admin sending sp gagal
-            // }
-        }
-
-
-        // $inv = TrInvoice::findOrFail(12342);
-        // \Mail::to($inv->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($inv));
+        // test function
     }
 
     public function unposting(Request $request)

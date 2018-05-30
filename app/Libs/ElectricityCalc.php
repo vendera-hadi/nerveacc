@@ -49,7 +49,7 @@ class ElectricityCalc extends Meter {
                 $total += $grossup_total;
             }
               // echo "Grandtotal $total<br>";
-            return round($total,2);
+            return round($total);
         }catch(Exception $e){
             return false;
         }
