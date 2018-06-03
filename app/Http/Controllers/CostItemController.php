@@ -115,7 +115,7 @@ class CostItemController extends Controller
     public function delete(Request $request){
         try{
             $id = $request->id;
-            $exceptions = [1,2,4,5,6,9,10];
+            $exceptions = [1,2,4,5,6,7,9,10];
             // tambahin stamp
             $stamp = MsCostItem::where('cost_code','STAMP')->first();
             if($stamp) $exceptions[] = $stamp->id;
@@ -161,6 +161,7 @@ class CostItemController extends Controller
                 $temp['percentage'] = $value->percentage;
                 $temp['grossup_pph'] = $value->grossup_pph;
                 $temp['costd_ismeter'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
+                $temp['costd_admin_type']= $value->costd_admin_type;
                 $result['rows'][] = $temp;
             }
             return response()->json($result);

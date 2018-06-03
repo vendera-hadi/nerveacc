@@ -145,6 +145,12 @@
                                 </div>
 
                                 <div class="form-group">
+                                  <label>Use Materai</label><br>
+                                  <input type="radio" name="use_materai" value="1" @if($use_materai == 1) checked @endif> &nbsp; Active &nbsp;&nbsp;
+                                  <input type="radio" name="use_materai" value="0" @if($use_materai == 0) checked @endif> &nbsp; Not Active
+                                </div>
+
+                                <div class="form-group">
                                   <label>Prefix Kuitansi (max 3 Character)</label>
                                   <input type="text" name="prefix_kuitansi" class="form-control" value="{{$prefixKuitansi}}" maxlength="3">
                                 </div>

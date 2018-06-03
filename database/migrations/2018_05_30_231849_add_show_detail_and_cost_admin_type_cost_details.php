@@ -16,6 +16,7 @@ class AddShowDetailAndCostAdminTypeCostDetails extends Migration
         Schema::table('ms_cost_detail', function (Blueprint $table) {
             $table->enum("costd_admin_type",["value","percent"])->default("value")->nullable();
             $table->boolean("costd_show_detail")->default(false)->nullable();
+            $table->boolean("year_cycle")->default(true)->nullable();
         });
     }
 

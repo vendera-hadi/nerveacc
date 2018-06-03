@@ -12,7 +12,12 @@ class WaterCalc extends Meter {
     {
         try{
             $this->meter_cost = $this->getMeterUsed() * $this->meter_rate;
-            $this->total = $this->meter_cost + $this->meter_burden + $this->meter_admin;
+            $this->total = $this->meter_cost + $this->meter_burden;
+            if($this->costDetail->costd_admin_type == 'percent'){
+                $this->total += ($this->costDetail->costd_admin/100 * $this->meter_cost);
+            }else{
+                $this->total += $this->costDetail->costd_admin;
+            }
             return round($this->total);
         }catch(Exception $e){
             return false;
@@ -21,7 +26,9 @@ class WaterCalc extends Meter {
 
     public function customNote($date_start, $date_end)
     {
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end))."<br>Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->getMeterUsed(),2)."&nbsp;&nbsp;&nbsp; Tarif (per M3) : ".number_format($this->meter_rate,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter_burden,2)."&nbsp;&nbsp;&nbsp;Adm : ".number_format($this->meter_admin,2);
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end));
+        if(!empty(@$this->costDetail->costd_show_detail))
+            $note .= "<br>Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->getMeterUsed(),2)."&nbsp;&nbsp;&nbsp; Tarif (per M3) : ".number_format($this->meter_rate,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter_burden,2)."&nbsp;&nbsp;&nbsp;Adm : ".number_format($this->meter_admin,2);
         return $note;
     }
 

@@ -600,7 +600,12 @@ class PeriodMeterController extends Controller
                             if(empty($public_area)) $public_area = 0;
                         }
                         // echo "Public Area $public_area<br>";
-                        $total = $subtotal + $costdt->costd_admin + $public_area;
+                        if(!empty(@$costdt->costd_show_detail)){
+                            $admincost = $costdt->costd_admin / 100 * $subtotal;
+                        }else{
+                            $admincost = $costdt->costd_admin;
+                        }
+                        $total = $subtotal + $admincost + $public_area;
                         // echo "Total before grossup $total<br>";
                         if(!empty($costdt->grossup_pph)){
                             $grossup_total = $total / 0.9 * 0.1;
@@ -613,7 +618,12 @@ class PeriodMeterController extends Controller
                     }else{
                         // AIR
                         $meter_cost = $meter_used * $costdt->costd_rate;
-                        $total =  $meter_cost + $costdt->costd_burden + $costdt->costd_admin;
+                        if(!empty(@$costdt->costd_show_detail)){
+                            $admincost = $costdt->costd_admin / 100 * $meter_cost;
+                        }else{
+                            $admincost = $costdt->costd_admin;
+                        }
+                        $total =  $meter_cost + $costdt->costd_burden + $admincost;
                         $meter_row->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>0,'total'=>$total]);
                     }
                 }

@@ -45,6 +45,8 @@ class CompanyController extends Controller
         $data['start_sp2'] = @MsConfig::where('name','start_sp2')->first()->value;
 
         $data['accounts'] = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['use_materai'] = @MsConfig::where('name','use_materai')->first()->value;
+
         return view('config',$data);
     }
 

@@ -41,7 +41,12 @@ class ElectricityCalc extends Meter {
                 if(empty($public_area)) $public_area = 0;
             }
             // echo "Public Area $public_area<br>";
-            $total = $subtotal + $this->meter_admin + $public_area;
+            if($this->costDetail->costd_admin_type == 'percent'){
+                $admincost = $this->costDetail->costd_admin/100 * $subtotal;
+            }else{
+                $admincost = $this->costDetail->costd_admin;
+            }
+            $total = $subtotal + $admincost + $public_area;
             // echo "Total before grossup $total<br>";
             if(!empty($this->grossup)){
                 $grossup_total = $total / 0.9 * 0.1;
@@ -59,7 +64,9 @@ class ElectricityCalc extends Meter {
     {
         $public_area = $this->percentage;
         if($this->value_type == 'percent') $public_area = $this->percentage." %";
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end))."<br>Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->getMeterUsed(),2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter_burden,2)."&nbsp;&nbsp;&nbsp;Tarif (/kWh): ".number_format($this->meter_rate,2)."&nbsp;&nbsp;&nbsp;PPJU : ".@$this->bpju."% &nbsp;&nbsp;&nbsp;Beban Bersama : ".$public_area;
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($date_start))." - ".date('d/m/Y',strtotime($date_end));
+        if(!empty(@$this->costDetail->costd_show_detail))
+            $note .= "<br>Awal : ".number_format($this->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->getMeterUsed(),2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter_burden,2)."&nbsp;&nbsp;&nbsp;Tarif (/kWh): ".number_format($this->meter_rate,2)."&nbsp;&nbsp;&nbsp;PPJU : ".@$this->bpju."% &nbsp;&nbsp;&nbsp;Beban Bersama : ".$public_area;
         return $note;
     }
 

@@ -3,6 +3,7 @@ namespace App\Libs;
 
 use App\Models\TrContract;
 use App\Models\MsUnitOwner;
+use App\Models\MsTenant;
 
 class Contract {
 
@@ -72,5 +73,10 @@ class Contract {
         $owner = $this->getOwner();
         if(!$owner) return false;
         return TrContract::where('unit_id',$this->contract->unit_id)->where('tenan_id', $owner->tenan_id)->where('contr_status','confirmed')->where('contr_iscancel',false)->first();
+    }
+
+    public function getTenant()
+    {
+        return MsTenant::find($this->contract->tenan_id);
     }
 }

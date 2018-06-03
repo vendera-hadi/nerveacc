@@ -129,6 +129,8 @@ class CostCreator {
                 return $this->generateSinkingFund();
             }else if($this->costDetail->costitem->is_insurance){
                 return $this->generateInsurance();
+            }else if($this->costDetail->costitem->is_sewa){
+                return $this->generateSewa();
             }else{
                 return $this->generateOtherNonMeter();
             }
@@ -143,7 +145,12 @@ class CostCreator {
 
     private function generateServiceCharge()
     {
-        if(!$this->checkLastInvoicePeriodRumus()) return false;
+        if(!empty(@$this->costDetail->year_cycle)){
+            if(!$this->checkLastInvoicePeriodRumus()) return false;
+        }else{
+            $ctrInv = $this->getContractInvoice();
+            $this->monthGapNext = $ctrInv->continv_period - 1;
+        }
         $currUnit = MsUnit::find($this->contract->unit_id);
         $alias = @MsConfig::where('name','service_charge_alias')->first()->value;
 
@@ -156,12 +163,22 @@ class CostCreator {
             $note = $alias." ".date('F Y',strtotime($this->periodStart))." (ProRate $kelebihanHari / $totalDayOfMonth days) ";
             if($this->monthGapNext > 0) $note .= "s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".$this->monthGapNext." months +  $kelebihanHari days)";
-            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
+            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden;
+            if($this->costDetail->costd_admin_type == 'percent'){
+                $amount += ($this->costDetail->costd_admin/100 * $amount);
+            }else{
+                $amount += $this->costDetail->costd_admin;
+            }
         }else{
             $note = $alias." ".date('F Y',strtotime($this->periodStart));
             if($this->monthGapNext > 0) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
-            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
+            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden;
+            if($this->costDetail->costd_admin_type == 'percent'){
+                $amount += ($this->costDetail->costd_admin/100 * $amount);
+            }else{
+                $amount += $this->costDetail->costd_admin;
+            }
         }
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
@@ -184,14 +201,24 @@ class CostCreator {
         $note = $alias." ".date('d F Y',strtotime($this->periodStart))." s/d ".date('d F Y',strtotime($this->periodEnd));
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." ".$diff->format('%d')." / $totalDayOfMonth days)";
 
-        $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
+        $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden;
+        if($this->costDetail->costd_admin_type == 'percent'){
+            $amount += ($this->costDetail->costd_admin/100 * $amount);
+        }else{
+            $amount += $this->costDetail->costd_admin;
+        }
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
 
     private function generateSinkingFund()
     {
-        if(!$this->checkLastInvoicePeriodRumus()) return false;
+        if(!empty(@$this->costDetail->year_cycle)){
+            if(!$this->checkLastInvoicePeriodRumus()) return false;
+        }else{
+            $ctrInv = $this->getContractInvoice();
+            $this->monthGapNext = $ctrInv->continv_period - 1;
+        }
         $currUnit = MsUnit::find($this->contract->unit_id);
 
         if($this->checkNeedProRate()){
@@ -203,13 +230,23 @@ class CostCreator {
             $note = $this->costDetail->costd_name." (SF)  ".date('F Y',strtotime($this->periodStart))." (ProRate $kelebihanHari / $totalDayOfMonth days)" ;
             if($this->monthGapNext > 0) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".$this->monthGapNext." months + $kelebihanHari days)";
-            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
+            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden;
+            if($this->costDetail->costd_admin_type == 'percent'){
+                $amount += ($this->costDetail->costd_admin/100 * $amount);
+            }else{
+                $amount += $this->costDetail->costd_admin;
+            }
         }else{
             $note = $this->costDetail->costd_name." (SF)  ".date('F Y',strtotime($this->periodStart));
 
             if($this->monthGapNext > 0) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
-            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
+            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden;
+            if($this->costDetail->costd_admin_type == 'percent'){
+                $amount += ($this->costDetail->costd_admin/100 * $amount);
+            }else{
+                $amount += $this->costDetail->costd_admin;
+            }
         }
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
@@ -231,7 +268,12 @@ class CostCreator {
         $note = $this->costDetail->costd_name." (SF)  ".date('d F Y',strtotime($this->periodStart))." s/d ".date('d F Y',strtotime($this->periodEnd));
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." $kelebihanHari / $totalDayOfMonth days)";
 
-        $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
+        $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden;
+        if($this->costDetail->costd_admin_type == 'percent'){
+            $amount += ($this->costDetail->costd_admin/100 * $amount);
+        }else{
+            $amount += $this->costDetail->costd_admin;
+        }
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
@@ -259,7 +301,12 @@ class CostCreator {
         $note = $this->costDetail->costd_name." Periode ".date('F Y',strtotime($this->periodStart));
         if($this->monthGapNext > 1) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
         // rumus cost + burden + admin
-        $amount = $this->costDetail->costd_rate + $this->costDetail->costd_burden + $this->costDetail->costd_admin;
+        $amount = $this->costDetail->costd_rate + $this->costDetail->costd_burden;
+        if($this->costDetail->costd_admin_type == 'percent'){
+            $amount += ($this->costDetail->costd_admin/100 * $amount);
+        }else{
+            $amount += $this->costDetail->costd_admin;
+        }
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
@@ -285,14 +332,37 @@ class CostCreator {
         $bpju = @MsConfig::where('name','ppju')->first()->value;
         $public_area = @$this->costDetail->percentage;
         if(@$this->costDetail->value_type == 'percent') $public_area = $public_area." %";
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->meter->meter_used,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter->meter_burden,2)."&nbsp;&nbsp;&nbsp;Tarif (/kWh): ".number_format($this->costDetail->costd_rate,2)."&nbsp;&nbsp;&nbsp;PPJU : ".$bpju."% &nbsp;&nbsp;&nbsp;Beban Bersama : ".$public_area;
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date));
+        if(!empty(@$this->costDetail->costd_show_detail))
+            $note .= "<br>Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->meter->meter_used,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter->meter_burden,2)."&nbsp;&nbsp;&nbsp;Tarif (/kWh): ".number_format($this->costDetail->costd_rate,2)."&nbsp;&nbsp;&nbsp;PPJU : ".$bpju."% &nbsp;&nbsp;&nbsp;Beban Bersama : ".$public_area;
         return $this->defineOutput($note);
     }
 
     private function generateWater()
     {
         // water
-        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date))."<br>Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->meter->meter_used,2)."&nbsp;&nbsp;&nbsp; Tarif (per M3) : ".number_format($this->costDetail->costd_rate,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter->meter_burden,2)."&nbsp;&nbsp;&nbsp;Adm : ".number_format($this->meter->meter_admin,2);
+        $note = $this->costDetail->costd_name." : ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_start_date))." - ".date('d/m/Y',strtotime($this->lastPeriodMeter->prdmet_end_date));
+        if(!empty(@$this->costDetail->costd_show_detail))
+            $note .= "<br>Awal : ".number_format($this->meter->meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($this->meter->meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($this->meter->meter_used,2)."&nbsp;&nbsp;&nbsp; Tarif (per M3) : ".number_format($this->costDetail->costd_rate,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($this->meter->meter_burden,2)."&nbsp;&nbsp;&nbsp;Adm : ".number_format($this->meter->meter_admin,2);
+        return $this->defineOutput($note);
+    }
+
+    // additional JUN18
+    private function generateSewa()
+    {
+        if(!$this->checkLastInvoicePeriod()) return false;
+        $ctrInv = $this->getContractInvoice();
+        $period = $ctrInv->continv_period;
+        // periode berjalan tidak perlu rumus check periode
+        $dateContract = date('d',strtotime($this->contract->contr_startdate));
+        $startInvoice = date('Y-m-'.$dateContract, strtotime($this->periodStart));
+        $endInvoice = date('Y-m-d', strtotime($startInvoice." +".$period." months - 1 day"));
+        $note = $this->costDetail->costd_name." Periode ".date('d F Y',strtotime($startInvoice))." s/d ".date('d F Y',strtotime($endInvoice));
+
+        // rumus luas area * cost rate * lama per bln
+        $currUnit = MsUnit::find($this->contract->unit_id);
+        $amount = $currUnit->unit_sqrt *$this->costDetail->costd_rate * $period;
+        $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
 
@@ -325,7 +395,7 @@ class CostCreator {
     private function checkLastInvoicePeriod()
     {
         $result = false;
-        $invoice = TrInvoice::where('invtp_id', $this->invtp->id)->where('contr_id', $this->contract->id)->where('inv_date','<',$this->invStartDate)->orderBy('id', 'desc')->first();
+        $invoice = TrInvoice::where('invtp_id', $this->invtp->id)->where('contr_id', $this->contract->id)->where('inv_date','<',$this->invStartDate)->where('inv_iscancel',0)->where('inv_post',1)->orderBy('id', 'desc')->first();
         $ctrInv = $this->getContractInvoice();
         if(!empty($invoice)){
             // cek inv date lalu + period apa sudah lewat ?
@@ -367,7 +437,7 @@ class CostCreator {
                 $this->monthGapNext = $last - $currentmonth;
 
                 // cari invoice yg ada dalam gap waktu ini
-                $invoice = TrInvoice::where('contr_id', $this->contract->id)->where('invtp_id',$this->invtp->id)->whereBetween(\DB::raw('EXTRACT(month from inv_date)'), [$first+1, $last+1])->where('inv_iscancel',0)->first();
+                $invoice = TrInvoice::where('contr_id', $this->contract->id)->where('invtp_id',$this->invtp->id)->whereBetween(\DB::raw('EXTRACT(month from inv_date)'), [$first+1, $last+1])->where('inv_iscancel',0)->where('inv_post',1)->first();
             }
         }
         // echo "<br>INVOICE:<br>".$invoice."<br><br>";

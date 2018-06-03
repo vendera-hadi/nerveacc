@@ -86,7 +86,7 @@ class InvoiceTypeController extends Controller
     public function update(Request $request){
         try{
         	$id = $request->id;
-            if(in_array($id, [1,2])){
+            if(in_array($id, [1,2,3])){
                 return response()->json(['errorMsg' => 'Invoice ini adalah default dari sistem dan tidak dapat diubah']);
             }
         	$input = $request->all();
@@ -101,7 +101,7 @@ class InvoiceTypeController extends Controller
     public function delete(Request $request){
         try{
         	$id = $request->id;
-            if(in_array($id, [1,2])){
+            if(in_array($id, [1,2,3])){
                 return response()->json(['errorMsg' => 'Invoice Type ini adalah default dari sistem dan tidak dapat dihapus']);
             }else{
         	   // MsInvoiceType::destroy($id);

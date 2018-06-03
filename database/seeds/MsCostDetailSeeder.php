@@ -86,9 +86,9 @@ class MsCostDetailSeeder extends Seeder
         ],
         [
             'cost_id' => 7,
-            'costd_name' => 'BIAYA PROMOSI LAIN 1',
+            'costd_name' => 'BIAYA SEWA OFFICE',
             'costd_unit' => 'M2',
-            'costd_rate' => '550',
+            'costd_rate' => '100000',
             'costd_burden' => 0,
             'costd_admin' => 0,
             'costd_ismeter' => FALSE

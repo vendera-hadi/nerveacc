@@ -109,6 +109,11 @@ class MsConfigSeeder extends Seeder
                 'name' => 'coa_ppn',
                 'desc' => 'COA PPN',
                 'value' => 21999
+            ],
+            [
+                'name' => 'use_materai',
+                'desc' => 'Use Materai',
+                'value' => 1
             ]
             ]);
     }

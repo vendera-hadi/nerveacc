@@ -122,35 +122,40 @@
                     </select>
                 </div>
                 <div style="margin-bottom:10px" id="showdetail">
-                    <select class="easyui-combobox" required="true" name="costd_show_detail" label="Show Detail to Invoice:" style="width:300px;">
+                    <select class="easyui-combobox" name="costd_show_detail" label="Show Detail to Invoice:" style="width:300px;">
+                        <option value="true" >yes</option>
+                        <option value="false">no</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom:10px" id="yearcycle">
+                    <select class="easyui-combobox" name="year_cycle" label="Using 1 Year Cycle:" style="width:300px;">
                         <option value="true" >yes</option>
                         <option value="false">no</option>
                     </select>
                 </div>
 
 
-                <br><br>
+                <!-- <br><br>
                 <h5><b>Opsi untuk listrik, Hiraukan jika bukan</b></h5>
-                <br>
-                <div style="margin-bottom:10px">
-                    <select class="easyui-combobox" name="value_type" label="Use Percent (Public Area)" style="width:300px;">
-                        <option value="value">no (default)</option>
-                        <option value="percent" >yes</option>
+                <br> -->
+                <div style="margin-bottom:10px" class="opsiListrik">
+                    <select class="easyui-combobox" name="value_type" label="Public Area Variable" style="width:30%;">
+                        <option value="value">Rp.</option>
+                        <option value="percent">%</option>
                     </select>
+                    <input name="percentage" class="easyui-textbox" label="" style="width:60%" data-options="">
                 </div>
-                <div style="margin-bottom:10px">
+                <div style="margin-bottom:10px" class="opsiListrik">
                     <select class="easyui-combobox" name="grossup_pph" label="Use Gross up PPH" style="width:300px;">
                         <option value="0">no</option>
                         <option value="1" >yes</option>
                     </select>
                 </div>
-                <div style="margin-bottom:10px">
-                    <input name="percentage" class="easyui-textbox" label="Value Percent / Cost:" style="width:100%" data-options="validType:'length[0,100]'">
-                </div>
                 <!-- <div style="margin-bottom:10px">
                     <input id="cc" class="easyui-combobox" required="true" name="cost_id" style="width:100%" label="Component Billing:" data-options="valueField:'id',textField:'text',url:'{{route('cost_detail.options')}}'">
                 </div> -->
-                <div style="margin-bottom:10px">
+                <div style="margin-bottom:10px" class="opsiListrik">
                     <input name="daya" class="easyui-textbox" label="Daya :" style="width:100%" data-options="validType:'length[0,100]'">
                 </div>
 
@@ -261,6 +266,25 @@
                 $('#fm2').form('clear');
                 $('#chosen-costitem').val(tempId);
                 url = insert_url2;
+                $('#showdetail').show();
+
+                if(tempId == 1){
+                    $('.opsiListrik').show();
+                }else{
+                    $('.opsiListrik').hide();
+                }
+
+                if(tempId == 1 || tempId == 2){
+                    $('#showdetail').show();
+                }else{
+                    $('#showdetail').hide();
+                }
+
+                if(tempId == 4 || tempId == 5){
+                    $('#yearcycle').show();
+                }else{
+                    $('#yearcycle').hide();
+                }
             }
         }];
 
@@ -272,10 +296,23 @@
             if (row){
                 $('#dlg2').dialog('open').dialog('center').dialog('setTitle','Edit '+entity2);
                 $('#fm2').form('load',row);
-                if(row.costd_ismeter == 'yes'){
+                // console.log(row.cost_id, 'IDs');
+                if(row.cost_id == 1){
+                    $('.opsiListrik').show();
+                }else{
+                    $('.opsiListrik').hide();
+                }
+
+                if(row.cost_id == 1 || row.cost_id == 2){
                     $('#showdetail').show();
                 }else{
                     $('#showdetail').hide();
+                }
+
+                if(row.cost_id == 4 || row.cost_id == 5){
+                    $('#yearcycle').show();
+                }else{
+                    $('#yearcycle').hide();
                 }
                 url = update_url2+'?id='+row.id;
             }
@@ -332,9 +369,6 @@
             }
         }
 
-        $(document).ready(function(){
-            console.log($('#ismeter').val(), 'meterr');
-        });
 </script>
 <script src="{{asset('js/jeasycrud.js')}}"></script>
 @endsection

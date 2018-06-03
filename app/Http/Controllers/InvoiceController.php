@@ -552,6 +552,7 @@ class InvoiceController extends Controller
                 $contract = new Contract($periodStart, $periodEnd);
                 $contract->setContract($sch->contract_id);
                 $cost_details = $contract->getCostItems($sch->invtp_id);
+                $tenant = $contract->getTenant();
                 $countCost = 0;
                 $tempDetails = [];
                 foreach ($cost_details as $costdt) {
@@ -577,8 +578,11 @@ class InvoiceController extends Controller
                         $invoice->addChild($dt);
                     }
                     $invoice->addDenda();
-                    $invoice->addPPN();
-                    $invoice->addMaterai();
+                    // tenan_isppn kalau aktif tambah PPN
+                    if(@$tenant->tenan_isppn) $invoice->addPPN();
+                    // kalau config materai aktif add materai
+                    $use_materai = @MsConfig::where('name','use_materai')->first()->value;
+                    if(!empty($use_materai)) $invoice->addMaterai();
                 // }
                 // echo "SKIPPED";
 
