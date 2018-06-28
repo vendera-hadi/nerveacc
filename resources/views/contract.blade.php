@@ -178,7 +178,6 @@
                             <tr class="text-center">
                                 <td>Component Billing</td>
                                 <td>Name</td>
-                                <td>Unit</td>
                                 <td>Cost Rate</td>
                                 <td>Cost Burden</td>
                                 <td>Cost Admin</td>

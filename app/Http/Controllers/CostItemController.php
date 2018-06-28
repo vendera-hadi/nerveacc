@@ -162,6 +162,8 @@ class CostItemController extends Controller
                 $temp['grossup_pph'] = $value->grossup_pph;
                 $temp['costd_ismeter'] = !empty($value->costd_ismeter) ? 'yes' : 'no';
                 $temp['costd_admin_type']= $value->costd_admin_type;
+                $temp['costd_show_detail'] = !empty($value->costd_show_detail) ? 'yes' : 'no';
+                $temp['year_cycle'] = !empty($value->year_cycle) ? 'yes' : 'no';
                 $result['rows'][] = $temp;
             }
             return response()->json($result);

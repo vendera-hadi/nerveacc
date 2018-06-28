@@ -110,7 +110,10 @@ class CostDetailController extends Controller
             if(empty(@$input['value_type'])) $input['value_type'] = 'value';
             if(empty(@$input['daya'])) $input['daya'] = 0;
             if(empty(@$input['percentage'])) $input['percentage'] = 0;
-            if(empty(@$input['grossup_pph'])) $input['percentage'] = 0;
+            if(empty(@$input['grossup_pph'])) $input['grossup_pph'] = 0;
+            if(empty(@$input['costd_show_detail'])) $input['costd_show_detail'] = 0;
+            if(empty(@$input['year_cycle'])) $input['year_cycle'] = 0;
+
             $input['costd_is'] = md5(date('Y-m-d H:i:s'));
             return MsCostDetail::create($input);
         }catch(\Exception $e){
@@ -125,7 +128,10 @@ class CostDetailController extends Controller
             if(empty(@$input['value_type'])) $input['value_type'] = 'value';
             if(empty(@$input['daya'])) $input['daya'] = 0;
             if(empty(@$input['percentage'])) $input['percentage'] = 0;
-            if(empty(@$input['grossup_pph'])) $input['percentage'] = 0;
+            if(empty(@$input['grossup_pph'])) $input['grossup_pph'] = 0;
+            if(empty(@$input['costd_show_detail'])) $input['costd_show_detail'] = 0;
+            if(empty(@$input['year_cycle'])) $input['year_cycle'] = 0;
+
             MsCostDetail::find($id)->update($input);
             return MsCostDetail::find($id);
         }catch(\Exception $e){
