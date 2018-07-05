@@ -16,10 +16,10 @@ class CreateMsMasterCoasTable extends Migration
         Schema::create('ms_master_coa', function (Blueprint $table) {
             $table->increments('id');
             $table->char('coa_year', 4);
-            $table->char('coa_code', 10);
-            $table->string('coa_name', 100);
+            $table->string('coa_code');
+            $table->string('coa_name');
             $table->boolean('coa_isparent')->default(0);
-            $table->biginteger('coa_level');
+            $table->string('coa_level');
             $table->char('coa_type', 10);
             $table->decimal('coa_beginning', 18, 2);
             $table->decimal('coa_debit', 18, 2);
