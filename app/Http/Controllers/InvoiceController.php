@@ -9,6 +9,7 @@ use Auth;
 use App\Libs\Invoice;
 use App\Libs\Contract;
 use App\Libs\CostCreator;
+use App\Jobs\SendMail;
 
 // load model
 use App\Models\TrInvoice;
@@ -710,6 +711,15 @@ class InvoiceController extends Controller
          }
     }
 
+    // public function sendInvoice(Request $request, $id){
+    //     $invoice = TrInvoice::find($id);
+    //     $mailClass = new \App\Mail\InvoiceMail($invoice);
+    //     $cc = @MsConfig::where('name','cc_email')->first()->value;
+    //     if(empty($cc)) $cc = [];
+    //     dispatch(new SendMail($mailClass, 'vendera.hadi@gmail.com', []));
+    //     echo "email sent";
+    // }
+
     public function print_kwitansi(Request $request){
         $sendKwitansi = @$request->send;
         $company = MsCompany::with('MsCashbank')->first()->toArray();
@@ -936,8 +946,12 @@ class InvoiceController extends Controller
                         $invoice = TrInvoice::find($id);
                         $invoice->update(['inv_post'=>1]);
                         // send email if flag send mail is active
-                        if(!empty($sendMailFlag))
-                            \Mail::to($invoice->MsTenant->tenan_email)->send(new \App\Mail\InvoiceMail($invoice));
+                        if(!empty($sendMailFlag)){
+                            $cc = @MsConfig::where('name','cc_email')->first()->value;
+                            if(empty($cc)) $cc = [];
+                            $mailClass = new \App\Mail\InvoiceMail($invoice);
+                            dispatch(new SendMail($mailClass, $invoice->MsTenant->tenan_email, $cc));
+                        }
                     }
                 }
             });
@@ -1275,6 +1289,7 @@ class InvoiceController extends Controller
     public function test()
     {
         // test function
+
     }
 
     public function unposting(Request $request)

@@ -386,7 +386,7 @@ class CostCreator {
     {
         $result = true;
         // check last invoice dan expired kapan
-        if(!$this->checkLastInvoicePeriod() && $this->isMeter()){
+        if(!$this->checkLastInvoicePeriod() && !$this->isMeter()){
             $result = false;
         }
         return $result;
@@ -400,6 +400,7 @@ class CostCreator {
         if(!empty($invoice)){
             // cek inv date lalu + period apa sudah lewat ?
             $estimatedEndInv = date('Y-m-d', strtotime($invoice->inv_date." +".$ctrInv->continv_period." months"));
+            // dd("$this->invStartDate >= $estimatedEndInv");
             if($this->invStartDate >= $estimatedEndInv){
                 // suda lewat
                 $result = true;

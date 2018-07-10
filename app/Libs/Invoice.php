@@ -260,10 +260,11 @@ class Invoice {
           if(empty($config))
             $duedate = date('Y-m-d', strtotime($this->invStartDate.' +15 days'));
           else
-            $duedate = date('Y-m-'.$config, strtotime($this->periodStart.' +1 month'));
+            $duedate = date('Y-m-'.$config, strtotime($this->invStartDate.' +'.(int)$config.' days'));
         } catch(\Exception $e) {
             $duedate = date('Y-m-d', strtotime($this->invStartDate.' +15 days'));
         }
+
         $this->invEndDate = $duedate;
     }
 
