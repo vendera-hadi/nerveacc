@@ -74,8 +74,8 @@ table tr td{font-size:9pt;}
     $no_invoice = $inv['inv_number'];
     $invoice_date = date('d/m/Y', strtotime($inv['inv_date']));
     $invoice_due_date = date('d/m/Y', strtotime($inv['inv_duedate']));
-    $tenan_name = $inv['ms_tenant']['tenan_taxname'];
-    $tenan_address = $inv['ms_tenant']['tenan_tax_address'];
+    $tenan_name = $inv['ms_tenant']['tenan_name'];
+    $tenan_address = $inv['ms_tenant']['tenan_address'];
     $invoice_type_prefix = $inv['invoice_type']['invtp_prefix'];
     $virtual_account = ($invoice_type_prefix == 'MN ') ? $inv['va_maintenance'] : $inv['va_utilities'];
     ?>
