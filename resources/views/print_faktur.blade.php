@@ -39,7 +39,7 @@ body {
     padding: 0cm;
     /*border: 1px #ccc solid;*/
     height: 250mm;
-    outline: 1cm #fff solid;
+    /*outline: 1cm #fff solid;*/
     /*background: url("'.base_url().'asset/copied.png") no-repeat center;*/
     /*background-size: 80%;*/
 }
@@ -81,13 +81,19 @@ table tr td{font-size:9pt;}
     ?>
     <div class="page">
         <div class="subpage">
-            <div style="position:absolute;"><img src="{{asset($company_logo)}}" style="width:110px;"/></div>
-            <div style="font-size:10pt; text-align: center; width: 100%;">
-                    <b>{{ $company_name }}</b><br>
-                    {!! $company_address !!}<br>
-                    {{'Tlp: '.$company_phone.'/Fax: '.$company_fax}}<br><br><br>
-            </div>
-
+            <table>
+                <tr>
+                    <td><div style="position:absolute;"><img src="{{asset($company_logo)}}" style="width:110px;"/></div></td>
+                    <td>
+                        <div style="font-size:10pt; text-align: center; width: 100%;">
+                            <b>{{ $company_name }}</b><br>
+                            {!! $company_address !!}<br>
+                            {{'Tlp: '.$company_phone.'/Fax: '.$company_fax}}<br><br><br>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            
             <table style="width:100%;">
                 <tr>
                     <td style="text-align:center;" colspan="2"><h4 style="font-size:12pt;">INVOICE</h4></td>
@@ -115,7 +121,7 @@ table tr td{font-size:9pt;}
                     </td>
                 </tr>
                 <tr>
-                    <td rowspan="2" width="60%" style="vertical-align: top;"><?php echo $tenan_address; ?></td>
+                    <td rowspan="2" width="60%" style="vertical-align: top;">&nbsp;</td>
                     <td width="40%">
                         <table width="100%">
                             <tr>
