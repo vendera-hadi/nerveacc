@@ -38,7 +38,7 @@ body {
 .subpage {
     padding: 0cm;
     /*border: 1px #ccc solid;*/
-    height: 250mm;
+    height: 240mm;
     /*outline: 1cm #fff solid;*/
     /*background: url("'.base_url().'asset/copied.png") no-repeat center;*/
     /*background-size: 80%;*/
@@ -83,7 +83,7 @@ table tr td{font-size:9pt;}
         <div class="subpage">
             <table>
                 <tr>
-                    <td><div style="position:absolute;"><img src="{{asset($company_logo)}}" style="width:110px;"/></div></td>
+                    <td><img src="{{asset($company_logo)}}" style="width:110px;"/></td>
                     <td>
                         <div style="font-size:10pt; text-align: center; width: 100%;">
                             <b>{{ $company_name }}</b><br>
