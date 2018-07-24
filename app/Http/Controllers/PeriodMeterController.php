@@ -328,8 +328,8 @@ class PeriodMeterController extends Controller
                     $meter_used = ($meter_end[$key] - $meter_start[$key]);
                     if($cost_id[$key] == '1'){
                         //CEK MIN 40 JAM PEMAKAIAN LISTRIK
-                        $min = 40 * $daya[$key] * $meter_rate[$key];
-                        $elec_cost = $meter_used *  $meter_rate[$key];
+                        $min = (40 * $daya[$key] * $meter_rate[$key]) + $meter_burden[$key];
+                        $elec_cost = ($meter_used *  $meter_rate[$key]) + $meter_burden[$key];
                         if($elec_cost > $min){
                             $meter_cost = $elec_cost;
                         }else{
@@ -580,8 +580,8 @@ class PeriodMeterController extends Controller
                     // LISTRIK
                     if ($costdt->costitem->id == 1){
                         //CEK MIN 40 JAM PEMAKAIAN LISTRIK
-                        $min = 40 * $value->daya * $costdt->costd_rate;
-                        $elec_cost = $meter_used *  $costdt->costd_rate;
+                        $min = (40 * $value->daya * $costdt->costd_rate) + $costdt->costd_burden;
+                        $elec_cost = ($meter_used *  $costdt->costd_rate) + $costdt->costd_burden;
                         if($elec_cost > $min){
                             $meter_cost = $elec_cost;
                         }else{

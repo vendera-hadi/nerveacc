@@ -81,9 +81,9 @@ table tr td{font-size:9pt;}
     ?>
     <div class="page">
         <div class="subpage">
-            <table>
+            <table style="width:100%">
                 <tr>
-                    <td><img src="{{asset($company_logo)}}" style="width:110px;"/></td>
+                    <td style="width:120px;"><img src="{{asset($company_logo)}}" style="width:120px;"/></td>
                     <td>
                         <div style="font-size:10pt; text-align: center; width: 100%;">
                             <b>{{ $company_name }}</b><br>
@@ -196,7 +196,7 @@ table tr td{font-size:9pt;}
                         {!!$inv['label']!!}
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
-                        Jakarta, <?php echo date('d M Y'); ?><br><br>
+                        Jakarta, <?php echo date('d M Y',$inv['inv_date']); ?><br><br>
                         @if(!empty($signature) && !empty($signatureFlag))
                         <img src="{{asset($signature)}}" width="150">
                         <br><br>
