@@ -196,7 +196,7 @@ table tr td{font-size:9pt;}
                         {!!$inv['label']!!}
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
-                        Jakarta, <?php echo date('d M Y',$inv['inv_date']); ?><br><br>
+                        Jakarta, <?php echo date('d M Y',strtotime($inv['inv_date'])); ?><br><br>
                         @if(!empty($signature) && !empty($signatureFlag))
                         <img src="{{asset($signature)}}" width="150">
                         <br><br>
