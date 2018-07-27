@@ -578,7 +578,8 @@ class InvoiceController extends Controller
                     foreach ($tempDetails as $dt) {
                         $invoice->addChild($dt);
                     }
-                    $invoice->addDenda();
+                    $use_denda = @MsConfig::where('name','denda_active')->first()->value;
+                    if(!empty($use_denda)) $invoice->addDenda();
                     // tenan_isppn kalau aktif tambah PPN
                     if(@$tenant->tenan_isppn) $invoice->addPPN();
                     // kalau config materai aktif add materai
