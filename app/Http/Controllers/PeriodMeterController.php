@@ -600,7 +600,7 @@ class PeriodMeterController extends Controller
                             if(empty($public_area)) $public_area = 0;
                         }
                         // echo "Public Area $public_area<br>";
-                        if(!empty(@$costdt->costd_show_detail)){
+                        if(!empty(@$costdt->costd_admin_type) && @$costdt->costd_admin_type == 'percent'){
                             $admincost = $costdt->costd_admin / 100 * $subtotal;
                         }else{
                             $admincost = $costdt->costd_admin;
@@ -618,7 +618,7 @@ class PeriodMeterController extends Controller
                     }else{
                         // AIR
                         $meter_cost = $meter_used * $costdt->costd_rate;
-                        if(!empty(@$costdt->costd_show_detail)){
+                        if(!empty(@$costdt->costd_admin_type) && @$costdt->costd_admin_type == 'percent'){
                             $admincost = $costdt->costd_admin / 100 * $meter_cost;
                         }else{
                             $admincost = $costdt->costd_admin;
