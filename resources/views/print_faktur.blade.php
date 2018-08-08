@@ -19,7 +19,7 @@ body {
     margin: 0;
     padding: 0;
     /*background-color: #FAFAFA;*/
-    font: 11pt "Tahoma";
+    font: 10pt "Tahoma";
 }
 * {
     box-sizing: border-box;
@@ -51,7 +51,7 @@ body {
 @media print {
     html, body {
         width: 210mm;
-        height: 277mm;
+        height: 297mm;
     }
     .page {
         margin: 0;
@@ -192,7 +192,9 @@ table tr td{font-size:9pt;}
             <table width="100%" style="line-height: 18px;">
                 <tr>
                     <td width="77%" style="vertical-align:top">
-                        {!!$inv['footer']!!}<br><br>
+                        <div style="text-align: justify;text-justify: inter-word;">
+                        {!!$inv['footer']!!}
+                        </div>
                         {!!$inv['label']!!}
                     </td>
                     <td width="23%" style="text-align: center; vertical-align: top;">
