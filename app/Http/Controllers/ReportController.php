@@ -872,7 +872,7 @@ class ReportController extends Controller
         }else if($excel){
             $data['type'] = 'excel';
             $data = $units->get()->toArray();
-            $border = 'A1:N';
+            $border = 'A1:P';
             $tp = 'xls';
             return Excel::create('Unit Report', function($excel) use ($data,$border) {
                 $excel->sheet('Unit Report', function($sheet) use ($data,$border)

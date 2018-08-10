@@ -11,6 +11,8 @@
         <th style="text-align: center;">Owner Name</th>
         <th style="text-align: center;">Address</th>
         <th style="text-align: center;">Phone</th>
+        <th style="text-align: center;">BAST Date</th>
+        <th style="text-align: center;">BAST BY</th>
       </tr>
     </thead>
         <tbody>
@@ -26,6 +28,8 @@
           <td>{{$invoice['tenan_name']}}</td>
           <td>{{$invoice['tenan_address']}}</td>
           <td>{{$invoice['tenan_phone']}}</td>
+          <td>{{$invoice['contr_bast_date']}}</td>
+          <td>{{$invoice['contr_bast_by']}}</td>
         </tr>
         @endforeach
 
