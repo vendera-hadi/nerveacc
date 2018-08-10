@@ -854,11 +854,14 @@ class ReportController extends Controller
         $data['name'] = MsCompany::first()->comp_name;
         $data['template'] = 'report_unit';
         if($print == 1){ $data['type'] = 'print'; }else{ $data['type'] = 'none'; }
-        $units = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.va_utilities','ms_unit.va_maintenance','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address')
+        $units = MsUnit::select('ms_unit.unit_code','ms_unit.unit_sqrt','ms_unit.va_utilities','ms_unit.va_maintenance','ms_floor.floor_name','ms_unit.meter_listrik','ms_unit.meter_air','ms_tenant.tenan_name','ms_tenant.tenan_idno','ms_tenant.tenan_phone','ms_tenant.tenan_fax','ms_tenant.tenan_email','ms_tenant.tenan_npwp','ms_tenant.tenan_address','tr_contract.contr_bast_date','tr_contract.contr_bast_by')
                 ->join('ms_floor','ms_unit.floor_id',"=",'ms_floor.id')
                 ->leftjoin('ms_unit_owner','ms_unit.id',"=",'ms_unit_owner.unit_id')
                 ->leftjoin('ms_tenant','ms_tenant.id',"=",'ms_unit_owner.tenan_id')
+                ->leftjoin('tr_contract','tr_contract.unit_id',"=",'ms_unit.id')
                 ->whereNull('ms_unit_owner.deleted_at')
+                ->where('tr_contract.contr_iscancel',FALSE)
+                ->where('ms_tenant.tent_id',1)
                 ->orderBy('ms_unit.unit_code');
         $fetch = $units->get();
         $data['invoices'] = $fetch;
