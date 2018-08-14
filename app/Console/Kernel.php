@@ -16,7 +16,8 @@ class Kernel extends ConsoleKernel
         // Commands\QueuingSP::class,
         // Commands\ExecuteMailSP::class
         Commands\SendSP1::class,
-        Commands\SendSP2::class
+        Commands\SendSP2::class,
+        Commands\MailQueue::class
     ];
 
     /**

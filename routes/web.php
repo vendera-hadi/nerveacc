@@ -317,6 +317,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('generalledger/get','JournalController@glGet')->name('genledger.get');
 
 	// invoice list
+	Route::get('invoice/testsend/{id}', 'InvoiceController@sendInvoice');
+
 	Route::get('invoice','InvoiceController@index')->name('invoice.index');
 	Route::post('invoice/get','InvoiceController@get')->name('invoice.get');
 	Route::post('invoice/getdetail','InvoiceController@getdetail')->name('invoice.getdetail');

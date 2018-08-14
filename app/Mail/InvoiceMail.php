@@ -24,9 +24,9 @@ class InvoiceMail extends Mailable
      *
      * @return void
      */
-    public function __construct(TrInvoice $invoice)
+    public function __construct($invoice_id)
     {
-        $this->invoice = $invoice;
+        $this->invoice = TrInvoice::find($invoice_id);
     }
 
     /**

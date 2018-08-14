@@ -34,6 +34,8 @@ use App\Models\TrInvoicePaymdtl;
 use App\Models\Autoreminder;
 use App\Models\MsEmailTemplate;
 use App\Models\InvoiceScheduler;
+use App\Models\AkasaOutstanding;
+use App\Models\EmailQueue;
 use DB;
 use PDF;
 
@@ -48,6 +50,21 @@ class InvoiceController extends Controller
         $data['coa'] = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',FALSE)->get();
         return view('invoice',$data);
     }
+
+    public function sendInvoice(Request $request){
+        // $invoice = TrInvoice::find($id);
+        $invoice = TrInvoice::orderBy('created_at','desc')->limit(1)->first();
+        $queue = new EmailQueue;
+        $queue->status = 'new';
+        $queue->mailclass = '\App\Mail\InvoiceMail';
+        $queue->ref_id = $invoice->id;
+        $queue->to = 'vendera.hadi@gmail.com';
+        $queue->cc = 'rahmat.setiawan90@gmail.com';
+        $queue->save();
+
+        echo "email sent to queue";
+    }
+
 
     public function get(Request $request){
         try{
@@ -950,8 +967,16 @@ class InvoiceController extends Controller
                         if(!empty($sendMailFlag)){
                             $cc = @MsConfig::where('name','cc_email')->first()->value;
                             if(empty($cc)) $cc = [];
-                            $mailClass = new \App\Mail\InvoiceMail($invoice);
-                            dispatch(new SendMail($mailClass, $invoice->MsTenant->tenan_email, $cc));
+
+                            $queue = new EmailQueue;
+                            $queue->status = 'new';
+                            $queue->mailclass = '\App\Mail\InvoiceMail';
+                            $queue->ref_id = $invoice->id;
+                            $queue->to = $invoice->MsTenant->tenan_email;
+                            if(!empty($cc)) $queue->cc = $cc;
+                            $queue->save();
+                            // $mailClass = new \App\Mail\InvoiceMail($invoice);
+                            // dispatch(new SendMail($mailClass, $invoice->MsTenant->tenan_email, $cc));
                         }
                     }
                 }
