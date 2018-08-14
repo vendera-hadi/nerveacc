@@ -614,7 +614,7 @@ class PeriodMeterController extends Controller
                         }
                         // echo "Grandtotal $total<br>";
 
-                        $meter_row->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'meter_admin'=>$costdt->costd_admin,'other_cost'=>$bpju,'total'=>$total]);
+                        $meter_row->update(['meter_start' => $value->start,'meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'meter_admin'=>$costdt->costd_admin,'other_cost'=>$bpju,'total'=>$total]);
                     }else{
                         // AIR
                         $meter_cost = $meter_used * $costdt->costd_rate;
@@ -623,8 +623,8 @@ class PeriodMeterController extends Controller
                         }else{
                             $admincost = $costdt->costd_admin;
                         }
-                        $total =  $meter_cost + $costdt->costd_burden + $admincost;
-                        $meter_row->update(['meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>0,'total'=>$total]);
+                        $total =  $subtotal + $admincost;
+                        $meter_row->update(['meter_start' => $value->start,'meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>0,'meter_admin'=>$admincost,'total'=>$total]);
                     }
                 }
             }
