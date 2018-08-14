@@ -552,5 +552,16 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/realisasitpl','ReportController@realisasitpl')->name('report.realisasitpl');
 });
 
+Route::get('sendmail', 'InvoiceController@sendmail');
+
+Route::post('akasa/outstanding', 'AkasaController@outstanding');
+Route::post('akasa/token-purchase', 'AkasaController@insertTokenPurchase');
+// Route::get('akasa/trtrue', 'HomeController@akasaTransactionSetTrue');
+Route::post('akasa/ocbc', 'AkasaController@ocbc');
+Route::get('akasa/ocbc/inquiry', 'AkasaController@inquiry');
+Route::post('akasa/ocbc/payment', 'AkasaController@payment');
+Route::post('akasa/ocbc/upload-payment', 'AkasaController@uploadPayment');
+Route::post('akasa/ocbc/token/get', 'AkasaController@getTokenFromMsp');
+
 Route::get('membership', 'Auth\AuthController@membership');
 Route::get('logout','Auth\AuthController@logout');
