@@ -4,6 +4,6 @@
   <title>Invoice Mail</title>
 </head>
 <body>
-    {{ $bodymail }}    
+    {!!$bodymail!!}   
 </body>
 </html>

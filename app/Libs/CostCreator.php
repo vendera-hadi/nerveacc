@@ -227,7 +227,7 @@ class CostCreator {
             $amountPerMonth = $currUnit->unit_sqrt * $this->costDetail->costd_rate;
             $proRateAmount = $kelebihanHari / $totalDayOfMonth * $amountPerMonth;
 
-            $note = $this->costDetail->costd_name." (SF)  ".date('F Y',strtotime($this->periodStart))." (ProRate $kelebihanHari / $totalDayOfMonth days)" ;
+            $note = $this->costDetail->costd_name."  ".date('F Y',strtotime($this->periodStart))." (ProRate $kelebihanHari / $totalDayOfMonth days)" ;
             if($this->monthGapNext > 0) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".$this->monthGapNext." months + $kelebihanHari days)";
             $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden;
@@ -237,7 +237,7 @@ class CostCreator {
                 $amount += $this->costDetail->costd_admin;
             }
         }else{
-            $note = $this->costDetail->costd_name." (SF)  ".date('F Y',strtotime($this->periodStart));
+            $note = $this->costDetail->costd_name."  ".date('F Y',strtotime($this->periodStart));
 
             if($this->monthGapNext > 0) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
@@ -265,7 +265,7 @@ class CostCreator {
         $amountPerMonth = $currUnit->unit_sqrt * $this->costDetail->costd_rate;
         $proRateAmount = $kelebihanHari / $totalDayOfMonth * $amountPerMonth;
 
-        $note = $this->costDetail->costd_name." (SF)  ".date('d F Y',strtotime($this->periodStart))." s/d ".date('d F Y',strtotime($this->periodEnd));
+        $note = $this->costDetail->costd_name."  ".date('d F Y',strtotime($this->periodStart))." s/d ".date('d F Y',strtotime($this->periodEnd));
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." $kelebihanHari / $totalDayOfMonth days)";
 
         $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden;
