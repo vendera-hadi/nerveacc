@@ -69,8 +69,9 @@ class InvoiceMail extends Mailable
             'signature' => $signature,
             'signatureFlag' => $signatureFlag
         );
+        $bodymail = @MsConfig::where('name','inv_body_email')->first()->value;
         $pdf = PDF::loadView('print_faktur', $set_data)->setPaper('a4')->output();
-        return $this->view('print_faktur', $set_data)->subject('Tagihan '.$invoice_data[0]['inv_number'].' dari '.$company['comp_name'])->attachData($pdf, $invoice_data[0]['inv_number'].'.pdf', [
+        return $this->view('emails/invoicebodymail', $bodymail)->subject('Tagihan '.$invoice_data[0]['inv_number'].' dari '.$company['comp_name'])->attachData($pdf, $invoice_data[0]['inv_number'].'.pdf', [
                         'mime' => 'application/pdf',
                     ]);
     }
