@@ -45,11 +45,14 @@ class MailQueue extends Command
                 if(empty($queue->cc)) $queue->cc = [];
                 Mail::to($queue->to)->cc($queue->cc)->send(new $queue->mailclass($queue->ref_id));
                 $queue->status = 'success';
+                $queue->sent_at = date('Y-m-d H:i:s');
                 $queue->save();
+                $this->info('Email sukses terkirim');
             }catch(\Exception $e){
                 $queue->note = $e->getMessage();
                 $queue->status = 'failed';
                 $queue->save();
+                $this->info('Terjadi error saat mengirim email');
             }
         }else{
             $this->info('Email tidak ada dalam antrean');
