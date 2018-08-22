@@ -361,7 +361,7 @@ class CostCreator {
 
         // rumus luas area * cost rate * lama per bln
         $currUnit = MsUnit::find($this->contract->unit_id);
-        $amount = $currUnit->unit_sqrt *$this->costDetail->costd_rate * $period;
+        $amount = $this->costDetail->costd_rate * $period;
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }

@@ -782,7 +782,7 @@ class InvoiceController extends Controller
                 // 'signature' => $signature,
                 'header' => $paymentHeader,
                 'details' => $paymentDetails,
-                'terbilang' => $terbilang,
+                'terbilang' => $terbilang.' Rupiah',
                 'tenan' => @$contract->MsTenant->tenan_name,
                 'unit' => @$contract->MsUnit->unit_code
             );

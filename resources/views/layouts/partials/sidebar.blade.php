@@ -302,7 +302,7 @@
                       @endif
 
 
-                      @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                      @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                       <li @if(Request::url() == route('genledger.index')) class="active" @endif><a href="{{route('genledger.index')}}"><i class="fa fa-circle-o"></i> General Ledger</a></li>
                       @endif
 
@@ -314,31 +314,31 @@
                           </a>
                           <ul class="treeview-menu @if(in_array(Request::url(),$glUrls)){{'active menu-open'}}@endif" @if(in_array(Request::url(),$glUrls)) style="display:block" @endif>
 
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.glview')) class="active" @endif><a href="{{route('report.glview')}}"><i class="fa fa-circle-o"></i> GL List</a></li>
                             @endif
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.ytd')) class="active" @endif><a href="{{route('report.ytd')}}"><i class="fa fa-circle-o"></i> YTD General Ledger</a></li>
                             @endif
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.ledger_view')) class="active" @endif><a href="{{route('report.ledger_view')}}"><i class="fa fa-circle-o"></i> Ledger</a></li>
                             @endif
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.tb_view')) class="active" @endif><a href="{{route('report.tb_view')}}"><i class="fa fa-circle-o"></i> Working Trial Balance</a></li>
                             @endif
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.neraca')) class="active" @endif><a href="{{route('report.neraca')}}"><i class="fa fa-circle-o"></i> Balance Sheet</a></li>
                             @endif
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.profitloss')) class="active" @endif><a href="{{route('report.profitloss')}}"><i class="fa fa-circle-o"></i> Income Statement</a></li>
                             @endif
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.budgetreport')) class="active" @endif><a href="{{route('report.budgetreport')}}"><i class="fa fa-circle-o"></i> Budget Report</a></li>
                             @endif
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.cashflow')) class="active" @endif><a href="{{route('report.cashflow')}}"><i class="fa fa-circle-o"></i> Cashflow Report</a></li>
                             @endif
-                            @if(Session::get('role')==1 || in_array(77,Session::get('permissions')))
+                            @if(Session::get('role')==1 || in_array(76,Session::get('permissions')))
                             <li @if(Request::url() == route('report.realisasi')) class="active" @endif><a href="{{route('report.realisasi')}}"><i class="fa fa-circle-o"></i> Budget Vs Realisasi</a></li>
                             @endif
                           </ul>
