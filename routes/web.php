@@ -562,6 +562,8 @@ Route::get('akasa/ocbc/inquiry', 'AkasaController@inquiry');
 Route::post('akasa/ocbc/payment', 'AkasaController@payment');
 Route::post('akasa/ocbc/upload-payment', 'AkasaController@uploadPayment');
 Route::post('akasa/ocbc/token/get', 'AkasaController@getTokenFromMsp');
+Route::post('akasa/ocbc/inquiry/check', 'AkasaController@inquiryCheck');
+Route::post('akasa/ocbc/trx/check', 'AkasaController@trxCheck');
 
 Route::get('membership', 'Auth\AuthController@membership');
 Route::get('logout','Auth\AuthController@logout');

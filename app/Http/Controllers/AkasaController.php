@@ -23,7 +23,7 @@ class AkasaController extends Controller
     // middleware in construct
     public function __construct()
     {
-        $this->middleware('akasaAuth')->only('outstanding','insertTokenPurchase','payment','getTokenFromMsp');
+        $this->middleware('akasaAuth')->only('outstanding','insertTokenPurchase','payment','getTokenFromMsp','inquiryCheck','trxCheck');
     }
 
     // checking outstanding of unit
@@ -277,12 +277,12 @@ class AkasaController extends Controller
                     "error"=> true,
                     "error_code"=> 205,
                     "error_desc"=> "Unit code is required",
-                ],205);
+                ],400);
             if(empty($year)) return response()->json([
                     "error"=> true,
                     "error_code"=> 205,
                     "error_desc"=> "Year is required",
-                ],205);
+                ],400);
 
             // check unit existance
             $unit = MsUnit::where('unit_code',$unit_code)->orWhere('unit_name',$unit_code)->first();
@@ -290,7 +290,7 @@ class AkasaController extends Controller
                     "error"=> true,
                     "error_code"=> 214,
                     "error_desc"=> "Unit tidak ada",
-                ],214);
+                ],400);
 
             // fetch invoices
             $invoices = TrInvoice::where('inv_post',1)->where('inv_iscancel',0)->where(DB::raw('extract(year from inv_date)'), $year)->whereHas('TrContract.MsUnit',  function($q) use ($unit_code){
@@ -302,7 +302,7 @@ class AkasaController extends Controller
                     "error"=> true,
                     "error_code"=> 289,
                     "error_desc"=> "Tagihan belum ada",
-                ],289);
+                ],400);
 
             $result = [
                         "error"=> false,
@@ -323,6 +323,7 @@ class AkasaController extends Controller
                     })->where(DB::raw('extract(year from inv_date)'), $year);
                 if($month) $temp->where(DB::raw('extract(month from inv_date)'), $month);
                 $list = $temp->pluck('inv_amount','inv_number');
+                $outstanding = $temp->sum('inv_outstanding');
                 $sum = $temp->sum('inv_amount');
                 $sum = (float) round($sum,2);
 
@@ -332,7 +333,8 @@ class AkasaController extends Controller
                 $result['invoices'][] = [
                         'type' => $val->invtp_name,
                         'virtual_account' => $va,
-                        'total' => number_format($sum,2,'.', ''),
+                        'total_invoice' => number_format($sum,2,'.', ''),
+                        'total' => number_format($outstanding,2,'.', ''),
                         'invoice_no' => $list
                     ];
                 $total += $sum;
@@ -343,14 +345,14 @@ class AkasaController extends Controller
                     "error"=> true,
                     "error_code"=> 288,
                     "error_desc"=> "Tagihan lunas",
-                ],289);
+                ],400);
 
             $result['total_inv_amount'] = $total;
             $result['total_inv_amount'] = number_format($total,2,'.','');
 
             return response()->json($result);
         }catch(\Exception $e){
-            return $this->makeResponse(401, $e->getMessage());
+            return $this->makeResponse(400, $e->getMessage());
         }
     }
 
@@ -569,7 +571,7 @@ class AkasaController extends Controller
                         "error"=> true,
                         "error_code"=> 214,
                         "error_desc"=> "Unit tidak ada",
-                    ],214);
+                    ],400);
             // check bank id
             $bank_id = @$request['bank_id'];
             $bank = MsCashBank::find($bank_id);
@@ -578,7 +580,7 @@ class AkasaController extends Controller
                         "error"=> true,
                         "error_code"=> 214,
                         "error_desc"=> "Bank tidak ada",
-                    ],214);
+                    ],400);
 
             $invoices = @$request['payments'];
             if(empty(count($invoices)))
@@ -586,7 +588,7 @@ class AkasaController extends Controller
                         "error"=> true,
                         "error_code"=> 289,
                         "error_desc"=> "Tidak ada tagihan dalam inputan",
-                    ],289);
+                    ],400);
             // check setiap invoice ap ada outstanding, status posted, dan tdk cancel
             $countExist = $countNotExist = 0;
             foreach ($invoices as $inv) {
@@ -842,17 +844,24 @@ class AkasaController extends Controller
         // cek unit
         $unit_code = @$request->unit_code;
         $nominal = @$request->nominal;
+        $trx_id = @$request->trx_id;
         if(empty($unit_code))
             return response()->json([
                 "error"=> true,
-                "error_code"=> 400,
+                "error_code"=> 404,
                 "error_desc"=> "Unit code is required",
             ], 400);
         if(empty($nominal))
             return response()->json([
                 "error"=> true,
-                "error_code"=> 400,
+                "error_code"=> 404,
                 "error_desc"=> "Nominal is required",
+            ], 400);
+        if(empty($trx_id))
+            return response()->json([
+                "error"=> true,
+                "error_code"=> 405,
+                "error_desc"=> "Trx Code is required",
             ], 400);
         // cek unit availability
         $unit = MsUnit::where('unit_code',$unit_code)->first();
@@ -867,7 +876,7 @@ class AkasaController extends Controller
         if(!in_array($nominal, $nominal_whitelist))
             return response()->json([
                     "error"=> true,
-                    "error_code"=> 400,
+                    "error_code"=> 402,
                     "error_desc"=> "Nominal harus dalam opsi berikut : 50000, 100000, 150000, 200000, 250000",
                 ],400);
 
@@ -902,6 +911,7 @@ class AkasaController extends Controller
             curl_setopt_array($curl, $options);
             $results = curl_exec($curl);
             $result = json_decode($results, true);
+
             if(!empty(@$result["Error"]))
                 return response()->json([
                     "error"=> true,
@@ -916,7 +926,8 @@ class AkasaController extends Controller
                 $data->inv_date = $log["inv_date"];
                 $data->inv_no = $log["inv_no"];
                 $data->meter_no = $log["meter_no"];
-                $data->cust_name = $log["cust_name"];
+                // $data->cust_name = $log["cust_name"];
+                $data->cust_name = @$unit->owner->tenantWT->tenan_name;
                 $data->no_unit = $log["no_unit"];
                 $data->location = $log["location"];
                 $data->tariff_index = $log["tariff_index"];
@@ -932,6 +943,7 @@ class AkasaController extends Controller
                 $data->token_cost = $log["token_cost"];
                 $data->total_kwh = $log["total_kwh"];
                 $data->token = $log["token"];
+                $data->trx_id = $trx_id;
                 $data->save();
 
                 $response = [
@@ -956,6 +968,7 @@ class AkasaController extends Controller
                         "token_cost"=> $data->token_cost,
                         "total_kwh"=> $data->total_kwh,
                         "token"=> $data->token,
+                        "trx_id" => $data->trx_id
                     ];
                 return response()->json($response, 200);
 
@@ -971,6 +984,140 @@ class AkasaController extends Controller
                 ],400);
         }
 
+    }
+
+    public function inquiryCheck(Request $request){
+        $unit_code = @$request->unit_code;
+        if(empty($unit_code))
+            return response()->json([
+                "error"=> true,
+                "error_code"=> 404,
+                "error_desc"=> "Unit code is required",
+            ], 400);
+        // cek unit availability
+        $unit = MsUnit::where('unit_code',$unit_code)->first();
+        if(!$unit)
+            return response()->json([
+                    "error"=> true,
+                    "error_code"=> 400,
+                    "error_desc"=> "Unit tidak ada",
+                ],400);
+        // tembak ke MSP dapetin daya
+        try{
+            $endpoint_url = 'http://192.168.78.4/msp-api/...';
+            $data_to_post = [
+                'username' => 'kasirvirtual',
+                'password' => md5('qqq123'),
+                'no_unit' => $unit_code
+            ];
+            $options = [
+                CURLOPT_URL        => $endpoint_url,
+                CURLOPT_POST       => true,
+                CURLOPT_POSTFIELDS => $data_to_post,
+                CURLOPT_RETURNTRANSFER => true
+            ];
+            $curl = curl_init();
+            curl_setopt_array($curl, $options);
+            $results = curl_exec($curl);
+            $result = json_decode($results, true);
+
+            if(!empty(@$result["Error"]))
+                return response()->json([
+                    "error"=> true,
+                    "error_code"=> 400,
+                    "error_desc"=> $result["Error"],
+                ],400);
+
+            if(!empty(@$result["log_book"])){
+                $log = $result["log_book"];
+                $response = [
+                        'cust_name' => @$unit->owner->tenantWT->tenan_name,
+                        'daya' => $log["daya"]
+                    ];
+                return response()->json($response, 200);
+            }else{
+                return response()->json([
+                    "error"=> true,
+                    "error_code"=> 400,
+                    "error_desc"=> 'Customer data not found'
+                ],400);
+            }
+        }catch(\Exception $e){
+            return response()->json([
+                    "error"=> true,
+                    "error_code"=> 400,
+                    "error_desc"=> "Error occured when communicating with token server",
+                ],400);
+        }
+    }
+
+    public function trxCheck(Request $request){
+        // cek unit
+        $unit_code = @$request->unit_code;
+        $nominal = @$request->nominal;
+        $trx_id = @$request->trx_id;
+        if(empty($unit_code))
+            return response()->json([
+                "error"=> true,
+                "error_code"=> 404,
+                "error_desc"=> "Unit code is required",
+            ], 400);
+        if(empty($nominal))
+            return response()->json([
+                "error"=> true,
+                "error_code"=> 404,
+                "error_desc"=> "Nominal is required",
+            ], 400);
+        if(empty($trx_id))
+            return response()->json([
+                "error"=> true,
+                "error_code"=> 405,
+                "error_desc"=> "Trx Code is required",
+            ], 400);
+        // cek unit availability
+        $unit = MsUnit::where('unit_code',$unit_code)->first();
+        if(!$unit)
+            return response()->json([
+                    "error"=> true,
+                    "error_code"=> 400,
+                    "error_desc"=> "Unit tidak ada",
+                ],400);
+        // cek logbook
+        $fetch = TokenInvoice::where('trx_id',$trx_id)->where('total_pay',$nominal)->where('no_unit',$unit_code)->first();
+        if($fetch){
+            $data = $fetch;
+            $response = [
+                        "error"=> false,
+                        "error_code"=> 200,
+                        "inv_date"=> $data->inv_date,
+                        "inv_no"=> $data->inv_no,
+                        "meter_no"=> $data->meter_no,
+                        "cust_name"=> $data->cust_name,
+                        "no_unit"=> $data->no_unit,
+                        "location"=> $data->location,
+                        "tariff_index"=> $data->tariff_index,
+                        "daya"=> $data->daya,
+                        "total_pay" => $data->total_pay,
+                        "slab_cost"=> $data->slab_cost,
+                        "water_cost"=> $data->water_cost,
+                        "gas_cost"=> $data->gas_cost,
+                        "admin_cost"=> $data->admin_cost,
+                        "materai_cost"=> $data->materai_cost,
+                        "bpju"=> $data->bpju,
+                        "ppn"=> $data->ppn,
+                        "token_cost"=> $data->token_cost,
+                        "total_kwh"=> $data->total_kwh,
+                        "token"=> $data->token,
+                        "trx_id" => $data->trx_id
+                    ];
+            return response()->json($response, 200);
+        }else{
+            return response()->json([
+                    "error"=> false,
+                    "error_code"=> 200,
+                    "error_desc"=> "Transaksi tidak ditemukan",
+                ],200);
+        }
     }
 
 }
