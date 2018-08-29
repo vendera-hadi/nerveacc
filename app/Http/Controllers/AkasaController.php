@@ -887,7 +887,7 @@ class AkasaController extends Controller
         if($outstanding == "true")
             return response()->json([
                     "error"=> true,
-                    "error_code"=> 400,
+                    "error_code"=> 401,
                     "error_desc"=> "Unit masih memiliki tunggakan",
                 ],400);
 
@@ -986,6 +986,7 @@ class AkasaController extends Controller
 
     }
 
+    /*
     public function inquiryCheck(Request $request){
         $unit_code = @$request->unit_code;
         if(empty($unit_code))
@@ -1048,6 +1049,33 @@ class AkasaController extends Controller
                     "error_code"=> 400,
                     "error_desc"=> "Error occured when communicating with token server",
                 ],400);
+        }
+    }
+    */
+
+    public function inquiryCheck(Request $request){
+        $unit_code = @$request->unit_code;
+        if(empty($unit_code))
+            return response()->json([
+                "error"=> true,
+                "error_code"=> 404,
+                "error_desc"=> "Unit code is required",
+            ], 400);
+        // cek unit availability
+        $unit = MsUnit::where('unit_code',$unit_code)->first();
+        if(!$unit){
+            return response()->json([
+                    "error"=> true,
+                    "error_code"=> 400,
+                    "error_desc"=> "Unit tidak ada",
+                ],400);
+        }else{
+            $response = [
+                        "error"=> false,
+                        "error_code"=> 200,
+                        'cust_name' => @$unit->owner->tenantWT->tenan_name
+                    ];
+            return response()->json($response, 200);
         }
     }
 
