@@ -1141,8 +1141,8 @@ class AkasaController extends Controller
             return response()->json($response, 200);
         }else{
             return response()->json([
-                    "error"=> false,
-                    "error_code"=> 200,
+                    "error"=> true,
+                    "error_code"=> 406,
                     "error_desc"=> "Transaksi tidak ditemukan",
                 ],200);
         }
