@@ -21,3 +21,5 @@ jlmacc-error\.log
 jlmacc-access\.log
 
 public/upload/
+/bootstrap/cache
+/storage
