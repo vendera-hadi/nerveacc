@@ -14,6 +14,7 @@ use App\Models\MsTenant;
 use App\Models\User;
 use App\Models\MsFloor;
 use App\Models\MsVirtualAccount;
+use App\Models\AllUnit;
 use DB;
 
 class UnitController extends Controller
@@ -193,7 +194,9 @@ class UnitController extends Controller
                         'created_by' => Auth::id(),
                         'updated_by' => Auth::id(),
                         'unit_isavailable' => 1,
-                        'unit_isactive' => 1
+                        'unit_isactive' => 1,
+                        'air_start' => @$request->water_start,
+                        'listrik_start' => @$request->listrik_start
                     ]);
 
                 if(empty(@$request->owner)){
@@ -219,6 +222,11 @@ class UnitController extends Controller
                 }
 
                 MsUnitOwner::create(['unit_id'=>$unit->id, 'tenan_id'=>$tenant->id, 'unitow_start_date' => @$request->unitow_start_date]);
+                $upd = AllUnit::where('unit_code',@$request->unit_code)->first();
+                if(count($upd) > 0){
+                    $upd->used = 1;
+                    $upd->save();
+                }
             });
             return response()->json(['success'=>true, 'message'=>'Input Unit Success']);
         }catch(\Exception $e){
@@ -255,7 +263,10 @@ class UnitController extends Controller
                     'meter_listrik' => @$request->meter_listrik,
                     'floor_id' => @$request->floor_id,
                     'untype_id' => @$request->untype_id,
-                    'updated_by' => Auth::id()
+                    'updated_by' => Auth::id(),
+                    'air_start' => @$request->water_start,
+                    'listrik_start' => @$request->listrik_start
+
                 ];
             MsUnit::find($id)->update($updateUnit);
 
@@ -467,6 +478,27 @@ class UnitController extends Controller
         }catch(\Exception $e){
             return response()->json(['errorMsg' => $e->getMessage()]);
         }
+    }
+
+    public function getunit(Request $request){
+        $key = $request->q;
+        $fetch = AllUnit::select('*')->where(function($query) use($key){
+            $query->where(\DB::raw('LOWER(unit_code)'),'like','%'.$key.'%');
+        })->where('used', 'FALSE')->get();
+        $result = array();
+        foreach ($fetch as $value) {
+            $result[] = array(
+                "unit_sqrt"=>$value->unit_sqrt,
+                'stateName'=>$value->unit_code,
+                "va_utilities"=>$value->va_utilities,
+                "va_maintenance"=>$value->va_maintenance,
+                "meter_air"=>$value->meter_air,
+                "meter_listrik"=>$value->meter_listrik,
+                "untype_id"=>$value->untype_id,
+                "floor_id"=>$value->floor_id
+            );
+        }
+        return response()->json($result);
     }
 
 }

@@ -37,8 +37,12 @@ class HomeController extends Controller
         $year = $request->input('year', date('Y'));
         $data['tenant'] = TrContract::where('contr_terminate_date',NULL)->where('contr_status','confirmed')->where('contr_iscancel',false)->count();
         $data['unit'] = MsUnit::count();
-        $data['out'] = TrInvoice::select(DB::raw("SUM(inv_outstanding) AS ttl"))->where('inv_post',TRUE)->get();
-        $data['inv'] = TrInvoice::where('inv_post',TRUE)->where(\DB::raw('date_part(\'year\', inv_date)'),'=',$year)->where(\DB::raw('date_part(\'month\', inv_date)'),'=',date('m'))->count();
+        if($year == date('Y')){
+        	$data['out'] = TrInvoice::select(DB::raw("SUM(inv_outstanding) AS ttl"))->where('inv_post',TRUE)->get();
+    	}else{
+    		$data['out'] = TrInvoice::select(DB::raw("SUM(inv_outstanding) AS ttl"))->where('inv_post',TRUE)->where(\DB::raw('date_part(\'year\', inv_date)'),'=',$year)->get();
+    	}
+        $data['inv'] = TrInvoice::where('inv_post',TRUE)->where(\DB::raw('date_part(\'year\', inv_date)'),'=',$year)->count();
         $fetch = TrInvoice::select(
             DB::raw("SUM((CASE WHEN DATE_PART('MONTH', inv_date) = 1 THEN inv_outstanding ELSE 0 END)) AS jan"),
             DB::raw("SUM((CASE WHEN DATE_PART('MONTH', inv_date) = 2 THEN inv_outstanding ELSE 0 END)) AS feb"),
@@ -89,6 +93,11 @@ class HomeController extends Controller
             ->where('invpayh_post',TRUE)
             ->where('status_void',FALSE)
             ->whereYear('invpayh_date','=',$year)->get()->toArray();
+
+        $fetch3 = TrInvoice::select(DB::raw("SUM(inv_amount - inv_outstanding) AS total"))
+            ->where('inv_post',TRUE)
+            ->whereYear('inv_date','=',$year)->whereRaw('inv_amount <> inv_outstanding')->get()->toArray();
+
         $isi2 = array();
         $isi2[0] = (float)round($fetch2[0]['jan'] / 1000);
         $isi2[1] = (float)round($fetch2[0]['feb'] / 1000);
@@ -104,17 +113,17 @@ class HomeController extends Controller
         $isi2[11] = (float)round($fetch2[0]['des'] / 1000);
         $data['bayar'] = json_encode($isi2);
 
-        $total_all = $fetch[0]['total'] + $fetch2[0]['total'];
+        $total_all = $fetch3[0]['total'] + $fetch[0]['total'];
 
         $data['hutang_vs'] = (float)round($fetch[0]['total']/1000);
-        $data['bayar_vs'] = (float)round($fetch2[0]['total']/1000);
+        $data['bayar_vs'] = (float)round($fetch3[0]['total']/1000);
 
         if($total_all == 0){
             $data['hutang_persen'] = 'N/A';
             $data['bayar_persen'] = 'N/A';
         }else{
             $data['hutang_persen'] = number_format($fetch[0]['total']/$total_all*100,2);
-            $data['bayar_persen'] = number_format($fetch2[0]['total']/$total_all*100,2);
+            $data['bayar_persen'] = number_format($fetch3[0]['total']/$total_all*100,2);
         }
 
         $fetchListrik = TrMeter::join('tr_period_meter','tr_period_meter.id','=','tr_meter.prdmet_id')->select(

@@ -23,20 +23,20 @@
         <div class="col-md-12">
             <table class="table table-bordered table-condensed table-responsive tb">
                 <tr>
-                    <th>&nbsp;</th>
-                    <th style="text-align: center;">JANUARI</th>
-                    <th style="text-align: center;">FEBRUARI</th>
-                    <th style="text-align: center;">MARET</th>
-                    <th style="text-align: center;">APRIL</th>
-                    <th style="text-align: center;">MAY</th>
-                    <th style="text-align: center;">JUNI</th>
-                    <th style="text-align: center;">JULI</th>
-                    <th style="text-align: center;">AGUSTUS</th>
-                    <th style="text-align: center;">SEPTEMBER</th>
-                    <th style="text-align: center;">OKTOBER</th>
-                    <th style="text-align: center;">NOVEMBER</th>
-                    <th style="text-align: center;">DESEMBER</th>
-                    <th style="text-align: center;">TOTAL {{$tahun}}</th>
+                    <th style="min-width: 300px;">&nbsp;</th>
+                    <th style="text-align: center;min-width: 80px;">Jan-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Feb-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Mar-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Apr-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">May-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Jun-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Jul-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Aug-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Sep-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Oct-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Nov-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">Dec-{{$tahun}}</th>
+                    <th style="text-align: center;min-width: 80px;">YTD</th>   
                 </tr>
                 @foreach($detail as $dt)
                     @php
@@ -56,18 +56,18 @@
                         $dt->setVariables('okt',$v_okt);
                         $dt->setVariables('nov',$v_nov);
                         $dt->setVariables('des',$v_des);
-                        $jan = $dt->cashflowCalculate('1',$tahun);
-                        $feb = $dt->cashflowCalculate('2',$tahun);
-                        $mar = $dt->cashflowCalculate('3',$tahun);
-                        $apr = $dt->cashflowCalculate('4',$tahun);
-                        $may = $dt->cashflowCalculate('5',$tahun);
-                        $jun = $dt->cashflowCalculate('6',$tahun);
-                        $jul = $dt->cashflowCalculate('7',$tahun);
-                        $aug = $dt->cashflowCalculate('8',$tahun);
-                        $sep = $dt->cashflowCalculate('9',$tahun);
-                        $okt = $dt->cashflowCalculate('10',$tahun);
-                        $nov = $dt->cashflowCalculate('11',$tahun);
-                        $des = $dt->cashflowCalculate('12',$tahun);
+                        $jan = $dt->cashflowledgerCalculate('1',$tahun);
+                        $feb = $dt->cashflowledgerCalculate('2',$tahun);
+                        $mar = $dt->cashflowledgerCalculate('3',$tahun);
+                        $apr = $dt->cashflowledgerCalculate('4',$tahun);
+                        $may = $dt->cashflowledgerCalculate('5',$tahun);
+                        $jun = $dt->cashflowledgerCalculate('6',$tahun);
+                        $jul = $dt->cashflowledgerCalculate('7',$tahun);
+                        $aug = $dt->cashflowledgerCalculate('8',$tahun);
+                        $sep = $dt->cashflowledgerCalculate('9',$tahun);
+                        $okt = $dt->cashflowledgerCalculate('10',$tahun);
+                        $nov = $dt->cashflowledgerCalculate('11',$tahun);
+                        $des = $dt->cashflowledgerCalculate('12',$tahun);
                         $total = $jan+$feb+$mar+$apr+$may+$jun+$jul+$aug+$sep+$okt+$nov+$des;           
                         if(!empty($dt->variable)) 
                         $v_jan[$dt->variable] = $jan;
@@ -87,7 +87,7 @@
                     @if($dt->hide == 0)
                         <tr>
                         <td>{!!$desc!!}</b></td>
-                        <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($jan) }}@endif</td>
+                        <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($jan) }}@endif</td> 
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($feb) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($mar) }}@endif</td>
                         <td style="text-align:right; @if($dt->underline != 0) border-bottom: 1px solid black @endif">@if(!empty($dt->coa_code) || !empty($dt->formula)){{ format_report_numeric($apr) }}@endif</td>

@@ -152,7 +152,7 @@ class PeriodMeterController extends Controller
                                             ->first();
                                     }
 
-                                    $m_end = 0;
+                                    $m_end = $ctr->MsUnit->air_start;
                                     if($meter_last) $m_end = $meter_last->meter_end;
                                     $meterInput = [
                                             'meter_start'=> $m_end,
@@ -343,7 +343,7 @@ class PeriodMeterController extends Controller
                         // echo "Subtotal $subtotal<br>";
                         // Tambah public area
                         if($value_type[$key] == 'percent'){
-                            $public_area = $percentage[$key] / 100 * $subtotal;
+                            $public_area = CEIL($percentage[$key] / 100 * $subtotal);
                         }else{
                             $public_area = $percentage[$key];
                             if(empty($public_area)) $public_area = 0;
@@ -352,7 +352,7 @@ class PeriodMeterController extends Controller
                         $total = $subtotal + $meter_admin[$key] + $public_area;
                         // echo "Total before grossup $total<br>";
                         if(!empty($grossup[$key])){
-                            $grossup_total = $total / 0.9 * 0.1;
+                            $grossup_total = CEIL($total / 0.9 * 0.1);
                             // echo "Grossup $grossup_total<br>";
                             $total += $grossup_total;
                         }
@@ -367,7 +367,7 @@ class PeriodMeterController extends Controller
                         'meter_used' => $meter_used,
                         'meter_cost' => $meter_cost,
                         'other_cost' => $bpju,
-                        'total' => $total
+                        'total' => CEIL($total)
                     ];
                     TrMeter::find($id[$key])->update($input);
                 }
@@ -594,37 +594,41 @@ class PeriodMeterController extends Controller
                         // echo "Subtotal $subtotal<br>";
                         // Tambah public area
                         if($costdt->value_type == 'percent'){
-                            $public_area = $costdt->percentage / 100 * $subtotal;
+                            $public_area = CEIL($costdt->percentage / 100 * $subtotal);
                         }else{
                             $public_area = $costdt->percentage;
                             if(empty($public_area)) $public_area = 0;
                         }
                         // echo "Public Area $public_area<br>";
                         if(!empty(@$costdt->costd_admin_type) && @$costdt->costd_admin_type == 'percent'){
-                            $admincost = $costdt->costd_admin / 100 * $subtotal;
+                            $admincost = CEIL($costdt->costd_admin / 100 * $subtotal);
                         }else{
                             $admincost = $costdt->costd_admin;
                         }
                         $total = $subtotal + $admincost + $public_area;
                         // echo "Total before grossup $total<br>";
                         if(!empty($costdt->grossup_pph)){
-                            $grossup_total = $total / 0.9 * 0.1;
+                            $grossup_total = CEIL($total / 0.9 * 0.1);
                             // echo "Grossup $grossup_total<br>";
                             $total += $grossup_total;
                         }
                         // echo "Grandtotal $total<br>";
 
-                        $meter_row->update(['meter_start' => $value->start,'meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'meter_admin'=>$costdt->costd_admin,'other_cost'=>$bpju,'total'=>$total]);
+                        $meter_row->update(['meter_start' => $value->start,'meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'meter_admin'=>$costdt->costd_admin,'other_cost'=>$bpju,'total'=>CEIL($total)]);
                     }else{
                         // AIR
                         $meter_cost = $meter_used * $costdt->costd_rate;
                         if(!empty(@$costdt->costd_admin_type) && @$costdt->costd_admin_type == 'percent'){
+<<<<<<< Updated upstream
                             $admincost = $costdt->costd_admin / 100 * $meter_cost;
+=======
+                            $admincost = CEIL($costdt->costd_admin / 100 * $subtotal);
+>>>>>>> Stashed changes
                         }else{
                             $admincost = $costdt->costd_admin;
                         }
                         $total =  $subtotal + $admincost;
-                        $meter_row->update(['meter_start' => $value->start,'meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>0,'meter_admin'=>$admincost,'total'=>$total]);
+                        $meter_row->update(['meter_start' => $value->start,'meter_end' => $value->end,'meter_used' => $meter_used,'meter_cost' => $meter_cost,'other_cost'=>0,'meter_admin'=>$admincost,'total'=>CEIL($total)]);
                     }
                 }
             }

@@ -361,6 +361,7 @@ class ContractController extends Controller
         }
     }
 
+     /*
     public function optionParent(Request $request){
         $key = $request->q;
         // $fetch = TrContract::select('tr_contract.id','contr_code','contr_no','ms_tenant.tenan_name','ms_unit.unit_code')
@@ -375,6 +376,25 @@ class ContractController extends Controller
         foreach ($fetch as $key => $value) {
             // $temp = ['id'=>$value->id, 'text'=>$value->tenan_name." / ".$value->unit_code];
             $temp = ['id'=>$value->id, 'text'=>$value->tenan_name];
+            array_push($result['results'], $temp);
+        }
+        return json_encode($result);
+    }
+    */
+    public function optionParent(Request $request){
+        $key = $request->q;
+        $fetch = TrContract::select('tr_contract.id','contr_code','contr_no','ms_tenant.tenan_name','ms_unit.unit_code','tr_contract.unit_id')
+                 ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                 ->join('ms_tenant','tr_contract.tenan_id','=','ms_tenant.id')
+                 ->where('tr_contract.contr_status',"=",'confirmed')
+                 ->where(function($query) use ($key){
+                    $query->where(\DB::raw('LOWER(ms_tenant.tenan_name)'),'ilike','%'.$key.'%');
+                    $query->orWhere(\DB::raw('LOWER(ms_unit.unit_code)'),'ilike','%'.$key.'%');
+                })
+                 ->orderBy('ms_tenant.tenan_name')->limit(15)->get();
+        $result['results'] = [];
+        foreach ($fetch as $key => $value) {
+            $temp = ['id'=>$value->unit_id, 'text'=>$value->unit_code.' - '.$value->tenan_name];
             array_push($result['results'], $temp);
         }
         return json_encode($result);
@@ -1099,7 +1119,7 @@ class ContractController extends Controller
                                 ->join('ms_unit','tr_contract.unit_id','=','ms_unit.id')
                                 ->join('ms_cost_item','ms_cost_detail.cost_id','=','ms_cost_item.id')
                                 ->where('contr_id',$id)->where('costd_ismeter',0)->get();
-        $data['direct_close'] = false;
+        $data['direct_close'] = true;
         if(empty(count($data['contInvMeter'])) && empty(count($data['contInvNoMeter'])) ){
             // jika sama sekali tidak punya contract invoice arahin utk close lgsg
             $data['direct_close'] = true;

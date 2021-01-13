@@ -5,6 +5,12 @@ function newUser(){
     $('#fm').form('clear');
     url = insert_url;
 }
+function newUser2(){
+    console.log('create');
+    $('#dlg2').dialog('open').dialog('center').dialog('setTitle','New '+entity);
+    $('#fm2').form('clear');
+    url = insert_url;
+}
 function editUser(){
     console.log('edit');
     var row = $('#dg').datagrid('getSelected');
@@ -15,8 +21,32 @@ function editUser(){
     }
 }
 function saveUser(){
-    console.log('save or edit');
     $('#fm').form('submit',{
+        url: url,
+        onSubmit: function(){
+            return $(this).form('validate');
+        },
+        success: function(result){
+            var result = eval('('+result+')');
+            if (result.errorMsg){
+                $.messager.show({
+                    title: 'Error',
+                    msg: result.errorMsg
+                });
+            } else {
+                $.messager.alert('Success','Data saved');
+                $('#dlg2').dialog('close');      // close the dialog
+                $('#dg').datagrid('reload');    // reload the user data
+            }
+
+        },
+        error: function (request, status, error) {
+            alert(request.responseText);
+          }
+    });
+}
+function saveUser2(){
+    $('#fm2').form('submit',{
         url: url,
         onSubmit: function(){
             return $(this).form('validate');

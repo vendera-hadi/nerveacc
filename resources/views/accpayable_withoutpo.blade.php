@@ -358,7 +358,7 @@ function countTotal()
         // $('#ppnAmount').text(totaltax);
         // $('#totalAmount').text(subtotal + totaltax);
     }else{
-        $('#tableDetail tbody').append('<tr id="rowEmpty"><td colspan="6"><center>Data Kosong</center></td></tr>');
+        $('#tableDetail tbody').append('<tr id="rowEmpty"><td colspan="9"><center>Data Kosong</center></td></tr>');
     }
     return subtotal;
 }

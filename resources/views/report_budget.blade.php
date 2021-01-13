@@ -89,7 +89,7 @@
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12">
                     <button id="pdf" class="btn btn-success" style="margin-bottom:15px; display:none">Pdf</button>
-                    <!--<button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>!-->
+                    <button id="excel" class="btn btn-info" style="margin-bottom:15px; display:none">Excel</button>
                     <button id="print" class="btn btn-primary" style="margin-bottom:15px; display:none">Print</button>
                     <iframe id="frame" style="min-width:100%; border: 1px solid #f1ebeb; height:400px;overflow: scroll;"></iframe>
                 </div>
@@ -114,7 +114,7 @@
     $('#filter').submit(function(e){
         e.preventDefault();
         var type = $('#type').val();
-        var report_url = '@if($page=='Cashflow'){{route('report.cashflowtpl')}}@elseif($page=='Realisasi'){{route('report.realisasitpl')}}@else{{route('report.budgettpl')}}@endif';
+        var report_url = '@if($page=='YTD'){{route('report.ytdlaporantpl')}}@elseif($page=='Realisasi'){{route('report.realisasitpl')}}@elseif($page=='Cashflow'){{route('report.cashflowtpl')}}@else{{route('report.budgettpl')}}@endif';
         var from = $('input[name=from]').val();
         var to = $('input[name=to]').val(); 
         

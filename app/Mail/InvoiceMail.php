@@ -52,8 +52,12 @@ class InvoiceMail extends Mailable
             ->where('tr_invoice_detail.inv_id',$inv['id'])
             ->get()->toArray();
             $invoice_data[$key]['details'] = $result;
-            $terbilang = $this->terbilang($inv['inv_amount']);
-            $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
+	    $terbilang = $this->terbilang(($inv['inv_amount']-$inv['total_excess_payment']));
+	    if(($inv['inv_amount']-$inv['total_excess_payment']) == 0){
+                    $invoice_data[$key]['terbilang'] = '## LUNAS ##';
+                }else{
+                    $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
+                }
         }
         $total = $invoice_data[0]['inv_outstanding'];
 
@@ -65,7 +69,7 @@ class InvoiceMail extends Mailable
             'invoice_data' => $invoice_data,
             'result' => $result,
             'company' => $company,
-            'type' => null,
+            'type' => 'mail',
             'signature' => $signature,
             'signatureFlag' => $signatureFlag
         );

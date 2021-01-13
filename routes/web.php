@@ -335,7 +335,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('generateinvoice','InvoiceController@generateInvoice');
 	Route::post('progressgenerate','InvoiceController@progressGenerate');
 	Route::post('generateinvoice','InvoiceController@postGenerateInvoice')->name('invoice.generate');
-	Route::get('invoice/print_faktur', 'InvoiceController@print_faktur');
+	
 	Route::get('invoice/print_kwitansi', 'InvoiceController@print_kwitansi');
 	Route::get('invoice/receipt', 'InvoiceController@kuitansi');
 	Route::post('invoice/posting','InvoiceController@posting')->name('invoice.posting');
@@ -365,6 +365,18 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/r_unit','ReportController@ReportUnit')->name('report.r_unit');
 	Route::get('report/r_tenant','ReportController@ReportTenant')->name('report.r_tenant');
 	Route::get('report/arsummary','ReportController@arsummary')->name('report.ar_summary');
+<<<<<<< Updated upstream
+=======
+	Route::get('report/vasummary','ReportController@vasummary')->name('report.va_summary');
+	Route::get('report/depositsummary','ReportController@depositsummary')->name('report.deposit_summary');
+	Route::get('report/manualsummary','ReportController@manualsummary')->name('report.manual_summary');
+	Route::get('report/creditnotesummary','ReportController@creditnotesummary')->name('report.creditnote_summary');
+	Route::get('report/dendasummary','ReportController@dendasummary')->name('report.denda_summary');
+	Route::get('report/araging2','ReportController@arAging2')->name('report.aging2');
+	Route::get('report/spsummary','ReportController@spsummary')->name('report.sp_summary');
+	Route::get('report/vaother','ReportController@vaother')->name('report.vaother');
+	Route::get('report/lebihbayar','ReportController@lebihbayar')->name('report.lebihbayar');
+>>>>>>> Stashed changes
 
 	Route::get('report/glreport','ReportController@glview')->name('report.glview');
 	Route::get('report/ytd','ReportController@ytd')->name('report.ytd');
@@ -413,6 +425,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('accpayable/posting', 'PayableController@posting')->name('payable.posting');
 
 	Route::get('accpayable/withoutpo/edit/{id}', 'PayableController@withoutpoEdit')->name('payable.withoutpo.edit');
+	Route::post('accpayable/withoutpo/edit/{id}', 'PayableController@updateAP')->name('payable.updatewithoutpo');
 	Route::get('accpayable/withpo/edit/{id}', 'PayableController@withpoEdit')->name('payable.withpo.edit');
 
 	// purchase order
@@ -546,10 +559,99 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::post('budget/importExcel','BudgetController@importExcel')->name('budget.importExcel');
 	Route::get('report/budget-report','ReportController@budgetreport')->name('report.budgetreport');
 	Route::get('report/budgettpl','ReportController@budgettpl')->name('report.budgettpl');
-	Route::get('report/cashflow','ReportController@cashflow')->name('report.cashflow');
-	Route::get('report/cashflowtpl','ReportController@cashflowtpl')->name('report.cashflowtpl');
 	Route::get('report/realisasi','ReportController@realisasi')->name('report.realisasi');
 	Route::get('report/realisasitpl','ReportController@realisasitpl')->name('report.realisasitpl');
+<<<<<<< Updated upstream
+=======
+
+	// akasa only
+	Route::get('akasa/token-invoices', 'AkasaController@invoices');
+	Route::post('akasa/token-invoices/posting', 'AkasaController@posting')->name('invoice.akasa.posting');
+	Route::post('akasa/token-invoices/config', 'AkasaController@updateConfig')->name('akasa.config.update');
+	Route::post('akasa/token-invoices/get', 'AkasaController@invoicesGet')->name('akasa.invoices.get');
+	Route::get('akasa/token-invoices/pdf', 'AkasaController@exportPdf')->name('akasa.invoices.pdf');
+	Route::get('akasa/token-invoices/excel', 'AkasaController@exportExcel')->name('akasa.invoices.excel');
+
+	//manual reminder
+	Route::get('reminderm','InvoiceController@reminderm')->name('invoice.reminderm');
+	Route::post('reminderm/get','InvoiceController@getreminder')->name('invoice.getreminder');
+	Route::post('reminderm/updreminderr', 'InvoiceController@manualreminderUpdate')->name('invoice.updatemanualreminder');
+	Route::post('reminderm/updreminderr2', 'InvoiceController@manualreminderUpdate2')->name('invoice.updatemanualreminder2');
+	Route::post('reminderm/updreminderr3', 'InvoiceController@manualreminderUpdate3')->name('invoice.updatemanualreminder3');
+	Route::post('reminderm', 'InvoiceController@manualbodyemail')->name('invoice.manualbodyemail');
+	Route::post('payment/unposting','PaymentController@unposting')->name('payment.unposting');
+	Route::post('reminderm/insert', 'InvoiceController@newreminder')->name('invoice.newreminder');
+	Route::post('reminder/delete','InvoiceController@deletereminder')->name('invoice.reminderdelete');
+	Route::post('reminder/send','InvoiceController@sendreminder')->name('invoice.sendreminder');
+	Route::get('invoice/print_manualreminder', 'InvoiceController@print_manualreminder');
+	Route::post('invoice/ajax-get-manualinv','InvoiceController@ajaxGetManualInv')->name('invoice.ajaxgetmanualinv');
+	Route::post('invoice/ajax-store-manualinv','InvoiceController@ajaxStoreManualInv')->name('invoice.ajaxstoremanualinv');
+	Route::get('unit/getunit', 'UnitController@getunit')->name('unit.getunit');
+	Route::get('creditnote','InvoiceController@creditnote')->name('invoice.creditnote');
+	Route::post('creditnote/get','InvoiceController@creditnote_get')->name('creditnote.get');
+	Route::get('creditnote/get_invoice','PaymentController@get_invoice_creditnote')->name('creditnote.get_invoice');
+	Route::post('creditnote/insertcreditnote','InvoiceController@insertcreditnote')->name('creditnote.insertcreditnote');
+	Route::get('creditnote/creditnote_void','InvoiceController@creditnote_void')->name('creditnote.creditnote_void');
+	Route::post('creditnote/posting','InvoiceController@posting_creditnote')->name('creditnote.posting');
+	Route::post('creditnote/unposting','InvoiceController@unposting_creditnote')->name('creditnote.unposting');
+	Route::post('creditnote/detail', 'InvoiceController@getdetail_creditnote')->name('creditnote.getdetail');
+	Route::get('treasury/print_bpv', 'TreasuryController@print_bpv');
+	Route::get('report/sms','ReportController@sms')->name('report.sms');
+	Route::get('openentry','JournalController@opEntry')->name('opentry.index');
+	Route::post('doopenentry','JournalController@opEntryUpdate')->name('opentry.update');
+	Route::get('fittingin','FittingController@index')->name('fitting.fittingin');
+	Route::post('fittingin/get','FittingController@fittingin_get')->name('fittingin.get');
+	Route::post('fittingin/insertfittingin','FittingController@insertfittingin')->name('fitting.insertfittingin');
+	Route::get('fittingin/get_tenant','FittingController@get_tenant')->name('fitting.get_tenant');
+	Route::post('fittingin/posting','FittingController@posting_fittingin')->name('fittingin.posting');
+	Route::post('fittingin/unposting','FittingController@unposting_fittingin')->name('fittingin.unposting');
+	Route::get('fittingin/fittingin_void','FittingController@fittingin_void')->name('fittingin.fittingin_void');
+	Route::get('fittingin/print_tts', 'FittingController@print_tts');
+	Route::get('fittingout','FittingController@fittingout')->name('fitting.fittingout');
+	Route::post('fittingout/get','FittingController@fittingout_get')->name('fittingout.get');
+	Route::get('fittingin/get_tts','FittingController@get_tts')->name('fitting.get_tts');
+	Route::post('fittingin/insertfittingout','FittingController@insertfittingout')->name('fitting.insertfittingout');
+	Route::post('fittingout/posting','FittingController@posting_fittingout')->name('fittingout.posting');
+	Route::post('fittingout/unposting','FittingController@unposting_fittingout')->name('fittingout.unposting');
+	Route::get('fittingout/fittingout_void','FittingController@fittingout_void')->name('fittingout.fittingout_void');
+	Route::get('fittingout/print_bpv', 'FittingController@print_bpv');
+	Route::get('manualinv','ManualInvController@index')->name('manualinv.index');
+	Route::post('manualinv/get','ManualInvController@manualinv_get')->name('manualinv.get');
+	Route::post('manualinv/insertmanual','ManualInvController@insertmanual')->name('manualinv.insertmanual');
+	Route::get('manualinv/print_manualinv', 'ManualInvController@print_manualinv');
+	Route::post('manualinv/posting','ManualInvController@posting_manualinv')->name('manualinv.posting');
+	Route::post('manualinv/unposting','ManualInvController@unposting_manualinv')->name('manualinv.unposting');
+	Route::get('manualinv/void','ManualInvController@manualinv_void')->name('manualinv.void');
+	Route::post('fittingin/editfittingout','FittingController@editfittingout')->name('fitting.editfittingout');
+	Route::post('reminder/posting','InvoiceController@postingreminder')->name('invoice.postingdelete');
+	Route::get('paymentdenda','PaymentDendaController@index')->name('paymentdenda.index');
+	Route::post('paymentdenda/get','PaymentDendaController@get')->name('paymentdenda.get');
+	Route::get('paymentdenda/get_invoice','PaymentDendaController@get_invoice')->name('paymentdenda.get_invoice');
+	Route::post('paymentdenda/insert','PaymentDendaController@insert')->name('paymentdenda.insert');
+	Route::get('paymentdenda/void','PaymentDendaController@void')->name('paymentdenda.void');
+	Route::post('paymentdenda/posting','PaymentDendaController@posting')->name('paymentdenda.posting');
+	Route::post('paymentdenda/unposting','PaymentDendaController@unposting')->name('paymentdenda.unposting');
+	Route::get('paymentdenda/delete','PaymentDendaController@delete')->name('paymentdenda.delete');
+	Route::get('paymentdenda/print', 'PaymentDendaController@print');
+	Route::post('paymentdenda/sendkwitansi','PaymentDendaController@sendkwitansi')->name('paymentdenda.sendkwitansi');
+	Route::post('accpayable/unposting','PayableController@unposting')->name('payable.unposting');
+	Route::post('accpayable/','PayableController@unposting')->name('payable.unposting');
+	Route::post('accpayable/updatewithoutpo', 'PayableController@updateAP')->name('payable.updatewithoutpo');
+	Route::post('treasury/unposting','TreasuryController@unposting')->name('treasury.unposting');
+	Route::post('manualinv/editmanual','ManualInvController@editmanual')->name('manualinv.editmanual');
+	Route::post('report/getdownload','ReportController@getdownload')->name('report.getdownload');
+	Route::get('report/ytdlaporan','ReportController@ytdlaporan')->name('report.ytdlaporan');
+	Route::get('report/ytdlaporantpl','ReportController@ytdlaporantpl')->name('report.ytdlaporantpl');
+	Route::get('report/cashflow','ReportController@cashflow')->name('report.cashflow');
+	Route::get('report/cashflowtpl','ReportController@cashflowtpl')->name('report.cashflowtpl');
+	Route::post('reminder/unposting','InvoiceController@unpostingreminder')->name('invoice.unpostingdelete');
+	Route::get('payment/get_token','PaymentController@get_token')->name('payment.get_token');
+	Route::get('report/lebihpembayaran','ReportController@lebihpembayaran')->name('report.lebihpembayaran');
+	Route::get('report/piutangpenghuni','ReportController@piutangpenghuni')->name('report.piutangpenghuni');
+	Route::get('report/wablast','ReportController@wablast')->name('report.wablast');
+	Route::get('invoice/edit/{id}', 'InvoiceController@invEdit')->name('invoice.editinv');
+	Route::post('invoice/updateInv', 'InvoiceController@updateInv')->name('invoice.updateinvdata');
+>>>>>>> Stashed changes
 });
 
 Route::get('sendmail', 'InvoiceController@sendmail');
@@ -564,6 +666,19 @@ Route::post('akasa/ocbc/upload-payment', 'AkasaController@uploadPayment');
 Route::post('akasa/ocbc/token/get', 'AkasaController@getTokenFromMsp');
 Route::post('akasa/ocbc/inquiry/check', 'AkasaController@inquiryCheck');
 Route::post('akasa/ocbc/trx/check', 'AkasaController@trxCheck');
+Route::get('akasa/ocbc/inquiry2', 'AkasaController@inquiry2');
+Route::get('akasa/ocbc/checktagihan', 'AkasaController@inquiry3');
+Route::get('akasa/ocbc/inquiry-other', 'AkasaController@inquiry_other');
+Route::post('akasa/ocbc/payment-other', 'AkasaController@payment_va_other');
+Route::get('akasa/ocbc/testing', 'AkasaController@testing_check');
+Route::get('invoice/print_faktur', 'InvoiceController@print_faktur');
+Route::post('akasa/tokpedtoken', 'AkasaController@getTokenFromMspTokped');
+Route::post('akasa/tokpedtokencheck', 'AkasaController@trxCheck');
+Route::post('akasa/tokpedinquiry', 'AkasaController@inquiryCheck');
+//token E-LIVING
+Route::post('akasa/purchasetoken', 'AkasaController@getTokenFromMspEliving');
+Route::post('akasa/eligibletoken', 'AkasaController@eligibleCheck');
+Route::post('akasa/transactiontoken', 'AkasaController@trxCheck');
 
 Route::get('membership', 'Auth\AuthController@membership');
 Route::get('logout','Auth\AuthController@logout');

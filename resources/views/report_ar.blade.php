@@ -21,7 +21,7 @@
 @endsection
 
 @section('contentheader_breadcrumbs')
-	<ol class="breadcrumb">
+    <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">AR Reports</li>
     </ol>
@@ -44,11 +44,26 @@
                     <select id="type" name="type" class="form-control">
                         <option value="arbyinvoice">Invoice Issued Summary</option>
                         <option value="arbyinvoicecancel">List Canceled Invoice</option>
-                        <option value="araging">Aged Receivable</option>
+                        <option value="araging">Aged Receivable IPL</option>
+                        <option value="araging2">Aged Receivable Total</option>
                         <option value="payment">Payment History</option>
                         <option value="outinv">Outstanding By Unit</option>
                         <option value="outcontr">Outstanding By Billing Info</option>
                         <option value="arsummary">AR Summary By Unit</option>
+<<<<<<< Updated upstream
+=======
+                        <option value="vasummary">VA By Invoice Type</option>
+                        <option value="sms">SMS Blast Template</option>
+                        <option value="wablast">WA Blast Template</option>
+                        <option value="depositsummary">Deposit</option>
+                        <option value="manualsummary">Manual Invoice</option>
+                        <option value="dendasummary">Denda</option>
+                        <option value="spsummary">Reminder Manual</option>
+                        <option value="vaother">VA Other</option>
+                        <option value="lebihbayar">Status Lebih Bayar</option>
+                        <option value="lebihpembayaran">Lebih Pembayaran Unit</option>
+                        <option value="piutangpenghuni">Pemotongan Piutang Penghuni</option>
+>>>>>>> Stashed changes
                     </select>
                 </div>
                 <div class="row dates">
@@ -129,6 +144,12 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="form-group">
+                            <select class="form-control" name="date_type">
+                                <option value="0">Payment Date</option>
+                                <option value="1">Posting at</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="row history" style="display:none">
@@ -161,18 +182,105 @@
                         </div>
                         <div class="col-sm-3" style="padding-right: 0px;">
                             <div class="form-group">
-                             <input type="text" name="ag180" class="form-control" value="180" />
+                             <input type="text" name="ag180" class="form-control" value="90" />
                             </div>
                         </div>
+                        <div class="col-sm-6" style="padding-left:0;">
+                            <div class="form-group">
+                                <select class="form-control" name="jenis" id="ty">
+                                    <option value="1">NOT PAID</option>
+                                    <option value="2">PAID</option>
+                                    <option value="3">ALL</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6" style="padding-right:0;">
+                            <div class="form-group">
+                                <div class="input-group date">
+                                    <div class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control datepicker" name="cutoff" placeholder="Date Cut Off" data-date-format="yyyy-mm-dd" value="<?php echo date('Y-m-d') ?>">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<<<<<<< Updated upstream
+=======
+                <div class="row vasummary" style="display:none">
+                    <div class="col-md-4">
                         <div class="form-group">
-                            <select class="form-control" name="jenis" id="ty">
-                                <option value="1">NOT PAID</option>
-                                <option value="2">PAID</option>
-                                <option value="3">ALL</option>
+                            <select class="form-control" name="bulan" id="bln">
+                                <option value="1">JANUARY</option>
+                                <option value="2">FEBRUARY</option>
+                                <option value="3">MARCH</option>
+                                <option value="4">APRIL</option>
+                                <option value="5">MAY</option>
+                                <option value="6">JUNE</option>
+                                <option value="7">JULY</option>
+                                <option value="8">AUGUST</option>
+                                <option value="9">SEPTEMBER</option>
+                                <option value="10">OCTOBER</option>
+                                <option value="11">NOVEMBER</option>
+                                <option value="12">DECEMBER</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <select class="form-control" name="tahun" id="thn">
+                                <?php 
+                                    for($i=2018; $i<=date('Y'); $i++){
+                                        echo '<option value="'.$i.'">'.$i.'</option>';
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4 smsview">
+                        <div class="form-group">
+                            <div class="form-group">
+                                <select class="form-control" name="inv_type_2">
+                                    @foreach($invtypes as $invtype)
+                                    <option value="{{$invtype->id}}">{{$invtype->invtp_name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 rekap" style="display: none;">
+                        <div class="form-group">
+                            <div class="form-group">
+                                <select class="form-control" name="rekap">
+                                    <option value="1">REKAP</option>
+                                    <option value="0">PERBULAN</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row spsummary" style="display:none">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <select class="form-control" name="sptype" id="sp">
+                                <option value="4">SP1</option>
+                                <option value="5">SP2</option>
+                                <option value="6">SP3</option>
+                                <option value="0">ALL</option>
                             </select>
                         </div>
                     </div>
                 </div>
+                <div class="row unit-bayar" style="display:none">
+                    <div class="col-sm-12">
+                        <div class="form-group">
+                            <select class="form-control choose-unit" name="unit4" style="width: 100%;"></select>
+                        </div>
+                    </div>
+                </div>
+
+>>>>>>> Stashed changes
             </div>
           <!-- /.box-body -->
 
@@ -278,6 +386,7 @@
 
     $('#type').on('change', function() {
       var hasil = this.value;
+<<<<<<< Updated upstream
       if(hasil == "araging"){
         $( ".dates,.unit,.payment,.unit2" ).hide();
         $( ".history" ).show();
@@ -292,6 +401,48 @@
         $( ".unit2" ).show();
       }else{
         $( ".history,.unit,.payment,.unit2" ).hide();
+=======
+      if(hasil == "araging" || hasil == "araging2"){
+        $( ".dates,.unit,.payment,.unit2,.vasummary,.spsummary,.unit-bayar" ).hide();
+        $( ".history" ).show();
+      }else if(hasil == 'outinv'){
+        $( ".unit,.dates" ).show();
+        $( ".history,.payment,.unit2,.vasummary,.spsummary,.unit-bayar" ).hide();
+      }else if(hasil == 'payment'){
+        $( ".dates,.payment" ).show();
+        $( ".history,.unit,.unit2,.vasummary,.spsummary,.unit-bayar" ).hide();
+      }else if(hasil == 'arsummary'){
+        $( ".dates,.history,.payment,.unit,.vasummary,.spsummary,.unit-bayar" ).hide();
+        $( ".unit2" ).show();
+      }else if(hasil == 'spsummary'){
+        $( ".spsummary" ).show();
+        $( ".dates,.history,.unit,.payment,.unit2,.vasummary" ).hide();
+      }else if(hasil == 'vasummary' || hasil == 'sms' || hasil == 'depositsummary' || hasil == 'manualsummary' || hasil == 'dendasummary' || hasil == 'vaother' || hasil == 'wablast'){
+        $( ".dates,.history,.payment,.unit,.unit2,.spsummary,.unit-bayar" ).hide();
+        $( ".vasummary" ).show();
+        if(hasil == 'depositsummary' || hasil == 'vaother'){
+            $( ".rekap" ).show();
+        }
+        if(hasil == 'sms' || hasil == 'depositsummary' || hasil == 'manualsummary' || hasil == 'dendasummary' || hasil == 'vaother' || hasil == 'wablast'){
+            $( ".smsview" ).hide();
+            if(hasil == 'depositsummary' || hasil == 'vaother'){
+                $( ".rekap" ).show();
+            }
+        }else{
+            $( ".smsview" ).show();
+            $( ".rekap" ).hide();
+        }
+      }else if(hasil == 'lebihbayar'){
+        $( ".history,.unit,.payment,.unit2,.vasummary,.spsummary,.dates,.unit-bayar" ).hide();
+      }else if(hasil == 'lebihpembayaran'){
+        $( ".dates,.unit-bayar" ).show();
+        $( ".history,.unit,.unit2,.vasummary,.spsummary,.payment" ).hide();
+      }else if(hasil == 'piutangpenghuni'){
+        $( ".dates,.unit-bayar" ).show();
+        $( ".history,.unit,.unit2,.vasummary,.spsummary,.payment" ).hide();
+      }else{
+        $( ".history,.unit,.payment,.unit2,.vasummary,.spsummary,.unit-bayar" ).hide();
+>>>>>>> Stashed changes
         $( ".dates" ).show();
       }
     });

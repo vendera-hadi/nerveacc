@@ -117,7 +117,7 @@
                         <div class="col-sm-6">
                             <div class="form-group">
                                 <label>Unit Code</label>
-                                <input type="text" class="form-control" name="unit_code" placeholder="Unit Code" required>
+                                <input type="text" class="form-control" name="unit_code" placeholder="Unit Code" required id="udata">
                             </div>
                         </div>
                         <div class="col-sm-6">
@@ -168,6 +168,18 @@
                                     <option value="{{$unittype->id}}">{{$unittype->untype_name}}</option>
                                 @endforeach
                                 </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Water Start</label>
+                                <input type="text" class="form-control" name="water_start" placeholder="Starting Water Meter" value="0">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Electric Start</label>
+                                <input type="text" class="form-control" name="listrik_start" placeholder="Starting Electric Meter" value="0">
                             </div>
                         </div>
                         <!-- END UNIT -->
@@ -363,6 +375,18 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Water Start</label>
+                                <input type="text" class="form-control water_start" name="water_start" placeholder="Starting Water Meter">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Electric Start</label>
+                                <input type="text" class="form-control listrik_start" name="listrik_start" placeholder="Starting Electric Meter">
+                            </div>
+                        </div>
                         <!-- END UNIT -->
                         <div class="col-sm-12 text-center" style="margin-bottom: 20px;">
                             <h4><strong>Owner</strong></h4>
@@ -439,6 +463,7 @@
 <script src="{{asset('plugins/jQueryUI/jquery-ui.min.js')}}"></script>
 <script type="text/javascript" src="{{ asset('plugins/jquery-easyui/jquery.easyui.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('js/datagrid-filter.js') }}"></script>
+<script type="text/javascript" src="{{ asset('js/bootstrap-typeahead.js') }}"></script>
 <!-- datepicker -->
 <script type="text/javascript" src="{{ asset('plugins/datepicker/bootstrap-datepicker.js') }}"></script>
 <script type="text/javascript">
@@ -447,6 +472,48 @@
         var insert_url = "{{route('unit.insert')}}";
         var update_url = "{{route('unit.update')}}";
         var delete_url = "{{route('unit.delete')}}";
+
+        $('#udata').typeahead({
+            autoSelect: true,
+            minLength: 2,
+            delay: 400,
+            items:2,
+            source: function (query, process) {
+                $.ajax({
+                    url: "{{route('unit.getunit')}}",
+                    data: {q: query},
+                    dataType: 'json'
+                })
+                .done(function(response) {
+                    states = [];
+                    map = {};
+                    $.each(response, function (i, state) {
+                        map[state.stateName] = state;
+                        states.push(state.stateName);
+                    });
+                    process(states);
+                });
+            },
+            updater: function(item) {
+                $.ajax({
+                    url: "{{route('unit.getunit')}}",
+                    data: {q: item},
+                    dataType: 'json'
+                })
+                .done(function(response) {
+                    if(response.length > 0){
+                        $('input[name=unit_sqrt]').val(response[0].unit_sqrt);
+                        $('input[name=va_utilities]').val(response[0].va_utilities);
+                        $('input[name=va_maintenance]').val(response[0].va_maintenance);
+                        $('input[name=meter_air]').val(response[0].meter_air);
+                        $('input[name=meter_listrik]').val(response[0].meter_listrik);
+                        $("select[name=untype_id]").val(response[0].untype_id);
+                        $("select[name=floor_id]").val(response[0].floor_id);
+                    }
+                });
+                return item;
+            }
+        });
 
         $('.datepicker').datepicker({
             autoclose: true
@@ -497,6 +564,8 @@
                     $('.untype_id').val(result.untype_id);
                     $('.meter_listrik').val(result.meter_listrik);
                     $('.meter_air').val(result.meter_air);
+                    $('.water_start').val(result.air_start);
+                    $('.listrik_start').val(result.listrik_start);
                     if(result.tenant){
                         $('.tenan_name').val(result.tenant.tenan_name);
                         // $('.tenan_idno').val(result.tenant.tenan_idno);

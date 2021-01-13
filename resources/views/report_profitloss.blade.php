@@ -32,7 +32,7 @@
                         $dt->setDate($from, $to);
                         if(!empty($dt->header)) $desc = '<b>'.$desc.'</b>';
                         $dt->setVariables($variables);
-                        $calculate = $dt->calculateAccount();
+                        $calculate = $dt->calculateAccount($dt->jns);
                         if(!empty($dt->variable)) $variables[$dt->variable] = $calculate;
                     @endphp
                     @if($dt->hide == 0)

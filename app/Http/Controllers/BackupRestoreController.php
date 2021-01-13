@@ -30,8 +30,8 @@ class BackupRestoreController extends Controller
     		->setDbName(env('DB_DATABASE'))
     		->setUserName(env('DB_USERNAME'))
     		->setPassword(env('DB_PASSWORD'))
-    		->setStorePath(public_path('upload/backup.sql'))
-    		->includeTables(['tr_ap_invoice_dtl', 'tr_ap_invoice_hdr', 'tr_ap_invoice_dtl', 'tr_ap_invoice_hdr', 'tr_asset_mutations', 'tr_bank', 'tr_bankjv', 'tr_contract', 'tr_contract_invoice', 'tr_currency_rate', 'tr_invoice_journal', 'tr_invoice_paymdtl', 'tr_invoice_paymhdr', 'tr_invpaym_journal', 'tr_meter', 'tr_period_meter', 'tr_purchase_order_dtl', 'tr_purchase_order_hdr', 'tr_ledger', 'tr_invoice', 'tr_invoice_detail', 'ms_unit', 'ms_tenant', 'users']);
+    		->setStorePath(public_path('upload/backup.sql'));
+    		//->includeTables(['tr_ap_invoice_dtl', 'tr_ap_invoice_hdr', 'tr_ap_invoice_dtl', 'tr_ap_invoice_hdr', 'tr_asset_mutations', 'tr_bank', 'tr_bankjv', 'tr_contract', 'tr_contract_invoice', 'tr_currency_rate', 'tr_invoice_journal', 'tr_invoice_paymdtl', 'tr_invoice_paymhdr', 'tr_invpaym_journal', 'tr_meter', 'tr_period_meter', 'tr_purchase_order_dtl', 'tr_purchase_order_hdr', 'tr_ledger', 'tr_invoice', 'tr_invoice_detail', 'ms_unit', 'ms_tenant', 'users']);
 
     	if($dumpDB->dumpToFile()) return $dumpDB->downloadBackup();
 	}
@@ -52,6 +52,7 @@ class BackupRestoreController extends Controller
 	    	if($dumpDB->restoreDB()) return redirect()->back()->with('success', 'Data Restored Successfully');
 	    	else return redirect()->back()->with('error', 'Error Occured when restoring backup');
 	    }catch(\Exception $e){
+		dd($e->getMessage());
 	    	return redirect()->back()->with('error', 'Error Occured when restoring backup');
 	    }
 	}

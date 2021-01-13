@@ -70,14 +70,18 @@
                         <thead>
                             <tr>
                                 <!-- tambahin sortable="true" di kolom2 yg memungkinkan di sort -->
-                                <th field="checkbox" width="25"></th>
+                                <th field="checkbox" width="20"></th>
                                 <th field="tenan_name" sortable="true">Nama Tenant</th>
-                                <th field="unit_code" width="50" sortable="true">No Unit</th>
+                                <th field="unit_code" sortable="true">No Unit</th>
                                 <th field="inv_no" sortable="true">Invoice No</th>
-                                <th field="paymtp_name" width="50" sortable="true">Payment Type</th>
-                                <th field="invpayh_date" width="50" sortable="true">Payment Date</th>
+                                <th field="paymtp_name" sortable="true">Pay.Type</th>
+                                <th field="cashbk_name" sortable="true">Bank</th>
+                                <th field="invpayh_note" width="80" sortable="true">Note</th>
+                                <th field="invpayh_date" sortable="true">Pay.Date</th>
                                 <th field="invpayh_amount" sortable="true">Total</th>
-                                <th field="invpayh_post" width="50" sortable="true">Posting Status</th>
+                                <th field="lebih_pembayaran" sortable="true">Lebih</th>
+                                <th field="posting_at" sortable="true">Posting</th>
+                                <th field="invpayh_post" sortable="true">Status</th>
                                 <th field="action_button">Action</th>
                             </tr>
                         </thead>
@@ -90,8 +94,34 @@
                         @if(Session::get('role')==1 || in_array(70,Session::get('permissions')))
                         <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected Payment</span>
                         </a>
+<<<<<<< Updated upstream
+=======
+                        <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="sendInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-paper-plane"></i>&nbsp;Send Email Kwitansi</span>
+                        </a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="unpostingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-remove"></i>&nbsp;Unposting Selected Payment</span>
+                        </a>
+>>>>>>> Stashed changes
                         @endif
                     </div>
+                    <div id="dlg" class="easyui-dialog" style="width:40%"
+                        closed="true" buttons="#dlg-buttons">
+                        <form id="fm" method="post" novalidate style="margin:0;padding:20px 50px">
+                            <div style="margin-bottom:10px">
+                                <input type="text" class="easyui-datebox" required="required" name="posting_date" label="Posting Date :" style="width:100%" data-options="formatter:myformatter,parser:myparser">
+                            </div>
+                            <div style="margin-bottom:10px">
+                                <select id="sendflag" class="easyui-combobox" required="true" name="send_flag" label="Send Kwitansi:" style="width:300px;">
+                                    <option value="1">No</option>
+                                    <option value="2">Yes</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div id="dlg-buttons">
+                        <a href="javascript:void(0)" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="savepayment()" style="width:90px">Save</a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')" style="width:90px">Cancel</a>
+                    </div>
+
                     <!-- end icon -->
                 </div>
                 <!-- /.tab-pane -->
@@ -99,7 +129,7 @@
                     <div id="contractStep1">
                         <form method="POST" id="formPayment">
                             <div class="form-group">
-                                <label>Tenant Name</label>
+                                <label>Unit Code</label>
                                 <select class="form-control contrId choose-contract" name="tenan_id" style="width:100%"></select>
                             </div>
                             <div class="form-group">
@@ -159,6 +189,12 @@
                                 <input type="text" name="invpayh_note" class="form-control">
                             </div>
                             <div class="ajax-detail"></div>
+                            <?php 
+                            session_start();
+                            $secret=md5(uniqid(rand(), true));
+                            Session::set('FORM_SECRET', $secret); 
+                            ?>
+                            <input type="hidden" id="form_secret" name="form_secret" value="<?php echo $secret; ?>">
                             <button type="submit" id="submitForm" class="btn btn-primary">submit</button>
                         </form>
                     </div>
@@ -289,31 +325,21 @@
     $(".choose-style").select2();
 
     $(".choose-contract").select2({
-              ajax: {
-                url: "{{route('contract.optParent')}}",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                  return {
+        ajax: {
+            url: "{{route('contract.optParent')}}",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
                     q: params.term, // search term
                     page: params.page
-                  };
-                },
-
-                cache: true
-              },
-              escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
-              minimumInputLength: 0
-        })
-        // .on("select2:selecting", function(e) {
-        //     var contractId = $(".choose-contract").val();
-        //     $.post('{{route('tenant.outstanding')}}', {contract_id:contractId}, function(data){
-        //         console.log(data);
-        //         if(data.length > 0){
-        //           alert('Masih ada '+data.length+' Invoice yang belum terbayar untuk tenant ini');
-        //         }
-        //     });
-        // });
+                };
+            },
+            cache: true
+        },
+        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        minimumInputLength: 0
+    })
 
     $(".contrId").change(function(){
         var url = "{{route('payment.get_invoice')}}";
@@ -355,22 +381,7 @@
             });
         }
      });
-
-    var print_window = function(){
-        $('.print-window').off('click');
-        $('.print-window').click(function(){
-            var self = $(this);
-            var url = self.attr('href');
-            var title = self.attr('title');
-            var w = self.attr('data-width');
-            var h = self.attr('data-height');
-
-            openWindow(url, title, w, h);
-
-            return false;
-        });
-    };
-
+    /*
     function postingInv(){
         var ids = [];
         $('input[name=check]:checked').each(function() {
@@ -393,7 +404,167 @@
           });
         }
     }
+    */
+    function postingInv(){
+        $('#dlg').dialog('open').dialog('center').dialog('setTitle','Posting Payment');
+        $('#fm').form('clear');
+    }
 
+    function savepayment(){
+        var ids = [];
+        var url = "{{route('payment.get_token')}}";
+        var val = 10;
+        url = url+"?type="+val;
+
+        $('input[name=check]:checked').each(function() {
+           ids.push($(this).val());
+        });
+
+        if(ids.length > 0){
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(token) {
+                    var data = $("#fm").serializeArray();
+                    data.push({name: "id", value: ids});
+                    data.push({name: "token", value: token});
+                    $.post('{{route('payment.posting')}}',data, function(result){
+                        if(result.success == 1){
+                            $.messager.alert('Success','Data saved');
+                            $('#dlg').dialog('close');
+                            $('#dg').datagrid('reload');
+                        }else{
+                            $.messager.show({
+                                title: 'Error',
+                                msg: result.message
+                            });
+                        }
+                    });
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    alert('failed during proccess.');
+                    return false;
+                }
+            });
+        }
+        
+    }
+
+    function unpostingInv(){
+        var ids = [];
+        $('input[name=check]:checked').each(function() {
+           ids.push($(this).val());
+        });
+        if(ids.length > 0){
+          $.messager.confirm('Confirm','Are you sure you want to unpost this '+ids.length+' Payment ?',function(r){
+              if (r){
+                  $('.loadingScreen').show();
+                  $.post('{{route('payment.unposting')}}',{id:ids}, function(data){
+                      alert(data.message);
+                      $('.loadingScreen').hide();
+                      if(data.success == 1){
+                        $('#dg').datagrid('reload');
+                      } else{
+                        return false;
+                      }
+                  });
+              }
+          });
+        }
+    }
+
+<<<<<<< Updated upstream
+=======
+    function sendInv(){
+        var ids = [];
+        $('input[name=check]:checked').each(function() {
+           ids.push($(this).val());
+        });
+        if(ids.length > 0){
+          $.messager.confirm('Confirm','Are you sure you want to send email this '+ids.length+' Payment ?',function(r){
+              if (r){
+                  $('.loadingScreen').show();
+                  $.post('{{route('payment.sendkwitansi')}}',{id:ids}, function(data){
+                      alert(data.message);
+                      $('.loadingScreen').hide();
+                      if(data.success == 1){
+                        $('#dg').datagrid('reload');
+                      } else{
+                        return false;
+                      }
+                  });
+              }
+          });
+        }
+    }
+
+    $(document).delegate('.void-confirm','click',function(){
+        if(confirm("are you sure you want void this payment?")){
+            var url = $(this).attr('href');
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(result) {
+                    alert(result.message);
+                    if(result.status == 1) $('#dg').datagrid('reload');
+                    return false;
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    alert('failed during proccess.');
+                    return false;
+                }
+            });
+            return false;
+        }else{
+            return false;
+        }
+    });
+
+    $(document).delegate('.posting-confirm','click',function(){
+        if(confirm("are you sure you want posting this payment?")){
+            var id = $(this).attr('data-id');
+
+            $.post('{{route('payment.posting')}}',{id:id}, function(data){
+                alert(data.message);
+                if(data.success == 1){
+                    $('#dg').datagrid('reload');
+                }else{
+                    return false;
+                }
+            });
+        }else{
+            return false;
+        }
+    });
+
+    $(document).delegate('.paid-amount','change',function(){
+        var maxVal = parseFloat($(this).attr('maxlength'));
+        var currentVal = parseFloat($(this).val());
+        if(currentVal > maxVal) $(this).val(maxVal);
+        if(currentVal < 1) $(this).val(1);
+      });
+
+    $(document).delegate('.paid-check','change',function(){
+        if($(this).is(':checked')) $(this).parents('tr').find('.paid-amount').removeAttr('disabled');
+        else $(this).parents('tr').find('.paid-amount').attr('disabled','disabled');
+    });
+
+    var print_window = function(){
+        $('.print-window').off('click');
+        $('.print-window').click(function(){
+            var self = $(this);
+            var url = self.attr('href');
+            var title = self.attr('title');
+            var w = self.attr('data-width');
+            var h = self.attr('data-height');
+
+            openWindow(url, title, w, h);
+
+            return false;
+        });
+    };
+
+>>>>>>> Stashed changes
     function openWindow(url, title, w, h){
         // Fixes dual-screen position                         Most browsers      Firefox
         var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
@@ -412,58 +583,25 @@
         }
     }
 
-    $(document).delegate('.void-confirm','click',function(){
-      if(confirm("are you sure you want void this payment?")){
-        var url = $(this).attr('href');
+    function myformatter(date){
+        var y = date.getFullYear();
+        var m = date.getMonth()+1;
+        var d = date.getDate();
+        return (d<10?('0'+d):d)+'-'+(m<10?('0'+m):m)+'-'+y;
+    }
 
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function(result) {
-              alert(result.message);
-              if(result.status == 1) location.reload();
+    function myparser(s){
+        if (!s) return new Date();
+        var ss = (s.split('-'));
+        var y = parseInt(ss[0],10);
+        var m = parseInt(ss[1],10);
+        var d = parseInt(ss[2],10);
+        if (!isNaN(y) && !isNaN(m) && !isNaN(d)){
+            return new Date(d,m-1,y);
+        } else {
+            return new Date();
+        }
+    }
 
-              return false;
-            },
-            error: function(XMLHttpRequest, textStatus, errorThrown) {
-                alert('failed during proccess.');
-                return false;
-            }
-        });
-
-        return false;
-      }else{
-        return false;
-      }
-    });
-
-    $(document).delegate('.posting-confirm','click',function(){
-      if(confirm("are you sure you want posting this payment?")){
-        var id = $(this).attr('data-id');
-
-        $.post('{{route('payment.posting')}}',{id:id}, function(data){
-            alert(data.message);
-            if(data.success == 1){
-              location.reload();
-            } else{
-              return false;
-            }
-        });
-      }else{
-        return false;
-      }
-    });
-
-    $(document).delegate('.paid-amount','change',function(){
-        var maxVal = parseFloat($(this).attr('maxlength'));
-        var currentVal = parseFloat($(this).val());
-        if(currentVal > maxVal) $(this).val(maxVal);
-        if(currentVal < 1) $(this).val(1);
-      });
-
-    $(document).delegate('.paid-check','change',function(){
-        if($(this).is(':checked')) $(this).parents('tr').find('.paid-amount').removeAttr('disabled');
-        else $(this).parents('tr').find('.paid-amount').attr('disabled','disabled');
-      });
 </script>
 @endsection

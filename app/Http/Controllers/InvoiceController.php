@@ -36,8 +36,21 @@ use App\Models\MsEmailTemplate;
 use App\Models\InvoiceScheduler;
 use App\Models\AkasaOutstanding;
 use App\Models\EmailQueue;
+use App\Models\ReminderH;
+use App\Models\ReminderD;
+use App\Models\MsCashBank;
+use App\Models\MsPaymentType;
+use App\Models\ExcessPayment;
+use App\Models\LogExcessPayment;
+use App\Models\LogPaymentUsed;
+use App\Models\CreditNoteH;
+use App\Models\CreditNoteD;
+use App\Models\AkrualInv;
+use App\Models\KwitansiCounter;
+use App\Models\Numcounter;
 use DB;
 use PDF;
+use Validator;
 
 class InvoiceController extends Controller
 {
@@ -123,7 +136,11 @@ class InvoiceController extends Controller
             }
             // jika ada keyword
             if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
+<<<<<<< Updated upstream
                                         $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("unit_code"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'ilike','%'.$keyword.'%');
+=======
+                                        $query->where(\DB::raw('lower(trim("inv_amount"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("unit_code"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'ilike','%'.$keyword.'%');
+>>>>>>> Stashed changes
                                     });
             // jika ada inv type
             if(!empty($invtype)) $fetch = $fetch->where('tr_invoice.invtp_id',$invtype);
@@ -163,6 +180,10 @@ class InvoiceController extends Controller
 
                 if(!$value->inv_iscancel){
                     $temp['action_button'] = '<a href="'.url('invoice/print_faktur?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_faktur?id='.$value->id.'&type=pdf').'">PDF</a> | <a href="'.url('invoice/receipt?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Receipt</a>';
+
+                    if($value->invtp_name == 'INVOICE UTILITIES'){
+                        $temp['action_button'] .= ' | <a href="'.route('invoice.editinv',$value->id).'" >Edit</a>';
+                    }
 
                     // if(!empty((int)number_format($value->inv_outstanding))) $temp['action_button'] .= ' | <a href="'.url('invoice/sendreminder?id='.$value->tenan_id).'" class="print-window" data-width="640" data-height="660">Send Reminder</a>';
                 }
@@ -575,7 +596,7 @@ class InvoiceController extends Controller
                 $countCost = 0;
                 $tempDetails = [];
                 foreach ($cost_details as $costdt) {
-                    // echo $costdt.",";
+                     //echo $costdt.",";
                     $cost = new CostCreator;
                     $cost->setCostItem($costdt);
                     $cost->setInvType($sch->invtp_id);
@@ -583,16 +604,17 @@ class InvoiceController extends Controller
                     $cost->setInvStartDate($invoice->getInvStartDate());
                     $cost->setPeriod($sch->period_start, $sch->period_end);
                     $detail = $cost->generateDetail();
-                    // var_dump($detail);
+                     //print_r($detail);
+                     //die();
                     if(!empty($detail)){
                         $countCost++;
                         $tempDetails[] = $detail;
                     }
                 }
                 // jika semua cost lengkap dan bisa digenerate, masukin child
-                // echo $countCost." dan ".count($cost_details)."<br>";
-                // if($countCost == count($cost_details)){
-                    // echo "ADD CHILD";
+                //echo $countCost." dan ".count($cost_details)."<br>";
+                 if($countCost == count($cost_details)){
+                     //echo "ADD CHILD";
                     foreach ($tempDetails as $dt) {
                         $invoice->addChild($dt);
                     }
@@ -603,10 +625,10 @@ class InvoiceController extends Controller
                     // kalau config materai aktif add materai
                     $use_materai = @MsConfig::where('name','use_materai')->first()->value;
                     if(!empty($use_materai)) $invoice->addMaterai();
-                // }
-                // echo "SKIPPED";
+                 }
+                 //echo "SKIPPED";
 
-                // echo $invoice->create();
+                 //echo $invoice->create();
                 if($invoice->create()){
                     echo "Generated<br>--------------<br>";
                     $total++;
@@ -678,7 +700,7 @@ class InvoiceController extends Controller
 
             $invoice_data = TrInvoice::select('tr_invoice.*', 'ms_unit.unit_code', 'ms_unit.va_utilities', 'ms_unit.va_maintenance')
                                     ->leftJoin('tr_contract','tr_contract.id','=','tr_invoice.contr_id')
-                                    ->leftJoin('ms_unit','tr_contract.unit_id','=','ms_unit.id')
+                                    ->leftJoin('ms_unit','tr_invoice.unit_id','=','ms_unit.id')
                                     ->where('inv_iscancel','!=',1)
                                     ->whereIn('tr_invoice.id',$inv_id)->with('MsTenant','InvoiceType')->get()->toArray();
             foreach ($invoice_data as $key => $inv) {
@@ -699,8 +721,12 @@ class InvoiceController extends Controller
                 });
 
                 $invoice_data[$key]['details'] = $result;
-                $terbilang = $this->terbilang($inv['inv_amount']);
-                $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
+                $terbilang = $this->terbilang(($inv['inv_amount']-$inv['total_excess_payment']));
+                if(($inv['inv_amount']-$inv['total_excess_payment']) == 0){
+                    $invoice_data[$key]['terbilang'] = '## LUNAS ##';
+                }else{
+                    $invoice_data[$key]['terbilang'] = '## '.$terbilang.' Rupiah ##';
+                }
             }
             $total = $invoice_data[0]['inv_outstanding'];
 
@@ -720,7 +746,6 @@ class InvoiceController extends Controller
 
             if($type == 'pdf'){
                 $pdf = PDF::loadView('print_faktur', $set_data)->setPaper('a4');
-
                 return $pdf->download('FAKTUR-INV.pdf');
             }else{
                 return view('print_faktur', $set_data);
@@ -744,18 +769,28 @@ class InvoiceController extends Controller
         $company = MsCompany::with('MsCashbank')->first()->toArray();
         // $signature = @MsConfig::where('name','digital_signature')->first()->value;
         $paymentHeader = TrInvoicePaymhdr::find($request->id);
-        $contract = TrContract::where('tr_contract.tenan_id',$paymentHeader->tenan_id)->first();
-        $paymentDetails = TrInvoicePaymdtl::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount')
+        
+        $paymentDetails = TrInvoicePaymdtl::select('tr_invoice.id','tr_invoice.inv_number','tr_invoice_paymdtl.invpayd_amount','tr_invoice.inv_amount','tr_creditnote_dtl.credit_amount','tr_invoice.unit_id')
                                 ->join('tr_invoice','tr_invoice_paymdtl.inv_id','=','tr_invoice.id')
+                                ->leftJoin('tr_creditnote_dtl','tr_creditnote_dtl.inv_id','=','tr_invoice.id')
+                                ->leftJoin('tr_creditnote_hdr','tr_creditnote_hdr.id','=','tr_creditnote_dtl.creditnote_hdr_id')
                                 ->where('tr_invoice_paymdtl.invpayh_id',$request->id)->get();
+
+        $unit_k = $paymentDetails[0]->unit_id;
+        $contract = TrContract::where('tr_contract.tenan_id',$paymentHeader->tenan_id)->where('tr_contract.unit_id',$unit_k)->first();
         $total = 0;
+        $crd = 0;
         if(count($paymentDetails) > 0){
             foreach ($paymentDetails as $key => $value) {
-                $total += $value->invpayd_amount;
+                $total += $value->inv_amount;
                 // get detail invoice
                 $temp = [];
                 $invHd = TrInvoice::find($value->id);
                 $inv_details = TrInvoiceDetail::where('inv_id',$value->id)->get();
+                $crd_note = CreditNoteD::join('tr_creditnote_hdr','tr_creditnote_dtl.creditnote_hdr_id','=','tr_creditnote_hdr.id')
+                                ->where('tr_creditnote_dtl.inv_id',$value->id)
+                                ->where('creditnote_post','t')
+                                ->get();
                 // jabarin detail dan sisipkan order
                 if(count($inv_details) > 0){
                     foreach ($inv_details as $key2 => $value2) {
@@ -772,10 +807,16 @@ class InvoiceController extends Controller
                         else $temp[] = $value2['invdt_note'];
                     }
                 }
+                if(count($crd_note) > 0){
+                    foreach ($crd_note as $key3 => $value3) {
+                        $crd += $value3->credit_amount;
+                        $temp[] = $value3['creditnote_keterangan'];
+                    }
+                }
                 $paymentDetails[$key]->details = $temp;
             }
         }
-        $terbilang = $this->terbilang($total);
+        $terbilang = $this->terbilang($total - $crd);
 
         $set_data = array(
                 'company' => $company,
@@ -784,11 +825,51 @@ class InvoiceController extends Controller
                 'details' => $paymentDetails,
                 'terbilang' => $terbilang.' Rupiah',
                 'tenan' => @$contract->MsTenant->tenan_name,
-                'unit' => @$contract->MsUnit->unit_code
+                'unit' => @$contract->MsUnit->unit_code,
+                'type' => null
             );
 
         if(!empty($sendKwitansi)){
+<<<<<<< Updated upstream
             \Mail::to($paymentHeader->tenant->tenan_email)->send(new \App\Mail\Kwitansi($paymentHeader));
+=======
+            $cc = @MsConfig::where('name','cc_email')->first()->value;
+            $queue = new EmailQueue;
+            $queue->status = 'new';
+            $queue->mailclass = '\App\Mail\KwitansiMail';
+            $queue->ref_id = $paymentHeader;
+            $queue->to = $paymentHeader->tenant->tenan_email;
+            if(!empty($cc)) $queue->cc = $cc;
+            $queue->save();
+            if($buktifaktur->tenant->cc_email != NULL || $buktifaktur->tenant->cc_email != ''){
+                $cc_tenant = explode('|', $buktifaktur->tenant->cc_email);
+                if(count($cc_tenant) > 0){
+                    for($i=0; $i<count($cc_tenant); $i++){
+                        $tnt2 = explode('~', $cc_tenant[$i]);
+                        if(count($tnt2) > 0){
+                            $unit_dt = $tnt2[0];
+                            $units = MsUnit::where('unit_code', $unit_dt)->first();
+                            $kirim = explode(';', $tnt2[1]);
+                            if(count($units) > 0){
+                                //if($units->id == $invoice->unit_id){ 
+                                    if(count($kirim) > 0){
+                                        for($j=0; $j<count($kirim); $j++){
+                                            $queue = new EmailQueue;
+                                            $queue->status = 'new';
+                                            $queue->mailclass = '\App\Mail\KwitansiMail';
+                                            $queue->ref_id = $buktifaktur->id;
+                                            $queue->to = $kirim[$j];
+                                            if(!empty($cc)) $queue->cc = $cc;
+                                            $queue->save();
+                                        }
+                                    }
+                                //}
+                            } 
+                        }
+                    }
+                }
+            } 
+>>>>>>> Stashed changes
             return 'Success! Email sent to '.$paymentHeader->tenant->tenan_email;
         }
         return view('print_payment', $set_data);
@@ -802,18 +883,9 @@ class InvoiceController extends Controller
         $month = date('m');
         $journal = [];
         $invJournal = [];
+        $invAkrual = [];
+        $coatitipan = @MsConfig::where('name','coa_hutang_titipan')->first()->value;
 
-        // cari last prefix, order by journal type
-        $jourType = MsJournalType::where('jour_type_prefix','AR')->first();
-        if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "AR" first before posting an invoice']);
-        $lastJournal = TrLedger::where('jour_type_id',$jourType->id)->latest()->first();
-        if($lastJournal){
-            $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
-            $lastJournalNumber = (int) end($lastJournalNumber);
-            $nextJournalNumber = $lastJournalNumber + 1;
-        }else{
-            $nextJournalNumber = 1;
-        }
         $successPosting = 0;
         $successIds = [];
 
@@ -823,6 +895,25 @@ class InvoiceController extends Controller
         if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closing_at));
 
         foreach ($ids as $id) {
+
+            // cari last prefix, order by journal type
+            $jourType = MsJournalType::where('jour_type_prefix','AR')->first();
+            if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "AR" first before posting an invoice']);
+            $lastJournal = Numcounter::where('numtype','JG')->where('tahun',$coayear)->where('bulan',$month)->first();
+            if(count($lastJournal) > 0){
+                $lst = $lastJournal->last_counter;
+                $nextJournalNumber = $lst + 1;
+                $lastJournal->update(['last_counter'=>$nextJournalNumber]);
+            }else{
+                $nextJournalNumber = 1;
+                $lastcounter = new Numcounter;
+                $lastcounter->numtype = 'JG';
+                $lastcounter->tahun = date('Y');
+                $lastcounter->bulan = date('m');
+                $lastcounter->last_counter = 1;
+                $lastcounter->save();
+            }
+
             // get coa code dari invoice type
             $invoiceHd = TrInvoice::with('MsTenant')->find($id);
             if($invoiceHd->inv_iscancel) break;
@@ -855,14 +946,15 @@ class InvoiceController extends Controller
             if(!empty($limitMinPostingDate) && $invoiceHd->inv_date < $limitMinPostingDate){
                 return response()->json(['error'=>1, 'message'=> "You can't posting if one of these invoice date is before last close date"]);
             }
-            // if(!isset($invoiceHd->InvoiceType->invtp_coa_ar)) return response()->json(['error'=>1, 'message'=> 'Invoice Type Name: '.$invoiceHd->InvoiceType->invtp_name.' need to be set with COA code']);
+
+            $nextJournalNumber = str_pad($nextJournalNumber, 6, 0, STR_PAD_LEFT);
+            $journalNumber = "JG/".$coayear."/".$this->Romawi($month)."/".$nextJournalNumber;
+
             // create journal DEBET utk piutang
             foreach($debetCoaAmount as $key => $value){
-                $coaDebet = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$key)->first();
+                $coaDebet = MsMasterCoa::where('coa_code',$key)->first();
                 if(empty($coaDebet)) return response()->json(['error'=>1, 'message'=>'COA Code: '.$key.' is not found on this year list. Please ReInsert this COA Code']);
 
-                $nextJournalNumber = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
-                $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumber;
                 $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
                 // Debet
                 $journal[] = [
@@ -870,18 +962,148 @@ class InvoiceController extends Controller
                                 'ledge_fisyear' => $coayear,
                                 'ledg_number' => $journalNumber,
                                 'ledg_date' => date('Y-m-d'),
+                                //'ledg_date' => '2019-01-03',
                                 'ledg_refno' => $invoiceHd->inv_faktur_no,
                                 'ledg_debit' => $value,
                                 'ledg_credit' => 0,
                                 'ledg_description' => $debetCoaName[$key],
-                                'coa_year' => $coaDebet->coa_year,
+                                'coa_year' => $coayear,
                                 'coa_code' => $coaDebet->coa_code,
                                 'created_by' => Auth::id(),
                                 'updated_by' => Auth::id(),
                                 'jour_type_id' => $jourType->id,
-                                'dept_id' => 3 //hardcode utk finance
+                                'dept_id' => 3, //hardcode utk finance,
+                                'modulname' => 'AR',
+                                'refnumber' =>$id
                             ];
+                
+                if($invoiceHd->total_excess_payment > 0){
+                    if($invoiceHd->total_excess_payment < $invoiceHd->inv_amount){
+                        $sf = 10/100 * $invoiceHd->total_excess_payment;
+                        $ipl = $invoiceHd->total_excess_payment - $sf;
+                        $air = $invoiceHd->total_excess_payment;
 
+                        $lastJournal_titipan = Numcounter::where('numtype','JG')->where('tahun',$coayear)->where('bulan',$month)->first();
+                        if(count($lastJournal_titipan) > 0){
+                            $lst_titipan = $lastJournal_titipan->last_counter;
+                            $nextJournalNumber_titipan = $lst_titipan + 1;
+                            $lastJournal_titipan->update(['last_counter'=>$nextJournalNumber_titipan]);
+                        }else{
+                            $nextJournalNumber_titipan = 1;
+                            $lastcounter_titipan = new Numcounter;
+                            $lastcounter_titipan->numtype = 'BRV';
+                            $lastcounter_titipan->tahun = date('Y');
+                            $lastcounter_titipan->bulan = date('m');
+                            $lastcounter_titipan->last_counter = 1;
+                            $lastcounter_titipan->save();
+                        }
+                        $nextJournalNumber_titipan = str_pad($nextJournalNumber_titipan, 6, 0, STR_PAD_LEFT);
+                        $journalNumber_titipan = "JG/".$coayear."/".$this->Romawi($month)."/".$nextJournalNumber_titipan;
+
+                        if($invoiceHd->invtp_id == 2){
+                            if(trim($coaDebet->coa_code) == '10310'){
+                                $journal[] = [
+                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                    'ledge_fisyear' => $coayear,
+                                    'ledg_number' => $journalNumber_titipan,
+                                    'ledg_date' => date('Y-m-d'),
+                                    //'ledg_date' => '2019-01-03',
+                                    'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                    'ledg_debit' => $air,
+                                    'ledg_credit' => 0,
+                                    'ledg_description' => 'Hutang Titipan Pemotong Invoice '.$debetCoaName[$key],
+                                    'coa_year' => $coayear,
+                                    'coa_code' => $coatitipan,
+                                    'created_by' => Auth::id(),
+                                    'updated_by' => Auth::id(),
+                                    'jour_type_id' => $jourType->id,
+                                    'dept_id' => 3, //hardcode utk finance
+                                    'modulname' => 'AR',
+                                    'refnumber' =>$id
+                                ];
+                                $journal[] = [
+                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                    'ledge_fisyear' => $coayear,
+                                    'ledg_number' => $journalNumber_titipan,
+                                    'ledg_date' => date('Y-m-d'),
+                                    //'ledg_date' => '2019-01-03',
+                                    'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                    'ledg_debit' => 0,
+                                    'ledg_credit' => $ipl,
+                                    'ledg_description' => 'Hutang Titipan Pemotong Invoice '.$debetCoaName[$key],
+                                    'coa_year' => $coayear,
+                                    'coa_code' => $coaDebet->coa_code,
+                                    'created_by' => Auth::id(),
+                                    'updated_by' => Auth::id(),
+                                    'jour_type_id' => $jourType->id,
+                                    'dept_id' => 3, //hardcode utk finance
+                                    'modulname' => 'AR',
+                                    'refnumber' =>$id
+                                ];
+                            }else{
+                                $journal[] =[
+                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                    'ledge_fisyear' => $coayear,
+                                    'ledg_number' => $journalNumber_titipan,
+                                    'ledg_date' => date('Y-m-d'),
+                                    //'ledg_date' => '2019-01-03',
+                                    'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                    'ledg_debit' => 0,
+                                    'ledg_credit' => $sf,
+                                    'ledg_description' => 'Hutang Titipan Pemotong Invoice '.$debetCoaName[$key],
+                                    'coa_year' => $coayear,
+                                    'coa_code' => $coaDebet->coa_code,
+                                    'created_by' => Auth::id(),
+                                    'updated_by' => Auth::id(),
+                                    'jour_type_id' => $jourType->id,
+                                    'dept_id' => 3, //hardcode utk finance
+                                    'modulname' => 'AR',
+                                    'refnumber' =>$id
+                                ];
+                            }
+                        }else{
+                            $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber_titipan,
+                                'ledg_date' => date('Y-m-d'),
+                                //'ledg_date' => '2019-01-03',
+                                'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                'ledg_debit' => $air,
+                                'ledg_credit' => 0,
+                                'ledg_description' => 'Hutang Titipan Pemotong Invoice '.$debetCoaName[$key],
+                                'coa_year' => $coayear,
+                                'coa_code' => $coatitipan,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id,
+                                'dept_id' => 3, //hardcode utk finance
+                                'modulname' => 'AR',
+                                'refnumber' =>$id
+                            ];
+                            $journal[] =[
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber_titipan,
+                                'ledg_date' => date('Y-m-d'),
+                                //'ledg_date' => '2019-01-03',
+                                'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                'ledg_debit' => 0,
+                                'ledg_credit' => $air,
+                                'ledg_description' => 'Hutang Titipan Pemotong Invoice '.$debetCoaName[$key],
+                                'coa_year' => $coayear,
+                                'coa_code' => $coaDebet->coa_code,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id,
+                                'dept_id' => 3, //hardcode utk finance
+                                'modulname' => 'AR',
+                                'refnumber' =>$id
+                            ];
+                        }
+                    }
+                }
+                
                 $invJournal[] = [
                                 'inv_id' => $id,
                                 'invjour_voucher' => $journalNumber,
@@ -900,9 +1122,11 @@ class InvoiceController extends Controller
             $invDetails = TrInvoiceDetail::where('inv_id',$id)->get();
             foreach ($invDetails as $detail) {
                 // coa credit diambil dari cost item
+                //ACRUD jadi pas pertama kali akui piutang kreditnya ke COA pendapatan di terima di Muka
+                $pmuka = @MsConfig::where('name','coa_uangmuka')->first()->value;
                 if(!empty($detail->coa_code)){
                     $costItem = "";
-                    $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$detail->coa_code)->first();
+                    $coaCredit = MsMasterCoa::where('coa_code',$detail->coa_code)->first();
                 }else{
                     if($detail->costd_id != 0){
                         $costItem = MsCostDetail::join('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')->where('ms_cost_detail.id',$detail->costd_id)->first();
@@ -913,58 +1137,304 @@ class InvoiceController extends Controller
                         if(empty($detail->coa_code)) $detail->coa_code = 40900;
                         $cost_coa_code = $detail->coa_code;
                     }
-                    $coaCredit = MsMasterCoa::where('coa_year',$coayear)->where('coa_code',$cost_coa_code)->first();
+                    $coaCredit = MsMasterCoa::where('coa_code',$cost_coa_code)->first();
                 }
-                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
-                $ledgNote = !empty($costItem) ? $costItem->cost_name : $detail->invdt_note;
-                $journal[] = [
-                            'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
-                            'ledge_fisyear' => $coayear,
-                            'ledg_number' => $journalNumber,
-                            'ledg_date' => date('Y-m-d'),
-                            'ledg_refno' => $invoiceHd->inv_faktur_no,
-                            'ledg_debit' => 0,
-                            'ledg_credit' => $detail->invdt_amount,
-                            'ledg_description' => $invoiceHd->MsTenant->tenan_name." : ".$ledgNote,
-                            'coa_year' => $coaCredit->coa_year,
-                            'coa_code' => $coaCredit->coa_code,
-                            'created_by' => Auth::id(),
-                            'updated_by' => Auth::id(),
-                            'jour_type_id' => $jourType->id,
-                            'dept_id' => 3 //hardcode utk finance
-                        ];
+                //INPUT KE LOG AKRUAL
+                $totalp = 1;
+                if($invoiceHd->invtp_id == 2){
+                    $bulan = date('n',strtotime($invoiceHd->inv_date));
+                    switch ($bulan) {
+                        case '1':
+                            $totalp = 3;
+                            break;
+                        case '2':
+                            $totalp = 2;
+                            break;
+                        case '3':
+                            $totalp = 1;
+                            break;
+                        case '4':
+                            $totalp = 3;
+                            break;
+                        case '5':
+                            $totalp = 2;
+                            break;
+                        case '6':
+                            $totalp = 1;
+                            break;
+                        case '7':
+                            $totalp = 3;
+                            break;
+                        case '8':
+                            $totalp = 2;
+                            break;
+                        case '9':
+                            $totalp = 1;
+                            break;
+                        case '10':
+                            $totalp = 3;
+                            break;
+                        case '11':
+                            $totalp = 2;
+                            break;
+                        case '12':
+                            $totalp = 1;
+                            break;
+                        default:
+                            $totalp = 1;
+                            break;
+                    }
 
-                $invJournal[] = [
-                            'inv_id' => $id,
-                            'invjour_voucher' => $journalNumber,
-                            'invjour_date' => date('Y-m-d'),
-                            'invjour_note' => 'Posting Invoice '.$invoiceHd->inv_faktur_no,
-                            'coa_code' => $coaCredit->coa_code,
-                            'invjour_debit' => 0,
-                            'invjour_credit' => $detail->invdt_amount
-                        ];
+                    $ptgbulan = $detail->invdt_amount - $detail->prorate;
+                    if($detail->prorate > 0){
+                        if($ptgbulan > 0 && $totalp > 1 ){
+                            $ptg = $ptgbulan/($totalp - 1);
+                        }else{
+                            $ptg = $detail->invdt_amount/$totalp;
+                        }
+                    }else{
+                        $ptg = $detail->invdt_amount/$totalp;
+                    }
+
+                    if(trim($coaCredit->coa_code) == '40100'){
+                        $invAkrual[] = [
+                                    'inv_id' => $invoiceHd->id,
+                                    'inv_number' => $invoiceHd->inv_faktur_no,
+                                    'inv_date' => $invoiceHd->inv_date,
+                                    'inv_amount' => $detail->invdt_amount,
+                                    'potong_perbulan' => $ptg,
+                                    'prorate_amount' => $detail->prorate,
+                                    'coa_code' => $coaCredit->coa_code,
+                                    'total_potong' => $totalp,
+                                    'log_potong' => 0,
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                ];
+
+                        $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                        $ledgNote = !empty($costItem) ? $costItem->cost_name : $detail->invdt_note;
+                        $journal[] = [
+                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                    'ledge_fisyear' => $coayear,
+                                    'ledg_number' => $journalNumber,
+                                    'ledg_date' => date('Y-m-d'),
+                                    //'ledg_date' => '2019-01-03',
+                                    'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                    'ledg_debit' => 0,
+                                    'ledg_credit' => $detail->invdt_amount,
+                                    'ledg_description' => $invoiceHd->MsTenant->tenan_name." : ".$ledgNote,
+                                    'coa_year' => $coayear,
+                                    //'coa_code' => $coaCredit->coa_code,
+                                    'coa_code' => $pmuka,
+                                    'created_by' => Auth::id(),
+                                    'updated_by' => Auth::id(),
+                                    'jour_type_id' => $jourType->id,
+                                    'dept_id' => 3, //hardcode utk finance
+                                    'modulname' => 'AR',
+                                    'refnumber' =>$id
+                                ];
+
+                        $invJournal[] = [
+                                    'inv_id' => $id,
+                                    'invjour_voucher' => $journalNumber,
+                                    'invjour_date' => date('Y-m-d'),
+                                    'invjour_note' => 'Posting Invoice '.$invoiceHd->inv_faktur_no,
+                                    'coa_code' => $pmuka,
+                                    'invjour_debit' => 0,
+                                    'invjour_credit' => $detail->invdt_amount
+                                ];
+                    }else{
+                        $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                        $ledgNote = !empty($costItem) ? $costItem->cost_name : $detail->invdt_note;
+                        $journal[] = [
+                                    'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                    'ledge_fisyear' => $coayear,
+                                    'ledg_number' => $journalNumber,
+                                    'ledg_date' => date('Y-m-d'),
+                                    //'ledg_date' => '2019-01-03',
+                                    'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                    'ledg_debit' => 0,
+                                    'ledg_credit' => $detail->invdt_amount,
+                                    'ledg_description' => $invoiceHd->MsTenant->tenan_name." : ".$ledgNote,
+                                    'coa_year' => $coayear,
+                                    'coa_code' => $coaCredit->coa_code,
+                                    'created_by' => Auth::id(),
+                                    'updated_by' => Auth::id(),
+                                    'jour_type_id' => $jourType->id,
+                                    'dept_id' => 3,
+                                    'modulname' => 'AR',
+                                    'refnumber' =>$id
+                                ];
+
+                        $invJournal[] = [
+                                    'inv_id' => $id,
+                                    'invjour_voucher' => $journalNumber,
+                                    'invjour_date' => date('Y-m-d'),
+                                    'invjour_note' => 'Posting Invoice '.$invoiceHd->inv_faktur_no,
+                                    'coa_code' => $coaCredit->coa_code,
+                                    'invjour_debit' => 0,
+                                    'invjour_credit' => $detail->invdt_amount
+                                ];
+                    }    
+                }else{
+                    $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                    $ledgNote = !empty($costItem) ? $costItem->cost_name : $detail->invdt_note;
+                    $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => date('Y-m-d'),
+                                //'ledg_date' => '2019-01-03',
+                                'ledg_refno' => $invoiceHd->inv_faktur_no,
+                                'ledg_debit' => 0,
+                                'ledg_credit' => $detail->invdt_amount,
+                                'ledg_description' => $invoiceHd->MsTenant->tenan_name." : ".$ledgNote,
+                                'coa_year' => $coayear,
+                                'coa_code' => $coaCredit->coa_code,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id,
+                                'dept_id' => 3,
+                                'modulname' => 'AR',
+                                'refnumber' =>$id
+                            ];
+
+                    $invJournal[] = [
+                                'inv_id' => $id,
+                                'invjour_voucher' => $journalNumber,
+                                'invjour_date' => date('Y-m-d'),
+                                'invjour_note' => 'Posting Invoice '.$invoiceHd->inv_faktur_no,
+                                'coa_code' => $coaCredit->coa_code,
+                                'invjour_debit' => 0,
+                                'invjour_credit' => $detail->invdt_amount
+                            ];
+                }  
             }
             $successIds[] = $id;
             $nextJournalNumber++;
             $successPosting++;
         }
-        // var_dump($journal);
-        // var_dump($invJournal);
 
         // INSERT DATABASE
         try{
-            DB::transaction(function () use($successIds, $invJournal, $journal){
+            DB::transaction(function () use($successIds, $invJournal, $journal, $invAkrual){
                 $sendMailFlag = @MsConfig::where('name','send_inv_email')->first()->value;
                 // insert journal
                 TrLedger::insert($journal);
                 // insert invoice journal
                 TrInvoiceJournal::insert($invJournal);
+                // insert akrual
+                AkrualInv::insert($invAkrual);
                 // update posting to yes
                 if(count($successIds) > 0){
                     foreach ($successIds as $id) {
                         $invoice = TrInvoice::find($id);
                         $invoice->update(['inv_post'=>1]);
+                        if($invoice->inv_amount == $invoice->total_excess_payment){
+                            //belom tambahin biar langsung buat kwitansi
+                            $lastPayment = KwitansiCounter::where(\DB::raw('tahun'),'=',date('Y'))
+                                ->where(\DB::raw('bulan'),'=',date('m'))->first();
+                            $indexNumber = null;
+                            
+                            if($lastPayment){
+                                $index = $lastPayment->last_counter;
+                                $index+= 1;
+                                $indexNumber = $index;
+                                $index = str_pad($index, 3, "0", STR_PAD_LEFT);
+                                $lastPayment->update(['last_counter'=>$index]);
+                            }else{
+                                $index = "001";
+                                $indexNumber = 1;
+                                $lastcounter = new KwitansiCounter;
+                                $lastcounter->tahun = date('Y');
+                                $lastcounter->bulan = date('m');
+                                $lastcounter->last_counter = 1;
+                                $lastcounter->save();
+                            }
+
+                            $payVal = (int)$invoice->inv_amount;
+                            $total = $payVal;
+                            $detail_payment = array(
+                                'invpayd_amount' => $payVal,
+                                'inv_id' => $invoice->id
+                            );
+
+                            $action = new TrInvoicePaymhdr;
+                            $prefixKuitansi = @MsConfig::where('name','prefix_kuitansi')->first()->value;
+                            $banktitipan = @MsConfig::where('name','bank_titipan')->first()->value;
+                            $action->no_kwitansi = $prefixKuitansi.'-'.date('Y-m').'.'.$index;
+                            $action->invpayh_date = date('Y-m-d');
+                            //$action->invpayh_date = '2019-03-05';
+                            $action->invpayh_checkno = '';
+                            $action->invpayh_giro = NULL;
+                            $action->invpayh_note = 'PEMBAYARAN AUTO LUNAS';
+                            $action->invpayh_post = FALSE;
+                            $action->paymtp_code = 2;
+                            $action->cashbk_id = (int)$banktitipan;
+                            $action->tenan_id = $invoice->tenan_id;
+                            $action->invpayh_settlamt = 1;
+                            $action->invpayh_adjustamt = 1;
+                            $action->invpayh_amount = $total;
+                            $action->updated_by = $action->created_by = Auth::id();
+                            $action->status_void = FALSE;
+
+                            if($action->save()){
+                                $payment_id = $action->id;
+                                $payment_ids[] = $payment_id;
+
+                                $action_detail = new TrInvoicePaymdtl;
+                                $invoice_data = $invoice->get()->first();
+
+                                if(!empty($invoice_data)){
+                                    $invoice_data = $invoice_data->toArray();
+                                    $inv_amount = $invoice_data['inv_amount'];
+
+                                    $invoice_has_paid = TrInvoicePaymdtl::select('tr_invoice_paymhdr.*', 'tr_invoice_paymdtl.*')
+                                        ->join('tr_invoice_paymhdr','tr_invoice_paymdtl.invpayh_id','=','tr_invoice_paymhdr.id')
+                                        ->where('status_void', '=', false)
+                                        ->where('inv_id', '=', $detail_payment['inv_id'])
+                                        ->get()->first();
+
+                                    if(!empty($invoice_has_paid)){
+                                        $invoice_has_paid = $invoice_has_paid->sum('invpayd_amount');
+                                    }else{
+                                        $invoice_has_paid = 0;
+                                    }
+
+                                    $total_has_paid = $invoice_has_paid + $detail_payment['invpayd_amount'];
+                                    $outstand = $inv_amount - $total_has_paid;
+
+                                    if($outstand <= 0){
+                                        $outstand = 0;
+                                    }
+
+                                    $action_detail->invpayd_amount = $detail_payment['invpayd_amount'];
+                                    $action_detail->inv_id = $detail_payment['inv_id'];
+                                    $action_detail->invpayh_id = $payment_id;
+                                    $action_detail->last_outstanding = $detail_payment['invpayd_amount'];
+                                    $action_detail->save();
+                                }
+
+                                if(isset($invoice->inv_outstanding)){
+                                    $currentOutstanding = $invoice->inv_outstanding;
+                                    $tempAmount = $invoice->inv_outstanding - $payVal;
+                                    // update
+                                    if((int)$tempAmount < 0){
+                                        $lebih = $lebih + ($tempAmount * -1);  
+                                        $tempAmount = 0;
+                                    }
+                                    $invoice->inv_outstanding = (int)$tempAmount;
+                                    $invoice->save();
+                                }
+                            }
+                        }else{
+                            if($invoice->total_excess_payment > 0){
+                                $invoice->inv_outstanding = (int)$invoice->inv_outstanding - $invoice->total_excess_payment;
+                                $invoice->save();
+                            }
+                        }
                         // send email if flag send mail is active
+                        
                         if(!empty($sendMailFlag)){
                             $cc = @MsConfig::where('name','cc_email')->first()->value;
                             if(empty($cc)) $cc = [];
@@ -979,11 +1449,12 @@ class InvoiceController extends Controller
                             // $mailClass = new \App\Mail\InvoiceMail($invoice);
                             // dispatch(new SendMail($mailClass, $invoice->MsTenant->tenan_email, $cc));
                         }
+                        
                     }
                 }
             });
         }catch(\Exception $e){
-            return response()->json(['error'=>1, 'message'=> 'Error occured when posting invoice']);
+            return response()->json(['error'=>1, 'message'=> $e->getMessage()]);
         }
 
         return response()->json(['success'=>1, 'message'=>$successPosting.' Invoice posted Successfully']);
@@ -992,81 +1463,91 @@ class InvoiceController extends Controller
     public function insert(Request $request){
         $tenanId = @$request->tenan_id;
         if(empty($tenanId)) return response()->json(['error' => 1, 'message' => 'Tenant id is required']);
+        $form_secret = !empty($request->input('form_secret')) ? $request->input('form_secret') : '' ;
+        $msg = 'Insert Success!!!';
+        if(!empty($request->session()->get('FORM_SECRET'))) {
+            if(strcasecmp($form_secret, $request->session()->get('FORM_SECRET')) === 0) {
 
-        $inv_date = explode('-',$request->inv_date);
-        $invtp = MsInvoiceType::find($request->invtp_id);
-        $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$invtp->invtp_prefix.'-'.substr($inv_date[0], -2).$inv_date[1].'-%')->orderBy('id','desc')->first();
-        if($lastInvoiceofMonth){
-            $lastPrefix = explode('-', $lastInvoiceofMonth->inv_number);
-            $lastPrefix = (int) @$lastPrefix[2];
-        }else{
-            $lastPrefix = 0;
-        }
-        $newPrefix = $lastPrefix + 1;
-        $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
-
-        $tenant = MsTenant::find($tenanId);
-        $contractId = 0;
-        // $contract = TrContract::find($request->contr_id);
-        // $contractId = $contract->id;
-        // $contract = TrContract::where('tenan_id',$tenanId)->where('contr_status','confirmed')->first();
-        // if($contract) $contractId = $contract->id;
-        // else $contractId = 0;
-
-        $invHeader = [
-            'tenan_id' => $tenanId,
-            'inv_number' => $invtp->invtp_prefix."-".substr(@$inv_date[0], -2).@$inv_date[1]."-".$newPrefix,
-            'inv_faktur_no' => $invtp->invtp_prefix."-".substr(@$inv_date[0], -2).@$inv_date[1]."-".$newPrefix,
-            'inv_faktur_date' => $request->inv_date,
-            'inv_date' => $request->inv_date,
-            'inv_duedate' => $request->inv_duedate,
-            'inv_amount' => $request->amount,
-            'inv_ppn' => 0,
-            'inv_outstanding' => $request->amount,
-            'inv_ppn_amount' => $request->amount, // sementara begini dulu, ikutin cara di foto invoice
-            'inv_post' => 0,
-            'invtp_id' => $request->invtp_id,
-            // 'contr_id' => $request->contr_id,
-            'contr_id' => $contractId,
-            'created_by' => Auth::id(),
-            'updated_by' => Auth::id(),
-            'footer' => @MsConfig::where('name','footer_invoice')->first()->value,
-            'label' => @MsConfig::where('name','footer_label_inv')->first()->value
-        ];
-        if(!empty(@$request->unit_id)) $invHeader['unit_id'] = $request->unit_id;
-
-        $coa_codes = $request->coa_code;
-        $invdt_notes = $request->invdt_note;
-        $invdt_amounts = $request->invdt_amount;
-        foreach ($coa_codes as $key => $code) {
-            $invDtl[] = [
-                'invdt_amount' => $invdt_amounts[$key],
-                'invdt_note' => $invdt_notes[$key],
-                'costd_id' => 0,
-                'coa_code' => $code
-            ];
-            $updateCtrInv[] = [
-                'continv_start_inv' => $request->inv_date,
-                'continv_next_inv' => date('Y-m-d',strtotime($request->inv_date." +1 months"))
-            ];
-        }
-
-        try{
-            // DB::transaction(function () use($invHeader, $invDtl, $request, $updateCtrInv){
-                $insertInvoice = TrInvoice::create($invHeader);
-
-                // insert detail
-                foreach($invDtl as $key => $indt){
-                    $indt['inv_id'] = $insertInvoice->id;
-                    TrInvoiceDetail::create($indt);
-
-                    // TrContractInvoice::where('invtp_id',$request->invtp_id)->where('contr_id',$request->contr_id)->where('costd_id',$indt['costd_id'])->update($updateCtrInv[$key]);
+                $inv_date = explode('-',$request->inv_date);
+                $invtp = MsInvoiceType::find($request->invtp_id);
+                $lastInvoiceofMonth = TrInvoice::select('inv_number')->where('inv_number','like',$invtp->invtp_prefix.'-'.substr($inv_date[0], -2).$inv_date[1].'-%')->orderBy('id','desc')->first();
+                if($lastInvoiceofMonth){
+                    $lastPrefix = explode('-', $lastInvoiceofMonth->inv_number);
+                    $lastPrefix = (int) @$lastPrefix[2];
+                }else{
+                    $lastPrefix = 0;
                 }
-            // });
-        }catch(\Exception $e){
-            return response()->json(['error' => 1, 'message' => 'Error Occured']);
-        }
-        return response()->json(['success' => 1, 'inv_id' => $insertInvoice->id, 'message' => 'Insert Invoice Success']);
+                $newPrefix = $lastPrefix + 1;
+                $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
+
+                $tenant = MsTenant::find($tenanId);
+                $contractId = 0;
+                // $contract = TrContract::find($request->contr_id);
+                // $contractId = $contract->id;
+                // $contract = TrContract::where('tenan_id',$tenanId)->where('contr_status','confirmed')->first();
+                // if($contract) $contractId = $contract->id;
+                // else $contractId = 0;
+
+                $invHeader = [
+                    'tenan_id' => $tenanId,
+                    'inv_number' => $invtp->invtp_prefix."-".substr(@$inv_date[0], -2).@$inv_date[1]."-".$newPrefix,
+                    'inv_faktur_no' => $invtp->invtp_prefix."-".substr(@$inv_date[0], -2).@$inv_date[1]."-".$newPrefix,
+                    'inv_faktur_date' => $request->inv_date,
+                    'inv_date' => $request->inv_date,
+                    'inv_duedate' => $request->inv_duedate,
+                    'inv_amount' => $request->amount,
+                    'inv_ppn' => 0,
+                    'inv_outstanding' => $request->amount,
+                    'inv_ppn_amount' => $request->amount, // sementara begini dulu, ikutin cara di foto invoice
+                    'inv_post' => 0,
+                    'invtp_id' => $request->invtp_id,
+                    // 'contr_id' => $request->contr_id,
+                    'contr_id' => $contractId,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                    'footer' => @MsConfig::where('name','footer_invoice')->first()->value,
+                    'label' => @MsConfig::where('name','footer_label_inv')->first()->value
+                ];
+                if(!empty(@$request->unit_id)) $invHeader['unit_id'] = $request->unit_id;
+
+                $coa_codes = $request->coa_code;
+                $invdt_notes = $request->invdt_note;
+                $invdt_amounts = $request->invdt_amount;
+                foreach ($coa_codes as $key => $code) {
+                    $invDtl[] = [
+                        'invdt_amount' => $invdt_amounts[$key],
+                        'invdt_note' => $invdt_notes[$key],
+                        'costd_id' => 0,
+                        'coa_code' => $code
+                    ];
+                    $updateCtrInv[] = [
+                        'continv_start_inv' => $request->inv_date,
+                        'continv_next_inv' => date('Y-m-d',strtotime($request->inv_date." +1 months"))
+                    ];
+                }
+
+                try{
+                    // DB::transaction(function () use($invHeader, $invDtl, $request, $updateCtrInv){
+                    $insertInvoice = TrInvoice::create($invHeader);
+
+                    // insert detail
+                    foreach($invDtl as $key => $indt){
+                        $indt['inv_id'] = $insertInvoice->id;
+                        TrInvoiceDetail::create($indt);
+
+                        // TrContractInvoice::where('invtp_id',$request->invtp_id)->where('contr_id',$request->contr_id)->where('costd_id',$indt['costd_id'])->update($updateCtrInv[$key]);
+                    }
+                    // });
+                }catch(\Exception $e){
+                    return response()->json(['error' => 1, 'message' => 'Error Occured']);
+                }
+
+                $request->session()->forget('FORM_SECRET');
+                $msg = 'Insert Invoice Success';
+            }
+            $msg = 'Insert Success!!';
+        }   
+        return response()->json(['success' => 1, 'message' => $msg]);
     }
 
     public function cancel(Request $request){
@@ -1079,6 +1560,15 @@ class InvoiceController extends Controller
                 TrContractInvoice::where('invtp_id',$invoice->invtp_id)->where('contr_id',$invoice->contr_id)->update(['continv_next_inv'=>null]);
                 // TrInvoice::where('id',$id)->delete();
                 TrInvoice::where('id',$invoice->id)->update(['inv_iscancel'=>1]);
+                if($invoice->total_excess_payment > 0){
+                    $lebih = ExcessPayment::where('unit_id',$invoice->unit_id)->get()->first();
+                    $current = ($lebih->total_amount + $invoice->total_excess_payment);
+                    $lebih->total_amount = $current;
+                    $lebih->save();
+
+                    LogPaymentUsed::where('inv_id',$invoice->id)->delete();
+
+                }
             }
             return response()->json(['success' => 1, 'message' => 'Cancel '.@$invoices->count().' Invoice Success']);
         }catch(\Exception $e){
@@ -1396,4 +1886,1028 @@ class InvoiceController extends Controller
         }
     }
 
+<<<<<<< Updated upstream
+=======
+    public function resendinvoice(Request $request){
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+
+        $successPosting = 0;
+        $successIds = [];
+
+        foreach ($ids as $id) {     
+            $successIds[] = $id;
+            $successPosting++;
+        }
+
+        try{
+            DB::transaction(function () use($successIds){
+                $sendMailFlag = @MsConfig::where('name','send_inv_email')->first()->value;
+                
+                if(count($successIds) > 0){
+                    foreach ($successIds as $id) {
+                        $invoice = TrInvoice::find($id);
+                        if(!empty($sendMailFlag)){
+                            $cc = @MsConfig::where('name','cc_email')->first()->value;
+                            if(empty($cc)) $cc = [];
+
+                            $queue = new EmailQueue;
+                            $queue->status = 'new';
+                            $queue->mailclass = '\App\Mail\InvoiceMail';
+                            $queue->ref_id = $invoice->id;
+                            $queue->to = $invoice->MsTenant->tenan_email;
+                            if(!empty($cc)) $queue->cc = $cc;
+                            $queue->save();
+                        }
+                    }
+                }
+            });
+        }catch(\Exception $e){
+            return response()->json(['error'=>1, 'message'=> 'Error occured when posting invoice']);
+        }
+
+        return response()->json(['success'=>1, 'message'=>$successPosting.' Invoice send Successfully']);
+    }
+
+    public function reminderm(){
+
+        $manual = @MsEmailTemplate::where('name','MANUAL')->first();
+        $manual2 = @MsEmailTemplate::where('name','MANUAL2')->first();
+        $manual3 = @MsEmailTemplate::where('name','MANUAL3')->first();
+        $body_email_reminder = @MsConfig::where('name','rm_body_email')->first();
+        $unit= MsUnit::select('id','unit_code')->orderBy('unit_code')->get();
+
+        return view('reminderm', array(
+
+            'bodyemail' => $body_email_reminder->value,
+            'attach' => $manual->title,
+            'hrulesFlag' =>(empty($manual->title) == true ? 0 : 1),
+            'unit' => $unit,
+            'manual2' => $manual2,
+            'manual3' => $manual3,
+            'manual' => $manual
+        ));
+    }
+
+    public function getreminder(Request $request){
+        try{
+            // params
+            $keyword = @$request->q;
+            $invtype = @$request->invtype;
+            $datefrom = @$request->datefrom;
+            $dateto = @$request->dateto;
+
+            $page = $request->page;
+            $perPage = $request->rows;
+            $page-=1;
+            $offset = $page * $perPage;
+            // @ -> isset(var) ? var : null
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+
+            // olah data
+            $count = ReminderH::count();
+            $fetch = ReminderH::select('reminder_header.*', 'ms_unit.unit_code' ,'ms_tenant.tenan_name','ms_tenant.tenan_phone')
+            		->leftjoin('ms_unit_owner','ms_unit_owner.unit_id','=','reminder_header.unit_id')
+                    ->leftJoin('ms_unit','reminder_header.unit_id','=','ms_unit.id')
+                    ->leftjoin('ms_tenant','ms_tenant.id','=','ms_unit_owner.tenan_id')
+                    ->where('ms_unit_owner.deleted_at',NULL);
+
+            if(!empty($filters) && count($filters) > 0){
+                foreach($filters as $filter){
+                    $op = "like";
+                    // tentuin operator
+                    switch ($filter->op) {
+                        case 'contains':
+                            $op = 'like';
+                            break;
+                        case 'less':
+                            $op = '<=';
+                            break;
+                        case 'greater':
+                            $op = '>=';
+                            break;
+                        default:
+                            break;
+                    }
+                    // end special condition
+                    if($op == 'like'){
+                        $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                    }else{
+                        $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    }
+
+                }
+            }
+            if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
+                                        $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("unit_code"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'ilike','%'.$keyword.'%');
+                                    });
+            // jika ada inv type
+            if(!empty($invtype)) $fetch = $fetch->where('tr_invoice.invtp_id',$invtype);
+            // jika ada date from
+            if(!empty($datefrom)) $fetch = $fetch->where('tr_invoice.inv_faktur_date','>=',$datefrom);
+            // jika ada date to
+            if(!empty($dateto)) $fetch = $fetch->where('tr_invoice.inv_faktur_date','<=',$dateto);
+            // outstanding
+            if(!empty($outstanding)){
+                if($outstanding == 1) $fetch = $fetch->where('tr_invoice.inv_outstanding','>',0);
+                else $fetch = $fetch->where('tr_invoice.inv_outstanding',0);
+            }
+
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['reminder_no'] = $value->reminder_no;
+                $temp['unit_code'] = !empty($value->unit) ? @$value->unit->unit_code : @$value->unit_code;
+                $temp['tenan_name'] = $value->tenan_name;
+                $temp['tenan_phone'] = $value->tenan_phone;
+                $temp['reminder_date'] = date('Y-m-d',strtotime($value->reminder_date));
+                $temp['pokok_amount'] = "Rp. ".number_format($value->pokok_amount);
+                $temp['denda_total'] = "Rp. ".number_format($value->denda_total);
+                $temp['denda_outstanding'] = "Rp. ".number_format($value->denda_outstanding);
+                $temp['lastsent_date'] = !empty($value->lastsent_date) ? date('Y-m-d',strtotime($value->lastsent_date)) : '';
+                $temp['sent_counter'] = $value->sent_counter;
+                $temp['sp_type'] = ($value->sp_type == 4 ? 'SP 1' : ($value->sp_type ==  5 ? 'SP 2' : 'SP 3'));
+                $temp['posting'] = $value->posting == 1 ? 'yes' : 'no';
+                $temp['checkbox'] = '<input type="checkbox" name="check" data-posting="'.$value->sent_counter.'" value="'.$value->id.'">';
+
+                $temp['action_button'] = '<center><a href="'.url('invoice/print_manualreminder?id='.$value->id).'" class="print-window" data-width="640" data-height="660">Print</a> | <a href="'.url('invoice/print_manualreminder?id='.$value->id.'&type=pdf').'">PDF</a></center>';
+                $result['rows'][] = $temp;
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+    }
+
+    public function manualreminderUpdate(Request $request){
+        $subject2 = $request->judul;
+        $content = $request->spcontent;
+        $content_email = $request->spemailcontent;
+        $upd = MsEmailTemplate::where('name','MANUAL')->first();
+        $upd->update(['subject'=>$subject2,'content'=>$content]);
+       
+        $request->session()->flash('success', 'Update template SP1 data success');
+        return redirect()->back();
+    }
+
+    public function manualreminderUpdate2(Request $request){
+        $subject2 = $request->judul;
+        $content = $request->spcontent;
+        $content_email = $request->spemailcontent;
+        $upd = MsEmailTemplate::where('name','MANUAL2')->first();
+        $upd->update(['subject'=>$subject2,'content'=>$content]);
+       
+        $request->session()->flash('success', 'Update template SP2 data success');
+        return redirect()->back();
+    }
+
+    public function manualreminderUpdate3(Request $request){
+        $subject2 = $request->judul;
+        $content = $request->spcontent;
+        $content_email = $request->spemailcontent;
+        $upd = MsEmailTemplate::where('name','MANUAL3')->first();
+        $upd->update(['subject'=>$subject2,'content'=>$content]);
+
+        $request->session()->flash('success', 'Update template SP3 data success');
+        return redirect()->back();
+    }
+
+    public function manualbodyemail(Request $request){
+        $content_email = $request->spemailcontent;
+        $upd2 = MsConfig::where('name','rm_body_email')->first();
+        $upd2->update(['value'=>$content_email]);
+       
+        $request->session()->flash('success', 'Update template Body Email data success');
+        return redirect()->back();
+    }
+
+    public function newreminder(Request $request){
+        try{
+            $rmd_date = date('Y-m-d',strtotime($request->reminder_date));
+            $unit = $request->unit_id;
+            $sp_type = $request->sp_type;
+            $tahun = date('y',strtotime($rmd_date));
+            $bulan = date('n',strtotime($rmd_date));
+            $variable_denda = @MsConfig::where('name','denda_variable')->first()->value;
+
+            if(!empty($unit)){
+                $outstanding = TrInvoice::select('unit_id')->where('inv_outstanding','>',0)->where('inv_iscancel','f')->where('inv_post','t')->whereRaw('((current_date::date - inv_duedate::date) > 7)')->where('unit_id',$unit)->groupBy('unit_id')->get();
+            }else{
+                 $outstanding = TrInvoice::select('unit_id')->where('inv_outstanding','>',0)->where('inv_iscancel','f')->where('inv_post','t')->whereRaw('((current_date::date - inv_duedate::date) > 7)')->groupBy('unit_id')->get();
+            }
+            $counter = 0;
+            foreach($outstanding as $ost){
+                //CHECK APAKAH SUDAH PERNAH DIBUAT
+                $cek = ReminderH::where('reminder_date','=',$rmd_date)->where('unit_id','=',$ost->unit_id)->first();
+                switch ($sp_type) {
+                    case '4':
+                        $ctn = @MsEmailTemplate::where('name','MANUAL')->first();
+                        break;
+                    case '5':
+                        $ctn = @MsEmailTemplate::where('name','MANUAL2')->first();
+                        break;
+                    case '6':
+                        $ctn = @MsEmailTemplate::where('name','MANUAL3')->first();
+                        break;
+                    default:
+                        $ctn = @MsEmailTemplate::where('name','MANUAL')->first();
+                        break;
+                }
+                $cek_last_sp3 = ReminderH::where('unit_id','=',$ost->unit_id)->where('sp_type',6)->where('active_tagih',1)->where('posting',1)->first();
+                if(count($cek_last_sp3) == 0){
+                    if(count($cek) == 0){
+                        $lastnum = ReminderH::select('reminder_no')->where('reminder_no','like','RM-'.$tahun.$bulan.'-%')->orderBy('id','desc')->first();
+                        if($lastnum){
+                            $lastPrefix = explode('-', $lastnum->reminder_no);
+                            $lastPrefix = (int) $lastPrefix[2];
+                        }else{
+                            $lastPrefix = 0;
+                        }
+                        $newPrefix = $lastPrefix + 1;
+                        $newPrefix = str_pad($newPrefix, 4, 0, STR_PAD_LEFT);
+
+                        $rmHeader = [
+                            'reminder_no' => "RM-".$tahun.$bulan."-".$newPrefix,
+                            'unit_id' => $ost->unit_id,
+                            'reminder_date' => $rmd_date,
+                            'sent_counter' => 0,
+                            'isi_content' => $ctn->content,
+                            'sp_type' => $sp_type
+                        ];
+                        $newreminder =  ReminderH::create($rmHeader);
+                        //CHECK INVOICE OUTSTANDING
+                        $dtl_outstanding = TrInvoice::select('id','inv_amount','inv_outstanding',DB::raw('(current_date::date - inv_duedate::date) AS hari'))->where('unit_id','=',$ost->unit_id)->where('inv_outstanding','>',0)->where('inv_iscancel','f')->where('inv_post','t')->get();
+                        $total_denda = 0;
+                        $total_pokok = 0;
+                        foreach($dtl_outstanding as $dtl){
+                            $hari_dnd = ($dtl->hari < 0 ? 0 : $dtl->hari);
+                            $denda_amt = ROUND($variable_denda*$dtl->inv_outstanding*$hari_dnd,0);
+
+                            $rmDetails = [
+                                'reminderh_id' => $newreminder->id,
+                                'inv_id' => $dtl->id,
+                                'denda_days' => $hari_dnd,
+                                'denda_amount' =>$denda_amt
+                            ];
+                            $total_denda = $total_denda + $denda_amt;
+                            $total_pokok = $total_pokok + $dtl->inv_outstanding;
+                            $newdtl = ReminderD::create($rmDetails);
+                        }
+                        ReminderH::where('id',$newreminder->id)->update(['pokok_amount'=>$total_pokok,'denda_total'=>$total_denda,'denda_outstanding'=>($total_denda+$total_pokok),'active_tagih'=>0,'posting'=>0]);
+                        $counter++;
+                    }
+                }else{
+                    //skip klo sp 3 udh pernah di buat dan masih aktif di tagih
+                }
+            }
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+        return ['status' => 1, 'message' => 'Successfully create '.$counter.' Reminder'];
+    }
+
+    public function deletereminder(Request $request){
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+        $success = 0; 
+        for($i=0; $i<count($ids); $i++){
+            //CEK APABILA SUDAH DIKIRIM GK BISA DI DELETE
+            $check = ReminderH::where('id',$ids[$i])->first();
+            if($check->sent_counter == 0){
+                ReminderD::where('reminderh_id',$ids[$i])->delete();
+                ReminderH::where('id',$ids[$i])->delete();
+                $success++;
+            }
+        }
+
+        $message = $success.' Reminder Ter-delete';
+        return response()->json(['success'=>1, 'message'=> $message]);
+    }
+
+    public function postingreminder(Request $request){
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+        $success = 0; 
+        for($i=0; $i<count($ids); $i++){
+            $check = ReminderH::where('id',$ids[$i])->first();
+            //cek semua sp yang masih aktif dibuat non aktif dan di aktifin cuma 1
+            ReminderH::where('unit_id',$check->unit_id)->update(['active_tagih'=>0]);
+        }
+
+        for($k=0; $k<count($ids); $k++){
+        	ReminderH::where('id',$ids[$k])->update(['posting'=>1,'active_tagih'=>1]);
+        	$success++;
+        }
+
+        $message = $success.' Reminder Ter-posting';
+        return response()->json(['success'=>1, 'message'=> $message]);
+    }
+
+    public function unpostingreminder(Request $request){
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+        $success = 0; 
+
+        for($k=0; $k<count($ids); $k++){
+            ReminderH::where('id',$ids[$k])->update(['posting'=>0,'active_tagih'=>0]);
+            $success++;
+        }
+
+        $message = $success.' Reminder Ter-Unposting';
+        return response()->json(['success'=>1, 'message'=> $message]);
+    }
+
+    public function sendreminder(Request $request){
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+        $success_send = 0;
+        $cc = @MsConfig::where('name','cc_email')->first()->value;
+        for($k=0; $k<count($ids); $k++){
+            $reminder_inv = ReminderH::select('reminder_header.id','reminder_header.unit_id','tenan_email','cc_email','ms_email_templates.subject')
+            ->join('ms_unit_owner','ms_unit_owner.unit_id','=','reminder_header.unit_id')
+            ->join('ms_email_templates','ms_email_templates.id','=','reminder_header.sp_type')
+            ->join('ms_tenant','ms_tenant.id','=','ms_unit_owner.tenan_id')
+            ->where('ms_unit_owner.deleted_at','=',NULL)->where('ms_tenant.deleted_at','=',NULL)->where('reminder_header.id',$ids[$k])->get();
+            //UPDATE REMINDERH
+            $upd3 = ReminderH::where('id','=',$ids[$k])->first();
+            $ct = (int)($upd3->sent_counter)+1;
+            $upd3->update(['lastsent_date'=>date('Y-m-d'),'sent_counter'=>$ct]);
+            $success_send++;
+            foreach($reminder_inv as $invoice_rmd){
+                $queue = new EmailQueue;
+                $queue->status = 'new';
+                $queue->mailclass = '\App\Mail\ManualReminderMail';
+                $queue->ref_id = $ids[$k];
+                $queue->to = $invoice_rmd->tenan_email;
+                if(!empty($cc)) $queue->cc = $cc;
+                $queue->save();
+                
+                if($invoice_rmd->cc_email != NULL || $invoice_rmd->cc_email != ''){
+                    $cc_tenant = explode('|', $invoice_rmd->cc_email);
+                    if(count($cc_tenant) > 0){
+                        for($i=0; $i<count($cc_tenant); $i++){
+                            $tnt2 = explode('~', $cc_tenant[$i]);
+                            if(count($tnt2) > 0){
+                                $unit_dt = $tnt2[0];
+                                $units = MsUnit::where('unit_code', $unit_dt)->first();
+                                $kirim = explode(';', $tnt2[1]);
+                                if(count($units) > 0){
+                                    if($units->id == $invoice_rmd->unit_id){ 
+                                        if(count($kirim) > 0){
+                                            for($j=0; $j<count($kirim); $j++){
+                                                $queue = new EmailQueue;
+                                                $queue->status = 'new';
+                                                $queue->mailclass = '\App\Mail\ManualReminderMail';
+                                                $queue->ref_id = $ids[$k];
+                                                $queue->to = $kirim[$j];
+                                                if(!empty($cc)) $queue->cc = $cc;
+                                                $queue->save();
+                                            }
+                                        }
+                                    }
+                                } 
+                            }
+                        }
+                    }
+                }         
+            }
+        }
+        return response()->json(['success'=>1, 'message'=>$success_send.' reminder send Successfully']);
+    }
+
+    public function print_manualreminder(Request $request){
+        try{
+            $inv_id = $request->id;
+            if(!is_array($inv_id)) $inv_id = [$inv_id];
+            $type = $request->type;
+
+            $invoice_data = ReminderH::select('reminder_header.*', 'ms_unit.unit_code','ms_email_templates.subject','ms_tenant.tenan_name')
+            						->leftjoin('ms_unit_owner','ms_unit_owner.unit_id','=','reminder_header.unit_id')
+                                    ->leftJoin('ms_unit','reminder_header.unit_id','=','ms_unit.id')
+                                    ->leftjoin('ms_tenant','ms_tenant.id','=','ms_unit_owner.tenan_id')
+                                    ->leftjoin('ms_email_templates','ms_email_templates.id','=','reminder_header.sp_type')
+                                    ->where('ms_unit_owner.deleted_at',NULL)
+                                    ->whereIn('reminder_header.id',$inv_id)->get()->toArray();
+            foreach ($invoice_data as $key => $inv) {
+                $result = ReminderD::select('tr_invoice.inv_number','tr_invoice.inv_outstanding','inv_amount','ms_invoice_type.invtp_name','denda_days','denda_amount')
+                ->join('tr_invoice','reminder_details.inv_id',"=",'tr_invoice.id')
+                ->leftJoin('ms_invoice_type','ms_invoice_type.id',"=",'tr_invoice.invtp_id')
+                ->where('reminder_details.reminderh_id',$inv['id'])
+                ->orderBy('inv_date','asc')
+                ->get()->toArray();
+
+                $lastreminder = ReminderH::select('reminder_date')->where('unit_id',$inv['unit_id'])->where('sp_type',4)->orderBy('reminder_date','DESC')->first();
+
+                $invoice_data[$key]['details'] = $result;
+                if(count($lastreminder) > 0){
+                    $invoice_data[$key]['rdate'] = $lastreminder->reminder_date;
+                }else{
+                    $invoice_data[$key]['rdate'] = '';
+                }
+            }
+
+            $company = MsCompany::with('MsCashbank')->first()->toArray();
+            $signature = @MsConfig::where('name','digital_signature')->first()->value;
+            $signatureFlag = @MsConfig::where('name','invoice_signature_flag')->first()->value;
+            $content = MsEmailTemplate::where('name','MANUAL')->first();
+
+            $set_data = array(
+                'invoice_data' => $invoice_data,
+                'result' => $result,
+                'company' => $company,
+                'signature' => $signature,
+                'signatureFlag' => $signatureFlag,
+                'title' => $content->subject,
+                'content' => $content->content,
+                'type' => $type
+            );
+
+            if($type == 'pdf'){
+                $pdf = PDF::loadView('print_manualr', $set_data)->setPaper('a4');
+
+                return $pdf->download('REMINDER-OUTSTANDING-INV.pdf');
+            }else{
+                return view('print_manualr', $set_data);
+            }
+         }catch(\Exception $e){
+             return $e->getMessage();
+         }
+    }
+
+    public function ajaxGetManualInv(Request $request){
+        $rmd_id = $request->id;
+        $invoice = ReminderH::select('id','manual_inv')->find($rmd_id)->toArray();
+        if(!$invoice) return response()->json(['errMsg' => 'Reminder not found']);
+
+        return response()->json(['status' => 1, 'result' => $invoice]);
+    }
+
+    public function ajaxStoreManualInv(Request $request){
+        if(!empty(@$request->id)){
+            try{
+                $reminder = ReminderH::find($request->id);
+                $reminder->manual_inv = $request->manual_invoice;
+                $reminder->save();
+                return response()->json(['success' => 1]);
+            }catch(\Exception $e){
+                return response()->json(['errMsg' => $e->getMessage()]);
+            }
+        }else{
+            return response()->json(['errMsg' => 'Reminder ID not found']);
+        }
+    }
+
+    public function creditnote(){
+
+        $contract_data = TrInvoice::select('ms_tenant.tenan_name', 'tr_contract.contr_code', 'tr_contract.id', 'tr_invoice.contr_id')
+        ->join('ms_tenant','tr_invoice.tenan_id','=','ms_tenant.id')
+        ->join('tr_contract','tr_invoice.contr_id','=','tr_contract.id')
+        ->orderBy('ms_tenant.tenan_name', 'ASC')
+        ->groupBy('tr_invoice.contr_id', 'ms_tenant.tenan_name', 'tr_contract.contr_code', 'tr_contract.id')
+        ->where('tr_invoice.inv_outstanding', '>', 0)
+        ->get()
+        ->toArray();
+
+        $coa = MsMasterCoa::where('coa_year',date('Y'))->where('coa_isparent',FALSE)->get();
+
+        if(!empty($contract_data)){
+            $temp = array();
+            foreach ($contract_data as $key => $value) {
+                $temp[] = array(
+                    'id' => $value['id'],
+                    'tenan_name' => sprintf('%s | %s', $value['tenan_name'], $value['contr_code'])
+                );
+            }
+
+            $contract_data = $temp;
+        }
+
+        return view('creditnote', array(
+            'contract_data' => $contract_data,
+            'coa' => $coa
+        ));
+    }
+
+    public function creditnote_get(Request $request){
+        try{
+            $keyword = @$request->q;
+            $datefrom = @$request->datefrom;
+            $dateto = @$request->dateto;
+
+            $page = $request->page;
+            $perPage = $request->rows;
+            $page-=1;
+            $offset = $page * $perPage;
+            $sort = @$request->sort;
+            $order = @$request->order;
+            $filters = @$request->filterRules;
+            if(!empty($filters)) $filters = json_decode($filters);
+
+            $count = CreditNoteH::count();
+            $fetch = CreditNoteH::select('tr_creditnote_hdr.*','tr_invoice.inv_number','ms_unit.unit_code')->join('ms_unit','ms_unit.id',"=",'tr_creditnote_hdr.unit_id')->join('tr_invoice','tr_invoice.id',"=",'tr_creditnote_hdr.inv_id');
+
+            if(!empty($filters) && count($filters) > 0){
+                foreach($filters as $filter){
+                    $op = "like";
+                    switch ($filter->op) {
+                        case 'contains':
+                            $op = 'like';
+                            break;
+                        case 'less':
+                            $op = '<=';
+                            break;
+                        case 'greater':
+                            $op = '>=';
+                            break;
+                        default:
+                            break;
+                    }
+                    if($op == 'like'){
+                        $fetch = $fetch->where(\DB::raw('lower(trim("'.$filter->field.'"::varchar))'),$op,'%'.$filter->value.'%');
+                    }else{
+                        $fetch = $fetch->where($filter->field, $op, $filter->value);
+                    }
+
+                }
+            }
+
+            if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
+                                        $query->where(\DB::raw('lower(trim("creditnote_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'like','%'.$keyword.'%');
+                                    });
+            if(!empty($datefrom)) $fetch = $fetch->where('tr_invoice_paymhdr.creditnote_date','>=',$datefrom);
+            if(!empty($dateto)) $fetch = $fetch->where('tr_invoice_paymhdr.creditnote_date','<=',$dateto);
+            $count = $fetch->count();
+            if(!empty($sort)) $fetch = $fetch->orderBy($sort,$order);
+
+            $fetch = $fetch->skip($offset)->take($perPage)->get();
+            $result = ['total' => $count, 'rows' => []];
+            foreach ($fetch as $key => $value) {
+                $temp = [];
+                $temp['id'] = $value->id;
+                $temp['creditnote_number'] = $value->creditnote_number;
+                $temp['creditnote_keterangan'] = $value->creditnote_keterangan;
+                $temp['creditnote_date'] = date('d/m/Y',strtotime($value->creditnote_date));
+                $temp['posting_at'] = ($value->posting_at == NULL ? '' : date('d/m/Y',strtotime($value->posting_at)));
+                $temp['inv_number'] = $value->inv_number;
+                $temp['unit_code'] = $value->unit_code;
+                $temp['total_amt'] = "Rp. ".number_format($value->total_amt);
+                $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'">';
+                $creditnote_post = $temp['creditnote_post'] = !empty($value->creditnote_post) ? 'yes' : 'no';
+
+                $action_button = '<a href="#" title="View Detail" data-toggle="modal" data-target="#detailModal" data-id="'.$value->id.'" class="getDetail"><i class="fa fa-eye" aria-hidden="true"></i></a>';
+
+                if($creditnote_post == 'no'){
+                    if(\Session::get('role')==1 || in_array(78,\Session::get('permissions'))){
+                        $action_button .= ' | <a href="#" data-id="'.$value->id.'" title="Posting Payment" class="posting-confirm"><i class="fa fa-arrow-circle-o-up"></i></a>';
+                    }
+                    if(\Session::get('role')==1 || in_array(78,\Session::get('permissions'))){
+                        $action_button .= ' | <a href="creditnote/creditnote_void?id='.$value->id.'" title="Void" class="void-confirm"><i class="fa fa-ban"></i></a>';
+                    }
+                }
+                $temp['action_button'] = $action_button;
+
+                $result['rows'][] = $temp;
+            }
+            return response()->json($result);
+        }catch(\Exception $e){
+            return response()->json(['errorMsg' => $e->getMessage()]);
+        }
+    }
+
+    public function insertcreditnote(Request $request){
+        $messages = [
+            'creditnote_date.required' => 'Payment Date is required',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'creditnote_date' => 'required:tr_creditnote_hdr'
+        ], $messages);
+
+        if ($validator->fails()) {
+            $errors = $validator->errors()->first();
+            return ['status' => 0, 'message' => $errors];
+        }
+
+        $data_payment = $request->input('data_payment');
+        $detail_payment = array();
+        $payment_ids = [];
+        if(!empty($data_payment) && count($data_payment['invpayd_amount']) > 0){
+            $lastPayment = CreditNoteH::where(\DB::raw('EXTRACT(YEAR FROM created_at)'),'=',date('Y'))
+                                ->where(\DB::raw('EXTRACT(MONTH FROM created_at)'),'=',date('m'))
+                                ->orderBy('created_at','desc')->first();
+            $indexNumber = null;
+            if($lastPayment){
+                $index = explode('.',$lastPayment->creditnote_number);
+                $index = (int) end($index);
+                $index+= 1;
+                $indexNumber = $index;
+                $index = str_pad($index, 3, "0", STR_PAD_LEFT);
+            }else{
+                $index = "001";
+                $indexNumber = 1;
+            }
+
+            $lebih = 0;
+            foreach ($data_payment['invpayd_amount'] as $key => $value) {
+                $tempAmount = $currentOutstanding = 0;
+                $invoice = TrInvoice::find($key);
+                if(!empty($value)){
+                    $cek_pay = true;
+
+                    $payVal = (int)$data_payment['totalpay'][$key];
+                    $total = $payVal;
+
+                    $action = new CreditNoteH;
+                    $action->creditnote_number = 'CR'.'-'.date('Y-m').'.'.$index;
+                    $action->creditnote_date = $request->input('creditnote_date');
+                    $action->creditnote_keterangan = $request->input('creditnote_keterangan');
+                    $action->creditnote_post = !empty($request->input('creditnote_post')) ? true : false;
+                    $action->unit_id = $request->input('tenan_id');
+                    $action->total_amt = $payVal;
+                    $action->inv_id = $key;
+
+                    if($action->save()){
+                        $payment_id = $action->id;
+                        $payment_ids[] = $payment_id;
+
+                        $action_detail = new CreditNoteD;
+                        $action_detail->inv_amount = $invoice->inv_outstanding;
+                        $action_detail->credit_amount = $payVal;
+                        $action_detail->inv_id = $key;
+                        $action_detail->jurnal_type = $request->input('coatype');
+                        $action_detail->coa_code = $request->input('coa_code');
+                        $action_detail->creditnote_hdr_id = $payment_id;
+                       
+                        $action_detail->save();
+                        $currentOutstanding = $invoice->inv_outstanding;
+                        $tempAmount = $invoice->inv_outstanding - $payVal;
+                        $invoice->inv_outstanding = (int)$tempAmount;
+                        $invoice->save();
+                    }
+
+                    $indexNumber++;
+                    $index = str_pad($indexNumber, 3, "0", STR_PAD_LEFT);
+                }
+            }
+        }else{
+            return ['status' => 0, 'message' => 'Please Check at least one of Invoice for payment'];
+        }
+        return ['status' => 1, 'message' => 'Insert Success', 'paym_id' => $payment_ids];
+    }
+
+    public function creditnote_void(Request $request){
+        $id = $request->id;
+        $paymHeader = CreditNoteH::find($id);
+        // default result
+        $result = array(
+            'status'=>0,
+            'message'=> 'Data not found'
+        );
+        if(!empty($paymHeader)){
+            if($paymHeader->creditnote_post == 't'){
+                $result['message'] = 'You can\'t void posted payment';
+                return response()->json($result);
+            }
+            foreach ($paymHeader->CreditNoteD as $payDtl) {
+                $invoice_id = $payDtl->inv_id;
+                $invoice = TrInvoice::find($invoice_id);
+
+                $invoice->inv_outstanding += $payDtl->credit_amount;
+                $invoice->save();
+            }
+            CreditNoteH::where('id',$id)->delete();
+            CreditNoteD::where('creditnote_hdr_id',$id)->delete();
+
+            $result = array(
+                'status'=>1,
+                'message'=> 'Success void credit note'
+            );
+        }else{
+            return response()->json($result);
+        }
+        return response()->json($result);
+    }
+
+
+    public function posting_creditnote(Request $request){
+        $ids = $request->id;
+        $postingdate = date('Y-m-d',strtotime($request->posting_date));
+        if(!is_array($ids)) $ids = explode(',',$ids);
+        $ids = CreditNoteH::where('creditnote_post',0)->whereIn('id', $ids)->pluck('id');
+        if(count($ids) < 1) return response()->json(['error'=>1, 'message'=> "0 Credit Note Terposting"]);
+
+        $coayear = date('Y');
+        $month = date('m');
+        $journal = [];
+
+        $jourType = MsJournalType::where('jour_type_prefix','AR')->first();
+        if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "AR" first before posting an credit note']);
+        $successPosting = 0;
+        $successIds = [];
+        $piutangIds = [];
+
+        // cek backdate dr closing bulanan/tahunan
+        $lastclose = TrLedger::whereNotNull('closed_at')->orderBy('closed_at','desc')->first();
+        $limitMinPostingDate = null;
+        if($lastclose) $limitMinPostingDate = date('Y-m-t', strtotime($lastclose->closed_at));
+
+        foreach ($ids as $id) {
+            $lastJournal = Numcounter::where('numtype','JG')->where('tahun',$coayear)->where('bulan',$month)->first();
+            if(count($lastJournal) > 0){
+                $lst = $lastJournal->last_counter;
+                $nextJournalNumber = $lst + 1;
+                $lastJournal->update(['last_counter'=>$nextJournalNumber]);
+            }else{
+                $nextJournalNumber = 1;
+                $lastcounter = new Numcounter;
+                $lastcounter->numtype = 'JG';
+                $lastcounter->tahun = date('Y');
+                $lastcounter->bulan = date('m');
+                $lastcounter->last_counter = 1;
+                $lastcounter->save();
+            }
+
+            $paymentHd = CreditNoteH::find($id);
+            $paymentDtl = CreditNoteD::select('tr_creditnote_dtl.coa_code','credit_amount','tr_invoice_detail.coa_code as coa_ar','ms_cost_item.ar_coa_code','ms_cost_detail.costd_name','inv_number')
+                                        ->join('tr_invoice','tr_creditnote_dtl.inv_id','=','tr_invoice.id')
+                                        ->join('tr_invoice_detail','tr_invoice.id','=','tr_invoice_detail.inv_id')
+                                        ->leftjoin('ms_cost_detail','ms_cost_detail.id','=','tr_invoice_detail.costd_id')
+                                        ->leftjoin('ms_cost_item','ms_cost_item.id','=','ms_cost_detail.cost_id')
+                                        ->where('creditnote_hdr_id',$id)->get();
+            $refno = $paymentHd->creditnote_number;
+            $nextJournalNumber = str_pad($nextJournalNumber, 6, 0, STR_PAD_LEFT);
+            $journalNumber = "JG/".$coayear."/".$this->Romawi($month)."/".$nextJournalNumber;
+            //DEBET
+            $cek = 0;
+            foreach ($paymentDtl as $value) {
+                if($cek == 0){
+                $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                $journal[] = [
+                        'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                        'ledge_fisyear' => $coayear,
+                        'ledg_number' => $journalNumber,
+                        'ledg_date' => $postingdate,
+                        'ledg_refno' => $refno,
+                        'ledg_debit' => $value->credit_amount,
+                        'ledg_credit' => 0,
+                        'ledg_description' => $paymentHd->creditnote_keterangan,
+                        'coa_year' => date('Y',strtotime($postingdate)),
+                        'coa_code' => $value->coa_code,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                        'jour_type_id' => $jourType->id, //hardcode utk finance
+                        'dept_id' => 3, //hardcode utk finance
+                        'modulname' => 'Credit Note',
+                        'refnumber' =>$id
+                    ];
+                    $cek++;
+                }
+            }   
+            
+            //KREDIT
+            foreach ($paymentDtl as $value) {
+                $service = ROUND($value->credit_amount/1.1,0);
+                $sinkinfund = ROUND(10/100 * $service,0);
+                if(trim($value->ar_coa_code) == '10310'){
+                    $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                    $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => $postingdate,
+                                'ledg_refno' => $value->inv_number,
+                                'ledg_debit' => 0,
+                                'ledg_credit' => $sinkinfund,
+                                'ledg_description' => $paymentHd->creditnote_keterangan,
+                                'coa_year' => date('Y',strtotime($postingdate)),
+                                'coa_code' => ($value->ar_coa_code == NULL ? $value->coa_ar : $value->ar_coa_code),
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id, //hardcode utk finance
+                                'dept_id' => 3, //hardcode utk finance
+                                'modulname' => 'Credit Note',
+                                'refnumber' =>$id
+                            ];
+                }else if(trim($value->ar_coa_code) == '10320'){
+                    $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                    $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => $postingdate,
+                                'ledg_refno' => $value->inv_number,
+                                'ledg_debit' => 0,
+                                'ledg_credit' => $service,
+                                'ledg_description' => $paymentHd->creditnote_keterangan,
+                                'coa_year' => date('Y',strtotime($postingdate)),
+                                'coa_code' => ($value->ar_coa_code == NULL ? $value->coa_ar : $value->ar_coa_code),
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id, //hardcode utk finance
+                                'dept_id' => 3, //hardcode utk finance
+                                'modulname' => 'Credit Note',
+                                'refnumber' =>$id
+                            ];
+                }else{
+                    $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
+                    $journal[] = [
+                                'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
+                                'ledge_fisyear' => $coayear,
+                                'ledg_number' => $journalNumber,
+                                'ledg_date' => $postingdate,
+                                'ledg_refno' => $value->inv_number,
+                                'ledg_debit' => 0,
+                                'ledg_credit' => $value->credit_amount,
+                                'ledg_description' => $paymentHd->creditnote_keterangan,
+                                'coa_year' => date('Y',strtotime($postingdate)),
+                                'coa_code' => ($value->ar_coa_code == NULL ? $value->coa_ar : $value->ar_coa_code),
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                                'jour_type_id' => $jourType->id, //hardcode utk finance
+                                'dept_id' => 3, //hardcode utk finance
+                                'modulname' => 'Credit Note',
+                                'refnumber' =>$id
+                            ];
+                }
+            }
+            $successIds[] = $id;
+        }
+        // INSERT DATABASE
+        DB::beginTransaction();
+        try{
+            // insert journal
+            TrLedger::insert($journal);
+
+            if(count($successIds) > 0){
+                foreach ($successIds as $id) {
+                    CreditNoteH::where('id', $id)->update(['creditnote_post'=>1, 'posting_at'=>$postingdate, 'posting_by'=>Auth::id()]);
+                }
+            }
+            DB::commit();
+        }catch(\Exception $e){
+            DB::rollback();
+            return response()->json(['error'=>1, 'message'=> $e->getMessage()]);
+        }
+        $message = count($successIds).' Credit Note Terposting';
+        return response()->json(['success'=>1, 'message'=> $message]);
+    }
+
+    public function unposting_creditnote(Request $request){
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+
+        $ids = CreditNoteH::where('creditnote_post',1)->whereIn('id', $ids)->pluck('id');
+        if(count($ids) < 1) return response()->json(['error'=>1, 'message'=> "0 Credit Note Ter-unposting"]);
+        $sc = 0;
+        foreach ($ids as $id) {
+            TrLedger::where('refnumber', $id)->where('modulname','Credit Note')->delete();
+            $pay = CreditNoteH::find($id);
+            $pay->update(['creditnote_post'=>0,'posting_by'=>NULL,'posting_at'=>NULL]);
+            $sc++;   
+        }
+        $message = $sc.' Credit Note Unposting';
+        return response()->json(['success'=>1, 'message'=> $message]);
+    }
+
+    public function getdetail_creditnote(Request $request){
+        $id = $request->id;
+        $note_hdr = CreditNoteH::find($id);
+        $note_dtl = CreditNoteD::select('tr_creditnote_dtl.*','tr_invoice.inv_number','ms_master_coa.coa_name')
+                    ->join('tr_invoice','tr_invoice.id','=','tr_creditnote_dtl.inv_id')
+                    ->join('ms_master_coa','ms_master_coa.coa_code','=','tr_creditnote_dtl.coa_code')
+                    ->where('tr_creditnote_dtl.creditnote_hdr_id','=',$id)
+                    ->where('ms_master_coa.coa_year','=',date('Y'))
+                    ->get();
+
+        return view('modal.creditnote', ['header' => $note_hdr, 'detail' => $note_dtl]);
+    }
+
+    public function Romawi($n){
+        $hasil = "";
+        $iromawi = array("","I","II","III","IV","V","VI","VII","VIII","IX","X",20=>"XX",30=>"XXX",40=>"XL",50=>"L",60=>"LX",70=>"LXX",80=>"LXXX",90=>"XC",100=>"C",200=>"CC",300=>"CCC",400=>"CD",500=>"D",600=>"DC",700=>"DCC",800=>"DCCC",900=>"CM",1000=>"M",2000=>"MM",3000=>"MMM");
+        if(array_key_exists($n,$iromawi)){
+            $hasil = $iromawi[$n];
+        }elseif($n >= 11 && $n <= 99){
+            $i = $n % 10;
+            $hasil = $iromawi[$n-$i].$this->Romawi($n % 10);
+        }elseif($n >= 101 && $n <= 999){
+            $i = $n % 100;
+            $hasil = $iromawi[$n-$i].$this->Romawi($n % 100);
+        }else{
+            $i = $n % 1000;
+            $hasil = $iromawi[$n-$i].$this->Romawi($n % 1000);
+        }
+        return $hasil;
+    }
+
+    public function invEdit(Request $request, $id)
+    {
+        $data['detail'] = TrInvoiceDetail::select(
+            'invdt_amount','invdt_note','ms_cost_detail.costd_rate','ms_cost_detail.costd_burden','ms_cost_detail.costd_admin','costd_admin_type','meter_start','meter_end','tr_invoice_detail.costd_id')
+        ->join('ms_cost_detail','ms_cost_detail.id','=','tr_invoice_detail.costd_id')
+        ->leftjoin('tr_meter','tr_meter.id','=','tr_invoice_detail.meter_id')->where('inv_id',$id)->get();
+        $data['ids'] = $id;
+        return view('invoice_edit',$data);
+    }
+
+    public function updateInv(Request $request){
+        $inv_id = $request->id;
+        $st_data = $request->start;
+        $end_data = $request->end;
+        $cost_data = $request->costd_id;
+        $start_note = $request->note;
+        $bpju = @MsConfig::where('name','ppju')->first()->value;
+        
+        $subtotal_data = 0;
+        $ids = array();
+        for($i=0; $i<count($cost_data); $i++){
+            $cost_detail = MsCostDetail::find($cost_data[$i]);
+            $last_detail = TrInvoiceDetail::where('inv_id',$inv_id)->where('costd_id',$cost_data[$i])->first();
+            $meter_start = $st_data[$i];
+            $meter_end = $end_data[$i];
+            $used = $meter_end - $meter_start;
+
+            if($cost_data[$i] != '4'){
+                //LISTRIK
+                $min = (40 * $cost_detail->daya * $cost_detail->costd_rate) + $cost_detail->costd_burden;
+                $elec_cost = ($used *  $cost_detail->costd_rate) + $cost_detail->costd_burden;
+                if($elec_cost > $min){
+                    $meter_cost = $elec_cost;
+                }else{
+                    $meter_cost = $min;
+                }
+                $bpju_s = round($bpju/100 * $meter_cost);
+                $subtotal = $meter_cost + $bpju_s;
+
+                if($cost_detail->value_type == 'percent'){
+                    $public_area = round($cost_detail->percentage / 100 * $subtotal);
+                }else{
+                    $public_area = $cost_detail->percentage;
+                    if(empty($public_area)) $public_area = 0;
+                }
+
+                if(!empty($cost_detail->costd_admin_type) && $cost_detail->costd_admin_type == 'percent'){
+                    $admincost = round($cost_detail->costd_admin / 100 * $subtotal);
+                }else{
+                    $admincost = $cost_detail->costd_admin;
+                }
+
+                $total = $subtotal + $admincost + $public_area;
+
+                if(!empty($cost_detail->grossup_pph)){
+                    $grossup_total = round($total / 0.9 * 0.1);
+                    // echo "Grossup $grossup_total<br>";
+                    $total += $grossup_total;
+                }
+
+                $last_note = "<br>Awal : ".number_format($meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($used,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($cost_detail->costd_burden,2)."&nbsp;&nbsp;&nbsp;Tarif (/kWh): ".number_format($cost_detail->costd_rate,2)."&nbsp;&nbsp;&nbsp;PPJU : ".$bpju."% &nbsp;&nbsp;&nbsp;Beban Bersama : ".$public_area."&nbsp;&nbsp;&nbsp;Biaya Admin : ".$admincost;
+                $notes = $start_note[$i].$last_note;
+
+            }else{
+                //AIR
+                $admin = $cost_detail->costd_admin/100 * (($used * $cost_detail->costd_rate) + $cost_detail->costd_burden);
+                $total = ($used * $cost_detail->costd_rate) + ($cost_detail->costd_burden + $admin);
+                $last_note = "<br>Awal : ".number_format($meter_start,2)."&nbsp;&nbsp;&nbsp; Akhir : ".number_format($meter_end,2)."&nbsp;&nbsp;&nbsp; Pakai : ".number_format($used,2)."&nbsp;&nbsp;&nbsp; Tarif (per M3) : ".number_format($cost_detail->costd_rate,2)."&nbsp;&nbsp;&nbsp;Abodemen : ".number_format($cost_detail->costd_burden,2)."&nbsp;&nbsp;&nbsp;Adm : ".number_format($admin,2);
+                $notes = $start_note[$i].$last_note;
+
+            }
+
+            $invdet = [
+                        'invdt_amount' => $total,
+                        'invdt_note' => $notes,
+                        'costd_id' => $cost_data[$i],
+                        'inv_id' => $inv_id,
+                        'meter_id' => $last_detail->meter_id,
+                        'coa_code' => NULL
+                    ];
+            $last_detail->update($invdet);
+            $subtotal_data = $subtotal_data + $total;
+
+            //UPDATE TRMETER
+            $upd_meter = TrMeter::find($last_detail->meter_id);
+            $upd_meter->update(['meter_start' => $meter_start,'meter_end' => $meter_end,'meter_used' => $used]);
+
+        }
+        //DELETE PPN DAN MATERAI
+        TrInvoiceDetail::where('inv_id',$inv_id)->where('invdt_note','PPN')->delete();
+        TrInvoiceDetail::where('inv_id',$inv_id)->where('invdt_note','MATERAI')->delete();        
+        $all = $subtotal_data;
+
+        //UPDATE HEADER
+        $upd_header = TrInvoice::find($inv_id);
+        $upd_header->update(['inv_amount' => $all,'inv_outstanding' => $all]);
+
+        $request->session()->flash('success', 'Update edit Invoice');
+        return redirect()->back();
+    }
+
+>>>>>>> Stashed changes
 }

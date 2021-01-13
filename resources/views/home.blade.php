@@ -32,7 +32,7 @@ Dashboard
 				<div class="inner">
 					<h3 style="font-size: 28px;">{{ $inv }}</h3>
 
-					<p>Invoice This Month</p>
+					<p>Invoice This Year</p>
 				</div>
 				<div class="icon">
 					<i class="ion ion-document"></i>

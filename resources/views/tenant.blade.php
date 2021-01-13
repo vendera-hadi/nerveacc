@@ -20,7 +20,7 @@
 @endsection
 
 @section('contentheader_breadcrumbs')
-	<ol class="breadcrumb">
+    <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
         <li class="active">Tenant / Owner</li>
     </ol>
@@ -28,8 +28,8 @@
 
 @section('main-content')
 <div class="row">
-	<div class="col-md-12">
-  		<!-- content -->
+    <div class="col-md-12">
+        <!-- content -->
         <div style="overflow: auto;">
         <div class="row">
             <div class="col-sm-4">
@@ -45,7 +45,7 @@
         <br>
         <!-- template tabel -->
         <div style="height:400px">
-  		<table id="dg" title="Tenant / Owner" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
+        <table id="dg" title="Tenant / Owner" class="easyui-datagrid" style="width:100%;height:100%" toolbar="#toolbar">
             <!-- kolom -->
             <thead>
                 <tr>
@@ -212,8 +212,8 @@
 
         </div>
         </div>
-  		<!-- content -->
-	</div>
+        <!-- content -->
+    </div>
 </div>
 @endsection
 

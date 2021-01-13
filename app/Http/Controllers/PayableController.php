@@ -15,6 +15,7 @@ use App\Models\TrApHeader;
 use App\Models\TrPODetail;
 use App\Models\TrPOHeader;
 use App\Models\MsSupplier;
+use App\Models\Numcounter;
 use Auth;
 use DB;
 
@@ -44,8 +45,9 @@ class PayableController extends Controller
 
             // olah data
             $count = TrApHeader::count();
-            $fetch = TrApHeader::select('tr_ap_invoice_hdr.*', 'tr_purchase_order_hdr.po_number')
-                    ->leftJoin('tr_purchase_order_hdr','tr_purchase_order_hdr.id','=','tr_ap_invoice_hdr.po_id');
+            $fetch = TrApHeader::select('tr_ap_invoice_hdr.*', 'tr_purchase_order_hdr.po_number','ms_supplier.spl_name')
+                    ->leftJoin('tr_purchase_order_hdr','tr_purchase_order_hdr.id','=','tr_ap_invoice_hdr.po_id')
+                    ->leftJoin('ms_supplier','tr_ap_invoice_hdr.spl_id','=','ms_supplier.id');
 
              if(!empty($filters) && count($filters) > 0){
                 foreach($filters as $filter){
@@ -83,6 +85,7 @@ class PayableController extends Controller
                 $temp = [];
                 $temp['checkbox'] = '<input type="checkbox" name="check" value="'.$value->id.'" data-posting="'.$value->posting.'">';
                 $temp['id'] = $value->id;
+                $temp['spl_name'] = $value->spl_name;
                 $temp['invoice_no'] = $value->invoice_no;
                 $temp['invoice_date'] = $value->invoice_date;
                 $temp['invoice_duedate'] = $value->invoice_duedate;
@@ -91,10 +94,11 @@ class PayableController extends Controller
                 $temp['po_no'] = !empty($value->po_number) ? $value->po_number : "-";
                 $action_button = '<a href="javascript:void(0)" data-id="'.$value->id.'" class="detail"><i class="fa fa-eye"></i></a>';
                 if($temp['posting'] == 'no'){
-                    // if(!empty($value->po_number))
-                    //     $action_button = '<a href="'.route('payable.withpo.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
-                    // else
-                    //     $action_button = '<a href="'.route('payable.withoutpo.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
+                    if(!empty($value->po_number)){
+                        $action_button = '<a href="'.route('payable.withpo.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
+                    }else{
+                        $action_button = '<a href="'.route('payable.withoutpo.edit',$value->id).'" ><i class="fa fa-pencil"></i></a>';
+                    }
                     $action_button .= '&nbsp;&nbsp; <a href="#" data-id="'.$value->id.'" class="remove"><i class="fa fa-times"></i></a>';
                 }
                 $temp['action_button'] = $action_button;
@@ -149,6 +153,9 @@ class PayableController extends Controller
             $header->created_by = \Auth::id();
             $header->updated_by = \Auth::id();
 
+            $type_spl2 = MsSupplier::find($request->spl_id);
+            $type_spl = $type_spl2->spl_pkp;
+
             $coa_code = $request->coa_code;
             $ppn_coa = $request->ppn_coa_code;
             $notes = $request->note;
@@ -182,6 +189,11 @@ class PayableController extends Controller
             $header->total = $total + $totalppn;
             $header->outstanding = $header->total;
             $header->ppn = $totalppn;
+            if($type_spl == 2){
+                $header->dpp = ROUND($header->final_total/1.1,0);
+            }else{
+                $header->dpp = ROUND($header->final_total,0);
+            }
             $header->save();
             $header->detail()->saveMany($details);
             \DB::commit();
@@ -261,11 +273,12 @@ class PayableController extends Controller
     public function posting(Request $request)
     {
         $ids = $request->id;
-        if(!is_array($ids)) $ids = [$ids];
+        $postingdate = (!empty($request->posting_date) ? date('Y-m-d',strtotime($request->posting_date)) : date('Y-m-d')); 
+        if(!is_array($ids)) $ids = explode(',',$ids);
         \DB::beginTransaction();
         try{
-            $coayear = date('Y');
-            $month = date('m');
+            $coayear = date('Y',strtotime($request->posting_date));
+            $month = date('m',strtotime($request->posting_date));
             $journaltype = 'AP';
 
             // cek backdate dr closing bulanan/tahunan
@@ -277,14 +290,23 @@ class PayableController extends Controller
                 // cari last prefix, order by journal type
                 $jourType = MsJournalType::where('jour_type_prefix',$journaltype)->first();
                 if(empty($jourType)) return response()->json(['error'=>1, 'message'=>'Please Create Journal Type with prefix "'.$journaltype.'" ']);
-                $lastJournal = TrLedger::where('jour_type_id',$jourType->id)->latest()->first();
-                if($lastJournal){
-                    $lastJournalNumber = explode(" ", $lastJournal->ledg_number);
-                    $lastJournalNumber = (int) end($lastJournalNumber);
-                    $nextJournalNumber = $lastJournalNumber + 1;
+                $lastJournal = Numcounter::where('numtype','BPV')->where('tahun',$coayear)->where('bulan',$month)->first();
+                if(count($lastJournal) > 0){
+                    $lst = $lastJournal->last_counter;
+                    $nextJournalNumber = $lst + 1;
+                    $lastJournal->update(['last_counter'=>$nextJournalNumber]);
                 }else{
                     $nextJournalNumber = 1;
+                    $lastcounter = new Numcounter;
+                    $lastcounter->numtype = 'BPV';
+                    $lastcounter->tahun = $coayear;
+                    $lastcounter->bulan = $month;
+                    $lastcounter->last_counter = 1;
+                    $lastcounter->save();
                 }
+
+                $nextJournalNumber = str_pad($nextJournalNumber, 6, 0, STR_PAD_LEFT);
+                $journalNumber = "BPV/".$coayear."/".$this->Romawi($month)."/".$nextJournalNumber;
 
                 $header = TrApHeader::find($id);
                 if(!empty($limitMinPostingDate) && $header->invoice_date < $limitMinPostingDate){
@@ -295,24 +317,22 @@ class PayableController extends Controller
                 // lawanan hutang (DEBET)
                 $total = 0;
                 foreach ($header->detail as $detail) {
-                    $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
-                    $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
                     $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
                     $journal = [
                                     'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
                                     'ledge_fisyear' => $coayear,
                                     'ledg_number' => $journalNumber,
-                                    'ledg_date' => date('Y-m-d'),
+                                    'ledg_date' => $header->invoice_date,
                                     'ledg_refno' => $header->invoice_no,
-                                    // 'ledg_debit' => $detail->qty * $detail->amount,
-                                    // 'ledg_credit' => 0,
-                                    'ledg_description' => $header->invoice_no,
+                                    'ledg_description' => $detail->note,
                                     'coa_year' => $coayear,
                                     'coa_code' => $detail->coa_code,
                                     'created_by' => Auth::id(),
                                     'updated_by' => Auth::id(),
                                     'jour_type_id' => $jourType->id,
-                                    'dept_id' => $detail->dept_id
+                                    'dept_id' => $detail->dept_id,
+                                    'modulname' => 'AP',
+                                    'refnumber' =>$id
                                 ];
                     if($detail->coa_type == 'DEBET'){
                         $journal['ledg_debit'] = $detail->qty * $detail->amount;
@@ -324,58 +344,35 @@ class PayableController extends Controller
                         $total -= $detail->qty * $detail->amount;
                     }
                     TrLedger::create($journal);
-
-                    // if(!empty($detail->ppn_coa_code)){
-                    //     $nextJournalNumber++;
-                    //     $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
-                    //     $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
-                    //     $journal = [
-                    //                 'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
-                    //                 'ledge_fisyear' => $coayear,
-                    //                 'ledg_number' => $journalNumber,
-                    //                 'ledg_date' => date('Y-m-d'),
-                    //                 'ledg_refno' => $header->invoice_no,
-                    //                 'ledg_debit' => $detail->ppn_amount,
-                    //                 'ledg_credit' => 0,
-                    //                 'ledg_description' => $header->invoice_no,
-                    //                 'coa_year' => $coayear,
-                    //                 'coa_code' => $detail->ppn_coa_code,
-                    //                 'created_by' => Auth::id(),
-                    //                 'updated_by' => Auth::id(),
-                    //                 'jour_type_id' => $jourType->id,
-                    //                 'dept_id' => $detail->dept_id
-                    //             ];
-                    //     TrLedger::create($journal);
-                    //     $total += $detail->ppn_amount;
-                    // }
                     $nextJournalNumber++;
                 }
-                // endforeach
                 // Hutang (KREDIT)
-                $nextJournalNumberConvert = str_pad($nextJournalNumber, 4, 0, STR_PAD_LEFT);
-                $journalNumber = $jourType->jour_type_prefix." ".$coayear.$month." ".$nextJournalNumberConvert;
                 $microtime = str_replace(".", "", str_replace(" ", "",microtime()));
                 $journal = [
                         'ledg_id' => "JRNL".substr($microtime,10).str_random(5),
                         'ledge_fisyear' => $coayear,
                         'ledg_number' => $journalNumber,
-                        'ledg_date' => date('Y-m-d'),
+                        'ledg_date' => $header->invoice_date,
                         'ledg_refno' => $header->invoice_no,
                         'ledg_debit' => 0,
                         'ledg_credit' => $total,
-                        'ledg_description' => $header->invoice_no,
+                        'ledg_description' => $detail->note,
                         'coa_year' => $coayear,
                         'coa_code' => $header->supplier->coa_code,
                         'created_by' => Auth::id(),
                         'updated_by' => Auth::id(),
                         'jour_type_id' => $jourType->id,
-                        'dept_id' => $detail->dept_id
+                        'dept_id' => $detail->dept_id,
+                        'modulname' => 'AP',
+                        'refnumber' =>$id
                     ];
                 TrLedger::create($journal);
+
+                $header->posting = true;
+                $header->posting_at = date('Y-m-d');
+                $header->save();
             }
-            $header->posting = true;
-            $header->posting_at = date('Y-m-d');
-            $header->save();
+            
             \DB::commit();
             return response()->json(['success'=>1, 'message'=>'AP posted Successfully']);
         }catch(\Exception $e){
@@ -383,6 +380,101 @@ class PayableController extends Controller
             return response()->json(['error'=>1, 'message'=> $e->getMessage()]);
         }
 
+    }
+
+    public function unposting(Request $request){
+        $ids = $request->id;
+        if(!is_array($ids)) $ids = [$ids];
+
+        $ids = TrApHeader::where('posting',1)->whereIn('id', $ids)->pluck('id');
+        if(count($ids) < 1) return response()->json(['error'=>1, 'message'=> "0 AP Ter-unposting"]);
+        $sc = 0;
+        foreach ($ids as $id) {
+            TrLedger::where('refnumber', $id)->where('modulname','AP')->delete();
+            $pay = TrApHeader::find($id);
+            $pay->update(['posting'=>0,'posting_at'=>NULL]);
+            $sc++;
+        }
+        $message = $sc.' AP Unposting';
+        return response()->json(['success'=>1, 'message'=> $message]);
+    }
+
+    public function withoutpoEdit(Request $request, $id)
+    {
+        $coaYear = date('Y');
+        $data['accounts'] = MsMasterCoa::where('coa_year',$coaYear)->where('coa_isparent',0)->orderBy('coa_type')->get();
+        $data['suppliers'] = MsSupplier::all();
+        $data['departments'] = MsDepartment::where('dept_isactive',1)->get();
+        $data['payment_terms'] = DB::table('ms_payment_terms')->get();
+        $data['ppn_options'] = DB::table('ms_ppn')->get();
+        $data['header'] = TrApHeader::find($id);
+        $data['detail'] = TrApDetail::join('ms_department','ms_department.id','=','tr_ap_invoice_dtl.dept_id')->where('aphdr_id',$id)->get();
+        $supps= MsSupplier::find($data['header']->spl_id);
+        $data['supps'] = $supps;
+        return view('accpayable_edit_withoutpo',$data);
+    }
+
+    public function updateAP(Request $request)
+    {
+
+        $id = $request->ap_id;
+        $header = TrApHeader::find($id);
+        $header->spl_id = $request->spl_id;
+        $header->invoice_date = $request->invoice_date;
+        $header->invoice_duedate = $request->invoice_duedate;
+        $header->invoice_no = $request->invoice_no;
+        $header->terms = $request->terms;
+        $header->note = $request->hdnote;
+        $header->apdate = date('Y-m-d');
+        $header->created_by = \Auth::id();
+        $header->updated_by = \Auth::id();
+
+        $coa_code = $request->coa_code;
+        $ppn_coa = $request->ppn_coa_code;
+        $notes = $request->note;
+        $qty = $request->qty;
+        $amount = $request->amount;
+        $discount = $request->discount;
+        $coatype = $request->coa_type;
+        $dept = $request->dept_id;
+        $total = $totalppn = $totaldiscount = 0;
+
+        //delete detail
+        TrApDetail::where('aphdr_id',$id)->delete();
+
+        foreach ($coa_code as $key => $coa) {
+            $detail = new TrApDetail;
+            $detail->aphdr_id = $id;
+            $detail->note = $notes[$key];
+            $detail->qty = $qty[$key];
+            $detail->amount = (float)$amount[$key];
+            $detail->discount = (float)$discount[$key];
+            $detail->final_total = $detail->amount - $detail->discount;
+            $detail->ppn_amount = 0;
+            $detail->coa_code = $coa;
+            $detail->dept_id = $dept[$key];
+            $detail->coa_type = $coatype[$key];
+            $details[] = $detail;
+            if($detail->coa_type == 'DEBET'){
+               // $total += $qty[$key] * $amount[$key];
+                $total += $detail->final_total;
+            }else{
+                // $total -= $qty[$key] * $amount[$key];
+                $total -= $detail->final_total;
+            }
+            // $totalppn += $ppn_amount[$key];
+            $totaldiscount += $detail->discount;
+        }
+        $header->total = $total + $totalppn;
+        $header->discount = $totaldiscount;
+        $header->final_total = $header->total - $header->discount;
+        $header->outstanding = $header->final_total;
+        $header->ppn = $totalppn;
+        $header->dpp = ROUND($header->final_total/1.1,0);
+        $header->update();
+        $header->detail()->saveMany($details);
+        \DB::commit();
+        return redirect()->back()->with(['success' => 'Update Success']);
     }
 
 	// purchase order
@@ -661,6 +753,24 @@ class PayableController extends Controller
         $id = $request->id;
         $data['ap'] = TrApHeader::find($id);
         return view('modal.detailap', $data);
+    }
+
+    public function Romawi($n){
+        $hasil = "";
+        $iromawi = array("","I","II","III","IV","V","VI","VII","VIII","IX","X",20=>"XX",30=>"XXX",40=>"XL",50=>"L",60=>"LX",70=>"LXX",80=>"LXXX",90=>"XC",100=>"C",200=>"CC",300=>"CCC",400=>"CD",500=>"D",600=>"DC",700=>"DCC",800=>"DCCC",900=>"CM",1000=>"M",2000=>"MM",3000=>"MMM");
+        if(array_key_exists($n,$iromawi)){
+            $hasil = $iromawi[$n];
+        }elseif($n >= 11 && $n <= 99){
+            $i = $n % 10;
+            $hasil = $iromawi[$n-$i].$this->Romawi($n % 10);
+        }elseif($n >= 101 && $n <= 999){
+            $i = $n % 100;
+            $hasil = $iromawi[$n-$i].$this->Romawi($n % 100);
+        }else{
+            $i = $n % 1000;
+            $hasil = $iromawi[$n-$i].$this->Romawi($n % 1000);
+        }
+        return $hasil;
     }
 
 }

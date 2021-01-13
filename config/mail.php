@@ -56,8 +56,9 @@ return [
     */
 
     'from' => [
-        'address' => 'hello@example.com',
-        'name' => 'Example',
+        //'address' => 'postmaster@sandbox8860038a2f2d44fb968cc38a190f1694.mailgun.org',
+        'address' => 'no-reply@akasa-bsdcity.com',
+	'name' => 'akasa@ptjlm.com',
     ],
 
     /*
@@ -111,5 +112,13 @@ return [
     */
 
     'sendmail' => '/usr/sbin/sendmail -bs',
+
+    /*'stream' => [
+		'ssl' => [
+			'verify_peer' => false,
+			'verify_peer_name' => false,
+			'allow_self_signed' => true
+		]
+	]*/
 
 ];

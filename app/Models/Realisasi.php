@@ -206,7 +206,12 @@ class Realisasi extends Model
                 $bdg = TrBudgetDtl::join('tr_budget_hdr','tr_budget_hdr.id','=','tr_budget_dtl.budget_id')
                 ->where('tahun',$tahun)
                 ->where('coa_code',$this->attributes['coa_code'])->get();
-                $total = $bdg[0]->$bln;
+                if(count($bdg) > 0){
+                    $total = $bdg[0]->$bln;
+                }else{
+                    $total = 0;
+                }
+                
             }else if(substr($this->attributes['coa_code'], 0, 1) === '@'){
                 // kalau group account
                 $key = str_replace('@', '', $this->attributes['coa_code']);
@@ -217,7 +222,12 @@ class Realisasi extends Model
                         $bdg = TrBudgetDtl::join('tr_budget_hdr','tr_budget_hdr.id','=','tr_budget_dtl.budget_id')
                         ->where('tahun',$tahun)
                         ->where('coa_code',$dt->coa_code)->get();
-                        $total += $bdg[0]->$bln;
+                        if(count($bdg) > 0){
+                            $total += $bdg[0]->$bln;
+                        }else{
+                            $total += 0;
+                        }
+                        
                     }
                 }else{
                     $total = 0;

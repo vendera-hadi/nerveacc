@@ -3,12 +3,13 @@
     <table class="table table-hover table-bordered">
         <thead>
             <tr>
-                <th width="10" ></th>
+                <th width="10" style="text-align:center"><input type="checkbox" name="checkall2"></th>
                 <th width="100">No.Invoice</th>
-                <th width="100">Unit</th>
+                <th width="100">Tenant Name</th>
                 <th width="50">Tgl Invoice</th>
                 <th width="50">Jatuh Tempo</th>
                 <th width="80">Outstanding Amount</th>
+                <th width="80">Print</th>
                 <th width="100">Terbayar</th>
             </tr>
         </thead>
@@ -28,23 +29,24 @@
                         }
                     ?>
                 <tr class="<?php echo $class;?>">
-                    <td><input type="checkbox" name="data_payment[invpayd_amount][<?php echo $inv_id;?>]" value="<?php echo $value->inv_outstanding;?>" class="paid-check"></td>
+                    <td style="text-align:center"><input type="checkbox" name="data_payment[invpayd_amount][<?php echo $inv_id;?>]" value="<?php echo $value->inv_outstanding;?>" class="paid-check"></td>
                     <td><?php echo $value->inv_number;?></td>
-                    <td>{{ !empty(@$value->unit) ? $value->unit->unit_code : @$value->unit_name }}</td>
+                    <td>{{ $value->tenan_name }}</td>
                     <td><?php echo date('d/m/y', $inv_date);?></td>
                     <td><?php echo date('d/m/y', $inv_duedate);?></td>
                     <td><?php echo 'Rp. '.number_format($value->inv_outstanding);?></td>
+                    <td><center><a href="<?php echo url('invoice/print_faktur?id='.$value->id) ?>" class="print-window2" data-width="640" data-height="660">Print</a></center></td>
                     <td><input type="number" name="data_payment[totalpay][{{$inv_id}}]" value="{{floor($value->inv_outstanding)}}"  min="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
                 </tr>
                 @endforeach
             @else
             <tr>
-                <td colspan="7">Data not found</td>
+                <td colspan="8">Data not found</td>
             </tr>
             @endif
 
             <tr>
-                <td colspan="6"><span class="pull-right">Grand Total</span></td>
+                <td colspan="7"><span class="pull-right">Grand Total</span></td>
                 <td>Rp. <span id="totalCash">0</span></td>
             </tr>
         </tbody>
@@ -56,7 +58,7 @@ function reCount(){
     var total = 0;
     $('.paid-amount').each(function(){
         if($(this).parents('tr').find('.paid-check').is(':checked')){
-            console.log(parseFloat($(this).val()));
+            //console.log(parseFloat($(this).val()));
             total = total + parseFloat($(this).val());
         }
     });
@@ -94,5 +96,46 @@ function checkPaidAmount(target)
     //     target.val(max);
     // }
 }
+
+$('.print-window2').click(function(){
+
+    var self = $(this);
+    var url2 = self.attr('href');
+    var title2 = self.attr('title');
+    var w2 = self.attr('data-width');
+    var h2 = self.attr('data-height');
+
+    openWindow(url2, title2, w2, h2);
+    return false;
+});
+
+$('input[name=checkall2]').change(function() {
+    if($(this).is(':checked')){
+        $('.paid-check').each(function(){
+            $(this).prop('checked',true);
+            reCount();
+            disabledform(1);
+        });
+    }else{
+        $('.paid-check').each(function(){
+            $(this).prop('checked',false);
+            reCount();
+            disabledform(2);
+        });
+    }
+ });
+
+function disabledform(cekdata){
+    if(cekdata == 1){
+        $('.paid-amount').each(function(){
+            $(this).removeAttr('disabled');
+        });
+    }else{
+        $('.paid-amount').each(function(){
+            $(this).attr('disabled','disabled');
+        });
+    }
+}
+
 </script>
 @endif

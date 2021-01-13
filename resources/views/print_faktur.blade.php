@@ -83,7 +83,13 @@ table tr td{font-size:9pt;}
         <div class="subpage">
             <table style="width:100%">
                 <tr>
-                    <td style="width:120px;"><img src="{{asset($company_logo)}}" style="width:120px;"/></td>
+                    <td style="width:120px;">
+                        <?php if($type == 'pdf' || $type == 'mail'){ ?>
+                        <img src="{{'file://'.base_path('public/'.$company_logo)}}" style="width:120px;"/>
+                        <?php }else{ ?>
+                        <img src="{{asset($company_logo)}}" style="width:120px;"/>
+                        <?php } ?>
+                    </td>
                     <td>
                         <div style="font-size:10pt; text-align: center; width: 100%;">
                             <b>{{ $company_name }}</b><br>
@@ -168,9 +174,16 @@ table tr td{font-size:9pt;}
                 <?php
                     }
                 ?>
-
                 <tr>
-
+                    <td style="vertical-align: top; padding-left:15px; padding-right:10px; padding-top:10px">
+                       LEBIH BAYAR BULAN LALU
+                    </td>
+                    <td style="border-left: solid 1px; text-align:right">Rp.</td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px">
+                        <div style="padding-right: 3px;"><?php echo number_format($inv['total_excess_payment']);?></div>
+                    </td>
+                </tr>
+                <tr>
                     <td>&nbsp;</td>
                     <td colspan="2" style="border-collapse: collapse; border-left: solid 1px;">&nbsp;</td>
                 </tr>
@@ -178,12 +191,16 @@ table tr td{font-size:9pt;}
 
                     <td style="padding-left:15px; padding-right:10px; padding-bottom:10px; padding-top:10px"><b>TOTAL TAGIHAN BULAN INI</b></td>
                     <td style="border-left: solid 1px; text-align:right">Rp.</td>
-                    <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format(($total-$inv['total_excess_payment']),0)}}</b></td>
                 </tr>
                 <?php
                     }
                 ?>
             </table>
+            <br>
+            <div style="font-size: 9pt; font-weight: bold;">
+            Outstanding yang belum terbayarkan : Rp. {{number_format($inv['current_last_outstanding'])}}
+            </div>
             <br>
             <div style="font-size: 9pt;">
             Terbilang :<br>
@@ -191,16 +208,22 @@ table tr td{font-size:9pt;}
             </div>
             <table width="100%" style="line-height: 18px;">
                 <tr>
-                    <td width="77%" style="vertical-align:top">
+                    <td width="100%" style="vertical-align:top">
                         <div style="text-align: justify;text-justify: inter-word;">
                         {!!$inv['footer']!!}
                         </div>
                         {!!$inv['label']!!}
                     </td>
-                    <td width="23%" style="text-align: center; vertical-align: top;">
+                </tr>
+                <tr>
+                    <td width="100%" style="text-align: left; vertical-align: top;">
                         Jakarta, <?php echo date('d M Y',strtotime($inv['inv_date'])); ?><br><br>
                         @if(!empty($signature) && !empty($signatureFlag))
+                        <?php if($type == 'pdf' || $type == 'mail'){ ?>
+                        <img src="{{'file://'.base_path('public/'.$signature)}}" width="150">
+                        <?php }else{ ?>
                         <img src="{{asset($signature)}}" width="150">
+                        <?php } ?>
                         <br><br>
                         <b><u>{{$company_sign}}</u></b><br>
                         {{$company_position}}

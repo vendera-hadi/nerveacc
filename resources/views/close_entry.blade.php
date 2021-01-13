@@ -138,7 +138,7 @@ $(document).ready(function() {
 		            if(data.errorMsg) $.messager.alert('Warning',data.errorMsg);
 		            if(data.success){
 		            	$.messager.alert('Success',data.success);
-		            	location.reload();
+		            	//location.reload();
 		            }
 		        });
 		    }

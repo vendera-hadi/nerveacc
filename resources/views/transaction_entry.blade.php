@@ -128,6 +128,12 @@
           <br><br>
           <div class="row">
             <div class="col-sm-12">
+              <?php 
+                session_start();
+                $secret=md5(uniqid(rand(), true));
+                Session::set('FORM_SECRET', $secret); 
+              ?>
+              <input type="hidden" id="form_secret" name="form_secret" value="<?php echo $secret; ?>">
               <button type="submit" class="btn btn-flat btn-primary" id="submitJournal">Submit</button>
             </div>
           </div>

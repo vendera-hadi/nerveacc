@@ -115,7 +115,7 @@
                         <!-- <th field="inv_outstanding" width="150" sortable="true" align="right">Outstanding Amount</th>  -->
                         <th field="invtp_name" width="90" sortable="true">Jenis Invoice</th>
                         <th field="inv_post" width="40" sortable="true">Posted</th>
-                    <th field="action_button" width="80" sortable="true">action</th>
+                    <th field="action_button" width="100" sortable="true">action</th>
                     </tr>
                 </thead>
             </table>
@@ -244,7 +244,7 @@
                                     <label>Invoice Type</label>
                                     <select name="invtp_id" class="form-control">
                                         @foreach($inv_type as $invtp)
-                                        @if($invtp->id != 1)
+                                        @if($invtp->id == 3)
                                         <option value="{{$invtp->id}}">{{$invtp->invtp_name}} ({{$invtp->invtp_prefix}}), COA: {{$invtp->invtp_coa_ar}}</option>
                                         @endif
                                         @endforeach
@@ -295,6 +295,12 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-3 col-sm-offset-9">
+                                <?php 
+                                session_start();
+                                $secret=md5(uniqid(rand(), true));
+                                Session::set('FORM_SECRET', $secret); 
+                                ?>
+                                <input type="hidden" id="form_secret" name="form_secret" value="<?php echo $secret; ?>">
                                 <button class="btn btn-info pull-right">Submit</button>
                             </div>
                         </div>
@@ -849,7 +855,6 @@ $(function(){
             if(result.error) $.messager.alert('Warning',result.message);
             if(result.success){
                 $.messager.alert('Success',result.message);
-                window.open("{{url('invoice/receipt?id=')}}"+result.inv_id,null,"height=660,width=640,status=yes,toolbar=no,menubar=no,location=no");
                 $('#addInvModal').modal("hide");
                 $('#dg').datagrid('reload');
             }

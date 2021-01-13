@@ -35,6 +35,12 @@
 			    @endforeach
 			</tbody>
 			@endif
+			<?php if($header->pajak_id != NULL){ ?>
+				<tr>
+			        <td>Pajak</td>
+			        <td>{{'Rp. '.number_format($header->pajak_amount)}}</td>
+			    </tr>
+			<?php } ?>
 			</table>
 	  </div>
 	  

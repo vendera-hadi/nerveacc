@@ -8,6 +8,9 @@ use App\Models\MsInvoiceType;
 use App\Models\MsConfig;
 use App\Models\MsCompany;
 use App\Models\MsCostItem;
+use App\Models\ExcessPayment;
+use App\Models\LogExcessPayment;
+use App\Models\LogPaymentUsed;
 use Auth, DB;
 
 class Invoice {
@@ -183,7 +186,44 @@ class Invoice {
         $newInvoice->updated_by = $newInvoice->created_by;
         $newInvoice->footer = $this->getInvFooter();
         $newInvoice->label = $this->getInvLabel();
+        //CHECK APAKAH SUDAH ADA DI TABEL LEBIH BAYAR
+        $check_lebih = ExcessPayment::where('unit_id',$this->contract->unit_id)->first();
+        $totalpotong = 0;
+        if(count($check_lebih) > 0){
+            $lebih = $check_lebih->total_amount;
+            $cur_inv = $this->grandTotal;
+            if($this->invoiceType->id == 1){
+                if($lebih > 0){
+                    //KLO TITIPAN LEBIH BESAR DARI NILAI INVOICE
+                    if($lebih > $cur_inv){
+                        $totalpotong = $cur_inv;
+                        $check_lebih->total_amount = ($lebih - $cur_inv);
+                    }else{
+                        $totalpotong = $lebih;
+                        $check_lebih->total_amount = 0;
+                    }
+                    $check_lebih->save();
+                }
+            }
+        }else{
+            $excess_detail = new ExcessPayment;
+            $excess_detail->unit_id = $this->contract->unit_id;
+            $excess_detail->total_amount = 0;
+            $excess_detail->save();
+        }
+        $totaloutstanding = TrInvoice::SELECT(DB::raw("SUM(inv_outstanding) AS total"))->where('unit_id',$this->contract->unit_id)->where('inv_post','t')->where('inv_outstanding','>',0)->get()->first();
+
+        $newInvoice->total_excess_payment = $totalpotong;
+        $newInvoice->current_last_outstanding = ($totaloutstanding->total == NULL ? 0 : $totaloutstanding->total);
         $newInvoice->save();
+        //INPUT LOG LEBIH
+        if($totalpotong > 0){
+            $p_log = new LogPaymentUsed;
+            $p_log->inv_id = $newInvoice->id;
+            $p_log->unit_id = $this->contract->unit_id;
+            $p_log->used_amount = $totalpotong;
+            $p_log->save();
+        }
         // return json_encode($this->children);
         // save details
         $newInvoice->TrInvoiceDetail()->saveMany($this->children);
@@ -193,7 +233,11 @@ class Invoice {
 
     public function exists()
     {
-        return TrInvoice::where('invtp_id',$this->invoiceType->id)->where('contr_id',$this->contract->id)->where('inv_date',$this->invStartDate)->where('inv_iscancel',0)->first();
+        return TrInvoice::where('invtp_id',$this->invoiceType->id)
+        ->where('contr_id',$this->contract->id)
+        ->where(DB::raw('EXTRACT(MONTH FROM inv_date)'),date('n',strtotime($this->invStartDate)))
+        ->where(DB::raw('EXTRACT(YEAR FROM inv_date)'),date('Y',strtotime($this->invStartDate)))
+        ->where('inv_iscancel',0)->first();
     }
 
     public function getContract()

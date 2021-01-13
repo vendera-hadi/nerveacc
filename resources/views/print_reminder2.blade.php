@@ -72,7 +72,13 @@ table tr td{font-size:9pt;}
 <body>
     <div class="page">
         <div class="subpage">
-            <div style="width: 100%"><img src="file://{{public_path($company_logo)}}" style="width:110px;"/></div>
+            <div style="width: 100%">
+                <?php if($type == 'pdf' || $type == 'mail'){ ?>
+                <img src="{{'file://'.base_path('public/'.$company_logo)}}" style="width:110px;"/>
+                <?php }else{ ?>
+                <img src="{{asset($company_logo)}}" style="width:110px;"/>
+                <?php } ?>
+            </div>
 
             <table style="width:100%;">
                 <tr>

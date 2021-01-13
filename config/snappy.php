@@ -22,9 +22,9 @@ return array(
         'env'     => array(),
     ),
     'image' => array(
-        'enabled' => true,
-        'binary'  => '"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe"',
-        'timeout' => false,
+        'enabled' => false,
+        'binary'  => '/usr/local/bin/wkhtmltoimage-amd54',
+        'timeout' => true,
         'options' => array(),
         'env'     => array(),
     ),

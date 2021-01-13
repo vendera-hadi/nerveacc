@@ -76,7 +76,11 @@ table tr td{font-size:9pt;}
             <table width="100%">
                 <tr>
                     <td width="30%" style="vertical-align:top">
+                        <?php if($type == 'pdf' || $type == 'mail'){ ?>
+                        <img src="{{'file://'.base_path('public/'.$company_logo)}}" style="width:110px;"/>
+                        <?php }else{ ?>
                         <img src="{{asset($company_logo)}}" style="width:110px;"/>
+                        <?php } ?>
                         <br><br>
                         <div style="width:100%; height:110px; border:1px solid">
                             <p style="padding-left:10px; padding-right:10px">Diterima dari:<br><br>
@@ -110,8 +114,9 @@ table tr td{font-size:9pt;}
                 <?php
                     if(count($details) > 0){
                         $total = 0;
+                        $crd = 0;
                         foreach ($details as $key => $value) {
-                            $total += $value->invpayd_amount;
+                            $total += $value->inv_amount;
                 ?>
                 <tr>
                     <td style="vertical-align: top; padding-left:15px; padding-right:10px; padding-top:10px">
@@ -122,9 +127,20 @@ table tr td{font-size:9pt;}
                         @endforeach
                         @endif
                     </td>
-                    <td style="border-left: solid 1px; text-align:right; padding-top:10px">Rp.</td>
+                    <td style="border-left: solid 1px; text-align:right; padding-top:10px">
+                    <?php if($value->credit_amount != null){ ?>
+                        {!! 'Rp.<br>Rp.' !!}
+                    <?php }else{ ?>
+                        {!! 'Rp.' !!}
+                    <?php } ?>
+                    </td>
                     <td style="border-collapse: collapse; text-align: right; padding-right:15px; padding-top:10px">
-                        <div style="padding-right: 3px;">{{ number_format($value->invpayd_amount) }}</div>
+                        <?php if($value->credit_amount != null){ ?>
+                            <?php $crd = $crd +  $value->credit_amount;?>
+                            <div style="padding-right: 3px;">{!! number_format($value->inv_amount).'<br>'.number_format($value->credit_amount) !!}</div>
+                        <?php }else{ ?>
+                            <div style="padding-right: 3px;">{{ number_format($value->inv_amount) }}</div>
+                        <?php } ?>
                     </td>
                 </tr>
                 <?php
@@ -138,7 +154,7 @@ table tr td{font-size:9pt;}
                 <tr style="border-top: 1px solid black;">
                     <td style="padding-left:15px; padding-right:10px; padding-bottom:10px; padding-top:10px"><b>TOTAL</b></td>
                     <td style="border-left: solid 1px; text-align:right;"><b>Rp.</b></td>
-                    <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format($total,0)}}</b></td>
+                    <td style="border-collapse: collapse; text-align: right; padding-right:15px"><b>{{number_format(($total - $crd),0)}}</b></td>
                 </tr>
             </table>
             <br>
@@ -162,7 +178,11 @@ table tr td{font-size:9pt;}
                         Jakarta, <?php echo date('d M Y'); ?><br><br>
                         
                          @if(!empty($signature) && !empty($signatureFlag))
+                        <?php if($type == 'pdf' || $type == 'mail'){ ?>
+                        <img src="{{'file://'.base_path('public/'.$signature)}}" width="150">
+                        <?php }else{ ?>
                         <img src="{{asset($signature)}}" width="150">
+                        <?php } ?>
                         <br><br>
                         <b><u>{{$company_sign}}</u></b><br>
                         {{$company_position}}

@@ -153,35 +153,36 @@ class CostCreator {
         }
         $currUnit = MsUnit::find($this->contract->unit_id);
         $alias = @MsConfig::where('name','service_charge_alias')->first()->value;
-
+        $pro_val = 0;
         if($this->checkNeedProRate()){
             $kelebihanHari = $this->getProRateDay();
             $totalDayOfMonth = date('t',strtotime($this->contract->contr_startdate));
-            $amountPerMonth = $currUnit->unit_sqrt * $this->costDetail->costd_rate;
-            $proRateAmount = $kelebihanHari / $totalDayOfMonth * $amountPerMonth;
+            $amountPerMonth = CEIL($currUnit->unit_sqrt * $this->costDetail->costd_rate);
+            $proRateAmount = CEIL($kelebihanHari / $totalDayOfMonth * $amountPerMonth);
 
             $note = $alias." ".date('F Y',strtotime($this->periodStart))." (ProRate $kelebihanHari / $totalDayOfMonth days) ";
             if($this->monthGapNext > 0) $note .= "s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".$this->monthGapNext." months +  $kelebihanHari days)";
-            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden;
+            $amount = CEIL(($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden);
             if($this->costDetail->costd_admin_type == 'percent'){
-                $amount += ($this->costDetail->costd_admin/100 * $amount);
+                $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
             }else{
-                $amount += $this->costDetail->costd_admin;
+                $amount += CEIL($this->costDetail->costd_admin);
             }
+            $pro_val = $proRateAmount;
         }else{
             $note = $alias." ".date('F Y',strtotime($this->periodStart));
             if($this->monthGapNext > 0) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
             $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden;
             if($this->costDetail->costd_admin_type == 'percent'){
-                $amount += ($this->costDetail->costd_admin/100 * $amount);
+                $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
             }else{
-                $amount += $this->costDetail->costd_admin;
+                $amount += CEIL($this->costDetail->costd_admin);
             }
         }
         $this->detailAmount = round($amount);
-        return $this->defineOutput($note);
+        return $this->defineOutput($note,$pro_val);
     }
 
     private function generateCutoffServiceCharge()
@@ -195,17 +196,17 @@ class CostCreator {
 
         $kelebihanHari = $diff->format('%d');
         $totalDayOfMonth = date('t',strtotime($this->periodEnd));
-        $amountPerMonth = $currUnit->unit_sqrt * $this->costDetail->costd_rate;
-        $proRateAmount = $kelebihanHari / $totalDayOfMonth * $amountPerMonth;
+        $amountPerMonth = CEIL($currUnit->unit_sqrt * $this->costDetail->costd_rate);
+        $proRateAmount = CEIL($kelebihanHari / $totalDayOfMonth * $amountPerMonth);
 
         $note = $alias." ".date('d F Y',strtotime($this->periodStart))." s/d ".date('d F Y',strtotime($this->periodEnd));
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." ".$diff->format('%d')." / $totalDayOfMonth days)";
 
         $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden;
         if($this->costDetail->costd_admin_type == 'percent'){
-            $amount += ($this->costDetail->costd_admin/100 * $amount);
+            $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
         }else{
-            $amount += $this->costDetail->costd_admin;
+            $amount += CEIL($this->costDetail->costd_admin);
         }
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
@@ -220,22 +221,23 @@ class CostCreator {
             $this->monthGapNext = $ctrInv->continv_period - 1;
         }
         $currUnit = MsUnit::find($this->contract->unit_id);
-
+        $pro_val = 0;
         if($this->checkNeedProRate()){
             $kelebihanHari = $this->getProRateDay();
             $totalDayOfMonth = date('t',strtotime($this->contract->contr_startdate));
-            $amountPerMonth = $currUnit->unit_sqrt * $this->costDetail->costd_rate;
-            $proRateAmount = $kelebihanHari / $totalDayOfMonth * $amountPerMonth;
+            $amountPerMonth = CEIL($currUnit->unit_sqrt * $this->costDetail->costd_rate);
+            $proRateAmount = CEIL($kelebihanHari / $totalDayOfMonth * $amountPerMonth);
 
             $note = $this->costDetail->costd_name."  ".date('F Y',strtotime($this->periodStart))." (ProRate $kelebihanHari / $totalDayOfMonth days)" ;
             if($this->monthGapNext > 0) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".$this->monthGapNext." months + $kelebihanHari days)";
-            $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden;
+            $amount = CEIL(($currUnit->unit_sqrt * $this->costDetail->costd_rate * $this->monthGapNext) + $proRateAmount + $this->costDetail->costd_burden);
             if($this->costDetail->costd_admin_type == 'percent'){
-                $amount += ($this->costDetail->costd_admin/100 * $amount);
+                $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
             }else{
-                $amount += $this->costDetail->costd_admin;
+                $amount += CEIL($this->costDetail->costd_admin);
             }
+            $pro_val = $proRateAmount;
         }else{
             $note = $this->costDetail->costd_name."  ".date('F Y',strtotime($this->periodStart));
 
@@ -243,13 +245,13 @@ class CostCreator {
             $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x ".($this->monthGapNext + 1)." months";
             $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * ($this->monthGapNext + 1)) + $this->costDetail->costd_burden;
             if($this->costDetail->costd_admin_type == 'percent'){
-                $amount += ($this->costDetail->costd_admin/100 * $amount);
+                $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
             }else{
-                $amount += $this->costDetail->costd_admin;
+                $amount += CEIL($this->costDetail->costd_admin);
             }
         }
         $this->detailAmount = round($amount);
-        return $this->defineOutput($note);
+        return $this->defineOutput($note,$pro_val);
     }
 
     private function generateCutoffSinkingFund()
@@ -262,17 +264,17 @@ class CostCreator {
 
         $kelebihanHari = $diff->format('%d');
         $totalDayOfMonth = date('t',strtotime($this->periodEnd));
-        $amountPerMonth = $currUnit->unit_sqrt * $this->costDetail->costd_rate;
-        $proRateAmount = $kelebihanHari / $totalDayOfMonth * $amountPerMonth;
+        $amountPerMonth = CEIL($currUnit->unit_sqrt * $this->costDetail->costd_rate);
+        $proRateAmount = CEIL($kelebihanHari / $totalDayOfMonth * $amountPerMonth);
 
         $note = $this->costDetail->costd_name."  ".date('d F Y',strtotime($this->periodStart))." s/d ".date('d F Y',strtotime($this->periodEnd));
         $note .= "<br>".number_format($currUnit->unit_sqrt,2)."M2 x Rp. ".number_format($this->costDetail->costd_rate)." x (".(!empty($diff->format('%m')) ? $diff->format('%m')."months" : "" )." $kelebihanHari / $totalDayOfMonth days)";
 
         $amount = ($currUnit->unit_sqrt * $this->costDetail->costd_rate * $diff->format('%m')) + $proRateAmount + $this->costDetail->costd_burden;
         if($this->costDetail->costd_admin_type == 'percent'){
-            $amount += ($this->costDetail->costd_admin/100 * $amount);
+            $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
         }else{
-            $amount += $this->costDetail->costd_admin;
+            $amount += CEIL($this->costDetail->costd_admin);
         }
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
@@ -285,10 +287,19 @@ class CostCreator {
         $ctrInv = $this->getContractInvoice();
         $npp_building = $this->companyData->comp_npp_insurance;
         // npp unit  = lust unit per luas total unit
-        $npp_unit =  $currUnit->unit_sqrt / $this->companyData->comp_sqrt;
+        $npp_unit =  CEIL($currUnit->unit_sqrt / $this->companyData->comp_sqrt);
         $note = $this->costDetail->costd_name." (Rp. ".number_format($this->costDetail->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('F Y',strtotime($this->periodStart))." s/d ".date('F Y',strtotime($this->periodStart." +".$ctrInv->continv_period." months"));
         // rumus cost + burden + admin
+<<<<<<< Updated upstream
         $amount = $this->costDetail->costd_rate / $npp_building * $npp_unit;
+=======
+        $amount = CEIL($this->costDetail->costd_rate / $npp_building * $npp_unit);
+        if($this->costDetail->costd_admin_type == 'percent'){
+            $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
+        }else{
+            $amount += CEIL($this->costDetail->costd_admin);
+        }
+>>>>>>> Stashed changes
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
@@ -301,11 +312,11 @@ class CostCreator {
         $note = $this->costDetail->costd_name." Periode ".date('F Y',strtotime($this->periodStart));
         if($this->monthGapNext > 1) $note .= " s/d ".date('F Y',strtotime($this->periodStart." +".$this->monthGapNext." months"));
         // rumus cost + burden + admin
-        $amount = $this->costDetail->costd_rate + $this->costDetail->costd_burden;
+        $amount = CEIL($this->costDetail->costd_rate + $this->costDetail->costd_burden);
         if($this->costDetail->costd_admin_type == 'percent'){
-            $amount += ($this->costDetail->costd_admin/100 * $amount);
+            $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
         }else{
-            $amount += $this->costDetail->costd_admin;
+            $amount += CEIL($this->costDetail->costd_admin);
         }
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
@@ -361,7 +372,7 @@ class CostCreator {
 
         // rumus luas area * cost rate * lama per bln
         $currUnit = MsUnit::find($this->contract->unit_id);
-        $amount = $this->costDetail->costd_rate * $period;
+        $amount = CEIL($this->costDetail->costd_rate * $period);
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }
@@ -372,10 +383,11 @@ class CostCreator {
         return $this->defineOutput($note);
     }
 
-    public function defineOutput($note)
+    public function defineOutput($note,$prorate=0)
     {
         return [
                 'invdt_amount' => $this->detailAmount,
+                'prorate'=>$prorate,
                 'invdt_note' => $note,
                 'costd_id' => $this->costDetail->id,
                 'meter_id' => !empty(@$this->meter->id) ? $this->meter->id : 0
@@ -395,12 +407,126 @@ class CostCreator {
     private function checkLastInvoicePeriod()
     {
         $result = false;
-        $invoice = TrInvoice::where('invtp_id', $this->invtp->id)->where('contr_id', $this->contract->id)->where('inv_date','<',$this->invStartDate)->where('inv_iscancel',0)->where('inv_post',1)->orderBy('id', 'desc')->first();
+        $invoice = TrInvoice::where('invtp_id', $this->invtp->id)->where('unit_id',$this->contract->unit_id)->where('inv_date','<',$this->invStartDate)->where('inv_iscancel',0)->orderBy('id', 'desc')->first();
         $ctrInv = $this->getContractInvoice();
         if(!empty($invoice)){
             // cek inv date lalu + period apa sudah lewat ?
-            $estimatedEndInv = date('Y-m-d', strtotime($invoice->inv_date." +".$ctrInv->continv_period." months"));
-            // dd("$this->invStartDate >= $estimatedEndInv");
+            //CEK JENIS INVOICE
+            if($this->invtp->id == 2){
+                $periode = $ctrInv->continv_period;
+                $tgl = date('d', strtotime($invoice->inv_date));
+                $tgl2 = date('d', strtotime($this->periodStart));
+                $bln = date('n', strtotime($invoice->inv_date));
+                $estimatedEndInv = date('Y-m-01', strtotime($invoice->inv_date." +".$ctrInv->continv_period." months"));
+                switch ($periode) {
+                    case '3':
+                        if($tgl == '5'){
+                            $estimatedEndInv = date('Y-m-01', strtotime($invoice->inv_date." +".$ctrInv->continv_period." months"));
+                        }else if($tgl != $tgl2){
+                            switch ($bln) {
+                                case '12':
+                                    $estimatedEndInv = date('Y-12-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '11':
+                                    $estimatedEndInv = date('Y-12-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '10':
+                                    $estimatedEndInv = date('Y-12-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '9':
+                                    $estimatedEndInv = date('Y-10-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '8':
+                                    $estimatedEndInv = date('Y-10-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '7':
+                                    $estimatedEndInv = date('Y-10-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '6':
+                                    $estimatedEndInv = date('Y-07-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '5':
+                                    $estimatedEndInv = date('Y-07-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '4':
+                                    $estimatedEndInv = date('Y-07-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '3':
+                                    $estimatedEndInv = date('Y-03-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '2':
+                                    $estimatedEndInv = date('Y-03-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '1':
+                                    $estimatedEndInv = date('Y-03-05', strtotime($invoice->inv_date));
+                                    break;
+                                default:
+                                    # code...
+                                    break;
+                            }
+                        }else{
+                            switch ($bln) {
+                                case '12':
+                                    $estimatedEndInv = date('Y-12-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '11':
+                                    $estimatedEndInv = date('Y-12-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '10':
+                                    $estimatedEndInv = date('Y-12-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '9':
+                                    $estimatedEndInv = date('Y-10-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '8':
+                                    $estimatedEndInv = date('Y-10-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '7':
+                                    $estimatedEndInv = date('Y-10-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '6':
+                                    $estimatedEndInv = date('Y-07-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '5':
+                                    $estimatedEndInv = date('Y-07-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '4':
+                                    $estimatedEndInv = date('Y-07-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '3':
+                                    $estimatedEndInv = date('Y-03-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '2':
+                                    $estimatedEndInv = date('Y-03-05', strtotime($invoice->inv_date));
+                                    break;
+                                case '1':
+                                    $estimatedEndInv = date('Y-03-05', strtotime($invoice->inv_date));
+                                    break;
+                                default:
+                                    # code...
+                                    break;
+                            }
+                        }
+                    break;
+                    default:
+                        # code...
+                    break;
+                }
+
+            }else{
+                $estimatedEndInv = date('Y-m-01', strtotime($invoice->inv_date." +".$ctrInv->continv_period." months"));
+            }
+            //echo $bln.' - '.$tgl.' - '.$tgl2.' - '.$this->invStartDate.' - '.$estimatedEndInv;
+            //f($this->invStartDate >= $estimatedEndInv){
+                // suda lewat
+                //$result = true;
+                //echo 'a';
+            //}else{
+           //     echo 'b';
+            //}
+            //die();
+            //echo $bln.' - '.$this->invStartDate.' - '.$estimatedEndInv.' - '.$periode.' - '.$tgl.' - '.$tgl2;
+            //die();
             if($this->invStartDate >= $estimatedEndInv){
                 // suda lewat
                 $result = true;
@@ -438,11 +564,14 @@ class CostCreator {
                 $this->monthGapNext = $last - $currentmonth;
 
                 // cari invoice yg ada dalam gap waktu ini
-                $invoice = TrInvoice::where('contr_id', $this->contract->id)->where('invtp_id',$this->invtp->id)->whereBetween(\DB::raw('EXTRACT(month from inv_date)'), [$first+1, $last+1])->where('inv_iscancel',0)->where('inv_post',1)->first();
+                $invoice = TrInvoice::where('contr_id', $this->contract->id)->where('invtp_id',$this->invtp->id)->whereBetween(\DB::raw('EXTRACT(month from inv_date)'), [$first, $last])->where('inv_iscancel',0)->first();
+                // CTT: sblmnya detect where is posted = 1, sementara dihilangin dlu biar kedetect inv sblmnya
             }
         }
-        // echo "<br>INVOICE:<br>".$invoice."<br><br>";
-        // echo "<br>MONTH GAP : ".$this->monthGapNext."<br>";
+         //echo "<br>INVOICE:<br>".$invoice."<br><br>";
+         //echo "<br>MONTH GAP : ".$this->monthGapNext."<br>";
+         //echo $first.' - '.$last;
+         //die();
         if(empty($invoice)){
             // inv kosong dalam gap waktu periode, allow insert
             $result = true;

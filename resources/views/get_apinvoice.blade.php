@@ -9,7 +9,8 @@
                 <th width="50">terms</th>
                 <th width="50">Tgl Invoice</th>
                 <th width="50">Jatuh Tempo</th>
-                <th width="80">Outstanding Amount</th>
+                <th width="80">Outstanding Amount + PPN</th>
+                <th width="80">DPP</th>
                 <th width="100">Terbayar</th>  
             </tr>
         </thead>
@@ -35,18 +36,19 @@
                     <td>{{ $value['terms'] }}</td>
                     <td>{{ date('d/m/y', $inv_date) }}</td>
                     <td>{{ date('d/m/y', $inv_duedate) }}</td>
-                    <td>{{ 'Rp. '.number_format($value['outstanding']) }}</td>
+                    <td>{{ 'Rp. '.number_format($value['total']) }}</td>
+                    <td>{{ 'Rp. '.number_format($value['dpp']) }}</td>
                     <td><input type="text" name="pay[{{$inv_id}}]" value="{{floor($value['outstanding'])}}" maxlength="{{floor($value['outstanding'])}}" minlength="1" placeholder="Jumlah Bayar / Total Paid" class="form-control paid-amount" disabled=""></td>
                 </tr>
                 @endforeach
             @else
             <tr>
-                <td colspan="7">Data not found</td>
+                <td colspan="8">Data not found</td>
             </tr>
             @endif
 
             <tr>
-                <td colspan="7"><span class="pull-right">Grand Total</span></td>
+                <td colspan="8"><span class="pull-right">Grand Total</span></td>
                 <td>Rp. <span id="totalCash">0</span></td>
             </tr> 
         </tbody>
