@@ -94,13 +94,10 @@
                         @if(Session::get('role')==1 || in_array(70,Session::get('permissions')))
                         <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="postingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-check"></i>&nbsp;Posting Selected Payment</span>
                         </a>
-<<<<<<< Updated upstream
-=======
                         <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="sendInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-paper-plane"></i>&nbsp;Send Email Kwitansi</span>
                         </a>
                         <a href="javascript:void(0)" class="easyui-linkbutton l-btn l-btn-small l-btn-plain" plain="true" onclick="unpostingInv()" group="" id=""><span class="l-btn-text"><i class="fa fa-remove"></i>&nbsp;Unposting Selected Payment</span>
                         </a>
->>>>>>> Stashed changes
                         @endif
                     </div>
                     <div id="dlg" class="easyui-dialog" style="width:40%"
@@ -473,8 +470,6 @@
         }
     }
 
-<<<<<<< Updated upstream
-=======
     function sendInv(){
         var ids = [];
         $('input[name=check]:checked').each(function() {
@@ -564,7 +559,6 @@
         });
     };
 
->>>>>>> Stashed changes
     function openWindow(url, title, w, h){
         // Fixes dual-screen position                         Most browsers      Firefox
         var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;

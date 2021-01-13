@@ -50,8 +50,6 @@
                         <option value="outinv">Outstanding By Unit</option>
                         <option value="outcontr">Outstanding By Billing Info</option>
                         <option value="arsummary">AR Summary By Unit</option>
-<<<<<<< Updated upstream
-=======
                         <option value="vasummary">VA By Invoice Type</option>
                         <option value="sms">SMS Blast Template</option>
                         <option value="wablast">WA Blast Template</option>
@@ -63,7 +61,6 @@
                         <option value="lebihbayar">Status Lebih Bayar</option>
                         <option value="lebihpembayaran">Lebih Pembayaran Unit</option>
                         <option value="piutangpenghuni">Pemotongan Piutang Penghuni</option>
->>>>>>> Stashed changes
                     </select>
                 </div>
                 <div class="row dates">
@@ -206,8 +203,6 @@
                         </div>
                     </div>
                 </div>
-<<<<<<< Updated upstream
-=======
                 <div class="row vasummary" style="display:none">
                     <div class="col-md-4">
                         <div class="form-group">
@@ -280,7 +275,6 @@
                     </div>
                 </div>
 
->>>>>>> Stashed changes
             </div>
           <!-- /.box-body -->
 
@@ -386,22 +380,6 @@
 
     $('#type').on('change', function() {
       var hasil = this.value;
-<<<<<<< Updated upstream
-      if(hasil == "araging"){
-        $( ".dates,.unit,.payment,.unit2" ).hide();
-        $( ".history" ).show();
-      }else if(hasil == 'outinv'){
-        $( ".unit,.dates" ).show();
-        $( ".history,.payment,.unit2" ).hide();
-      }else if(hasil == 'payment'){
-        $( ".dates,.payment" ).show();
-        $( ".history,.unit,.unit2" ).hide();
-      }else if(hasil == 'arsummary'){
-        $( ".dates,.history,.payment,.unit" ).hide();
-        $( ".unit2" ).show();
-      }else{
-        $( ".history,.unit,.payment,.unit2" ).hide();
-=======
       if(hasil == "araging" || hasil == "araging2"){
         $( ".dates,.unit,.payment,.unit2,.vasummary,.spsummary,.unit-bayar" ).hide();
         $( ".history" ).show();
@@ -442,7 +420,6 @@
         $( ".history,.unit,.unit2,.vasummary,.spsummary,.payment" ).hide();
       }else{
         $( ".history,.unit,.payment,.unit2,.vasummary,.spsummary,.unit-bayar" ).hide();
->>>>>>> Stashed changes
         $( ".dates" ).show();
       }
     });

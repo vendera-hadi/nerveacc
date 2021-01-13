@@ -619,11 +619,7 @@ class PeriodMeterController extends Controller
                         // AIR
                         $meter_cost = $meter_used * $costdt->costd_rate;
                         if(!empty(@$costdt->costd_admin_type) && @$costdt->costd_admin_type == 'percent'){
-<<<<<<< Updated upstream
-                            $admincost = $costdt->costd_admin / 100 * $meter_cost;
-=======
                             $admincost = CEIL($costdt->costd_admin / 100 * $subtotal);
->>>>>>> Stashed changes
                         }else{
                             $admincost = $costdt->costd_admin;
                         }

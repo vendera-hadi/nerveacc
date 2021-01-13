@@ -17,8 +17,6 @@ use App\Models\MsMasterCoa;
 use App\Models\MsJournalType;
 use App\Models\MsConfig;
 use App\Models\TrBank;
-<<<<<<< Updated upstream
-=======
 use App\Models\AkasaOutstanding;
 use App\Models\EmailQueue;
 use App\Models\ExcessPayment;
@@ -28,7 +26,6 @@ use App\Models\KwitansiCounter;
 use App\Models\Numcounter;
 use App\Models\TrInvoiceDetail;
 use App\Models\MsUnit;
->>>>>>> Stashed changes
 use Auth;
 use DB;
 use Validator;
@@ -273,6 +270,7 @@ class PaymentController extends Controller
         $total = 0;
         $payment_ids = [];
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         if(!empty($data_payment) && count($data_payment['invpayd_amount']) > 0){
             $lastPayment = TrInvoicePaymhdr::where(\DB::raw('EXTRACT(YEAR FROM created_at)'),'=',date('Y'))
                                 ->where(\DB::raw('EXTRACT(MONTH FROM created_at)'),'=',date('m'))
@@ -314,7 +312,7 @@ class PaymentController extends Controller
                         // echo "Outstanding tersisa $tempAmount<br>";
                         $invoice->inv_outstanding = (int)$tempAmount;
                         $invoice->save();
-=======
+
         $unit_data = 0;
         if(!empty($request->session()->get('FORM_SECRET'))) {
             if(strcasecmp($form_secret, $request->session()->get('FORM_SECRET')) === 0) {
@@ -356,7 +354,6 @@ class PaymentController extends Controller
                                 'inv_id' => $key
                             );
                         }
->>>>>>> Stashed changes
                     }
 
                     // create paym header
@@ -948,7 +945,7 @@ class PaymentController extends Controller
                 $result['message'] = 'You can\'t void posted payment';
                 return response()->json($result);
             }
-<<<<<<< Updated upstream
+
             // void payment
             $paymHeader->status_void = true;
             if($paymHeader->save()){
@@ -962,7 +959,7 @@ class PaymentController extends Controller
                             $invoice->inv_outstanding += $payDtl->invpayd_amount;
                         }
                         $invoice->save();
-=======
+
             //DELETE VOID AJA
             foreach ($paymHeader->TrInvoicePaymdtl as $payDtl) {
                 $invoice_id = $payDtl->inv_id;
@@ -972,11 +969,9 @@ class PaymentController extends Controller
                         $invoice->inv_outstanding += $payDtl->last_outstanding;
                     }else{
                         $invoice->inv_outstanding += $payDtl->invpayd_amount;
->>>>>>> Stashed changes
                     }
                     $invoice->save();
                 }
-<<<<<<< Updated upstream
                 $result = array(
                     'status'=>1,
                     'message'=> 'Success void payment'
@@ -986,8 +981,6 @@ class PaymentController extends Controller
                     'status'=>0,
                     'message'=> 'Cannot void payment, try again later'
                 );
-=======
->>>>>>> Stashed changes
             }
             TrInvoicePaymdtl::where('invpayh_id',$id)->delete();
             TrInvoicePaymhdr::where('id',$id)->delete();
@@ -1003,6 +996,7 @@ class PaymentController extends Controller
                 }
                 LogExcessPayment::where('invpayh_id',$id)->delete();
             }
+
             $result = array(
                 'status'=>1,
                 'message'=> 'Success void payment'
@@ -1011,11 +1005,7 @@ class PaymentController extends Controller
         }else{
             return response()->json($result);
         }
-<<<<<<< Updated upstream
 
-        return response()->json($result);
-    }
-=======
         return response()->json($result);
     }
 
@@ -1100,5 +1090,5 @@ class PaymentController extends Controller
         }
         return $hasil;
     }
->>>>>>> Stashed changes
+
 }

@@ -290,16 +290,12 @@ class CostCreator {
         $npp_unit =  CEIL($currUnit->unit_sqrt / $this->companyData->comp_sqrt);
         $note = $this->costDetail->costd_name." (Rp. ".number_format($this->costDetail->costd_rate,2)."/".number_format($npp_building,2)." x ".$npp_unit.") Periode ".date('F Y',strtotime($this->periodStart))." s/d ".date('F Y',strtotime($this->periodStart." +".$ctrInv->continv_period." months"));
         // rumus cost + burden + admin
-<<<<<<< Updated upstream
-        $amount = $this->costDetail->costd_rate / $npp_building * $npp_unit;
-=======
         $amount = CEIL($this->costDetail->costd_rate / $npp_building * $npp_unit);
         if($this->costDetail->costd_admin_type == 'percent'){
             $amount += CEIL($this->costDetail->costd_admin/100 * $amount);
         }else{
             $amount += CEIL($this->costDetail->costd_admin);
         }
->>>>>>> Stashed changes
         $this->detailAmount = round($amount);
         return $this->defineOutput($note);
     }

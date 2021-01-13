@@ -365,8 +365,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/r_unit','ReportController@ReportUnit')->name('report.r_unit');
 	Route::get('report/r_tenant','ReportController@ReportTenant')->name('report.r_tenant');
 	Route::get('report/arsummary','ReportController@arsummary')->name('report.ar_summary');
-<<<<<<< Updated upstream
-=======
+
 	Route::get('report/vasummary','ReportController@vasummary')->name('report.va_summary');
 	Route::get('report/depositsummary','ReportController@depositsummary')->name('report.deposit_summary');
 	Route::get('report/manualsummary','ReportController@manualsummary')->name('report.manual_summary');
@@ -376,7 +375,6 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/spsummary','ReportController@spsummary')->name('report.sp_summary');
 	Route::get('report/vaother','ReportController@vaother')->name('report.vaother');
 	Route::get('report/lebihbayar','ReportController@lebihbayar')->name('report.lebihbayar');
->>>>>>> Stashed changes
 
 	Route::get('report/glreport','ReportController@glview')->name('report.glview');
 	Route::get('report/ytd','ReportController@ytd')->name('report.ytd');
@@ -561,8 +559,6 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/budgettpl','ReportController@budgettpl')->name('report.budgettpl');
 	Route::get('report/realisasi','ReportController@realisasi')->name('report.realisasi');
 	Route::get('report/realisasitpl','ReportController@realisasitpl')->name('report.realisasitpl');
-<<<<<<< Updated upstream
-=======
 
 	// akasa only
 	Route::get('akasa/token-invoices', 'AkasaController@invoices');
@@ -651,7 +647,6 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('report/wablast','ReportController@wablast')->name('report.wablast');
 	Route::get('invoice/edit/{id}', 'InvoiceController@invEdit')->name('invoice.editinv');
 	Route::post('invoice/updateInv', 'InvoiceController@updateInv')->name('invoice.updateinvdata');
->>>>>>> Stashed changes
 });
 
 Route::get('sendmail', 'InvoiceController@sendmail');

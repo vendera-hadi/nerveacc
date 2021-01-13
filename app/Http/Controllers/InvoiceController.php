@@ -136,11 +136,8 @@ class InvoiceController extends Controller
             }
             // jika ada keyword
             if(!empty($keyword)) $fetch = $fetch->where(function($query) use($keyword){
-<<<<<<< Updated upstream
                                         $query->where(\DB::raw('lower(trim("contr_no"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("unit_code"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'ilike','%'.$keyword.'%');
-=======
                                         $query->where(\DB::raw('lower(trim("inv_amount"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("inv_number"::varchar))'),'like','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("unit_code"::varchar))'),'ilike','%'.$keyword.'%')->orWhere(\DB::raw('lower(trim("tenan_name"::varchar))'),'ilike','%'.$keyword.'%');
->>>>>>> Stashed changes
                                     });
             // jika ada inv type
             if(!empty($invtype)) $fetch = $fetch->where('tr_invoice.invtp_id',$invtype);
@@ -830,9 +827,8 @@ class InvoiceController extends Controller
             );
 
         if(!empty($sendKwitansi)){
-<<<<<<< Updated upstream
             \Mail::to($paymentHeader->tenant->tenan_email)->send(new \App\Mail\Kwitansi($paymentHeader));
-=======
+
             $cc = @MsConfig::where('name','cc_email')->first()->value;
             $queue = new EmailQueue;
             $queue->status = 'new';
@@ -869,7 +865,6 @@ class InvoiceController extends Controller
                     }
                 }
             } 
->>>>>>> Stashed changes
             return 'Success! Email sent to '.$paymentHeader->tenant->tenan_email;
         }
         return view('print_payment', $set_data);
@@ -1886,8 +1881,6 @@ class InvoiceController extends Controller
         }
     }
 
-<<<<<<< Updated upstream
-=======
     public function resendinvoice(Request $request){
         $ids = $request->id;
         if(!is_array($ids)) $ids = [$ids];
@@ -2909,5 +2902,4 @@ class InvoiceController extends Controller
         return redirect()->back();
     }
 
->>>>>>> Stashed changes
 }

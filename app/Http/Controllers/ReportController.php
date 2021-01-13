@@ -2480,8 +2480,6 @@ class ReportController extends Controller
             return 'Data Salah';
         }
     }
-<<<<<<< Updated upstream
-=======
 
     public function vasummary(Request $request){
         $pdf = @$request->pdf;
@@ -4023,5 +4021,4 @@ class ReportController extends Controller
             return view('layouts.report_template2', $data);
         }
     }
->>>>>>> Stashed changes
 }
